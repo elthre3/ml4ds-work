@@ -1,0 +1,82 @@
+---
+title: "Teacher note: week 5 seminar"
+subtitle: "For class teachers. Not for students."
+format:
+  html:
+    toc: true
+    embed-resources: true
+  pdf:
+    pdf-engine: xelatex
+    papersize: a4
+    geometry: margin=2cm
+---
+
+## Summary
+
+First 25 minutes: pen-and-paper problems that rebuild the lecture's two board derivations. The optimism theorem line by line (where the sampling assumption enters and where it does not); the covariance identity for a linear smoother, with $\sigma^2(1 \mp q/n)$ for least squares and the nearest-neighbor trace that explains week 1's zero; the variance of a correlated average and why the number software prints next to a cross-validation average is a heuristic; the standard error of a held-out score and the paired comparison; if time, a pipeline audit. Then in R: 5-fold cross-validation written as a loop on week 1's competition (the 100 training countries), $k$ for nearest neighbors chosen on the folds, the vault opened once; the same loop broken by a feature-selection step outside the folds on 2,000 noise columns (the honest version first, then the leak); and the legacy loess experiment, a held-out score under three kinds of shift.
+
+Files: `weeks/05-validation/notebooks/notebook5.qmd` (students) and `instructor/.../notebook5_complete.qmd` (yours; every answer is in a collapsed "Reveal" box, click to open on screen). The student file is generated from yours; never edit it by hand. Solutions are not released. There is no `set.seed`: every student has a different split, different folds, different noise columns and a different simulation, on purpose; the ranges below are orientation.
+
+In the student file, chunks with a blank (`...`) start with `#| eval: false`; students delete that line once the blank is filled. Checkpoint chunks (`stopifnot`) after the fold loop and after the cross-validation table tell a stuck student which stage to fix. The one hint (the neighbors come from `fit_rows`) is collapsed; open after a first attempt.
+
+## Plan
+
+| Segment | Minutes (approx.) | Teacher does |
+|---|---|---|
+| Opener | 5 | Two students read out; insist on "the training error of a function chosen to make it small" |
+| Problems 1--4 (5 if time) | 25 | Problem 2(a) and 3(a) are the ones that matter; reveal each answer when about two thirds have written something |
+| Coding 1: cross-validation, written out | 22 | The loop is the point; Question 1 before step 2; the vault is opened once, at step 3 |
+| Coding 2: break it | 12 | The honest loop first, then the leak; the prediction before running is the point, collect a show of hands |
+| Coding 3: shifts | 11 | The `loess` calls are given; Question 7's prediction before running |
+| Exit | 5 | Collect a few sentences; the regularization week's opener uses the cross-validation minimum |
+
+If short: drop problem 5 first, then problem 3(d), then coding step 2 of part 3 (the shifts; say what it shows, and point at the lecture's same-countries figure). Never drop problem 2(a), coding step 1 of part 1 (the loop) or step 2 of part 2 (the leak).
+
+Hints: R idiosyncrasies (`sapply` returning a matrix, `apply(cv, 2, sd)`, `cor(matrix, vector)` returning a 2000-by-1 matrix on which `order` works but `sort` confuses people, `glm` with a matrix of predictors, `predict` for `loess` returning `NA` outside the training range) get help at once; a fold loop whose five MSEs are identical is debugging, ask them to print `table(folds)` and `nrow(held)` and wait; "why is the leaky rate below 50%", "which of the two numbers is honest" and "why isn't the bar a standard error" are the mechanism, wait longest and ask a question back.
+
+## Opener
+
+$\mathbb E[\hat R_n(\hat f)] \le R(f_{\mathcal F}) \le \mathbb E[R(\hat f)]$: minimizer beats a fixed member on the training data; a fixed member's training error is unbiased for its risk (the sampling assumption); the fitted model is a member. The objection: 47.8 is the smallest of 14 noisy averages, and an average over five fits that are not the deployed model; report a reserved test score with its standard error.
+
+## Problems
+
+Answers, common errors and minimal hints are in the Reveal boxes of the complete notebook. In one line each:
+
+1. (a) By definition of $\hat f$, sample by sample; (b) $f_{\mathcal F}$ is fixed, each loss has mean $R(f_{\mathcal F})$, identical distribution suffices; (c) $\hat f \in \mathcal F$; (d) $\hat f$ was chosen to make those losses small, so the average is biased down. Hint for (b): "what does $f_{\mathcal F}$ depend on?"
+2. (a) Training cross term $-2\sigma^2 H_{ii}$, fresh cross term $0$, gap $2\sigma^2\,\mathrm{tr}(\mathbf H)/n$; (b) $\mathbf H\mathbf f = \mathbf f$, $\mathbb E\|\mathbf H\boldsymbol\varepsilon\|^2 = \sigma^2 q$, hence $\sigma^2(1 \mp q/n)$; (c) $n/k$ and $1$; $1$-NN has optimism $2\sigma^2$ and training error $0$; (d) $0.4$ and $2$. Error: the training cross term "vanishes because the noise has mean zero". Hint: "write $\hat y_i = \sum_j H_{ij}(f_j + \varepsilon_j)$ first".
+3. (a) $K\tau^2 + K(K-1)\rho\tau^2$ over $K^2$; (b) $\tau^2/K$ and $\tau^2$, the first term never shrinks; (c) the fits share $K - 2$ of $K - 1$ blocks; the overlap does not fix the sign of $\rho$; (d) $\mathbb E[s^2] = \tau^2(1 - \rho)$, so both halves of $s/\sqrt K$ carry $\rho$: a heuristic. Error: "disjoint, so independent". Hint for (c): "what do rounds 1 and 2 train on?"
+4. (a) Conditional on the fit, independent units; the uncertainty of one fit's score; (b) $0.032$, the rival is within one bar; (c) $\mathrm{sd}(D)/\sqrt m$ on the paired differences, can be much smaller (or larger) than either bar; (d) $m \ge 1{,}056$. Error: independence "because the rows are different". Hint: "variance of a Bernoulli".
+5. The selection on all rows is the operative leak; standardizing on all rows is a leak in principle that changes nothing in this unpenalized logistic fit; the CV error is the procedure's, and a selected minimum if tuned; reportable: nothing as it stands; fix: learned steps inside the folds, a reserved test set only if candidates are compared. Hint: "list every step that used the held-out rows' outcomes, then their inputs".
+
+## Coding: what students should see
+
+All random; ranges from 80 replications of part 1 and 60 of part 3 in the container, orientation only.
+
+Part 1: `table(folds)` is 20 each; the cross-validated curve is high at `k = 1` (roughly 70 to 100), flat between about `k = 5` and `k = 20` (roughly 35 to 65), and high again at `k = 50`. `k_min` lands in 5 to 20 about nineteen times in twenty, occasionally 3, 4 or 30, and `k = 1` about once in a hundred splits; the printed "SE" at the minimum is about 4 to 20; the vault score is 30 to 130 with a standard error of 6 to 36 (42 countries, and a few southern-African countries far below the line), and it is above the cross-validated minimum only about half the time: the selection effect on 14 candidates is small next to the noise of a 42-country vault. Say so; the point of Question 3 is which number is honest, not which is bigger.
+
+Part 2: 142 countries, `proportion_high` exactly 0.5; the honest rate 40 to 60 percent, the leaky rate 15 to 35 percent; individual folds wander widely (5-fold on 142 rows gives 28 or 29 held-out rows per fold); `glm` may warn that fitted probabilities are 0 or 1 (twenty noise columns on 113 rows is nearly separable), which is harmless here.
+
+Part 3: 320 training points and about 79 test points inside the training range; the training MSE falls all the way to span 0.1; the in-distribution test minimum is usually at a span of 0.2 to 0.5 (the expected curve is flat from 0.2 to 0.7, so 0.6, 0.7 and 0.8 happen); noisier outcomes add about 0.39 everywhere and the winner wanders in the same flat region; inputs on the right keep the winner in the flat region; the changed relation put the winner at span 0.9 or 0.95 in every one of 60 runs, which is a property of this simulation and is said as such.
+
+- **Q1.** Both ends worse than the middle; variance at `k = 1`, bias at `k = 50`; week 1's zero is not in the cross-validated number because a held-out country is never its own neighbor.
+- **Q2.** The flat region cannot be ranked; the bars are $s/\sqrt 5$ from correlated fold scores, a heuristic; a flat minimum is a selected minimum.
+- **Q3.** The vault score with its standard error; the cross-validated minimum is a selected minimum and an average over five fits on 80 countries; either can be larger on these data.
+- **Q4.** The held-out rows' outcomes chose the columns; the fold error is partly a training error; honest is near 50%.
+- **Q5.** Scaling, imputing, tuning, selection, resampling inside; fixed transformations exempt; standardizing changes nothing here (invertible rescaling, intercept, unpenalized) and is still against the rule.
+- **Q6.** Test above training everywhere, most at small spans; the minimum is flat and moves.
+- **Q7.** Noise shifts the curve up in expectation and leaves the expected minimizer where it was; inputs on the right change it a little; the changed relation moves it to the smoothest fits; a cross-validated span is an estimate for the old distribution and need not transfer.
+- **Exit.** (1) The training error of an empirical risk minimizer sits below the best risk in the class, which sits below the risk of the fit; $2\sigma^2 q/n$ for least squares at the training inputs. (2) The risk of the frozen predictor for the population the held-out units came from, with a standard error; nothing about another population, time or relation.
+
+## Alternative datasets
+
+- Part 1 on the penguins (`palmerpenguins`, week 3's data note): predict `body_mass_g` from `flipper_length_mm` by nearest neighbors, 5-fold on 200 birds with 133 in the vault; the curve should be sharper (more data) and the vault standard error smaller (not run here).
+- Part 3 with real data, the lecture's figure: fit `lifeExp ~ log10(gdpPercap)` on the 100 training countries in 2007 and score it on the 42 held-out countries in 2007 (in distribution) and on the same 42 in 1952 (the relation moved): the 1952 residuals are about 12 years negative on average, RMSE about 8 against about 14.
+
+## Where students get stuck
+
+- Looking up neighbors in `held` instead of `fit_rows` inside `cv_mse` (every fold MSE is then exactly zero at `k = 1`: the leak in miniature, worth saying).
+- `sapply(ks, cv_mse, ...)` returns a 5-by-14 matrix; `colMeans` and `apply(cv, 2, sd)` act on columns.
+- Reading the printed bar as a standard error (Question 2); reading the vault's standard error as the spread of the losses rather than of their mean.
+- In part 2, choosing columns with `noise` and `gm_all$high` unsubset (that is the leak; if it happens in step 1, the student has found the answer to step 2 early).
+- Filtering the shifted test sets to the training range of `x`: `loess` returns `NA` outside it and `mean()` returns `NA`. Leave that loud, it is week 2's extrapolation lesson, and fix it with `inside()`, as the code does, not with `na.rm = TRUE`.
+- Leaving `#| eval: false` on a chunk after filling the blank, then wondering why *Render* shows no output.

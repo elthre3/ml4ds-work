@@ -1,0 +1,489 @@
+---
+title: "Week 5 seminar (complete)"
+author: "Joshua Loftus"
+format:
+  html:
+    toc: true
+    embed-resources: false
+execute:
+  echo: true
+  warning: false
+  message: false
+  error: false
+---
+
+<!-- Teacher version. Every answer sits in a collapsed box headed "Reveal answer" or
+"Reveal solution"; click to open it on screen as the room gets there. The student
+file notebook5.qmd is generated from this one by _build_env/make_incomplete.py,
+which removes every box with class .answer. Do not edit the student file by hand,
+and do not release this file. In the seminar, reveal each answer when about two
+thirds of the room has something written; for the coding parts, reveal a solution
+only after the checkpoint has stopped someone. There is no set.seed on purpose:
+every student has a different split, different folds, different noise columns and
+a different simulated dataset; the ranges in the teacher note are orientation. -->
+
+```{r}
+#| label: setup
+library(tidyverse) # should've already install.packages("tidyverse")
+library(gapminder) # might need to install.packages("gapminder")
+theme_set(theme_minimal())
+```
+
+## Before you start
+
+<!-- 5 min -->
+
+Without looking anything up: (a) write the optimism theorem, the three quantities in order, and say in one line what each inequality uses; (b) the lecture's closing question: a colleague tunes $k$ by 5-fold cross-validation over 14 values and reports the smallest cross-validated MSE, 47.8, as "the model's error". Your one-sentence objection, and what you would report instead.
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) $\mathbb E[\hat R_n(\hat f)] \le R(f_{\mathcal F}) \le \mathbb E[R(\hat f)]$. The left inequality: $\hat f$ minimizes the training error over $\mathcal F$ and $f_{\mathcal F}$ is a member, so the training error of $\hat f$ is at most that of $f_{\mathcal F}$ for every sample, and $f_{\mathcal F}$ is fixed so its training error is unbiased for its risk (this is where the sampling assumption enters). The right: $\hat f$ is a member of $\mathcal F$ and $f_{\mathcal F}$ is the best member. (b) 47.8 is the smallest of 14 noisy averages, so it is optimistic for the $k$ it chose, and it averages the scores of five fits on 80 countries each, none of which is the model that gets deployed; report the score of the refitted model on a reserved test set, with its standard error, or say what 47.8 is (a cross-validated selection score). Two students read out; the common gap in (a) is "the training error is an average of losses so it is unbiased" without noticing that $\hat f$ was chosen to make those losses small.
+:::
+
+## Problems
+
+<!-- 25 min. Pen and paper. Compare with a neighbor before asking. -->
+
+These problems rebuild the pieces of the lecture's two board derivations. They use first-year probability (expectations, the variance of a sum, covariance) and the hat-matrix facts from week 2's problem 3.
+
+**Problem 1.** The optimism theorem. Training data $(x_i, y_i)$, $i = 1, \ldots, n$, i.i.d. draws from $F$; a class $\mathcal F$; $f_{\mathcal F}$ the minimizer of $R(f) = \mathbb E\,\ell(Y, f(X))$ over $\mathcal F$; $\hat f$ the minimizer of $\hat R_n(f) = \frac1n\sum_i \ell(y_i, f(x_i))$ over $\mathcal F$. Assume the minimizers exist and the risks are finite.
+
+(a) Explain why $\hat R_n(\hat f) \le \hat R_n(f_{\mathcal F})$ holds for every training set, not only on average.
+
+(b) Show that $\mathbb E[\hat R_n(f_{\mathcal F})] = R(f_{\mathcal F})$. Which assumption did you use? Is independence of the $n$ draws needed for this step?
+
+(c) Explain why $R(\hat f) \ge R(f_{\mathcal F})$ for every training set, and conclude the theorem.
+
+(d) A colleague writes $\mathbb E[\hat R_n(\hat f)] = R(\hat f)$ "because the training error is an average of losses, and averages are unbiased". What is wrong?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) $\hat f$ is, by definition, a function in $\mathcal F$ that makes $\hat R_n$ as small as possible; $f_{\mathcal F}$ is in $\mathcal F$; so $\hat R_n$ at $\hat f$ cannot exceed $\hat R_n$ at $f_{\mathcal F}$. Nothing random was used, so it holds sample by sample and therefore in expectation.
+
+(b) $f_{\mathcal F}$ does not depend on the sample, so $\ell(y_i, f_{\mathcal F}(x_i))$ is a function of the $i$th draw alone, with expectation $\mathbb E\,\ell(Y, f_{\mathcal F}(X)) = R(f_{\mathcal F})$ because $(x_i, y_i)$ has the distribution $F$. Average the $n$ expectations. Only "each draw has the distribution $F$" was used; independence is not needed for this line (it is needed later, for the standard error of a held-out score, problem 4).
+
+(c) $\hat f \in \mathcal F$ and $f_{\mathcal F}$ minimizes $R$ over $\mathcal F$, so $R(\hat f) \ge R(f_{\mathcal F})$ whatever training set produced $\hat f$; take expectations. Chain (a), (b), (c): $\mathbb E[\hat R_n(\hat f)] \le \mathbb E[\hat R_n(f_{\mathcal F})] = R(f_{\mathcal F}) \le \mathbb E[R(\hat f)]$.
+
+(d) The losses being averaged were not fixed before the data: $\hat f$ was chosen to make them small. (b) is for a function fixed in advance. For $\hat f$ the average is biased downward, and the theorem says by at least the gap between $\mathbb E[R(\hat f)]$ and $R(f_{\mathcal F})$.
+
+Common error: proving (a) "in expectation" by appealing to something random, or using i.i.d. in (a) or (c), where nothing is random. Minimal hint for (b): "what does $f_{\mathcal F}$ depend on?"
+:::
+
+**Problem 2.** The size of the gap, and degrees of freedom. Inputs fixed; $y_i = f^\star(x_i) + \varepsilon_i$ with independent noise of mean $0$ and variance $\sigma^2$; write $f_i = f^\star(x_i)$ and $\mathbf f = (f_1, \ldots, f_n)^\top$. A linear smoother $\hat{\mathbf y} = \mathbf H\mathbf y$ with $\mathbf H$ fixed. A fresh outcome $y_i^{\text{new}} = f_i + \varepsilon_i^{\text{new}}$ at each $x_i$, independent of everything.
+
+(a) Show that $\mathbb E(y_i - \hat y_i)^2 = \sigma^2 + \mathbb E(f_i - \hat y_i)^2 - 2\sigma^2 H_{ii}$ and $\mathbb E(y_i^{\text{new}} - \hat y_i)^2 = \sigma^2 + \mathbb E(f_i - \hat y_i)^2$, and hence that the expected fresh-outcome error minus the expected training error is $2\sigma^2\,\mathrm{tr}(\mathbf H)/n$.
+
+(b) Least squares with the model correct, $\mathbf f = \mathbf X\beta$, $\mathbf X$ with $q$ columns (the intercept counted) and full column rank. Show that $\mathbb E[\text{training error}] = \sigma^2(1 - q/n)$ and $\mathbb E[\text{fresh-outcome error}] = \sigma^2(1 + q/n)$.
+
+(c) Give $\mathrm{tr}(\mathbf H)$ for $k$ nearest neighbors (with the inputs fixed, the neighborhoods are fixed), and for the fit that predicts $\bar y$ everywhere. What is the optimism of $1$-NN, and what is its training error?
+
+(d) With $n = 50$ and $\sigma^2 = 1$: how optimistic is the training error of least squares with $q = 10$ columns, and of $1$-NN?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) Add and subtract $f_i$ inside each square. Training: $\mathbb E(y_i - \hat y_i)^2 = \mathbb E(\varepsilon_i + f_i - \hat y_i)^2 = \sigma^2 + \mathbb E(f_i - \hat y_i)^2 + 2\mathbb E[\varepsilon_i(f_i - \hat y_i)]$, and $\mathbb E[\varepsilon_i(f_i - \hat y_i)] = -\mathbb E[\varepsilon_i \hat y_i] = -\sum_j H_{ij}\,\mathbb E[\varepsilon_i(f_j + \varepsilon_j)] = -\sigma^2 H_{ii}$, since $f_j$ is a constant and the noises are independent with mean zero, so only $j = i$ survives. Fresh: the cross term is $2\mathbb E[\varepsilon_i^{\text{new}}(f_i - \hat y_i)] = 0$ because $\varepsilon_i^{\text{new}}$ is independent of $\hat y_i$ and has mean zero (week 1's problem 3(a)). Subtract and average over $i$: $\frac{2\sigma^2}{n}\sum_i H_{ii} = 2\sigma^2\,\mathrm{tr}(\mathbf H)/n$.
+
+(b) $\mathbf H$ projects onto the column space of $\mathbf X$ and $\mathbf f$ is in it, so $\mathbf H\mathbf f = \mathbf f$ and $\mathbf f - \hat{\mathbf y} = \mathbf f - \mathbf H(\mathbf f + \boldsymbol\varepsilon) = -\mathbf H\boldsymbol\varepsilon$. Then $\mathbb E\|\mathbf H\boldsymbol\varepsilon\|^2 = \mathbb E[\boldsymbol\varepsilon^\top \mathbf H^\top\mathbf H\boldsymbol\varepsilon] = \sigma^2\,\mathrm{tr}(\mathbf H^\top\mathbf H) = \sigma^2\,\mathrm{tr}(\mathbf H) = \sigma^2 q$ (symmetric, idempotent, trace $q$: week 2's problem 3). So $\frac1n\sum_i \mathbb E(f_i - \hat y_i)^2 = \sigma^2 q/n$, and by (a): training $\sigma^2 + \sigma^2 q/n - 2\sigma^2 q/n = \sigma^2(1 - q/n)$; fresh $\sigma^2(1 + q/n)$. The gap is $2\sigma^2 q/n$.
+
+(c) A point is its own nearest neighbor, so $H_{ii} = 1/k$ for every $i$ and $\mathrm{tr}(\mathbf H) = n/k$. The constant fit has $H_{ij} = 1/n$, trace $1$. At $k = 1$: $\mathrm{tr}(\mathbf H) = n$, optimism $2\sigma^2$, and the training error is exactly $0$ (week 1's problem 4(b)), so the fresh-outcome error at the training inputs is $2\sigma^2$: twice the noise, the whole story of week 1's zero.
+
+(d) Least squares: $2 \cdot 10/50 = 0.4$, against a training error of about $\sigma^2(1 - 10/50) = 0.8$ and a fresh-outcome error of about $1.2$. $1$-NN: optimism $2$, training error $0$.
+
+Common error: letting the training cross term vanish "because the noise has mean zero", forgetting that $\hat y_i$ depends on $\varepsilon_i$. Minimal hint for (a): "write $\hat y_i = \sum_j H_{ij}(f_j + \varepsilon_j)$ before taking the expectation". For (c): "what weight does a point give itself?"
+:::
+
+**Problem 3.** The variance of a correlated average. $V_1, \ldots, V_K$ each have variance $\tau^2$, and every pair has correlation $\rho$.
+
+(a) Show that $\mathrm{Var}\big(\frac1K\sum_k V_k\big) = \rho\tau^2 + (1 - \rho)\tau^2/K$.
+
+(b) Check the cases $\rho = 0$ and $\rho = 1$ against week 1's problem 2. What happens to the first term as $K$ grows?
+
+(c) In $K$-fold cross-validation the $K$ held-out blocks are disjoint. Why can the $K$ fold scores nevertheless be correlated? Does the overlap tell you the sign of $\rho$?
+
+(d) Suppose the $V_k$ also have equal means. Show that the sample variance $s^2 = \frac{1}{K - 1}\sum_k (V_k - \bar V)^2$ has $\mathbb E[s^2] = \tau^2(1 - \rho)$. What does this say about the number $s/\sqrt K$ that software prints next to a cross-validation average?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) $\mathrm{Var}(\sum_k V_k) = \sum_k \mathrm{Var}(V_k) + \sum_{k \ne l}\mathrm{Cov}(V_k, V_l) = K\tau^2 + K(K - 1)\rho\tau^2$; divide by $K^2$: $\tau^2/K + (K - 1)\rho\tau^2/K = \rho\tau^2 + (1 - \rho)\tau^2/K$.
+
+(b) $\rho = 0$ gives $\tau^2/K$, the independent case; $\rho = 1$ gives $\tau^2$, no reduction, the identical case. The first term does not depend on $K$: averaging cannot remove it, however many terms are averaged. (Week 9's bagging is exactly this: $B$ trees grown on resampled data remove only the $(1 - \rho)$ part.)
+
+(c) Each fold score is the error of a fit, and any two of the $K$ fits share $K - 2$ of the $K - 1$ training blocks, so the fits are functions of mostly the same data and their errors can move together; the disjointness of the held-out blocks does not make the *scores* independent. The overlap does not fix the sign: a learner that ignores the data gives $\rho = 0$, and small leave-one-out examples with the training mean as the predictor give negative correlations between fold scores; in practice $\rho$ is usually positive but that is an empirical statement, not a theorem.
+
+(d) With $\mathbb E V_k = \mu$: $\sum_k (V_k - \bar V)^2 = \sum_k (V_k - \mu)^2 - K(\bar V - \mu)^2$, so $\mathbb E\sum_k (V_k - \bar V)^2 = K\tau^2 - K\,\mathrm{Var}(\bar V) = K\tau^2 - K[\rho\tau^2 + (1 - \rho)\tau^2/K] = (K - 1)(1 - \rho)\tau^2$; divide by $K - 1$. So $s^2$ estimates $\tau^2(1 - \rho)$, not $\tau^2$, and $s/\sqrt K$ estimates $\sqrt{(1 - \rho)\tau^2/K}$, which is the true standard deviation of the average only when $\rho = 0$. Both halves of the printed number carry $\rho$, and $\rho$ cannot be read off the $K$ scores; read the number as a heuristic.
+
+Common error: "disjoint, so independent". Minimal hint for (c): "what do the fits of round 1 and round 2 have in common?" For (d): "add and subtract $\mu$ inside the square".
+:::
+
+**Problem 4.** The standard error of a held-out score.
+
+(a) A predictor is scored on $m$ held-out units with losses $L_1, \ldots, L_m$. Under what assumption is $\mathrm{sd}(L)/\sqrt m$ the standard error of the score, and what does it measure the uncertainty of?
+
+(b) A classifier makes 12 errors on 100 held-out cases. Treating each case as a Bernoulli trial, compute the standard error of the error rate $0.12$. A rival makes 10 errors on the same 100 cases. Are the two rates distinguishable, judged by the bars alone?
+
+(c) The two classifiers were scored on the *same* cases. Let $D_j = L_j^{A} - L_j^{B}$ be the difference of their losses on case $j$. Write the standard error of $\bar D$. Explain why it is the right ruler for the gap, and whether it can be smaller than both bars in (b).
+
+(d) How many held-out cases would be needed for a rival at $0.10$ to be two standard errors (of the marginal rate) away from $0.12$?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) Conditional on the fitted predictor (which does not change as we score), the losses are independent if the held-out units are independent draws from the population of interest; then $\mathrm{Var}(\bar L) = \mathrm{Var}(L)/m$ and the standard error is $\mathrm{sd}(L)/\sqrt m$. It measures the sampling uncertainty of this fit's score over held-out sets of size $m$, not the variability of refitting on a new training set, and not anything about a different population.
+
+(b) $\sqrt{0.12 \times 0.88/100} = 0.032$. The rival's rate is $0.02$ away, under one standard error; not distinguishable on the marginal bars.
+
+(c) $\mathrm{SE}(\bar D) = \mathrm{sd}(D)/\sqrt m$, with the $D_j$ independent across cases for the same reason as in (a). The gap between the two scores is $\bar D$, and its uncertainty is the spread of the paired differences, which is what the bars in (b) do not see: if the two classifiers make their mistakes on the same hard cases, the $D_j$ are mostly zero and $\mathrm{sd}(D)$ is small. So yes, the paired standard error can be much smaller than either marginal bar (and it can also be larger, if the two classifiers err on different cases). Overlapping bars do not settle a comparison; the paired difference does.
+
+(d) Need $0.02 \ge 2\sqrt{0.12 \times 0.88/m}$, so $m \ge 4 \times 0.1056/0.0004 = 1{,}056$.
+
+Common error in (a): "the losses are independent because the units are different rows" (independence is an assumption about how the units were sampled, not a fact about row numbers). Minimal hint for (b): "variance of a Bernoulli".
+:::
+
+**Problem 5.** (If time.) A pipeline, as described in a report: "We standardized all 1,000 rows, selected the 15 features most correlated with the outcome, and ran 10-fold cross-validation of a logistic regression on those 15 features; the CV error was 0.18. We then fitted the model on all 1,000 rows and deployed it; its expected error is 0.18." Identify every leak and every reporting error, say which number, if any, may be reported as the model's error, and what would have to change for a reportable number to exist.
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+The operative leak: the 15 features were chosen using the outcomes of all 1,000 rows, so each fold's held-out rows had already shaped the feature list; the folds were not held out from the pipeline, and 0.18 is partly a training error (the lecture's pure-noise example got near 30% on nothing). Standardizing on all rows is a leak in principle (it uses the held-out rows' covariates) and the rule is to fit it inside the folds; in *this* pipeline it happens to change nothing, because an invertible rescaling of the inputs, with an intercept in the model, leaves an unpenalized logistic regression's fitted probabilities where they were, and correlation-based selection is scale-free. Say the rule anyway: with a penalty, or with $k$-NN, the scaling matters. Reporting: a cross-validated error is an estimate of the *procedure's* error over training sets of this size, not of the one refitted model, which is fine as long as it is called that; if any tuning was done on the folds (the 15, a threshold, a $\lambda$), the reported minimum is a selected minimum and optimistic. Reportable as it stands: nothing, because of the selection leak. What would have to change: put the selection (and the standardizing) inside each fold's training rows and apply them to its held-out rows; if nothing is then tuned, the cross-validated error is a valid estimate of the procedure's error with no test set needed; if candidates are compared on the folds, reserve a test set before anything else, choose on the folds, refit on the training rows, score the test set once and report that number with its standard error.
+
+Common error: spotting the selection leak and calling the standardizing "the" leak, or missing that a cross-validated error of an untuned pipeline needs no vault. Minimal hint: "list every step that used the held-out rows' outcomes, then every step that used their inputs".
+:::
+
+## Coding
+
+<!-- 45 min: part 1 22, part 2 12, part 3 11. Skeleton lines in comments are scaffolds: the statistical operation is what you write. -->
+
+### 1. Cross-validation, written out
+
+<!-- 22 min -->
+
+Week 1's competition again: the countries observed in 2007, split at random into 100 you may use and 42 in the vault. Your split is different from your neighbor's. The nearest-neighbor function is week 1's, given back to you.
+
+```{r}
+gm <- gapminder |>
+  filter(year == 2007) |>
+  mutate(lgdp = log10(gdpPercap))
+test_id <- sample(nrow(gm), 42)
+train <- gm[-test_id, ]
+test <- gm[test_id, ]
+knn_predict <- function(x0, x, y, k) {
+  distances <- abs(x - x0)
+  nearest <- order(distances)[1:k]
+  mean(y[nearest])
+}
+```
+
+In week 1 you chose $k$ by looking at the score on the 42 held-out countries, and Question 3 asked whether that was a problem. It was: the vault had been opened to make a choice. Today the choice is made inside the 100 training countries, by 5-fold cross-validation, and the vault is opened once, at the end.
+
+**Step 1.** Assign the 100 training countries to $K = 5$ folds at random, then write `cv_mse(k, folds, data)`: for each fold, use the *other four* folds as the training countries for `knn_predict`, predict every country in the held-out fold, and record the held-out MSE. The function returns the five fold MSEs. The loops are set up; you write the prediction line and the MSE line.
+
+```{r}
+folds <- sample(rep(1:5, length.out = nrow(train)))
+table(folds)
+```
+
+```{r}
+#| eval: false
+cv_mse <- function(k, folds, data) {
+  fold_mse <- numeric(5)
+  for (f in 1:5) {
+    fit_rows <- data[folds != f, ]
+    held <- data[folds == f, ]
+    pred <- numeric(nrow(held))
+    for (j in seq_len(nrow(held))) {
+      # pred[j] <- knn_predict(held$lgdp[j], ____, ____, k = k)
+      ...
+    }
+    # fold_mse[f] <- mean((____ - ____)^2)
+    ...
+  }
+  fold_mse
+}
+```
+
+<details><summary>Hint (open after your first attempt)</summary>
+
+The neighbors come from `fit_rows`, never from `held`: `fit_rows$lgdp` and `fit_rows$lifeExp`.
+
+</details>
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+cv_mse <- function(k, folds, data) {
+  fold_mse <- numeric(5)
+  for (f in 1:5) {
+    fit_rows <- data[folds != f, ]
+    held <- data[folds == f, ]
+    pred <- numeric(nrow(held))
+    for (j in seq_len(nrow(held))) {
+      pred[j] <- knn_predict(held$lgdp[j], fit_rows$lgdp, fit_rows$lifeExp, k = k)
+    }
+    fold_mse[f] <- mean((held$lifeExp - pred)^2)
+  }
+  fold_mse
+}
+```
+:::
+
+Checkpoint (run it; if it stops, fix step 1 before going on):
+
+```{r}
+#| eval: !expr exists("cv_mse")
+stopifnot(length(cv_mse(5, folds, train)) == 5, all(cv_mse(5, folds, train) > 0))
+```
+
+**Question 1.** Before you run step 2: what will the cross-validated MSE look like at `k = 1` and at `k = 50`, compared with the middle, and why? Write your prediction down first. (Then: what was the *training* MSE at `k = 1` in week 1, and why does that number not appear anywhere in cross-validation?)
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+Both ends are worse than the middle. At `k = 1` every held-out country is predicted by one training country's outcome: the variance term of week 1's decomposition at its largest. At `k = 50` the neighborhood is most of the 80 available countries, so the prediction is nearly the same number everywhere: the bias term at its largest (the constant fit is `k = n`). Week 1's training MSE at `k = 1` was exactly zero because each country was its own nearest neighbor; in cross-validation a held-out country is never among its own neighbors, so the optimism the lecture measured ($2\sigma^2$ for 1-NN) is not in the number. That is the whole point of holding out.
+:::
+
+**Step 2.** Run `cv_mse` for `ks <- c(1:10, 15, 20, 30, 50)`, put the fold averages in a table together with the number software would print next to them, `sd(fold MSEs) / sqrt(5)`, plot the average against `k` with that number as an error bar, and find the `k` at the minimum.
+
+```{r}
+#| eval: false
+ks <- c(1:10, 15, 20, 30, 50)
+# cv <- sapply(ks, cv_mse, folds = folds, data = train)   # a 5-by-14 matrix
+# cv_table <- tibble(k = ks, cv_mse = ____, printed_se = ____)
+# k_min <- ks[which.min(cv_table$cv_mse)]
+...
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+ks <- c(1:10, 15, 20, 30, 50)
+cv <- sapply(ks, cv_mse, folds = folds, data = train)
+cv_table <- tibble(k = ks, cv_mse = colMeans(cv), printed_se = apply(cv, 2, sd) / sqrt(5))
+k_min <- ks[which.min(cv_table$cv_mse)]
+cv_table
+k_min
+```
+:::
+
+```{r}
+#| eval: !expr exists("cv_table")
+ggplot(cv_table, aes(k, cv_mse)) +
+  geom_errorbar(aes(ymin = cv_mse - printed_se, ymax = cv_mse + printed_se), width = 0.1, colour = "grey60") +
+  geom_line() +
+  geom_point() +
+  scale_x_log10() +
+  labs(y = "5-fold cross-validated MSE", caption = "bars: sd of the five fold MSEs over the square root of 5")
+```
+
+Checkpoint:
+
+```{r}
+#| eval: !expr exists("cv_table")
+stopifnot(nrow(cv_table) == 14, all(is.finite(cv_table$cv_mse)), k_min %in% ks)
+```
+
+**Question 2.** Which `k` won, and is it distinguishable from its neighbors on the curve, judged by the bars? What are the bars, and what are they not (problem 3)?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+The minimum is usually somewhere between `k = 5` and `k = 20`, and the curve is flat there: the differences among those `k`s are well inside the bars, so the choice is between several `k`s that the data cannot rank. The bars are $s/\sqrt 5$ with $s$ the sample standard deviation of five fold MSEs whose fits share three of their four training blocks; problem 3 says both $s$ and the $\sqrt 5$ assume the five scores are uncorrelated, which they need not be. They are a heuristic for how noisy the curve is, not a standard error. A flat minimum also says that the number at the minimum is a selected minimum: of several nearly tied candidates, the one that happened to come out lowest.
+:::
+
+**Step 3.** Open the vault once. Predict the 42 held-out countries with `k = k_min`, using *all* 100 training countries as neighbors (nearest neighbors has no refitting step; the "refit on everything" of the lecture is automatic), and compute the test MSE with its standard error, `sd(losses) / sqrt(42)`.
+
+```{r}
+#| eval: false
+# pred_test <- numeric(nrow(test))
+# for (j in seq_len(nrow(test))) pred_test[j] <- knn_predict(____, ____, ____, k = k_min)
+# losses <- (____ - ____)^2
+# c(cv_minimum = min(cv_table$cv_mse), test_mse = mean(losses), test_se = ____)
+...
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+pred_test <- numeric(nrow(test))
+for (j in seq_len(nrow(test))) pred_test[j] <- knn_predict(test$lgdp[j], train$lgdp, train$lifeExp, k = k_min)
+losses <- (test$lifeExp - pred_test)^2
+c(cv_minimum = min(cv_table$cv_mse), test_mse = mean(losses), test_se = sd(losses) / sqrt(length(losses)))
+```
+:::
+
+**Question 3.** Compare the cross-validated minimum with the vault score. Which of the two is the number you report as the model's error, and why is the other one not? (Two reasons.)
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+The vault score, with its standard error: the 42 countries were used neither to fit nor to choose, and conditional on the fitted predictor their losses are independent if the countries are, so `test_se` is a standard error in the lecture's sense. The cross-validated minimum is not, for two reasons. It is the smallest of 14 noisy averages, so it is optimistic for the `k` it selected (a selected minimum); and it is an average of the scores of five fits on 80 countries each, none of which is the model you report, which used all 100. The two numbers are often close on these data, and either can be the larger: the vault score has its own sampling noise (a standard error of 10 to 25 is typical), and 42 countries is a small vault. What the vault gives you is not a smaller number but an honest one.
+:::
+
+### 2. Break it: a leak
+
+<!-- 12 min -->
+
+Now the same loop with a step that is *learned from data* inside it. Take all 142 countries in 2007, make the outcome "life expectancy above the median" (so guessing gives 50%), and add 2,000 columns of pure noise, as if you had measured 2,000 irrelevant things.
+
+```{r}
+gm_all <- gapminder |>
+  filter(year == 2007) |>
+  mutate(high = as.numeric(lifeExp > median(lifeExp)))
+noise <- matrix(rnorm(nrow(gm_all) * 2000), nrow(gm_all), 2000)
+folds2 <- sample(rep(1:5, length.out = nrow(gm_all)))
+top20 <- function(Z, y) order(abs(cor(Z, y)), decreasing = TRUE)[1:20]
+c(n = nrow(gm_all), proportion_high = mean(gm_all$high))
+```
+
+**Step 1.** The honest pipeline. For each fold: choose the 20 noise columns most correlated with `high` **on the training rows of that fold**, fit a logistic regression of `high` on those 20 columns using the training rows, and record the misclassification rate (threshold $\tfrac12$) on the held-out rows. The fit and the prediction are written for you; you write the selection line.
+
+```{r}
+#| eval: false
+error_rate <- function(select_inside) {
+  chosen_all <- top20(noise, gm_all$high)      # the 20 columns chosen on ALL rows (used in step 2)
+  sapply(1:5, function(f) {
+    tr <- folds2 != f
+    if (select_inside) {
+      # chosen <- top20(noise[____, ], gm_all$high[____])
+      ...
+    } else {
+      chosen <- chosen_all
+    }
+    fit <- glm(gm_all$high[tr] ~ noise[tr, chosen], family = binomial)
+    p_hat <- plogis(cbind(1, noise[!tr, chosen]) %*% coef(fit))
+    mean((p_hat > 0.5) != gm_all$high[!tr])
+  })
+}
+honest <- error_rate(select_inside = TRUE)
+c(honest = mean(honest))
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+error_rate <- function(select_inside) {
+  chosen_all <- top20(noise, gm_all$high)
+  sapply(1:5, function(f) {
+    tr <- folds2 != f
+    if (select_inside) {
+      chosen <- top20(noise[tr, ], gm_all$high[tr])
+    } else {
+      chosen <- chosen_all
+    }
+    fit <- glm(gm_all$high[tr] ~ noise[tr, chosen], family = binomial)
+    p_hat <- plogis(cbind(1, noise[!tr, chosen]) %*% coef(fit))
+    mean((p_hat > 0.5) != gm_all$high[!tr])
+  })
+}
+honest <- error_rate(select_inside = TRUE)
+c(honest = mean(honest))
+```
+:::
+
+**Step 2.** Now break it: run the same function with `select_inside = FALSE`, so that the 20 columns are chosen once, using all 142 rows, before the folds are made. **Before you run it**, write down what the cross-validated error rate will be, roughly.
+
+```{r}
+#| eval: !expr exists("error_rate")
+leaky <- error_rate(select_inside = FALSE)
+rbind(honest, leaky)
+c(honest = mean(honest), leaky = mean(leaky))
+```
+
+**Question 4.** The columns are pure noise, so no classifier can beat 50% on new countries. How does the leaky version get below it, and what exactly did the held-out rows contribute to each fold's fit?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+The selection step looked at all 142 rows, including each fold's held-out rows, and picked the 20 columns that happened to correlate with `high` *in those rows too*; so the held-out rows' outcomes are built into the feature list before the fold is scored, and the "held-out" error is partly a training error. Typically the leaky rate is 15 to 35 percent and the honest one 40 to 60 percent (individual folds wander; the means are what matter). The honest version selects on the training rows only, so every step of the pipeline is blind to the held-out rows, and the error is near 50%.
+:::
+
+**Question 5.** Name three other preprocessing steps that must be fitted inside the folds for the same reason, and one that need not. In this particular pipeline, would standardizing the 2,000 columns on all rows have changed the number? Does that make it acceptable?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+Inside: centering or scaling (uses the means and spreads of all rows), imputing missing values from the data, choosing a tuning parameter (the $k$, a $\lambda$, a threshold), any feature selection that uses the data, oversampling one class. Need not: a transformation fixed in advance that learns nothing from the data (taking logs, dropping a column by name). Standardizing here would have changed nothing: correlation-based selection is scale-free, and an invertible rescaling of the inputs, with an intercept in the model, leaves an unpenalized logistic regression's fitted probabilities exactly where they were. It is still a leak in principle, and with a penalized fit or nearest neighbors it changes the answer, so the rule stays: fit every learned step on the training rows of the fold, apply it to the held-out rows.
+:::
+
+### 3. A held-out score is an in-distribution promise
+
+<!-- 11 min -->
+
+One predictor, a wiggly true conditional expectation, normal errors: the legacy validation experiment. The `loess` fits are given; the complexity parameter is the `span` (larger span, smoother fit).
+
+```{r}
+f <- function(x) 2 * (x^3 + 1) * sin(pi * x)
+n_sim <- 400
+noise_sd <- 0.5
+data_full <- tibble(x = runif(n_sim, -1, 1)) |>
+  mutate(true_CEF = f(x), y = true_CEF + rnorm(n_sim, sd = noise_sd))
+train_rows <- sample(n_sim, 320)
+data_train <- data_full[train_rows, ]
+# loess cannot predict outside the range of its training inputs, so keep test
+# points inside that range (the filter below is used on every test set)
+inside <- function(d) filter(d, x >= min(data_train$x), x <= max(data_train$x))
+data_test <- inside(data_full[-train_rows, ])
+spans <- c(seq(0.1, 0.9, by = 0.1), 0.95)
+models <- map(spans, function(s) loess(y ~ x, span = s, data = data_train))
+mse_of <- function(m, d) mean((predict(m, newdata = d) - d$y)^2)
+c(training = nrow(data_train), test = nrow(data_test))
+```
+
+**Step 1.** Compute the training MSE and the test MSE of every model, and plot both against the span.
+
+```{r}
+#| eval: false
+# curves <- tibble(span = spans,
+#                  training = sapply(models, mse_of, d = ____),
+#                  test = sapply(models, mse_of, d = ____))
+...
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+curves <- tibble(span = spans,
+                 training = sapply(models, mse_of, d = data_train),
+                 test = sapply(models, mse_of, d = data_test))
+curves |>
+  pivot_longer(-span, names_to = "set", values_to = "MSE") |>
+  ggplot(aes(span, MSE, colour = set)) + geom_line() + geom_point() +
+  scale_colour_viridis_d(end = 0.7)
+spans[which.min(curves$test)]
+```
+:::
+
+**Question 6.** What do you notice about the comparison? Which value of the complexity parameter has the lowest test error?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+The test error is above the training error at every span, most at the small spans (the wiggliest fits), which is the optimism theorem seen at eleven values of one tuning parameter. The training error keeps falling as the span shrinks (the wiggliest fit wins on the training points every time); the test curve turns. Its minimum is usually at a span between 0.2 and 0.5 for this function and noise level, but the expected test curve is nearly flat from 0.2 to 0.7, so the winner moves from student to student and can land as high as 0.8: the test set is 80 points, and a flat minimum is a selected minimum.
+:::
+
+**Step 2.** Distribution shift. Generate three new test sets, each shifted from the training distribution in one way: noisier outcomes (`noise_sd` of 0.8), inputs concentrated on the right (`x` uniform on $[0.3, 1]$), and a changed relation (`f(x) - 0.6 * sin(pi * x)` as the true conditional expectation). Keep each inside the training range of `x`. **Before you run it**: for each shift, write down whether every span gets worse by about the same amount, or the small spans suffer most, or the large spans do, and whether the best span moves.
+
+```{r}
+#| eval: false
+sim <- function(n, xmin = -1, xmax = 1, f_used = f, sd = noise_sd) {
+  tibble(x = runif(n, xmin, xmax)) |> mutate(y = f_used(x) + rnorm(n, sd = sd))
+}
+# shifted <- list(
+#   "in distribution" = data_test,
+#   "noisier outcomes" = inside(sim(400, sd = ____)),
+#   "inputs on the right" = inside(sim(400, xmin = ____)),
+#   "relation changed" = inside(sim(400, f_used = function(x) ____))
+# )
+# shift_curves <- map_dfr(names(shifted), function(nm)
+#   tibble(shift = nm, span = spans, MSE = sapply(models, mse_of, d = shifted[[nm]])))
+...
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+sim <- function(n, xmin = -1, xmax = 1, f_used = f, sd = noise_sd) {
+  tibble(x = runif(n, xmin, xmax)) |> mutate(y = f_used(x) + rnorm(n, sd = sd))
+}
+shifted <- list(
+  "in distribution" = data_test,
+  "noisier outcomes" = inside(sim(400, sd = 0.8)),
+  "inputs on the right" = inside(sim(400, xmin = 0.3)),
+  "relation changed" = inside(sim(400, f_used = function(x) f(x) - 0.6 * sin(pi * x)))
+)
+shift_curves <- map_dfr(names(shifted), function(nm)
+  tibble(shift = nm, span = spans, MSE = sapply(models, mse_of, d = shifted[[nm]])))
+ggplot(shift_curves, aes(span, MSE, colour = shift)) + geom_line() + geom_point() +
+  scale_colour_viridis_d(end = 0.9)
+shift_curves |> group_by(shift) |> slice_min(MSE, n = 1)
+```
+:::
+
+**Question 7.** Which shift adds about the same amount to every span, which one moves the best span, and what does that say about a span chosen by cross-validation on the old data? Does the complexity that minimizes the in-distribution test error also minimize the out-of-distribution error?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+Noisier outcomes: in expectation every span's error rises by the extra noise variance, $0.8^2 - 0.5^2 = 0.39$, and the expected curve's minimizer does not move; the realized minimum wanders, as it did in distribution, because the test sets are finite. Inputs on the right: the curve changes shape a little, because the function is steeper there and the fits were trained mostly elsewhere; the winner usually stays in the same flat region. The changed relation moves it a lot: the spans that followed the old wiggle are punished, and in our runs the smoothest fits (span 0.9 or 0.95) won every time, though that is a property of this simulation, not a rule. A span chosen by cross-validation is the candidate with the best *estimated* error for the old distribution, subject to its own sampling and selection noise; it need not be best there, and nothing about it transfers after the relation changes. So no, not in general: the held-out and cross-validated scores are in-distribution numbers, and the lecture's same-countries figure is the same lesson on real data.
+:::
+
+## Before you leave
+
+<!-- 5 min -->
+
+Two sentences: (1) the optimism theorem in words, and the size of the gap for least squares at the training inputs; (2) what a held-out score estimates, and one thing it cannot tell you.
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(1) The training error of an empirical risk minimizer is, on average, below the best risk in its class, which is below the risk of the fitted model; at the training inputs, with fresh outcomes, the gap for least squares is $2\sigma^2 q/n$, twice the noise times the number of columns over $n$. (2) The risk of the frozen predictor for the population the held-out units were drawn from, with a standard error; it cannot tell you what happens on a different population, at a different time, or when the relation between inputs and outcome moves. Collect a few sentences; the regularization week's opener uses the cross-validation minimum.
+:::
