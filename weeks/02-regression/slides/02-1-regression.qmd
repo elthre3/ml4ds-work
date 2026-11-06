@@ -43,7 +43,7 @@ library(gapminder)
 library(knitr)
 theme_set(theme_minimal(base_size = 18))
 options(knitr.table.format = "html")
-set.seed(42)
+set.seed(310)   # the deck's only seed: every random step below follows from it, in order
 # Palette: viridis for the primary scale, magma for the second one.
 v_dark <- "#440154"; v_blue <- "#31688e"; v_teal <- "#21918c"; v_green <- "#5ec962"
 m_pink <- "#b73779"; m_purple <- "#8c2981"; m_orange <- "#fc8961"
