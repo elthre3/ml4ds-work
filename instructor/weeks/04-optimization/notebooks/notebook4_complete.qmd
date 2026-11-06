@@ -26,7 +26,7 @@ proof and is not gone through in the room). In the room: problems 1 to 4 (about 
 minutes, hints then answers), then the coding (about 40: part 1 22, part 2 18).
 Everything headed "Optional, can be done at home" is outside the seminar. If the room
 runs slow, protect problem 1, coding part 1 steps 2 and 5, and coding part 2 step 2.
-The simulations in part 2 have seeds, so every student sees the same numbers. -->
+Part 2 has one seed, so a student who runs the chunks in order sees the same numbers, and one who skips or re-runs a chunk sees different ones. -->
 
 ```{r}
 #| label: setup
@@ -538,10 +538,10 @@ Only the loss. The loop is `gradient_descent`, unchanged since step 2, and the g
 
 <!-- 16 min: steps 1 and 2, questions 4 and 5. -->
 
-**Step 1.** More coefficients than observations: $n = 100$, $p = 400$. Implement mini-batch stochastic gradient descent for least squares from `beta <- rep(0, p)`: in each epoch, shuffle the rows (`sample(n)`) and, for each batch of 10 rows, take a step of size `gamma = 0.005` along the batch's gradient. Record after each epoch the training MSE and the distance $\|\beta_t - \beta\|$ to the true coefficients.
+**Step 1.** More coefficients than observations: $n = 100$, $p = 400$. Implement mini-batch stochastic gradient descent for least squares from `beta <- rep(0, p)`: in each epoch, shuffle the rows (`sample(n_big)`) and, for each batch of 10 rows, take a step of size `gamma = 0.005` along the batch's gradient. Record after each epoch the training MSE and the distance $\|\beta_t - \beta\|$ to the true coefficients.
 
 ```{r}
-set.seed(1)
+set.seed(310)   # change this number: different random draws, and different numbers below
 n_big <- 100
 p_big <- 400
 X_big <- matrix(rnorm(n_big * p_big), n_big, p_big)
@@ -588,16 +588,15 @@ sgd_path |>
 ```
 :::
 
-**Question 4.** The training MSE goes to zero. Why is that possible, and why should it worry you? The distance to the true coefficients levels off at about $33$, from a starting distance of $38$: what is it that the algorithm cannot learn from these data?
+**Question 4.** The training MSE goes to zero. Why is that possible, and why should it worry you? The distance to the true coefficients levels off at about $34$, from a starting distance of $39$: what is it that the algorithm cannot learn from these data?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-With $p = 400 > n = 100$ there are infinitely many $\beta$ with $\mathbf X\beta = \mathbf y$ exactly (week 2: the normal equations have a whole affine space of solutions), so the training error can be driven to zero whatever the noise is: a zero training error says nothing about whether the coefficients are right. The distance to the truth stops falling because the data only determine $\beta$ in the $100$-dimensional row space of $\mathbf X$; the component of $\beta_{\text{true}}$ orthogonal to every row is invisible to the loss, and starting from zero the iterates never acquire any such component (every step adds a combination of rows). What is left is exactly that invisible part, about $33$ out of $38$. The optional step at the end checks that this is the minimum-norm solution of week 2.
+With $p = 400 > n = 100$ there are infinitely many $\beta$ with $\mathbf X\beta = \mathbf y$ exactly (week 2: the normal equations have a whole affine space of solutions), so the training error can be driven to zero whatever the noise is: a zero training error says nothing about whether the coefficients are right. The distance to the truth stops falling because the data only determine $\beta$ in the $100$-dimensional row space of $\mathbf X$; the component of $\beta_{\text{true}}$ orthogonal to every row is invisible to the loss, and starting from zero the iterates never acquire any such component (every step adds a combination of rows). What is left is exactly that invisible part, about $34$ out of $39$. The optional step at the end checks that this is the minimum-norm solution of week 2.
 :::
 
 **Step 2.** The lecture's wide regression: $n = 80$, $p = 60$, noisy, and a held-out set of 2,000 rows from the same model. Run full-batch gradient descent from zero for 300 steps with step `0.5 / L`, where `L` is twice the largest eigenvalue of $\mathbf X^T\mathbf X/n$, and record the training and the held-out MSE after every step. Plot both against the step (log scale on the horizontal axis), and find the step at which the held-out MSE is smallest.
 
 ```{r}
-set.seed(12)
 n_w <- 80
 p_w <- 60
 X_w <- matrix(rnorm(n_w * p_w), n_w, p_w)
@@ -637,7 +636,7 @@ range(es_path$held_out)
 **Question 5.** The training error falls at every step, as the descent lemma says it must. Where would you have stopped if you had only seen it? You chose the number of steps by looking at the held-out MSE: can you now report that held-out MSE as an honest estimate of the chosen model's error? What would you need instead?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-Watching the training error alone, you would have run to the end: it is still falling at step 300, and every diagnostic from the lecture (loss, gradient norm) says "keep going". The held-out error is smallest at step 15 (about $15.7$) and ends at about $32$, worse than at step 1. The training loss is the number the algorithm minimizes, and minimizing it all the way was the wrong thing to do: that is early stopping, and the number of steps is a tuning parameter. Having used the held-out set to pick the step, its MSE at the chosen step is no longer an honest estimate of the chosen model's error: it was the minimum of 300 noisy numbers, selected because it was small, so it is biased downward (the 300 candidates are nearby iterates and far from independent, so the bias is smaller than for 300 unrelated models, but it is there). An honest estimate needs data that were used neither to fit nor to choose: a third set, or next week's cross-validation.
+Watching the training error alone, you would have run to the end: it is still falling at step 300, and every diagnostic from the lecture (loss, gradient norm) says "keep going". The held-out error is smallest at step 6 (about $16.5$) and ends at about $25$, worse than at step 1. The training loss is the number the algorithm minimizes, and minimizing it all the way was the wrong thing to do: that is early stopping, and the number of steps is a tuning parameter. Having used the held-out set to pick the step, its MSE at the chosen step is no longer an honest estimate of the chosen model's error: it was the minimum of 300 noisy numbers, selected because it was small, so it is biased downward (the 300 candidates are nearby iterates and far from independent, so the bias is smaller than for 300 unrelated models, but it is there). An honest estimate needs data that were used neither to fit nor to choose: a third set, or next week's cross-validation.
 :::
 
 ### Optional, can be done at home: which of the many solutions
@@ -657,7 +656,7 @@ c(distance = sqrt(sum((beta_sgd - beta_mn)^2)),
   norm_sgd = sqrt(sum(beta_sgd^2)), norm_min_norm = sqrt(sum(beta_mn^2)))
 ```
 
-Of the infinitely many exact fits, stochastic gradient descent from zero landed on the one of smallest norm, to two decimals. Every step adds a multiple of rows of $\mathbf X$, so an iterate that starts at $\mathbf 0$ stays in the row space, and the only exact fit in the row space is the minimum-norm one. The algorithm is part of the method: two algorithms for the same objective can return different fits, and this one carries a preference it was never told about. Week 7 writes that preference down as a penalty.
+Of the infinitely many exact fits, stochastic gradient descent from zero landed on the one of smallest norm, to one decimal. Every step adds a multiple of rows of $\mathbf X$, so an iterate that starts at $\mathbf 0$ stays in the row space, and the only exact fit in the row space is the minimum-norm one. The algorithm is part of the method: two algorithms for the same objective can return different fits, and this one carries a preference it was never told about. Week 7 writes that preference down as a penalty.
 :::
 
 ### Optional, can be done at home: saddle points in $p$ dimensions
