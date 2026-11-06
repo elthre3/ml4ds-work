@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="58,788 films from the Internet Movie Database with year, length, average user rating and vote counts; 53,388 after the course’s selection. The additive-model data: rating on length and year, fitted in week 5 and backfitted in week 8.">
+<meta name="description" content="58,788 films from the Internet Movie Database, up to 2005, with year, length, average user rating and vote counts.">
 
 <title>Movies – machine learning 4 data science</title>
 <style>
@@ -191,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    58,788 films from the Internet Movie Database with year, length, average user rating and vote counts; 53,388 after the course’s selection. The additive-model data: rating on length and year, fitted in week 5 and backfitted in week 8.
+    58,788 films from the Internet Movie Database, up to 2005, with year, length, average user rating and vote counts.
   </div>
 </div>
 
@@ -215,68 +215,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </colgroup>
 <tbody>
 <tr class="odd">
-<td><strong>Provenance and licence</strong></td>
-<td>The IMDb data extracted by Hadley Wickham for the <code>ggplot2</code> package’s original <code>movies</code> dataset and moved to the <code>ggplot2movies</code> package. Its documentation says films were included if they had a known length and at least one user rating; the shipped data run to 2005 and every film has at least five votes (the documentation’s row count, 28,819, is stale against the 58,788 shipped). GPL-3 for the package (<code>packageDescription("ggplot2movies")$License</code>). IMDb’s own terms restrict commercial use of its data; this is teaching.</td>
+<td><strong>Source</strong></td>
+<td>IMDb data extracted by Hadley Wickham, shipped in the R package <code>ggplot2movies</code> (GPL-3). IMDb’s terms restrict commercial use.</td>
 </tr>
 <tr class="even">
-<td><strong>R access</strong></td>
-<td><code>ggplot2movies::movies</code> (package version 0.0.1).</td>
+<td><strong>Rows</strong></td>
+<td>One row per film (58,788 rows), films with a known length and at least five user votes, 1893 to 2005.</td>
 </tr>
 <tr class="odd">
-<td><strong>Unit of observation</strong></td>
-<td>A film (58,788 rows), 24 columns: <code>title</code>, <code>year</code> (1893–2005), <code>length</code> (minutes), <code>budget</code> (91% missing), <code>rating</code> (average user rating, 1–10), <code>votes</code>, <code>r1</code> to <code>r10</code> (the share of users giving each rating, coarsened), <code>mpaa</code> (blank for 92% of films), and seven genre indicators (<code>Action</code>, <code>Animation</code>, <code>Comedy</code>, <code>Drama</code>, <code>Documentary</code>, <code>Romance</code>, <code>Short</code>).</td>
+<td><strong>Columns</strong></td>
+<td><code>title</code>, <code>year</code>, <code>length</code> (minutes), <code>budget</code> (91% missing), <code>rating</code> (average user rating, 1 to 10), <code>votes</code>, <code>r1</code> to <code>r10</code> (the share of users giving each rating), <code>mpaa</code> (mostly blank), and seven genre indicators (<code>Action</code>, <code>Animation</code>, <code>Comedy</code>, <code>Drama</code>, <code>Documentary</code>, <code>Romance</code>, <code>Short</code>).</td>
 </tr>
 <tr class="even">
-<td><strong>Target and loss</strong></td>
-<td><code>rating</code> with squared error.</td>
+<td><strong>Target</strong></td>
+<td><code>rating</code>. The ratings come from people who chose to watch a film and then to rate it.</td>
 </tr>
 <tr class="odd">
-<td><strong>Available at prediction time</strong></td>
-<td><code>year</code>, <code>length</code>, the genre indicators. <code>votes</code> and the <code>r1</code>–<code>r10</code> columns come from the same users’ ratings and are not honest predictors of <code>rating</code> (the <code>r</code> columns nearly determine it). <code>budget</code> is mostly missing.</td>
-</tr>
-<tr class="even">
-<td><strong>Permitted predictors</strong></td>
-<td>Weeks 5 and 8 use <code>length</code> and <code>year</code> only, as smooth terms. Genre indicators may be added as linear terms in <code>mgcv</code> (<code>+ Comedy + Drama</code>).</td>
-</tr>
-<tr class="odd">
-<td><strong>Missingness</strong></td>
-<td><code>budget</code> 91% missing and unused; nothing else.</td>
-</tr>
-<tr class="even">
-<td><strong>Selection</strong></td>
-<td>The course filters to <code>length &lt;= 200</code>, <code>length &gt; 10</code>, <code>year &gt; 1918</code>, <code>votes &gt;= 5</code> (the last removes nothing): 53,388 films. The 4,805 films of ten minutes or less are shorts, the 250 above 200 minutes are serials and epics, and the 630 films from before 1919 are sparse; each group would dominate the ends of a length or year curve.</td>
-</tr>
-<tr class="odd">
-<td><strong>Split unit</strong></td>
-<td>Films. No seed in the seminar notebook, so a random 70/30 split and a subsample of 5,000 for the by-hand loop differ across students. The split in time (train before 1990, test from 1990 on) is deterministic: 31,412 and 21,976 films. It is a retrospective check using one snapshot of ratings, not a forecast made in 1990.</td>
-</tr>
-<tr class="even">
-<td><strong>Baseline</strong></td>
-<td>Predict the mean rating (5.88): mean squared error 2.43 (the variance of <code>rating</code>). The additive model on length and year reaches about 2.15 on a random split, and 3.16 on the split in time, worse than the training mean (2.66).</td>
-</tr>
-<tr class="odd">
-<td><strong>Methods that use it</strong></td>
-<td>Week 5: the additive model as least squares on spline basis functions, <code>lm(rating ~ ns(length, 8) + ns(year, 8))</code>, and its component plots. Week 8: the separate smooth against the backfitted component; <code>mgcv</code>; backfitting by hand on a subsample; the two splits. The legacy GAM deck and notebook used the same data.</td>
-</tr>
-<tr class="even">
-<td><strong>Complication it carries</strong></td>
-<td>Ratings come from people who chose to watch a film and then to rate it. Films of 60 to 80 minutes are mostly old (median year 1956), and older films here are rated higher; one plausible explanation is that the old films still watched are the ones that survived, but the association does not identify that, and cohort and genre are other explanations the data cannot separate. The split in time shows a second complication: films from 1990 on have years the training data never contained, so the year component is evaluated outside its data.</td>
-</tr>
-<tr class="odd">
-<td><strong>Limitations</strong></td>
-<td>Ratings up to 2005 from a site whose users were not a sample of anyone; <code>length</code> as reported to IMDb; no director, cast, language or country. Fine for the mechanism of additive fitting and for the two splits, not for a claim about films.</td>
-</tr>
-<tr class="even">
-<td><strong>Fictional?</strong></td>
-<td>No.</td>
+<td><strong>Notes</strong></td>
+<td><code>votes</code> and <code>r1</code> to <code>r10</code> come from the same users’ ratings, so they are not honest predictors of <code>rating</code>. Lengths are as reported to IMDb; there is no director, cast, language or country.</td>
 </tr>
 </tbody>
 </table>
 <section id="loader" class="level2">
 <h2 class="anchored" data-anchor-id="loader">Loader</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2movies)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mv <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(length <span class="sc">&lt;=</span> <span class="dv">200</span>, length <span class="sc">&gt;</span> <span class="dv">10</span>, year <span class="sc">&gt;</span> <span class="dv">1918</span>, votes <span class="sc">&gt;=</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mv <span class="ot">&lt;-</span> movies</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section>
