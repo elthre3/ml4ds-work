@@ -321,11 +321,11 @@ p(x) = P(Y = 1 \mid X = x) = \mathbb E[Y \mid X = x]
 <span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(model_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 x 5
-  term        estimate std.error statistic  p.value
-  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-1 (Intercept)    -2.24     0.656     -3.42 0.000635
-2 x1              2.17     0.584      3.72 0.000198
-3 x2              1.53     0.499      3.07 0.00215 </code></pre>
+  term        estimate std.error statistic   p.value
+  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+1 (Intercept)    -2.33     0.583     -3.99 0.0000657
+2 x1              1.56     0.391      3.99 0.0000656
+3 x2              1.22     0.352      3.46 0.000547 </code></pre>
 </div>
 </div>
 <p>Coefficient scale: log-odds? Exponentiate <span class="math inline">\(\to\)</span> odds ratios (intercept: baseline odds)</p>
@@ -335,9 +335,9 @@ p(x) = P(Y = 1 \mid X = x) = \mathbb E[Y \mid X = x]
 <pre><code># A tibble: 3 x 2
   term        estimate
   &lt;chr&gt;          &lt;dbl&gt;
-1 (Intercept)    0.106
-2 x1             8.78 
-3 x2             4.62 </code></pre>
+1 (Intercept)   0.0976
+2 x1            4.76  
+3 x2            3.38  </code></pre>
 </div>
 </div>
 </section>
@@ -357,7 +357,7 @@ p(x) = P(Y = 1 \mid X = x) = \mathbb E[Y \mid X = x]
 <pre><code># A tibble: 1 x 8
   null.deviance df.null logLik   AIC   BIC deviance df.residual  nobs
           &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;       &lt;int&gt; &lt;int&gt;
-1          110.      79  -25.8  57.5  64.7     51.5          77    80</code></pre>
+1          108.      79  -29.8  65.6  72.8     59.6          77    80</code></pre>
 </div>
 </div>
 <ul>
@@ -586,24 +586,24 @@ p(x) &gt; c^\star = \frac{c_{FP}}{c_{FP} + c_{FN}},
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">(Intercept)</td>
-<td style="text-align: right;">0.028</td>
-<td style="text-align: right;">0.044</td>
-<td style="text-align: right;">0.644</td>
-<td style="text-align: right;">0.520</td>
+<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.042</td>
+<td style="text-align: right;">0.145</td>
+<td style="text-align: right;">0.885</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">welfare</td>
-<td style="text-align: right;">0.500</td>
-<td style="text-align: right;">0.016</td>
-<td style="text-align: right;">31.334</td>
+<td style="text-align: right;">0.499</td>
+<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">33.420</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">age</td>
-<td style="text-align: right;">0.188</td>
-<td style="text-align: right;">0.081</td>
-<td style="text-align: right;">2.319</td>
-<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.204</td>
+<td style="text-align: right;">0.079</td>
+<td style="text-align: right;">2.596</td>
+<td style="text-align: right;">0.010</td>
 </tr>
 </tbody>
 </table>
@@ -627,23 +627,23 @@ p(x) &gt; c^\star = \frac{c_{FP}}{c_{FP} + c_{FN}},
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">(Intercept)</td>
-<td style="text-align: right;">-0.005</td>
+<td style="text-align: right;">0.014</td>
 <td style="text-align: right;">0.062</td>
-<td style="text-align: right;">-0.079</td>
-<td style="text-align: right;">0.937</td>
+<td style="text-align: right;">0.235</td>
+<td style="text-align: right;">0.814</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">poverty</td>
-<td style="text-align: right;">0.993</td>
+<td style="text-align: right;">1.058</td>
 <td style="text-align: right;">0.032</td>
-<td style="text-align: right;">31.334</td>
+<td style="text-align: right;">33.420</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">age</td>
-<td style="text-align: right;">0.537</td>
-<td style="text-align: right;">0.113</td>
-<td style="text-align: right;">4.744</td>
+<td style="text-align: right;">0.447</td>
+<td style="text-align: right;">0.114</td>
+<td style="text-align: right;">3.923</td>
 <td style="text-align: right;">0.000</td>
 </tr>
 </tbody>
