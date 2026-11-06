@@ -1007,7 +1007,7 @@ Curse of dimensionality: $k$-NN last on truths A and B, seven idle inputs. No fr
 ## What the training error hides {minutes="3"}
 
 ::: {.notes}
-Two minutes for the ask; collect two orderings before the reveal. Why anyone cared: the training error is the only error you can compute without new data. The hollow points sat left of the filled ones on most rows, the forest's by a factor of five or more, and right of them on a few (the network and both planes on truth C); the question is whether the usual direction is a law, and what the exceptions are. Expected answer after the theorem: it is a statement about averages over training sets, and one realization of 300 rows can go either way by a little; the test MSE is itself a noisy number. Week 4's symbols: a class, the best in it, what the data return.
+Two minutes for the ask; collect two orderings before the reveal. Why anyone cared: the training error is the only error you can compute without new data. The hollow points sat left of the filled ones on most rows, the forest's by a factor of about five (seven on the wide panel), and right of them on a few (the network and both planes on truth C; on Spotify the plane without genre and the mean, by 1 or 2); the question is whether the usual direction is a law, and what the exceptions are. Expected answer after the theorem: it is a statement about averages over training sets, and one realization of 300 rows can go either way by a little; the test MSE is itself a noisy number. Week 4's symbols: a class, the best in it, what the data return.
 :::
 
 On most rows of the leaderboards the training MSE sat below the test or selection MSE; on a few it sat above. Luck, or a law?
