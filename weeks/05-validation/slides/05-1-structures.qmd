@@ -46,7 +46,6 @@ library(gapminder)
 theme_set(theme_minimal(base_size = 18))
 options(knitr.table.format = "html")
 options(digits = 5)
-set.seed(5)
 # Palette: viridis for the primary scale, magma for the second one.
 v_dark <- "#440154"; v_blue <- "#31688e"; v_teal <- "#21918c"; v_green <- "#5ec962"
 m_pink <- "#b73779"; m_purple <- "#8c2981"; m_orange <- "#fc8961"
@@ -59,13 +58,13 @@ knn_predict <- function(Xnew, Xtrain, ytrain, k) {
   apply(d2, 1, function(d) mean(ytrain[order(d)[1:k]]))
 }
 # The week's task: Spotify tracks (data note: data/spotify.md), one row per track, split three
-# ways with the seminar's seed: 5,000 training, 2,000 selection, 3,000 test tracks.
+# ways as in the seminar: 5,000 training, 2,000 selection, 3,000 test tracks.
 sp <- read_csv("../../../files/spotify_tracks.csv", show_col_types = FALSE) |>
   distinct(track_id, .keep_all = TRUE) |>
   mutate(duration_min = duration_ms / 60000, genre = factor(playlist_genre))
 feat <- c("danceability", "energy", "loudness", "speechiness", "acousticness",
           "instrumentalness", "liveness", "valence", "tempo", "duration_min", "release_year")
-set.seed(5)
+set.seed(310)   # the deck's only seed: the split (the seminar's), then every random step below, in order
 sp_id <- sample(nrow(sp))
 sp_train <- sp[sp_id[1:5000], ]
 sp_sel   <- sp[sp_id[5001:7000], ]
@@ -126,7 +125,7 @@ Part 5: neural networks
 
 Part 6: which structure?
 
-## Where week 4 left us {minutes="1"}
+## Where we left off {minutes="1"}
 
 ::: {.notes}
 One minute. Last week how a model is fitted; this week what shapes a model can have. Each family briefly; each gets its own detail later.
@@ -134,7 +133,7 @@ One minute. Last week how a model is fitted; this week what shapes a model can h
 
 Last week: optimization, the general concepts and the methods that fit a model
 
-This week: a few specific families of supervised models, each with its own **functional structure**, each introduced briefly. Every one of them gets more detail in a later week
+This week: a few specific families of supervised models, each with its own **functional structure**, each introduced briefly. Every one of them gets more detail later in the course
 
 Each family is a bet on the shape of $f^\star$. To compare the bets we need one task
 
@@ -192,7 +191,7 @@ The one rule for evaluation data: a row is fair game for scoring only if nothing
 ## CTF competition: baselines {minutes="3"}
 
 ::: {.notes}
-What we can fit so far, scored on the selection tracks, both on the same eleven numeric inputs (genre is a factor and joins in the seminar, where the distance on its dummies is the students' decision): the mean 581, least squares 541, k-NN 528 at k = 100 chosen on the selection rows, standardized inputs. About one standard error apart: neither is far from the other. The question for the rest of the lecture: can a different shape beat both? The test set stays shut until the seminar.
+What we can fit so far, scored on the selection tracks, both on the same eleven numeric inputs (genre is a factor and joins in the seminar, where the distance on its dummies is the students' decision): the mean 564, least squares 526, k-NN 523 at k = 100 chosen on the selection rows, standardized inputs. The same split and the same numbers as the seminar's first leaderboard. Well within a standard error of each other. The question for the rest of the lecture: can a different shape beat both? The test set stays shut until the seminar.
 :::
 
 What we can fit so far, each a bet on $f^\star$: **least squares**, a plane (every input a slope); **logistic regression**, a plane for the log-odds (for a label, not today); **$k$ nearest neighbors**, a local average, its $k$ the knob
@@ -222,7 +221,7 @@ ggplot(lb, aes(mse, competitor)) +
   labs(x = "MSE on the 2,000 selection tracks", y = NULL, caption = "bars: one standard error")
 ```
 
-The local average ($k = `r k_sp`$) and the plane, one standard error apart. Can a different shape beat both? The test set stays shut
+The local average ($k = `r k_sp`$) and the plane, well within a standard error of each other. Can a different shape beat both? The test set stays shut
 
 ## Tuning {.inverse background-image="img/dial.jpg" background-size="cover" background-opacity="0.55" background-color="#440154"}
 
@@ -304,7 +303,7 @@ Larger coefficients are penalized more (squared penalty)
 ## What $\lambda$ controls {minutes="3"}
 
 ::: {.notes}
-Exercise 2 derives the equations: the gradient of the penalized objective. Invertible for every positive lambda because X'X is positive semidefinite and lambda I adds lambda to every eigenvalue; that is "fitting when p > n". The figure: ridge on the Spotify training tracks, the eleven numeric inputs and five genre dummies, standardized; minus log lambda on glmnet's scale, so large lambda is on the left, every coefficient near zero; lambda to zero on the right, least squares (p = 16 < n here). Energy, duration and the pop and rap genres carry the largest coefficients.
+Exercise 2 derives the equations: the gradient of the penalized objective. Invertible for every positive lambda because X'X is positive semidefinite and lambda I adds lambda to every eigenvalue; that is "fitting when p > n". The figure: ridge on the Spotify training tracks, the eleven numeric inputs and five genre dummies, standardized; minus log lambda on glmnet's scale, so large lambda is on the left, every coefficient near zero; lambda to zero on the right, least squares (p = 16 < n here). The pop and rock genres, energy and loudness carry the largest coefficients.
 :::
 
 ```{r}
@@ -362,7 +361,7 @@ The lasso often gives estimates with many coefficients set to exactly zero
 ## Lasso vs ridge: solution paths of $\hat \beta$
 
 ::: {.notes}
-The legacy figure's two panels, on the Spotify training tracks instead of the legacy simulation. Right panel, read left to right: at large lambda everything is zero, coefficients enter one at a time as lambda falls (energy and duration first, then instrumentalness and the pop genre), and several stay at exactly zero until far right. Left panel: every path shrinks toward zero and none sits at zero over an interval. Same inputs as the ridge slide.
+The legacy figure's two panels, on the Spotify training tracks instead of the legacy simulation. Right panel, read left to right: at large lambda everything is zero, coefficients enter one at a time as lambda falls (instrumentalness, duration and the pop genre first, then energy and acousticness), and several stay at exactly zero until far right. Left panel: every path shrinks toward zero and none sits at zero over an interval. Same inputs as the ridge slide.
 :::
 
 ::: {.columns}
@@ -507,7 +506,7 @@ Today each $f_j$ is a spline with $J$ basis functions, so the whole model is one
 ## An additive model for popularity
 
 ::: {.notes}
-Spotify, the training tracks: six of the numeric inputs as splines with J = 4, genre as a factor, one least-squares fit on 30 columns. R squared about 0.17: most of popularity is not in these inputs, which is the honest state of affairs. Each panel is a fitted component, centered, over the middle 98 percent of its input. Read two: loudness (louder tracks score higher, 20 points across the range), release year (the oldest tracks score high, a low around 2012, then the steep rise into 2019 and 2020: recency, as the data note says). Energy falls once loudness is in the model: the two are correlated, and the component is what energy adds with loudness held fixed, week 2's reading. Backfitting, later in the course, is how these components are found when the one-input fits are not least squares.
+Spotify, the training tracks: six of the numeric inputs as splines with J = 4, genre as a factor, one least-squares fit on 30 columns. R squared about 0.17: most of popularity is not in these inputs, which is the honest state of affairs. Each panel is a fitted component, centered, over the middle 98 percent of its input. Read two: loudness (louder tracks score higher, about 18 points across the range), release year (the oldest tracks score high, a low around 2012, then the steep rise into 2019 and 2020: recency, as the data note says). Energy falls once loudness is in the model: the two are correlated, and the component is what energy adds with loudness held fixed, week 2's reading. Backfitting, later in the course, is how these components are found when the one-input fits are not least squares.
 :::
 
 ```{r}
@@ -552,22 +551,37 @@ Compress: a sequence of yes-or-no questions, each about one input, is a model to
 ## A regression tree for popularity
 
 ::: {.notes}
-The legacy penguin tree, on the Spotify training tracks: popularity on release year and energy (the year for its recency effect, energy as the strongest linear input on the lasso path), depth 3, at least 250 tracks in a leaf. Read it from the top: one question per node, the left branch is yes, a number in each leaf. The cutoff 2017.5 (2018 and later to the right) splits first; energy matters on both sides, with different cutoffs; the right side splits again at 2018.5. The leaf values are mean popularity in the leaf.
+The legacy penguin tree, on the Spotify training tracks: popularity on release year and energy (the year for its recency effect, energy for the largest numeric coefficient in the plane), depth 3, at least 250 tracks in a leaf. Read it from the top: one question per node, the left branch is yes, a number in each leaf. The cutoff 2017.5 (2018 and later to the right) splits first. The left side splits on the year alone (2004.5, then 2014.5 and 1984.5); the right side asks about energy (0.89) and then the year again (2018.5). The leaf values are mean popularity in the leaf.
 :::
 
 ```{r}
-#| label: spotify-tree
-#| echo: !expr -1
+#| label: spotify-tree-code
+#| echo: true
+#| eval: false
 #| code-line-numbers: "1-2"
-#| fig-width: 12
-#| fig-height: 3.2
-#| fig-align: center
-#| out-width: "92%"
-par(mar = c(0, 0, 0, 0), xpd = NA)   # no margins, labels may overhang: the par() in setup does not reach this chunk
 fit_tree <- rpart(track_popularity ~ release_year + energy, sp_train,
                   control = rpart.control(maxdepth = 3, cp = 0, minbucket = 250))
 plot(fit_tree, uniform = TRUE, margin = 0.1)
 text(fit_tree, pretty = 0, cex = 1.9, digits = 5)
+```
+
+```{r}
+#| label: spotify-tree
+#| echo: false
+#| fig-width: 12
+#| fig-height: 3.2
+#| fig-align: center
+#| out-width: "92%"
+# Runs the code shown above, except the last line: text.rpart() ignores digits for the split labels and
+# rounds them to four significant digits (2017.5 prints as 2018). Here: leaf values, then the splits in full.
+par(mar = c(0, 0, 0, 0), xpd = NA)   # no margins, labels may overhang: the par() in setup does not reach this chunk
+fit_tree <- rpart(track_popularity ~ release_year + energy, sp_train,
+                  control = rpart.control(maxdepth = 3, cp = 0, minbucket = 250))
+plot(fit_tree, uniform = TRUE, margin = 0.1)
+text(fit_tree, splits = FALSE, cex = 1.9, digits = 5)
+xy <- rpart:::rpartco(fit_tree)
+nd <- as.numeric(row.names(fit_tree$frame))
+text(xy$x, xy$y + 0.5 * par("cxy")[2], labels(fit_tree, digits = 6)[match(2 * nd, nd)], cex = 1.65)
 ```
 
 Left branch: yes. Leaves: mean popularity of the training tracks that reach them
@@ -575,7 +589,7 @@ Left branch: yes. Leaves: mean popularity of the training tracks that reach them
 ## Regression tree predictions
 
 ::: {.notes}
-The same tree drawn in the input plane: each leaf is a rectangle, and the prediction is the mean popularity of the training tracks in it. A step function in two inputs, flat inside each rectangle: nothing smooth, nothing additive. The energy question is asked on both sides of 2018 with different cutoffs, which an additive model could not do.
+The same tree drawn in the input plane: each leaf is a rectangle, and the prediction is the mean popularity of the training tracks in it. A step function in two inputs, flat inside each rectangle: nothing smooth, nothing additive. The energy question is asked only for tracks from 2018 on: how energy matters depends on the year, which an additive model could not do.
 :::
 
 ```{r}
@@ -595,7 +609,7 @@ ggplot() +
   labs(x = "release year", y = "energy")
 ```
 
-Each leaf is a rectangle with one value; the training tracks in white. The three narrow strips on the right are the leaves for 2018 and for 2019 to 2020, split again by energy
+Each leaf is a rectangle with one value; the training tracks in white. Energy matters only on the right, from 2018 on: one leaf for the most energetic tracks, two below it
 
 ## One predictor, every cutoff
 
@@ -658,14 +672,13 @@ Until some **stopping rule** prevents more splitting (today: a maximum depth, th
 ## A tree is unstable; a forest averages many
 
 ::: {.notes}
-New slide, before the fix. Gapminder, where 142 points make it visible: eight resamples of the countries (draws with replacement, the same size), a depth-3 tree and a J = 4 spline on each. The trees' cutoffs jump between resamples and their steps jump with them; the splines barely move. Across the grid the eight trees' predictions have an average standard deviation of about 1.6 years, the splines' about 0.9. A tree has high variance; the orange line, the average of the eight trees, is already smoother than any of them. Said, not derived: a random forest grows hundreds of trees, each on a resample of the training rows (these draws with replacement) with a random subset of the inputs offered at each split, and averages them: the orange line with hundreds of trees instead of eight. One model, more stable than any one tree, and no knob to tune today (the defaults). What the resampling and the random subsets do, how much averaging buys and what correlation costs: later in the course.
+New slide, before the fix. Gapminder, where 142 points make it visible: eight resamples of the countries (draws with replacement, the same size), a depth-3 tree and a J = 4 spline on each. The trees' cutoffs jump between resamples and their steps jump with them; the splines barely move. Across the grid the eight trees' predictions have an average standard deviation of about 1.8 years, the splines' about 0.8. A tree has high variance; the orange line, the average of the eight trees, is already smoother than any of them. Said, not derived: a random forest grows hundreds of trees, each on a resample of the training rows (these draws with replacement) with a random subset of the inputs offered at each split, and averages them: the orange line with hundreds of trees instead of eight. One model, more stable than any one tree, and no knob to tune today (the defaults). What the resampling and the random subsets do, how much averaging buys and what correlation costs: later in the course.
 :::
 
 ```{r}
 #| label: tree-variance
 #| fig-height: 3.1
 #| fig-width: 12
-set.seed(3)
 resamples <- map_dfr(1:8, function(b) {
   d <- slice_sample(gm, n = nrow(gm), replace = TRUE)
   t_b <- rpart(lifeExp ~ gdpPercap, d, control = rpart.control(maxdepth = 3, cp = 0, minbucket = 5))
@@ -793,8 +806,7 @@ For each truth: which family wins, which loses, and why?
 # neighbors), then scored on the test rows. Returns one row per competitor with training MSE (on
 # the refit rows), test MSE and its standard error. wide = TRUE drops least squares and the
 # additive fit (no unique fit with more columns than rows) and adds ridge.
-compare_families <- function(truth, p, n_train, n_sel, n_test, seed, wide = FALSE) {
-  set.seed(seed)
+compare_families <- function(truth, p, n_train, n_sel, n_test, wide = FALSE) {
   gen <- function(n) {
     X <- matrix(runif(n * p, -1, 1), n, p); colnames(X) <- paste0("x", 1:p)
     tibble(as.data.frame(X), y = truth(X) + rnorm(n))
@@ -837,7 +849,7 @@ compare_families <- function(truth, p, n_train, n_sel, n_test, seed, wide = FALS
   out$forest <- score("forest", predict(rf, all), predict(rf, te))
   # A one-hidden-layer network: M chosen on the selection rows, a small fixed penalty on the weights.
   Ms <- c(2, 4, 8, 16)
-  nn_fit <- function(d, M) { set.seed(10); nnet(y ~ ., d, size = M, decay = 0.01, linout = TRUE, maxit = 500, MaxNWts = 5000, trace = FALSE) }
+  nn_fit <- function(d, M) { nnet(y ~ ., d, size = M, decay = 0.01, linout = TRUE, maxit = 500, MaxNWts = 5000, trace = FALSE) }
   M <- Ms[which.min(sapply(Ms, function(M) mse(se$y, predict(nn_fit(tr, M), se))))]
   nn <- nn_fit(all, M)
   out$network <- score("network", predict(nn, all), predict(nn, te))
@@ -850,10 +862,10 @@ f3 <- function(x) exp(-5 * (x - 1/2)^2)
 truth_A <- function(X) 2 * X[, 1] - 1.5 * X[, 2] + X[, 3]
 truth_B <- function(X) 1.5 * (f1(X[, 1]) + f2(X[, 2]) + f3(X[, 3]))
 truth_C <- function(X) 4 * (X[, 1] > 0 & X[, 2] > 0)
-res_A  <- compare_families(truth_A, p = 10, 300, 100, 2000, seed = 1)
-res_Aw <- compare_families(truth_A, p = 200, 100, 50, 2000, seed = 2, wide = TRUE)
-res_B  <- compare_families(truth_B, p = 10, 300, 100, 2000, seed = 1)
-res_C  <- compare_families(truth_C, p = 10, 300, 100, 2000, seed = 1)
+res_A  <- compare_families(truth_A, p = 10, 300, 100, 2000)
+res_Aw <- compare_families(truth_A, p = 200, 100, 50, 2000, wide = TRUE)
+res_B  <- compare_families(truth_B, p = 10, 300, 100, 2000)
+res_C  <- compare_families(truth_C, p = 10, 300, 100, 2000)
 leaderboard <- function(res, title, xmax = NULL) {
   d <- res |> mutate(competitor = fct_reorder(competitor, -test))
   g <- ggplot(d, aes(y = competitor)) +
@@ -872,7 +884,7 @@ leaderboard <- function(res, title, xmax = NULL) {
 ## Truth A: sparse linear, tall and then wide
 
 ::: {.notes}
-Left, tall: 300 training rows, 100 selection, refit on the 400. Least squares and the lasso sit on the floor (dotted line, the noise variance, the smallest population MSE; a realized test MSE on 2,000 rows can sit a little below it); the additive fit and the two-unit network are close, each with many more parameters to estimate; the forest and the tree pay for a shape they do not need; k-NN in ten dimensions is last. Right, wide: 100 training rows, 50 selection, refit on the 150, p = 200, the same truth. Least squares and the additive fit have no unique fit; the lasso alone stays near the floor; ridge, the forest and k-NN are near the mean's score; the two-unit network, with over 400 weights for 100 rows, fits the training rows exactly and is last. The hollow points: the forest's training error is a quarter of its test error; least squares' training error sits above its test error here (one realization; the theorem is about averages).
+Left, tall: 300 training rows, 100 selection, refit on the 400. Least squares and the lasso sit on the floor (dotted line, the noise variance, the smallest population MSE; a realized test MSE on 2,000 rows can sit a little below it); the additive fit and the two-unit network are close, each with many more parameters to estimate; the forest and the tree pay for a shape they do not need; k-NN in ten dimensions is last. Right, wide: 100 training rows, 50 selection, refit on the 150, p = 200, the same truth. Least squares and the additive fit have no unique fit; the lasso is far ahead of the rest; the forest and the tree next; ridge and k-NN near the mean's score (about 3.4); the network, M = 16 chosen, over 3,000 weights for 150 rows, fits the training rows exactly and is last, worse than the mean. The hollow points: the forest's training error is under a fifth of its test error on both panels.
 :::
 
 ```{r}
@@ -882,12 +894,12 @@ Left, tall: 300 training rows, 100 selection, refit on the 400. Least squares an
 leaderboard(res_A, "tall: 300 + 100 rows, p = 10") + leaderboard(res_Aw, "wide: 100 + 50 rows, p = 200")
 ```
 
-Dotted line: the noise variance, the smallest population MSE. For this sparse truth the lasso ties least squares when $n \gg p$, and alone stays near the floor when $p > n$
+Dotted line: the noise variance, the smallest population MSE. For this sparse truth the lasso ties least squares when $n \gg p$, and is far ahead of every other family when $p > n$
 
 ## Truth B: additive smooth
 
 ::: {.notes}
-The additive fit near the floor, J = 3 chosen; the forest and the network behind it, then the tree, then the two planes, k-NN last. The forest can bend, but it bends with rectangles and needs many of them for a smooth curve; the plane cannot bend at all.
+The additive fit near the floor, J = 4 chosen; the forest and the network behind it, then the tree, then the two planes, k-NN last. The forest can bend, but it bends with rectangles and needs many of them for a smooth curve; the plane cannot bend at all.
 :::
 
 ```{r}
@@ -904,7 +916,7 @@ The additive fit was built for this truth. A forest can bend, with rectangles; a
 ## Truth C: thresholds with an interaction
 
 ::: {.notes}
-The tree of depth 2 is the truth, so it sits on the floor; the forest close behind. A sum of one-input functions can hold at most two thirds of this signal (each input's share) and the smooth splines hold less than that, so the additive fit and least squares are far from the floor. The fitted network generalizes poorly here (one run; a network can approximate a step closely but this fit did not): the network and k-NN at the bottom. The tree's training error sits above its test error: another one-realization exception.
+The tree of depth 2 is the truth, so it sits near the floor, level with the forest. A sum of one-input functions can hold at most two thirds of this signal (each input's share) and the smooth splines hold less than that, so the additive fit and least squares are far from the floor; the splines, J = 6 chosen, are last. The network (M = 2) sits between the trees and the rest. Three training errors sit above their test errors here, the network's and both planes': one-realization exceptions.
 :::
 
 ```{r}
@@ -921,7 +933,7 @@ A sum of one-input functions can hold each input's share of this step, two third
 ## CTF competition: everyone on Spotify
 
 ::: {.notes}
-The baselines slide asked whether a shape could beat both; this is the answer on the selection tracks, the knobs chosen there. The two-unit network 486, additive splines 490 and the forest 493 lead; the tree 512; the lasso and least squares with genre 525; k-NN 528; least squares without genre 541; the mean 581. Least squares with genre is the fair comparison for the bending fits: same inputs, so the gap is the structure. The bars are each method's own standard error, not that of a difference, and the knobs were chosen on these same tracks, so the ranking is descriptive; the seminar's test set, with paired losses, is where differences get a standard error. The hollow points are the training scores: the forest's is 86, and that is right, not a bug: predict() on the training rows uses the trees that had each row in-bag, grown to leaves of five rows, so the forest nearly reproduces its training rows; its out-of-bag score, the honest in-sample number, is 475. The vault stays shut: the seminar refits on training plus selection and opens it once. What these data have: a nonlinear year effect and loudness, which the plane cannot bend to, and little else the inputs can see.
+The baselines slide asked whether a shape could beat both; this is the answer on the selection tracks, the knobs chosen there. The forest 477 and additive splines 485 (J = 4) lead; the tree (depth 6) 501; the network (M = 8) 513, level with the planes in this run, its fit depending on its random starting weights; the lasso and least squares with genre 515; k-NN 522; least squares without genre 526; the mean 564. Least squares with genre is the fair comparison for the bending fits: same inputs, so the gap is the structure. The bars are each method's own standard error, not that of a difference, and the knobs were chosen on these same tracks, so the ranking is descriptive; the seminar's test set, with paired losses, is where differences get a standard error. The hollow points are the training scores: the forest's is 86, and that is right, not a bug: predict() on the training rows uses the trees that had each row in-bag, grown to leaves of five rows, so the forest nearly reproduces its training rows; its out-of-bag score, the honest in-sample number, is 475. The vault stays shut: the seminar refits on training plus selection and opens it once. What these data have: a nonlinear year effect and loudness, which the plane cannot bend to, and little else the inputs can see.
 :::
 
 ```{r}
@@ -944,7 +956,7 @@ d_sp <- ds_sp[which.min(sapply(ds_sp, function(d) mse(y_se, predict(rpart(f_gen,
 fit_tree_sp <- rpart(f_gen, sp_train, control = rpart.control(maxdepth = d_sp, cp = 0, minbucket = 10))
 fit_rf_sp <- randomForest(f_gen, sp_train, ntree = 300)
 Ms_sp <- c(2, 4, 8, 16)
-nn_sp <- function(X, y, M) { set.seed(10); nnet(X, y, size = M, decay = 0.1, linout = TRUE, maxit = 300, trace = FALSE) }
+nn_sp <- function(X, y, M) { nnet(X, y, size = M, decay = 0.1, linout = TRUE, maxit = 300, trace = FALSE) }
 M_sp <- Ms_sp[which.min(sapply(Ms_sp, function(M) mse(y_se, predict(nn_sp(sp_Xtr, y_tr, M), sp_Xse))))]
 fit_nn_sp <- nn_sp(sp_Xtr, y_tr, M_sp)
 six <- bind_rows(
@@ -967,12 +979,12 @@ ggplot(six, aes(y = competitor)) +
   theme(legend.position = "top")
 ```
 
-Knobs chosen on the selection tracks, scored there. The three that can bend lead, close together and below the plane with the same inputs; the forest's training score is `r round(six$train[six$competitor == "forest, + genre, defaults"])`. The vault stays shut: the seminar refits and opens it once
+Knobs chosen on the selection tracks, scored there. The forest and the additive splines lead, 30 to 40 below the plane with the same inputs; the forest's training score is `r round(six$train[six$competitor == "forest, + genre, defaults"])`. The vault stays shut: the seminar refits and opens it once
 
 ## Four dimensions, not one {minutes="3"}
 
 ::: {.notes}
-Three minutes. Four questions about the world, not one scale from simple to complex: a truth can be tall and interactive, or wide and smooth. Each family is a bet on an answer; week 4's no free lunch says the bet is doing the work, and the selection set says which bet paid on these data (Spotify: smooth in year and loudness, roughly additive, so the splines, the forest and a two-unit network). k-NN near the bottom on every simulated truth: ten inputs of which seven are idle, 300 points, week 1's curse with a price on it; a rate on that price comes later in the course.
+Three minutes. Four questions about the world, not one scale from simple to complex: a truth can be tall and interactive, or wide and smooth. Each family is a bet on an answer; week 4's no free lunch says the bet is doing the work, and the selection set says which bet paid on these data (Spotify: smooth in year and loudness, roughly additive, so the forest and the splines). k-NN last on truths A and B: ten inputs of which seven are idle, 300 points, week 1's curse with a price on it; a rate on that price comes later in the course.
 :::
 
 ::: {style="font-size: 0.94em"}
@@ -989,13 +1001,13 @@ Three minutes. Four questions about the world, not one scale from simple to comp
 Four separate questions, not one scale from simple to complex. A family is a bet on the answers; a selection set says which bet paid
 
 ::: {.retrieval}
-Curse of dimensionality: $k$-NN near the bottom on every truth, seven idle inputs. No free lunch theorem: no family won every truth, and none can.
+Curse of dimensionality: $k$-NN last on truths A and B, seven idle inputs. No free lunch theorem: no family won every truth, and none can.
 :::
 
 ## What the training error hides {minutes="3"}
 
 ::: {.notes}
-Two minutes for the ask; collect two orderings before the reveal. Why anyone cared: the training error is the only error you can compute without new data. The hollow points sat left of the filled ones on most rows, the forest's by a factor of four, and right of them on a few (least squares on truth A, the tree on truth C); the question is whether the usual direction is a law, and what the exceptions are. Expected answer after the theorem: it is a statement about averages over training sets, and one realization of 300 rows can go either way by a little; the test MSE is itself a noisy number. Week 4's symbols: a class, the best in it, what the data return.
+Two minutes for the ask; collect two orderings before the reveal. Why anyone cared: the training error is the only error you can compute without new data. The hollow points sat left of the filled ones on most rows, the forest's by a factor of about five (seven on the wide panel), and right of them on a few (the network and both planes on truth C; on Spotify the plane without genre and the mean, by 1 or 2); the question is whether the usual direction is a law, and what the exceptions are. Expected answer after the theorem: it is a statement about averages over training sets, and one realization of 300 rows can go either way by a little; the test MSE is itself a noisy number. Week 4's symbols: a class, the best in it, what the data return.
 :::
 
 On most rows of the leaderboards the training MSE sat below the test or selection MSE; on a few it sat above. Luck, or a law?

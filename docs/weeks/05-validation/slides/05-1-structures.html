@@ -224,10 +224,10 @@ Joshua Loftus
 <p>Part 5: neural networks</p>
 <p>Part 6: which structure?</p>
 </section>
-<section id="where-week-4-left-us" class="slide level2" data-minutes="1">
-<h2>Where week 4 left us</h2>
+<section id="where-we-left-off" class="slide level2" data-minutes="1">
+<h2>Where we left off</h2>
 <p>Last week: optimization, the general concepts and the methods that fit a model</p>
-<p>This week: a few specific families of supervised models, each with its own <strong>functional structure</strong>, each introduced briefly. Every one of them gets more detail in a later week</p>
+<p>This week: a few specific families of supervised models, each with its own <strong>functional structure</strong>, each introduced briefly. Every one of them gets more detail later in the course</p>
 <p>Each family is a bet on the shape of <span class="math inline">\(f^\star\)</span>. To compare the bets we need one task</p>
 </section>
 <section id="the-task-10000-spotify-tracks" class="slide level2">
@@ -242,7 +242,7 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p>10,000 tracks from playlists of six genres (<a href="https://ml4ds.com/data/spotify.html">data note</a>); the 5,000 training tracks plotted. Their popularity has variance 559: the MSE of predicting the mean for everyone</p>
+<p>10,000 tracks from playlists of six genres (<a href="https://ml4ds.com/data/spotify.html">data note</a>); the 5,000 training tracks plotted. Their popularity has variance 565: the MSE of predicting the mean for everyone</p>
 </section>
 <section id="data-split" class="slide level2">
 <h2>Data split</h2>
@@ -296,7 +296,7 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p>The local average (<span class="math inline">\(k = 100\)</span>) and the plane, one standard error apart. Can a different shape beat both? The test set stays shut</p>
+<p>The local average (<span class="math inline">\(k = 100\)</span>) and the plane, well within a standard error of each other. Can a different shape beat both? The test set stays shut</p>
 </section>
 <section id="tuning" class="slide level2 inverse" data-background-image="img/dial.jpg" data-background-size="cover" data-background-opacity="0.55" data-background-color="#440154">
 <h2>Tuning</h2>
@@ -524,11 +524,13 @@ f(x) = \beta_0 + \sum_{j=1}^J \beta_j\, b_j(x)
 </section>
 <section id="a-regression-tree-for-popularity" class="slide level2">
 <h2>A regression tree for popularity</h2>
-<div class="cell" data-layout-align="center">
+<div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" data-code-line-numbers="1-2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-label="1"></a>fit_tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(track_popularity <span class="sc">~</span> release_year <span class="sc">+</span> energy, sp_train,</span>
 <span id="cb2-2"><a aria-label="2"></a>                  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">maxdepth =</span> <span class="dv">3</span>, <span class="at">cp =</span> <span class="dv">0</span>, <span class="at">minbucket =</span> <span class="dv">250</span>))</span>
 <span id="cb2-3"><a aria-label="3"></a><span class="fu">plot</span>(fit_tree, <span class="at">uniform =</span> <span class="cn">TRUE</span>, <span class="at">margin =</span> <span class="fl">0.1</span>)</span>
 <span id="cb2-4"><a aria-label="4"></a><span class="fu">text</span>(fit_tree, <span class="at">pretty =</span> <span class="dv">0</span>, <span class="at">cex =</span> <span class="fl">1.9</span>, <span class="at">digits =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -550,7 +552,7 @@ f(x) = \beta_0 + \sum_{j=1}^J \beta_j\, b_j(x)
 </div>
 </div>
 </div>
-<p>Each leaf is a rectangle with one value; the training tracks in white. The three narrow strips on the right are the leaves for 2018 and for 2019 to 2020, split again by energy</p>
+<p>Each leaf is a rectangle with one value; the training tracks in white. Energy matters only on the right, from 2018 on: one leaf for the most energetic tracks, two below it</p>
 </section>
 <section id="one-predictor-every-cutoff" class="slide level2">
 <h2>One predictor, every cutoff</h2>
@@ -651,7 +653,7 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 </div>
 </div>
 </div>
-<p>Dotted line: the noise variance, the smallest population MSE. For this sparse truth the lasso ties least squares when <span class="math inline">\(n \gg p\)</span>, and alone stays near the floor when <span class="math inline">\(p &gt; n\)</span></p>
+<p>Dotted line: the noise variance, the smallest population MSE. For this sparse truth the lasso ties least squares when <span class="math inline">\(n \gg p\)</span>, and is far ahead of every other family when <span class="math inline">\(p &gt; n\)</span></p>
 </section>
 <section id="truth-b-additive-smooth" class="slide level2">
 <h2>Truth B: additive smooth</h2>
@@ -690,7 +692,7 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 </div>
 </div>
 </div>
-<p>Knobs chosen on the selection tracks, scored there. The three that can bend lead, close together and below the plane with the same inputs; the forest’s training score is 86. The vault stays shut: the seminar refits and opens it once</p>
+<p>Knobs chosen on the selection tracks, scored there. The forest and the additive splines lead, 30 to 40 below the plane with the same inputs; the forest’s training score is 86. The vault stays shut: the seminar refits and opens it once</p>
 </section>
 <section id="four-dimensions-not-one" class="slide level2" data-minutes="3">
 <h2>Four dimensions, not one</h2>
@@ -734,7 +736,7 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 </div>
 <p>Four separate questions, not one scale from simple to complex. A family is a bet on the answers; a selection set says which bet paid</p>
 <div class="retrieval">
-<p>Curse of dimensionality: <span class="math inline">\(k\)</span>-NN near the bottom on every truth, seven idle inputs. No free lunch theorem: no family won every truth, and none can.</p>
+<p>Curse of dimensionality: <span class="math inline">\(k\)</span>-NN last on truths A and B, seven idle inputs. No free lunch theorem: no family won every truth, and none can.</p>
 </div>
 </section>
 <section id="what-the-training-error-hides" class="slide level2" data-minutes="3">

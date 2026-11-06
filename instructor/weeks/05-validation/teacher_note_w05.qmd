@@ -23,7 +23,7 @@ In seminar order. Planned total 60 minutes; cutting the first item marked gets b
 | Coding 2, step 3: the lasso, $\lambda$ chosen from the path, no coefficient at zero, 526 | 4 | Keep | `predict()` gives one column per $\lambda$; `apply` over columns |
 | Coding 2, step 4: additive splines, $J = 3$, 495 | 4 | Keep | Same loop as step 3 with `spline_fit(J, sp_train)` |
 | Coding 2, step 5: tree depth 3 (513), forest 499 | 5 | Rush | Start the forest and talk while it fits (about half a minute) |
-| Coding 2, step 6: network, $M = 2$, 496 | 3 | Rush; cut first | Say it: the lecture's number, two hidden units, and the bigger ones do worse |
+| Coding 2, step 6: network, $M = 2$, 496 | 3 | Rush; cut first | Say it: two hidden units, and the bigger ones do worse |
 | Coding 2, leaderboard and question 2: the three that bend lead by about 30; the mean, the plane and the forest are the unbiased rows | 2 | Keep | Problem 1 read off the board |
 | Coding 3, step 7: every competitor fitted so far refitted on the 7,000 training and tuning tracks at its chosen knob | 6 | Keep | The solution's `exists()` guards skip what was cut; refitting the plane, the lasso and the splines is enough |
 | Coding 3, step 8 and question 3: the vault opened once; forest, network and splines all 499; the tuning leaders, splines against network, paired difference 0.3 with standard error 3.2 | 4 | Keep | The pair is chosen on the tuning leaderboard, before the vault; this one draw cannot isolate problem 1's bias |

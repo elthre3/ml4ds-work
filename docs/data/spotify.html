@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="10,000 tracks from Spotify playlists of six genres, with audio features, a release date and Spotify’s popularity score. The week-5 task: what makes a song popular?">
+<meta name="description" content="10,000 tracks from Spotify playlists of six genres, with audio features, a release date and Spotify’s popularity score.">
 
 <title>Spotify tracks – machine learning 4 data science</title>
 <style>
@@ -94,35 +94,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -220,7 +191,7 @@ window.Quarto = {
 
 <div>
   <div class="description">
-    10,000 tracks from Spotify playlists of six genres, with audio features, a release date and Spotify’s popularity score. The week-5 task: what makes a song popular?
+    10,000 tracks from Spotify playlists of six genres, with audio features, a release date and Spotify’s popularity score.
   </div>
 </div>
 
@@ -244,56 +215,24 @@ window.Quarto = {
 </colgroup>
 <tbody>
 <tr class="odd">
-<td><strong>Provenance and license</strong></td>
-<td>Collected from the Spotify Web API by Kaylin Pavlik (January 2020) and published as the TidyTuesday dataset of 21 January 2020, 32,833 rows. Spotify’s developer terms restrict commercial use; this is teaching. The course file is 10,000 tracks drawn at random from the 28,356 distinct tracks.</td>
+<td><strong>Source</strong></td>
+<td>Collected from the Spotify Web API by Kaylin Pavlik and published as a TidyTuesday dataset (21 January 2020). The course file is a random sample of 10,000 of its tracks. Spotify’s terms restrict commercial use.</td>
 </tr>
 <tr class="even">
-<td><strong>R access</strong></td>
-<td><code>readr::read_csv("https://ml4ds.com/files/spotify_tracks.csv")</code>, then one row per <code>track_id</code> (the loader below).</td>
+<td><strong>Rows</strong></td>
+<td>One row per track and playlist (11,554 rows): 1,101 tracks are in more than one playlist. For one row per track, use <code>distinct(track_id, .keep_all = TRUE)</code>, as the loader below does.</td>
 </tr>
 <tr class="odd">
-<td><strong>Unit of observation</strong></td>
-<td>A track. The file has a row per track and playlist (11,554 rows), since 1,101 tracks are in more than one playlist. Columns: <code>track_id</code>, <code>track_name</code>, <code>track_artist</code>, <code>track_popularity</code> (0 to 100), <code>release_date</code>, <code>release_year</code>, <code>playlist_genre</code>, <code>playlist_subgenre</code>, and the audio features <code>danceability</code>, <code>energy</code>, <code>key</code>, <code>loudness</code>, <code>mode</code>, <code>speechiness</code>, <code>acousticness</code>, <code>instrumentalness</code>, <code>liveness</code>, <code>valence</code>, <code>tempo</code>, <code>duration_ms</code>.</td>
+<td><strong>Columns</strong></td>
+<td><code>track_id</code>, <code>track_name</code>, <code>track_artist</code>, <code>track_popularity</code> (0 to 100), <code>release_date</code>, <code>release_year</code>, <code>playlist_genre</code>, <code>playlist_subgenre</code>, and the audio features <code>danceability</code>, <code>energy</code>, <code>key</code>, <code>loudness</code>, <code>mode</code>, <code>speechiness</code>, <code>acousticness</code>, <code>instrumentalness</code>, <code>liveness</code>, <code>valence</code>, <code>tempo</code>, <code>duration_ms</code>.</td>
 </tr>
 <tr class="even">
-<td><strong>Target and loss</strong></td>
-<td><code>track_popularity</code> with squared error. Variance about 560; a tenth of the tracks score exactly 0.</td>
+<td><strong>Target</strong></td>
+<td><code>track_popularity</code>, Spotify’s score in January 2020. It rewards recent plays, so <code>release_year</code> carries recency as well as era. A tenth of the tracks score exactly 0.</td>
 </tr>
 <tr class="odd">
-<td><strong>Available at prediction time</strong></td>
-<td>The audio features and the release date are properties of the recording. The genre is the playlist’s, not the track’s. Popularity is Spotify’s score in January 2020 and rewards recent plays, so <code>release_year</code> carries recency as well as era.</td>
-</tr>
-<tr class="even">
-<td><strong>Permitted predictors</strong></td>
-<td>Week 5: the ten audio features (<code>duration_ms</code> in minutes), <code>release_year</code> and <code>playlist_genre</code>.</td>
-</tr>
-<tr class="odd">
-<td><strong>Missingness</strong></td>
-<td>None in the features; one track lacks a name.</td>
-</tr>
-<tr class="even">
-<td><strong>Split unit and seed</strong></td>
-<td>Tracks, with <code>set.seed(5)</code>: 5,000 training, 2,000 selection, 3,000 test. A split by row puts the same track on both sides (a leakage example for later in the course).</td>
-</tr>
-<tr class="odd">
-<td><strong>Baseline</strong></td>
-<td>The training mean, 39.1: MSE 581 on the selection tracks, where least squares on the eleven numeric inputs scores about 541 and <span class="math inline">\(k\)</span> nearest neighbors on the same inputs about 528. The test scores are the seminar’s.</td>
-</tr>
-<tr class="even">
-<td><strong>Methods that use it</strong></td>
-<td>Week 5: the lecture’s demonstrations and the seminar’s leaderboard. Later: cross-validation and the leakage check.</td>
-</tr>
-<tr class="odd">
-<td><strong>Complication it carries</strong></td>
-<td>The score is a snapshot of plays, not a judgment of the music; the playlists were one person’s choice in one month.</td>
-</tr>
-<tr class="even">
-<td><strong>Limitations</strong></td>
-<td>Six genres, no lyrics, no artist history, no play counts. Fine for the mechanism, not for a claim about music.</td>
-</tr>
-<tr class="odd">
-<td><strong>Fictional?</strong></td>
-<td>No.</td>
+<td><strong>Notes</strong></td>
+<td>The genre is the playlist’s, not the track’s. No missing values in the features; one track has no name. Six genres, no lyrics, no artist history, no play counts.</td>
 </tr>
 </tbody>
 </table>
@@ -302,7 +241,7 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"https://ml4ds.com/files/spotify_tracks.csv"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(track_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span>          <span class="co"># one row per track</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">duration_min =</span> duration_ms <span class="sc">/</span> <span class="dv">60000</span>, <span class="at">genre =</span> <span class="fu">factor</span>(playlist_genre))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">duration_min =</span> duration_ms <span class="sc">/</span> <span class="dv">60000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section>
