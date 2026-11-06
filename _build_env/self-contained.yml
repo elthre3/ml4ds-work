@@ -1,0 +1,16 @@
+# Metadata for the self-contained pages: teacher notes, complete notebooks and notebooks with
+# solutions (build.sh passes it with --metadata-file). For a self-contained page Quarto loads
+# MathJax 3; these pages load MathJax 4 like the rest of the site, with the two rules that
+# styles.css gives the site's pages (an inline formula on one line, at the paragraph's line
+# height, from tablet width up). styles.css itself does not reach these pages.
+html-math-method:
+  method: mathjax
+  url: "https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"
+include-in-header:
+  text: |
+    <style>
+    @media (min-width: 768px) {
+      mjx-container:not([display="true"]) { line-height: 0; }
+      mjx-container:not([display="true"]) mjx-break { white-space: nowrap !important; }
+    }
+    </style>

@@ -25,6 +25,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT=$(pwd)
+# A container with no locale set runs R in the POSIX locale, and R output loses its non-ASCII
+# characters (a tibble prints "3 x 5" for "3 × 5"). Use UTF-8 when nothing else is set.
+if [ -z "${LC_ALL:-}${LC_CTYPE:-}${LANG:-}" ]; then export LANG=C.UTF-8; fi
 
 import() {
   local src="${1:?delivery folder required}"
@@ -62,7 +65,7 @@ instructor() {
   # Teacher notes, board scripts, complete notebooks (all formats in their YAML).
   for f in instructor/weeks/${WEEK:-*}/*.qmd instructor/weeks/${WEEK:-*}/notebooks/*_complete.qmd; do
     [ -e "$f" ] || continue
-    quarto render "$f" --embed-resources
+    quarto render "$f" --embed-resources --metadata-file _build_env/self-contained.yml
   done
   # Their output lands under docs/instructor/ (project output-dir) or, if Quarto
   # treats them as outside the project, beside the source. Move either out.
@@ -119,7 +122,7 @@ solutions() {
     fi
     s="${c%_complete.qmd}_solutions.qmd"
     python3 _build_env/make_incomplete.py --solutions "$c" "$s"
-    quarto render "$s" --embed-resources
+    quarto render "$s" --embed-resources --metadata-file _build_env/self-contained.yml
     # The output is under docs/ (project output-dir) or beside the source.
     out="${s%.qmd}.html"
     if [ -e "docs/$out" ]; then
@@ -256,6 +259,8 @@ check() {
   # Every page uses MathJax 4 (html-math-method in _quarto.yml). A deck that ends up without a math
   # method gets MathJax 2.7.9 from reveal's plugin; one that names another URL gets that.
   if grep -rlq --include='*.html' -e "mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@[0-3]" docs; then echo "FAIL: a deck loads a MathJax older than 4 (check html-math-method in its YAML and in _quarto.yml)"; fail=1; fi
+  # The self-contained pages get MathJax 4 from _build_env/self-contained.yml; without it Quarto loads 3.
+  if grep -lq -e 'npm/mathjax@[0-3]' docs/teachers/*_complete.html docs/teachers/teacher_note*.html docs/solutions/*.html 2>/dev/null; then echo "FAIL: a teacher page or notebook with solutions loads a MathJax older than 4 (render it with --metadata-file _build_env/self-contained.yml)"; fail=1; fi
   # Nothing under teachers/ (or the old decks-notes/ and seminar-teachers/) is linked from a public page. What students get,
   # the week after the seminar, is the notebook with solutions under solutions/.
   n=$(grep -rlE --include='*.html' --exclude-dir=teachers -e 'href="[^"]*teachers/' -e 'href="[^"]*decks-notes/' docs | tr '\n' ' ' || true)
