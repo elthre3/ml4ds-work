@@ -285,10 +285,10 @@ stopifnot(max(abs(numeric_grad(logit_loss, X_pg, y_pg, c(0.5, -0.3)) - logit_gra
 
 <!-- 16 min: steps 1 and 2, questions 4 and 5. -->
 
-**Step 1.** More coefficients than observations: $n = 100$, $p = 400$. Implement mini-batch stochastic gradient descent for least squares from `beta <- rep(0, p)`: in each epoch, shuffle the rows (`sample(n)`) and, for each batch of 10 rows, take a step of size `gamma = 0.005` along the batch's gradient. Record after each epoch the training MSE and the distance $\|\beta_t - \beta\|$ to the true coefficients.
+**Step 1.** More coefficients than observations: $n = 100$, $p = 400$. Implement mini-batch stochastic gradient descent for least squares from `beta <- rep(0, p)`: in each epoch, shuffle the rows (`sample(n_big)`) and, for each batch of 10 rows, take a step of size `gamma = 0.005` along the batch's gradient. Record after each epoch the training MSE and the distance $\|\beta_t - \beta\|$ to the true coefficients.
 
 ```{r}
-set.seed(1)
+set.seed(310)   # change this number: different random draws, and different numbers below
 n_big <- 100
 p_big <- 400
 X_big <- matrix(rnorm(n_big * p_big), n_big, p_big)
@@ -311,12 +311,11 @@ for (e in 1:epochs) {
 # ...
 ```
 
-**Question 4.** The training MSE goes to zero. Why is that possible, and why should it worry you? The distance to the true coefficients levels off at about $33$, from a starting distance of $38$: what is it that the algorithm cannot learn from these data?
+**Question 4.** The training MSE goes to zero. Why is that possible, and why should it worry you? The distance to the true coefficients levels off at about $34$, from a starting distance of $39$: what is it that the algorithm cannot learn from these data?
 
 **Step 2.** The lecture's wide regression: $n = 80$, $p = 60$, noisy, and a held-out set of 2,000 rows from the same model. Run full-batch gradient descent from zero for 300 steps with step `0.5 / L`, where `L` is twice the largest eigenvalue of $\mathbf X^T\mathbf X/n$, and record the training and the held-out MSE after every step. Plot both against the step (log scale on the horizontal axis), and find the step at which the held-out MSE is smallest.
 
 ```{r}
-set.seed(12)
 n_w <- 80
 p_w <- 60
 X_w <- matrix(rnorm(n_w * p_w), n_w, p_w)

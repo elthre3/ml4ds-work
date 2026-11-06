@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="344 penguins of three species measured at Palmer Station, Antarctica, 2007–2009: bill, flipper, body mass, sex, island. Small and clean; the classification data for the week-3 seminar.">
+<meta name="description" content="344 penguins of three species measured at Palmer Station, Antarctica, 2007–2009: bill, flipper, body mass, sex, island.">
 
 <title>Palmer penguins – machine learning 4 data science</title>
 <style>
@@ -191,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    344 penguins of three species measured at Palmer Station, Antarctica, 2007–2009: bill, flipper, body mass, sex, island. Small and clean; the classification data for the week-3 seminar.
+    344 penguins of three species measured at Palmer Station, Antarctica, 2007–2009: bill, flipper, body mass, sex, island.
   </div>
 </div>
 
@@ -215,52 +215,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </colgroup>
 <tbody>
 <tr class="odd">
-<td><strong>Provenance and license</strong></td>
-<td>Gorman, Williams and Fraser (2014), Palmer Station Long Term Ecological Research program; packaged by Horst, Hill and Gorman as <code>palmerpenguins</code>. The R package and its data are CC0.</td>
+<td><strong>Source</strong></td>
+<td>Gorman, Williams and Fraser (2014), Palmer Station Long Term Ecological Research program, packaged by Horst, Hill and Gorman as the R package <code>palmerpenguins</code>. The package and its data are CC0.</td>
 </tr>
 <tr class="even">
-<td><strong>R access</strong></td>
-<td><code>palmerpenguins::penguins</code>. Use the qualified name: <code>modeldata</code> also exports a <code>penguins</code> (7 columns, no <code>year</code>) and masks it when attached later.</td>
+<td><strong>Rows</strong></td>
+<td>One row per penguin (344): Adelie, Chinstrap and Gentoo. Two penguins lack all four measurements and eleven lack <code>sex</code>, so use <code>drop_na()</code> on the columns you use.</td>
 </tr>
 <tr class="odd">
-<td><strong>Unit of observation</strong></td>
-<td>A penguin (344 rows), 8 columns: <code>species</code>, <code>island</code>, <code>bill_length_mm</code>, <code>bill_depth_mm</code>, <code>flipper_length_mm</code>, <code>body_mass_g</code>, <code>sex</code>, <code>year</code>.</td>
+<td><strong>Columns</strong></td>
+<td><code>species</code>, <code>island</code>, <code>bill_length_mm</code>, <code>bill_depth_mm</code>, <code>flipper_length_mm</code>, <code>body_mass_g</code>, <code>sex</code>, <code>year</code>.</td>
 </tr>
 <tr class="even">
-<td><strong>Target and loss</strong></td>
-<td>Week 3: <code>species</code>, Adelie against Chinstrap (219 birds after dropping incomplete measurements), 0–1 loss or a cost-weighted loss with the costs stated.</td>
+<td><strong>Target</strong></td>
+<td>In the loader below, <code>chinstrap</code>: 1 for a Chinstrap, 0 for an Adelie (219 penguins with complete measurements).</td>
 </tr>
 <tr class="odd">
-<td><strong>Available at prediction time</strong></td>
-<td>The measurements and <code>island</code>, <code>sex</code>, <code>year</code>. In this dataset <code>island</code> completely separates Chinstrap from Gentoo (Chinstraps are on Dream, Gentoos on Biscoe; Adelies occur on all three islands), so a model with <code>island</code> in it is solving a different, easier task; say so if a student uses it.</td>
-</tr>
-<tr class="even">
-<td><strong>Permitted predictors</strong></td>
-<td>Week 3: <code>bill_length_mm</code> and <code>bill_depth_mm</code> (the default), <code>flipper_length_mm</code> alone (the weak model for the ROC curve).</td>
-</tr>
-<tr class="odd">
-<td><strong>Missingness</strong></td>
-<td>Two birds lack all four measurements; eleven lack <code>sex</code>. <code>drop_na()</code> on the columns used.</td>
-</tr>
-<tr class="even">
-<td><strong>Split unit and seed</strong></td>
-<td>Birds. Week 3 fits on all 219 birds with no split: the point is the mechanism, and every number in the seminar is computed on the training rows (apparent performance; the validation week says what that flatters).</td>
-</tr>
-<tr class="odd">
-<td><strong>Baseline</strong></td>
-<td>Predict the majority class, Adelie (the seminar computes its accuracy).</td>
-</tr>
-<tr class="even">
-<td><strong>Complication it carries</strong></td>
-<td>None social. Near-separability on the bill measurements: <code>glm</code> warns about fitted probabilities of 0 or 1, a live example of the lecture’s “too easy” slide.</td>
-</tr>
-<tr class="odd">
-<td><strong>Limitations</strong></td>
-<td>Three islands, three seasons, one research program: a clean dataset with no deployment story, which is why it is used when the mechanism is the lesson.</td>
-</tr>
-<tr class="even">
-<td><strong>Fictional?</strong></td>
-<td>No.</td>
+<td><strong>Notes</strong></td>
+<td>Write <code>palmerpenguins::penguins</code>: the <code>modeldata</code> package also has a <code>penguins</code> (7 columns, no <code>year</code>), which masks this one if it is attached later. <code>island</code> separates Chinstrap from Gentoo completely (Chinstraps are only on Dream, Gentoos only on Biscoe), so a model that uses it solves an easier problem. Adelie and Chinstrap are nearly separable on the bill measurements, so <code>glm</code> may warn about fitted probabilities of 0 or 1.</td>
 </tr>
 </tbody>
 </table>

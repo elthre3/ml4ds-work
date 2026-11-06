@@ -2421,13 +2421,13 @@ window.Quarto = {
 <td>Coding 2, step 1 and question 4: <span class="math inline">\(p &gt; n\)</span>, training MSE to zero</td>
 <td style="text-align: right;">7</td>
 <td>Keep</td>
-<td>Zero training error, distance to truth stuck at 33. If stuck, give the shuffle-and-batch lines; the step is <code>ls_grad</code> on the batch</td>
+<td>Zero training error, distance to truth stuck at 34. If stuck, give the shuffle-and-batch lines; the step is <code>ls_grad</code> on the batch</td>
 </tr>
 <tr class="odd">
-<td>Coding 2, step 2 and question 5: early stopping, best step 15</td>
+<td>Coding 2, step 2 and question 5: early stopping, best step 6</td>
 <td style="text-align: right;">8</td>
 <td>Keep</td>
-<td>Training says keep going; held-out turned at 15; the estimate is now biased</td>
+<td>Training says keep going; held-out turned at 6; the estimate is now biased</td>
 </tr>
 </tbody>
 </table>
@@ -2447,8 +2447,8 @@ window.Quarto = {
 <li>Coding 1: 142 countries; curvatures <span class="math inline">\(2\)</span> and <span class="math inline">\(0.69\)</span> centered, <span class="math inline">\(30.6\)</span> and <span class="math inline">\(0.045\)</span> uncentered. At <span class="math inline">\(\gamma = 0.3\)</span> the slope is <span class="math inline">\(16.585\)</span> to three decimals after 50 steps with gradient norm about <span class="math inline">\(10^{-4}\)</span>; at <span class="math inline">\(0.05\)</span> the slope is <span class="math inline">\(13.7\)</span> with gradient norm about <span class="math inline">\(2\)</span>; at <span class="math inline">\(1.05\)</span> the loss is about <span class="math inline">\(6 \times 10^7\)</span> after 50 steps. Uncentered, <span class="math inline">\(\gamma = 1/30\)</span>, 300 steps: intercept <span class="math inline">\(4.58\)</span> against <code>lm</code>’s <span class="math inline">\(4.95\)</span>.</li>
 <li>Coding 1, step 5: 219 birds; gradient descent and <code>glm</code> agree to three decimals, <span class="math inline">\((-0.935, 0.938)\)</span>; the score vector is about <span class="math inline">\(10^{-10}\)</span>.</li>
 <li>Coding 1, step 6: numeric and exact gradients agree to about <span class="math inline">\(10^{-10}\)</span> (logistic) and <span class="math inline">\(10^{-7}\)</span> (least squares, whose loss is of order <span class="math inline">\(10^3\)</span>); the fit by numeric gradient matches the exact one to <span class="math inline">\(10^{-10}\)</span>. If asked why not a smaller <span class="math inline">\(h\)</span>: at <span class="math inline">\(10^{-10}\)</span> the error grows to <span class="math inline">\(10^{-7}\)</span>.</li>
-<li>Coding 2, step 1 (seed 1): training MSE <span class="math inline">\(459\)</span> after one epoch, <span class="math inline">\(2.8\)</span> after ten, <span class="math inline">\(10^{-4}\)</span> after forty; distance to the truth <span class="math inline">\(35.5\)</span>, then <span class="math inline">\(33.3\)</span> from epoch ten on, from <span class="math inline">\(38.3\)</span> at the start.</li>
-<li>Coding 2, step 2 (seed 12): <span class="math inline">\(L \approx 7.5\)</span>; held-out MSE smallest at step 15, about <span class="math inline">\(15.7\)</span>, and about <span class="math inline">\(32\)</span> at step 300; training MSE <span class="math inline">\(2.2\)</span> at step 300.</li>
+<li>Coding 2, step 1: training MSE <span class="math inline">\(504\)</span> after one epoch, <span class="math inline">\(3.2\)</span> after ten, <span class="math inline">\(5 \times 10^{-4}\)</span> after forty; distance to the truth <span class="math inline">\(36.0\)</span>, then <span class="math inline">\(33.7\)</span> from epoch eleven on, from <span class="math inline">\(39.4\)</span> at the start.</li>
+<li>Coding 2, step 2: <span class="math inline">\(L \approx 6.3\)</span>; held-out MSE smallest at step 6, about <span class="math inline">\(16.5\)</span>, and about <span class="math inline">\(25\)</span> at step 300; training MSE <span class="math inline">\(2.7\)</span> at step 300.</li>
 </ul>
 <p>Where they get stuck</p>
 <ul>
