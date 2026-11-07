@@ -352,7 +352,7 @@ Every candidate has a knob. Turn it, and the fit follows the data more or less c
 </tbody>
 </table>
 </div>
-<p>and <strong>tune each model so that it is the best version of its kind</strong>: every knob chosen on the selection tracks, as <span class="math inline">\(k\)</span> was. Then compare the best of each kind</p>
+<p>and tune each model so that it is the best version of its kind: every knob chosen on the selection tracks, as <span class="math inline">\(k\)</span> was. Then compare the best of each kind</p>
 </section>
 <section id="section-1" class="slide level2 inverse center">
 <h2></h2>
@@ -379,8 +379,8 @@ Every candidate has a knob. Turn it, and the fit follows the data more or less c
 <p>For some constant <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math display">\[\text{minimize } \| \mathbf y - \mathbf X \beta \|^2_2 + \lambda \| \beta \|^2\]</span> <strong>Shrinks</strong> coefficients <span class="math inline">\(\hat \beta\)</span> toward 0</p>
 <p>Larger coefficients are penalized more (squared penalty)</p>
 </section>
-<section id="what-lambda-controls" class="slide level2" data-minutes="3">
-<h2>What <span class="math inline">\(\lambda\)</span> controls</h2>
+<section id="the-ridge-estimator" class="slide level2" data-minutes="3">
+<h2>The ridge estimator</h2>
 <div class="columns">
 <div class="column" style="width:52%;">
 <p>Set the gradient of <span class="math inline">\(\| \mathbf y - \mathbf X \beta \|^2 + \lambda \| \beta \|^2\)</span> to zero (exercise 2): <span class="math display">\[
@@ -618,8 +618,8 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 <p>A GLM whose inputs are <span class="math inline">\(M\)</span> GLMs. Iterate again: a <em>deep</em> network</p>
 </div></div>
 </section>
-<section id="what-to-know-about-networks-today" class="slide level2">
-<h2>What to know about networks today</h2>
+<section id="fitting-and-tuning-a-network" class="slide level2">
+<h2>Fitting and tuning a network</h2>
 <p><strong>How it is fitted.</strong> All <span class="math inline">\(M(p + 1) + M + 1\)</span> weights at once, by gradient-based optimization of a loss that is not convex: many valleys, with plateaus and saddles between them. Today’s fits: <code>nnet()</code>, a quasi-Newton method</p>
 <p><strong>The knob.</strong> <span class="math inline">\(M\)</span>, the number of hidden units, chosen on the selection tracks. Depth, and a penalty on the weights: later knobs. In R, <code>nnet(size = M, linout = TRUE)</code></p>
 </section>
@@ -719,7 +719,7 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 <tr class="even">
 <td><strong>sparse or dense</strong></td>
 <td>how many inputs matter</td>
-<td>the lasso bets few; least squares and ridge spread the fit over all; a forest tolerates idle inputs, <span class="math inline">\(k\)</span>-NN pays for them</td>
+<td>the lasso bets few; least squares and ridge spread the fit over all; a forest tolerates idle inputs, <span class="math inline">\(k\)</span>-NN is hurt by them</td>
 </tr>
 <tr class="odd">
 <td><strong>smooth or discontinuous</strong></td>
@@ -734,13 +734,13 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 </tbody>
 </table>
 </div>
-<p>Four separate questions, not one scale from simple to complex. A family is a bet on the answers; a selection set says which bet paid</p>
+<p>Four separate questions, not one scale from simple to complex. A family is a bet on the answers. A selection set shows which bet did best on these data</p>
 <div class="retrieval">
 <p>Curse of dimensionality: <span class="math inline">\(k\)</span>-NN last on truths A and B, seven idle inputs. No free lunch theorem: no family won every truth, and none can.</p>
 </div>
 </section>
-<section id="what-the-training-error-hides" class="slide level2" data-minutes="3">
-<h2>What the training error hides</h2>
+<section id="training-error-and-risk" class="slide level2" data-minutes="3">
+<h2>Training error and risk</h2>
 <p>On most rows of the leaderboards the training MSE sat below the test or selection MSE; on a few it sat above. Luck, or a law?</p>
 <p>Training data i.i.d. from the population; a class <span class="math inline">\(\mathcal F\)</span> fixed before the data; <span class="math inline">\(f_{\mathcal F}\)</span> the best in <span class="math inline">\(\mathcal F\)</span> (smallest <span class="math inline">\(R\)</span>); <span class="math inline">\(\hat f\)</span> the empirical risk minimizer (smallest <span class="math inline">\(\hat R_n\)</span> over <span class="math inline">\(\mathcal F\)</span>)</p>
 <div class="ask">
@@ -754,7 +754,7 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 \mathbb E\big[\hat R_n(\hat f)\big] \;\le\; R(f_{\mathcal F}) \;\le\; \mathbb E\big[R(\hat f)\big]
 \]</span></p>
 <div class="leave">
-<p>Training error underestimates the risk: on average it sits below the best risk the class can reach, and the fitted model’s risk above it. A test set estimates <span class="math inline">\(R(\hat f)\)</span>; its average is the right end.</p>
+<p>Training error underestimates the risk: on average it is below the best risk the class can reach, and the fitted model’s risk above it. A test set estimates <span class="math inline">\(R(\hat f)\)</span>; its average is the right end.</p>
 </div>
 <p><strong>Proof</strong>: exercise 1</p>
 </section>
@@ -765,8 +765,8 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 <li><p>In the seminar: the Spotify task with every family. Each knob chosen on the selection tracks, then the vault opened once for the leaderboard</p></li>
 </ul>
 </section>
-<section id="conclusion-five-bets-one-task" class="slide level2 inverse">
-<h2>Conclusion: five bets, one task</h2>
+<section id="conclusion" class="slide level2 inverse">
+<h2>Conclusion</h2>
 <h4 id="each-family-is-a-bet-on-the-shape-of-fstar">Each family is a bet on the shape of <span class="math inline">\(f^\star\)</span></h4>
 <p>A plane, a sparse plane, a sum of curves, a set of rectangles, an average of many, a composition. Four questions about the world decide which bet pays</p>
 <h4 id="the-data-split-decides-what-you-may-believe">The data split decides what you may believe</h4>

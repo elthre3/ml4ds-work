@@ -58,7 +58,7 @@ Condition on $X$ first (the tower property), then take out what is known.
 $$
 \mathbb E\big[\hat\beta_{\text{short}} \mid \mathbf x_1, \mathbf x_2\big] = \beta_1 + \beta_2\,\hat\delta, \qquad \hat\delta = \frac{\mathbf x_1^T\mathbf x_2}{\mathbf x_1^T\mathbf x_1},
 $$
-say in words what $\hat\delta$ is, and say why it carries no randomness. When is the short regression unbiased for $\beta_1$?
+say in words what $\hat\delta$ is, and say why it is not random. When is the short regression unbiased for $\beta_1$?
 
 ::: {.callout-note collapse="true" title="Hint 1"}
 Substitute the model for $\mathbf y$ inside $\mathbf x_1^T\mathbf y$ and split the fraction into three terms.
@@ -100,7 +100,7 @@ After multiplying by $\tilde{\mathbf x}_2^T = \mathbf x_2^T\mathbf M_1$, two thi
 
 (b) Deduce that $\mathrm{Var}(Y) = R(f^\star) + \mathrm{Var}\big(f^\star(X)\big)$, and write both terms on the right as conditional moments of $Y$ given $X$. Which identity from ST102 is this?
 
-(c) Week 1 scored methods by squared error on held-out data. Imagine two oracle entries: one predicts $\mathbb E Y$ for everyone, the other is $f^\star$. What is the gap between their risks? On an actual leaderboard the constant entry uses the training mean $\bar y$ and the best entry is some fitted $\hat f$; give two reasons the observed gap need not equal that quantity. For a predictor fitted and chosen without using the test set, can its expected held-out squared error be below $R(f^\star)$?
+(c) The gapminder competition scored methods by squared error on held-out data. Imagine two oracle entries: one predicts $\mathbb E Y$ for everyone, the other is $f^\star$. What is the gap between their risks? On an actual leaderboard the constant entry uses the training mean $\bar y$ and the best entry is some fitted $\hat f$; give two reasons the observed gap need not equal that quantity. For a predictor fitted and chosen without using the test set, can its expected held-out squared error be below $R(f^\star)$?
 
 **Problem 2 (leaving a variable out, exactly).** The setting of exercise 2, but forget the truth: let $\hat\beta_1$ and $\hat\beta_2$ be the least-squares coefficients from the long regression of $\mathbf y$ on both $\mathbf x_1$ and $\mathbf x_2$, with residual $\mathbf r$, so that $\mathbf y = \hat\beta_1\mathbf x_1 + \hat\beta_2\mathbf x_2 + \mathbf r$.
 
@@ -303,7 +303,7 @@ plot(model_simple)
 
 **Question 2.** How do we interpret diagnostic plots?
 
-**Step 2 (optional, can be done at home).** Create a scatterplot showing your simple linear model (just like last week: `geom_point`, then `geom_smooth(method = "lm")`).
+**Step 2 (optional, can be done at home).** Create a scatterplot showing your simple linear model (`geom_point`, then `geom_smooth(method = "lm")`).
 
 ```{r}
 #| eval: false
@@ -362,7 +362,7 @@ There is also a function `ggpairs` useful for exploratory data analysis, but bew
 
 <!-- 12 min -->
 
-Back to the 2007 countries: life expectancy on log GDP per capita, log population and continent.
+The 2007 countries again: life expectancy on log GDP per capita, log population and continent.
 
 ```{r}
 long <- lm(lifeExp ~ lgdp + lpop + continent, data = gm)

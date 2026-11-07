@@ -341,7 +341,7 @@ Note
 <ol type="a">
 <li><p>Show that <span class="math inline">\(R(\hat f) - R(f_{\mathcal F}) \ge 0\)</span> and <span class="math inline">\(R(f_{\mathcal F}) - R(f^\star) \ge 0\)</span>.</p></li>
 <li><p>Show that <span class="math inline">\(R(\hat f) = R(f^\star) + \big[R(\hat f) - R(f_{\mathcal F})\big] + \big[R(f_{\mathcal F}) - R(f^\star)\big]\)</span>, and say which term is random and which is fixed once <span class="math inline">\(\mathcal F\)</span> is chosen.</p></li>
-<li><p>For squared loss, use week 2’s optimal model theorem to write the approximation term as a squared distance.</p></li>
+<li><p>For squared loss, use the optimal model theorem to write the approximation term as a squared distance.</p></li>
 <li><p>The smallest class there is, <span class="math inline">\(\mathcal F = \{\text{constant functions}\}\)</span>, squared loss, <span class="math inline">\(\hat f = \bar y\)</span> from an i.i.d. sample of size <span class="math inline">\(n\)</span>. Find <span class="math inline">\(f_{\mathcal F}\)</span>, show that the approximation error is <span class="math inline">\(\mathrm{Var}(f^\star(X))\)</span>, and show that the expected estimation error is <span class="math inline">\(\mathrm{Var}(Y)/n\)</span>.</p></li>
 </ol>
 <div class="callout callout-style-default callout-note callout-titled" title="Hint 1">
@@ -447,7 +447,7 @@ Note
 <ol type="a">
 <li><p>Draw <span class="math inline">\(f\)</span> uniformly at random from all <span class="math inline">\(2^N\)</span> labelings. Show that <span class="math inline">\(\mathbb E\big[\mathrm{err}(\hat h, f)\big] = \tfrac12\)</span> for every method.</p></li>
 <li><p>Two methods, <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>. Suppose <span class="math inline">\(A\)</span>’s error on the unseen points is smaller than <span class="math inline">\(B\)</span>’s for some labeling. Show that <span class="math inline">\(B\)</span>’s is smaller than <span class="math inline">\(A\)</span>’s for another labeling.</p></li>
-<li><p>What would have to be true of the world for some method to do better than <span class="math inline">\(\tfrac12\)</span> on average? Where does that assumption sit in the ERM form of exercise 2?</p></li>
+<li><p>What would have to be true of the world for some method to do better than <span class="math inline">\(\tfrac12\)</span> on average? Where does that assumption enter the ERM form of exercise 2?</p></li>
 </ol>
 <div class="callout callout-style-default callout-note callout-titled" title="Hint 1">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
@@ -536,7 +536,7 @@ Note
 <section id="gradient-descent-written-once" class="level3">
 <h3 class="anchored" data-anchor-id="gradient-descent-written-once">1. Gradient descent, written once</h3>
 <!-- 26 min: steps 1 to 6, questions 1 to 3 and the step 6 question. -->
-<p>Life expectancy on <span class="math inline">\(\log_{10}\)</span> GDP per capita in 2007, as in week 2. The input is centered; step 4 shows why.</p>
+<p>Life expectancy on <span class="math inline">\(\log_{10}\)</span> GDP per capita in 2007, as before. The input is centered; step 4 shows why.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>g07 <span class="ot">&lt;-</span> gapminder <span class="sc">|&gt;</span> <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2007</span>) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">lgdp =</span> <span class="fu">log10</span>(gdpPercap))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> g07<span class="sc">$</span>lifeExp</span>
@@ -658,11 +658,11 @@ Note
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>es_path <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">step =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">300</span>, <span class="at">training =</span> <span class="cn">NA_real_</span>, <span class="at">held_out =</span> <span class="cn">NA_real_</span>)</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><strong>Question 5.</strong> The training error falls at every step, as the descent lemma says it must. Where would you have stopped if you had only seen it? You chose the number of steps by looking at the held-out MSE: can you now report that held-out MSE as an honest estimate of the chosen model’s error? What would you need instead?</p>
+<p><strong>Question 5.</strong> The training error falls at every step, as the descent lemma says it must. Where would you have stopped if you had only seen it? You chose the number of steps by looking at the held-out MSE: can you now report that held-out MSE as an unbiased estimate of the chosen model’s error? What would you need instead?</p>
 </section>
 <section id="optional-can-be-done-at-home-which-of-the-many-solutions" class="level3">
 <h3 class="anchored" data-anchor-id="optional-can-be-done-at-home-which-of-the-many-solutions">Optional, can be done at home: which of the many solutions</h3>
-<p>Compare the stochastic gradient descent estimate from part 2, step 1, with week 2’s minimum-norm least-squares solution, <code>MASS::ginv(X_big) %*% y_big</code>, and compute the norms of the two.</p>
+<p>Compare the stochastic gradient descent estimate from part 2, step 1, with the minimum-norm least-squares solution, <code>MASS::ginv(X_big) %*% y_big</code>, and compute the norms of the two.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>

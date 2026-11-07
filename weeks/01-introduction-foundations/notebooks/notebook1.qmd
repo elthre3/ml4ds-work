@@ -182,7 +182,7 @@ model_lm <- lm(lifeExp ~ lgdp, data = train)
 
 <!-- 20 min -->
 
-You may use `abs`, `order`, `mean` and a `for` loop, but not a library that does nearest neighbors for you. The point is to see the mechanism: a prediction is an average of the outcomes of the nearest training points (problem 4, in code).
+You may use `abs`, `order`, `mean` and a `for` loop, but not a library that does nearest neighbors for you. That way you see the mechanism: a prediction is an average of the outcomes of the nearest training points (problem 4, in code).
 
 **Step 1.** Write a function that takes one new input `x0`, the training inputs `x` and outcomes `y`, and a number of neighbors `k`, and returns the average outcome of the `k` training points nearest to `x0`. The distances are computed for you; you write the two lines that pick the neighbors and average their outcomes.
 
@@ -243,7 +243,7 @@ Checkpoint:
 stopifnot(length(pred) == nrow(test), all(is.finite(pred)), mse_knn5 > 0)
 ```
 
-**Step 3.** Wrap step 2 in a function `knn_mse(k, newdata)` that returns the MSE of the `k`-nearest-neighbor predictor on any data frame with columns `lgdp` and `lifeExp`; the skeleton is given, you write the prediction line and the MSE line. Then compute the **training** MSE and the **test** MSE for `k = 1, 2, 3, 5, 10, 25, 50`.
+**Step 3.** Wrap step 2 in a function `knn_mse(k, newdata)` that returns the MSE of the `k`-nearest-neighbor predictor on any data frame with columns `lgdp` and `lifeExp`; the skeleton is given, you write the prediction line and the MSE line. Then compute the *training* MSE and the *test* MSE for `k = 1, 2, 3, 5, 10, 25, 50`.
 
 **Question 2.** Before you run it: what do you expect the training MSE at `k = 1` to be, and why? Write your prediction down first.
 
@@ -291,7 +291,7 @@ stopifnot(nrow(results) == 7, results$train_mse[1] == 0 || any(duplicated(train$
 
 <!-- 7 min -->
 
-Your test MSE is an average of 42 losses. From the split you already have, compute the 42 individual squared errors of the `k = 5` predictor, their mean (the test MSE again) and the standard error of that mean, $\text{sd(losses)}/\sqrt{42}$. (This standard error treats the 42 losses as independent draws; that is an assumption about the countries, not a fact about them.)
+Your test MSE is an average of 42 losses. From the split you already have, compute the 42 individual squared errors of the `k = 5` predictor, their mean (the test MSE again) and the standard error of that mean, $\text{sd(losses)}/\sqrt{42}$. (This standard error treats the 42 losses as independent draws; that is an assumption about the countries.)
 
 ```{r}
 #| eval: false

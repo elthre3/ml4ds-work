@@ -53,7 +53,7 @@ Each exercise has hints, collapsed below it. Do not open a hint unless you have 
 
 (c) Show that $R(f_{\mathcal F}) \le R(\hat f)$ for every training set, and deduce $R(f_{\mathcal F}) \le \mathbb E[R(\hat f)]$. Of the two inequalities in the theorem, which used the sampling assumption and which used only the definitions?
 
-(d) A test set $(x'_j, y'_j)$, $j = 1, \ldots, m$, of independent draws from the population, independent of the training data, scores $\hat f$ by $\hat R_{\text{test}}(\hat f) = \tfrac1m\sum_j \ell(y'_j, \hat f(x'_j))$. Show that $\mathbb E[\hat R_{\text{test}}(\hat f)] = \mathbb E[R(\hat f)]$: the test score lands, on average, on the right end of the theorem.
+(d) A test set $(x'_j, y'_j)$, $j = 1, \ldots, m$, of independent draws from the population, independent of the training data, scores $\hat f$ by $\hat R_{\text{test}}(\hat f) = \tfrac1m\sum_j \ell(y'_j, \hat f(x'_j))$. Show that $\mathbb E[\hat R_{\text{test}}(\hat f)] = \mathbb E[R(\hat f)]$: on average, the test score equals the right end of the theorem.
 
 ::: {.callout-note collapse="true" title="Hint 1"}
 (a) $\hat R_n(f)$ is an average of $n$ terms; take the expectation of each term. What is the distribution of $(x_i, y_i)$?

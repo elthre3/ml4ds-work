@@ -2482,7 +2482,7 @@ intervention effects do not. -->
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol start="3" type="a">
-<li>Condition on <span class="math inline">\(X\)</span> first (the tower property), as in week 2’s exercise 1. What do you know about the inner expectation, at every <span class="math inline">\(x\)</span>?</li>
+<li>Condition on <span class="math inline">\(X\)</span> first (the tower property), as in the proof of the optimal model theorem. What do you know about the inner expectation, at every <span class="math inline">\(x\)</span>?</li>
 </ol>
 </div>
 </div>
@@ -2508,7 +2508,7 @@ c_{FN}\,p &gt; c_{FP}\,(1 - p) \iff p\,(c_{FP} + c_{FN}) &gt; c_{FP} \iff p &gt;
 \]</span> dividing by <span class="math inline">\(c_{FP} + c_{FN} &gt; 0\)</span>. At <span class="math inline">\(p(x) = c^\star\)</span> the two expected costs are equal, so either prediction is optimal.</p></li>
 <li><p>For any rule <span class="math inline">\(\delta\)</span>, by the tower property, <span class="math display">\[
 \mathbb E\big[\text{cost}(\delta(X), Y)\big] = \mathbb E_X\Big[\,\mathbb E\big[\text{cost}(\delta(X), Y) \mid X\big]\Big].
-\]</span> At <span class="math inline">\(X = x\)</span> the inner expectation is the expected cost of the prediction <span class="math inline">\(\delta(x)\)</span> from (a), and by (b) it is at least the expected cost of <span class="math inline">\(\delta^\star(x)\)</span>. An inequality that holds at every <span class="math inline">\(x\)</span> survives averaging over <span class="math inline">\(X\)</span>. <span class="math inline">\(\blacksquare\)</span> This is week 2’s step: minimize the expected loss at each <span class="math inline">\(x\)</span>, then average.</p></li>
+\]</span> At <span class="math inline">\(X = x\)</span> the inner expectation is the expected cost of the prediction <span class="math inline">\(\delta(x)\)</span> from (a), and by (b) it is at least the expected cost of <span class="math inline">\(\delta^\star(x)\)</span>. An inequality that holds at every <span class="math inline">\(x\)</span> survives averaging over <span class="math inline">\(X\)</span>. <span class="math inline">\(\blacksquare\)</span> This is the step from the proof of the optimal model theorem: minimize the expected loss at each <span class="math inline">\(x\)</span>, then average.</p></li>
 <li><p><span class="math inline">\(c^\star = \tfrac12\)</span>: predict the more probable class, the <strong>Bayes classifier</strong>. The probability of a wrong label at <span class="math inline">\(x\)</span> is <span class="math inline">\(1 - p(x)\)</span> if you predict <span class="math inline">\(1\)</span> and <span class="math inline">\(p(x)\)</span> if you predict <span class="math inline">\(0\)</span>, so under <span class="math inline">\(\delta^\star\)</span> it is <span class="math inline">\(\min(p(x), 1 - p(x))\)</span>. Equal costs make the expected cost a multiple of the probability of error, so by (c) no rule has a smaller overall probability of error.</p></li>
 </ol>
 <p>Common errors: the ratio upside down, <span class="math inline">\(c_{FN}/(c_{FP} + c_{FN})\)</span> (check an extreme: if a miss were infinitely costly the threshold must go to <span class="math inline">\(0\)</span>, and only <span class="math inline">\(c_{FP}/(c_{FP} + c_{FN})\)</span> does that); choosing one threshold to minimize the overall cost directly, without the argument at each <span class="math inline">\(x\)</span>; reading the theorem as a statement about <span class="math inline">\(\hat p\)</span>. It is about the true <span class="math inline">\(p(x)\)</span>; with <span class="math inline">\(\hat p\)</span> in its place the rule is a plug-in rule, only as good as the estimate.</p>
@@ -2523,7 +2523,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 <li><p>As observed, show that <span class="math inline">\(\mathbb E[Y \mid T = t] = \tau t + \beta\, \mathbb E[Z \mid T = t]\)</span>, and hence <span class="math display">\[
 \mathbb E[Y \mid T = 1] - \mathbb E[Y \mid T = 0] = \tau + \beta\,\big(\mathbb E[Z \mid T = 1] - \mathbb E[Z \mid T = 0]\big).
 \]</span> Where did you use independence?</p></li>
-<li><p>Show that the population slope of the least-squares line of <span class="math inline">\(Y\)</span> on <span class="math inline">\(T\)</span> alone, <span class="math inline">\(\mathrm{Cov}(T, Y)/\mathrm{Var}(T)\)</span>, is <span class="math inline">\(\tau + \beta\,\delta\)</span> with <span class="math inline">\(\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T)\)</span>. Which quantity in week 2’s omitted-variable bias plays the role of <span class="math inline">\(\delta\)</span>?</p></li>
+<li><p>Show that the population slope of the least-squares line of <span class="math inline">\(Y\)</span> on <span class="math inline">\(T\)</span> alone, <span class="math inline">\(\mathrm{Cov}(T, Y)/\mathrm{Var}(T)\)</span>, is <span class="math inline">\(\tau + \beta\,\delta\)</span> with <span class="math inline">\(\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T)\)</span>. Which quantity in the omitted-variable bias formula plays the role of <span class="math inline">\(\delta\)</span>?</p></li>
 <li><p>When is the gap zero?</p></li>
 </ol>
 <div class="callout callout-style-default callout-note callout-titled" title="Hint 1">
@@ -2691,7 +2691,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 \mathbb E[Y \mid T = t, Z = z] = \mathbb E\big[g(t, z, \varepsilon_Y) \mid T = t, Z = z\big] = m_t(z).
 \]</span> Hint 4: <span class="math inline">\(Z\)</span> is upstream of <span class="math inline">\(T\)</span>, so the intervention does not change it, and its distribution is the same in the two worlds. Averaging the last display over it, <span class="math display">\[
 \mathbb E[Y \mid do(T = t)] = \mathbb E_Z\big[m_t(Z)\big] = \mathbb E_Z\Big[\,\mathbb E[Y \mid T = t, Z]\,\Big]. \qquad \blacksquare
-\]</span> Where each assumption is used: the independence of the noises in the observed-world step (a common cause of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span> left out of <span class="math inline">\(Z\)</span> would sit in both <span class="math inline">\(\varepsilon_T\)</span> and <span class="math inline">\(\varepsilon_Y\)</span>, making them dependent); <span class="math inline">\(Z\)</span> not a consequence of <span class="math inline">\(T\)</span> in the intervened-world step (a <span class="math inline">\(Z\)</span> downstream of <span class="math inline">\(T\)</span> would change when <span class="math inline">\(T\)</span> is set, and its distribution would differ between the worlds); <span class="math inline">\(P(T = t \mid Z) &gt; 0\)</span> with probability one, so that for the values <span class="math inline">\(z\)</span> the average runs over there are units with <span class="math inline">\(T = t\)</span> and <span class="math inline">\(Z = z\)</span> to average (if a set of <span class="math inline">\(z\)</span> with positive probability had none, the right-hand side would not be defined there). For a continuous <span class="math inline">\(T\)</span>, the note under the exercise replaces this step. If <span class="math inline">\(Z\)</span> is empty, <span class="math inline">\(T = h(\varepsilon_T)\)</span> is independent of <span class="math inline">\(\varepsilon_Y\)</span> and the same lines give <span class="math inline">\(\mathbb E[Y \mid do(T = t)] = \mathbb E[Y \mid T = t]\)</span>: randomization.</p>
+\]</span> Where each assumption is used: the independence of the noises in the observed-world step (a common cause of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span> left out of <span class="math inline">\(Z\)</span> would be part of both <span class="math inline">\(\varepsilon_T\)</span> and <span class="math inline">\(\varepsilon_Y\)</span>, making them dependent); <span class="math inline">\(Z\)</span> not a consequence of <span class="math inline">\(T\)</span> in the intervened-world step (a <span class="math inline">\(Z\)</span> downstream of <span class="math inline">\(T\)</span> would change when <span class="math inline">\(T\)</span> is set, and its distribution would differ between the worlds); <span class="math inline">\(P(T = t \mid Z) &gt; 0\)</span> with probability one, so that for the values <span class="math inline">\(z\)</span> the average runs over there are units with <span class="math inline">\(T = t\)</span> and <span class="math inline">\(Z = z\)</span> to average (if a set of <span class="math inline">\(z\)</span> with positive probability had none, the right-hand side would not be defined there). For a continuous <span class="math inline">\(T\)</span>, the note under the exercise replaces this step. If <span class="math inline">\(Z\)</span> is empty, <span class="math inline">\(T = h(\varepsilon_T)\)</span> is independent of <span class="math inline">\(\varepsilon_Y\)</span> and the same lines give <span class="math inline">\(\mathbb E[Y \mid do(T = t)] = \mathbb E[Y \mid T = t]\)</span>: randomization.</p>
 <p>Common errors: letting <span class="math inline">\(Z\)</span> respond to the intervention; asserting <span class="math inline">\(\mathbb E[Y \mid T = t, Z = z] = m_t(z)\)</span> without the independence of <span class="math inline">\(\varepsilon_Y\)</span> from <span class="math inline">\((T, Z)\)</span>; reading the theorem as “regress <span class="math inline">\(Y\)</span> on <span class="math inline">\(T\)</span> and <span class="math inline">\(Z\)</span> and take the coefficient”, which is one way to estimate the inside when the conditional mean is linear, not what the theorem says.</p>
 </div>
 </div>
@@ -2800,7 +2800,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 \]</span></li>
 <li>Under <span class="math inline">\(do(T = 1)\)</span>, <span class="math inline">\(Y = g(1, Z, \varepsilon_Y)\)</span>, with <span class="math inline">\((Z, \varepsilon_Y)\)</span> distributed as before. (b) <span class="math inline">\(\pi(Z)/\pi(Z) = 1\)</span> because <span class="math inline">\(\pi(Z) &gt; 0\)</span>. (c) <span class="math inline">\(T = h(Z, \varepsilon_T)\)</span> and <span class="math inline">\(\varepsilon_T\)</span> is independent of <span class="math inline">\((Z, \varepsilon_Y)\)</span>, so by the second fact <span class="math inline">\(\mathbb E[T \mid Z = z, \varepsilon_Y = e] = P\big(h(z, \varepsilon_T) = 1\big)\)</span>; the same fact with <span class="math inline">\(Z\)</span> alone gives <span class="math inline">\(\pi(z) = P\big(h(z, \varepsilon_T) = 1\big)\)</span>. (d) <span class="math inline">\(g(1, Z, \varepsilon_Y)/\pi(Z)\)</span> is fixed once <span class="math inline">\((Z, \varepsilon_Y)\)</span> is given: taking out what is known, in reverse. (e) The tower property. (f) If <span class="math inline">\(T = 0\)</span>, both <span class="math inline">\(T\,g(1, Z, \varepsilon_Y)\)</span> and <span class="math inline">\(T\,Y\)</span> are <span class="math inline">\(0\)</span>; if <span class="math inline">\(T = 1\)</span>, <span class="math inline">\(Y = g(1, Z, \varepsilon_Y)\)</span>. The last line is the same average, written over the observed <span class="math inline">\((T, Z, Y)\)</span>, which are functions of <span class="math inline">\((Z, \varepsilon_T, \varepsilon_Y)\)</span>. <span class="math inline">\(\blacksquare\)</span></li>
 </ol>
-<p>Where each assumption is used: the independence of <span class="math inline">\(\varepsilon_T\)</span> from <span class="math inline">\((Z, \varepsilon_Y)\)</span> in (c) (a common cause of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span> left out of <span class="math inline">\(Z\)</span> would sit in both noises, and then <span class="math inline">\(\varepsilon_Y\)</span> would carry information about <span class="math inline">\(T\)</span> beyond <span class="math inline">\(Z\)</span>); <span class="math inline">\(\pi(Z) &gt; 0\)</span> in (b); <span class="math inline">\(Z\)</span> not a consequence of <span class="math inline">\(T\)</span> in (a) (a <span class="math inline">\(Z\)</span> downstream of <span class="math inline">\(T\)</span> would change when <span class="math inline">\(T\)</span> is set).</p>
+<p>Where each assumption is used: the independence of <span class="math inline">\(\varepsilon_T\)</span> from <span class="math inline">\((Z, \varepsilon_Y)\)</span> in (c) (a common cause of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span> left out of <span class="math inline">\(Z\)</span> would be part of both noises, and then <span class="math inline">\(\varepsilon_Y\)</span> would carry information about <span class="math inline">\(T\)</span> beyond <span class="math inline">\(Z\)</span>); <span class="math inline">\(\pi(Z) &gt; 0\)</span> in (b); <span class="math inline">\(Z\)</span> not a consequence of <span class="math inline">\(T\)</span> in (a) (a <span class="math inline">\(Z\)</span> downstream of <span class="math inline">\(T\)</span> would change when <span class="math inline">\(T\)</span> is set).</p>
 <ol start="2" type="a">
 <li><p>The same steps with <span class="math inline">\(1 - T\)</span> and <span class="math inline">\(1 - \pi(Z)\)</span>: in (b), multiply and divide by <span class="math inline">\(1 - \pi(Z)\)</span>, which needs <span class="math inline">\(\pi(Z) &lt; 1\)</span>; in (c), <span class="math inline">\(\mathbb E_{\varepsilon_T}[1 - T \mid Z, \varepsilon_Y] = 1 - \pi(Z)\)</span>; in (f), <span class="math inline">\((1 - T)\,g(0, Z, \varepsilon_Y) = (1 - T)\,Y\)</span>.</p></li>
 <li><p><span class="math inline">\(\mathbb E[T\,Y \mid Z] = \mathbb E\big[Y\,\mathbb 1[T = 1] \mid Z\big] = \pi(Z)\,\mathbb E[Y \mid T = 1, Z]\)</span>. Since <span class="math inline">\(1/\pi(Z)\)</span> is a function of <span class="math inline">\(Z\)</span>, the tower property gives <span class="math display">\[
@@ -2936,7 +2936,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 <div class="callout-body-container callout-body">
 <ol type="a">
 <li><p>Under <span class="math inline">\(do(T = t)\)</span>, <span class="math inline">\(Y = t + 2Z + \varepsilon_Y\)</span>, so <span class="math inline">\(\mathbb E[Y \mid do(T = t)] = t\)</span> and raising <span class="math inline">\(t\)</span> by one raises it by <span class="math inline">\(1\)</span>.</p></li>
-<li><p><span class="math inline">\(\mathrm{Var}(T) = 1 + 1 = 2\)</span>. <span class="math inline">\(\mathrm{Cov}(T, Y) = \mathrm{Var}(T) + 2\,\mathrm{Cov}(T, Z) + \mathrm{Cov}(T, \varepsilon_Y) = 2 + 2 + 0 = 4\)</span>. Slope <span class="math inline">\(4/2 = 2 = 1 + 2 \cdot \tfrac12\)</span>: the effect <span class="math inline">\(\tau = 1\)</span> plus the gap <span class="math inline">\(\beta\delta = 2 \cdot \tfrac12\)</span>, with <span class="math inline">\(\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T) = \tfrac12\)</span>. The naive slope credits <span class="math inline">\(T\)</span> with what <span class="math inline">\(Z\)</span> contributes through selection, and here the gap is as large as the effect.</p></li>
+<li><p><span class="math inline">\(\mathrm{Var}(T) = 1 + 1 = 2\)</span>. <span class="math inline">\(\mathrm{Cov}(T, Y) = \mathrm{Var}(T) + 2\,\mathrm{Cov}(T, Z) + \mathrm{Cov}(T, \varepsilon_Y) = 2 + 2 + 0 = 4\)</span>. Slope <span class="math inline">\(4/2 = 2 = 1 + 2 \cdot \tfrac12\)</span>: the effect <span class="math inline">\(\tau = 1\)</span> plus the gap <span class="math inline">\(\beta\delta = 2 \cdot \tfrac12\)</span>, with <span class="math inline">\(\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T) = \tfrac12\)</span>. The naive slope includes what <span class="math inline">\(Z\)</span> contributes through selection, and here the gap is as large as the effect.</p></li>
 <li><p>The adjustment theorem. <span class="math inline">\(\mathbb E[Y \mid T = t, Z = z] = t + 2z + \mathbb E[\varepsilon_Y \mid T = t, Z = z] = t + 2z\)</span>, because <span class="math inline">\(\varepsilon_Y\)</span> is independent of <span class="math inline">\((Z, \varepsilon_T)\)</span> and so of <span class="math inline">\((T, Z)\)</span>. Averaging over <span class="math inline">\(Z\)</span>: <span class="math inline">\(\mathbb E_Z[t + 2Z] = t\)</span>, which is (a). The independence is what made <span class="math inline">\(\mathbb E[\varepsilon_Y \mid T = t, Z = z]\)</span> zero. Normality is what makes this work at every <span class="math inline">\(t\)</span>: given <span class="math inline">\(Z\)</span>, <span class="math inline">\(T\)</span> has a positive density everywhere, so the adjustment theorem’s condition holds.</p></li>
 </ol>
 <p>Common errors: in (a), letting <span class="math inline">\(Z\)</span> change when <span class="math inline">\(T\)</span> is set; in (b), <span class="math inline">\(\mathrm{Cov}(T, Z) = 0\)</span>.</p>
@@ -3004,7 +3004,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 <li><p>Treated: 10 units with <span class="math inline">\(Z = 0\)</span> at weight <span class="math inline">\(1/0.2 = 5\)</span> count as 50; 40 units with <span class="math inline">\(Z = 1\)</span> at weight <span class="math inline">\(1/0.8 = 1.25\)</span> count as 50. The weighted treated units have the whole population’s <span class="math inline">\(Z\)</span>: half <span class="math inline">\(0\)</span>, half <span class="math inline">\(1\)</span>. The untreated are the same: <span class="math inline">\(40 \cdot 1.25 = 50\)</span> and <span class="math inline">\(10 \cdot 5 = 50\)</span>. Then <span class="math display">\[
 \mathbb E\Big[\frac{T\,Y}{\pi(Z)}\Big] = \frac{10 \cdot 5 \cdot 2 + 40 \cdot 1.25 \cdot 6}{100} = 4, \qquad \mathbb E\Big[\frac{(1 - T)\,Y}{1 - \pi(Z)}\Big] = \frac{40 \cdot 1.25 \cdot 0 + 10 \cdot 5 \cdot 4}{100} = 2,
 \]</span> which are <span class="math inline">\(\mathbb E[Y \mid do(T = 1)]\)</span> and <span class="math inline">\(\mathbb E[Y \mid do(T = 0)]\)</span> from (a). Difference <span class="math inline">\(2\)</span>.</p></li>
-<li><p>The treated units with <span class="math inline">\(Z = 0\)</span> and the untreated units with <span class="math inline">\(Z = 1\)</span>: the units whose treatment was unlikely given their <span class="math inline">\(Z\)</span>. Each stands in for the many units like it that went the other way. With <span class="math inline">\(\pi(0) = 0.01\)</span>, about one in a hundred units with <span class="math inline">\(Z = 0\)</span> is treated, and each gets weight <span class="math inline">\(100\)</span>. The condition <span class="math inline">\(\pi(Z) &gt; 0\)</span> still holds, but in a sample of a few hundred units one or two treated units with <span class="math inline">\(Z = 0\)</span> would carry the estimate for half the population, so it would be unstable.</p></li>
+<li><p>The treated units with <span class="math inline">\(Z = 0\)</span> and the untreated units with <span class="math inline">\(Z = 1\)</span>: the units whose treatment was unlikely given their <span class="math inline">\(Z\)</span>. Each stands in for the many units like it that went the other way. With <span class="math inline">\(\pi(0) = 0.01\)</span>, about one in a hundred units with <span class="math inline">\(Z = 0\)</span> is treated, and each gets weight <span class="math inline">\(100\)</span>. The condition <span class="math inline">\(\pi(Z) &gt; 0\)</span> still holds, but in a sample of a few hundred units one or two treated units with <span class="math inline">\(Z = 0\)</span> would determine the estimate for half the population, so it would be unstable.</p></li>
 </ol>
 <p>Common errors: weighting by <span class="math inline">\(\pi(Z)\)</span> instead of <span class="math inline">\(1/\pi(Z)\)</span>; weighting the untreated by <span class="math inline">\(1/\pi(Z)\)</span> instead of <span class="math inline">\(1/(1 - \pi(Z))\)</span>; dividing by the 50 treated units instead of all 100.</p>
 </div>
@@ -3113,7 +3113,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">inherits</span>(fit_bill, <span class="st">&quot;glm&quot;</span>), <span class="fu">length</span>(<span class="fu">coef</span>(fit_bill)) <span class="sc">==</span> <span class="dv">3</span>,</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all</span>(<span class="fu">fitted</span>(fit_bill) <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="fu">fitted</span>(fit_bill) <span class="sc">&lt;=</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>You may have seen a warning that fitted probabilities are numerically 0 or 1: the two species are nearly separable on these two measurements (step 3 counts the errors). This is the lecture’s “Challenges” slide in real life; next week says what it does to the fitting.</p>
+<p>You may have seen a warning that fitted probabilities are numerically 0 or 1: the two species are nearly separable on these two measurements (step 3 counts the errors). This is the lecture’s “Challenges” slide in real life; what it does to the fitting comes later in the course.</p>
 <p><strong>Question 1.</strong> Read the exponentiated coefficient on <code>bill_length_mm</code>. What happens to the odds of Chinstrap when bill length increases by one millimeter and bill depth is held fixed? Is that the change in the probability? Is it what would happen to a bird whose bill grew by a millimeter?</p>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-31-contents" aria-controls="callout-31" aria-expanded="false" aria-label="Toggle callout">
@@ -3335,7 +3335,7 @@ truth   0   1
 </div>
 <div id="callout-36" class="callout-36-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The survey did, by choosing costs 5 and 1; the model contributed only <span class="math inline">\(\hat p\)</span>. On these 219 birds it has a lower cost per bird under those costs, and a lower accuracy: “better” has no meaning until a loss is chosen. The formula gives the population optimum for the true <span class="math inline">\(p(x)\)</span>; the curve is an empirical cost on the birds the model was fitted to, with <span class="math inline">\(\hat p\)</span> plugged in, and its minimum is flat (several thresholds near <span class="math inline">\(1/6\)</span> tie). So the agreement is between an estimate and the formula, not a proof that the formula is right for new birds. That evaluating on the training rows flatters the model is the validation week’s subject.</p>
+<p>The survey did, by choosing costs 5 and 1; the model contributed only <span class="math inline">\(\hat p\)</span>. On these 219 birds it has a lower cost per bird under those costs, and a lower accuracy: “better” has no meaning until a loss is chosen. The formula gives the population optimum for the true <span class="math inline">\(p(x)\)</span>; the curve is an empirical cost on the birds the model was fitted to, with <span class="math inline">\(\hat p\)</span> plugged in, and its minimum is flat (several thresholds near <span class="math inline">\(1/6\)</span> tie). So the agreement is between an estimate and the formula, not a proof that the formula is right for new birds. That the cost on the training rows underestimates the risk comes up later in the course.</p>
 </div>
 </div>
 </div>
@@ -3458,10 +3458,10 @@ Prediction   0   1
 <pre><code># A tibble: 4 x 2
   world slope
   &lt;chr&gt; &lt;dbl&gt;
-1 A      2.01
-2 B      1.95
-3 C      1.96
-4 D     -3.80</code></pre>
+1 A      1.95
+2 B      2.02
+3 C      1.95
+4 D     -3.77</code></pre>
 </div>
 </div>
 </div>
@@ -3484,7 +3484,7 @@ Prediction   0   1
 </div>
 </div>
 </div>
-<p><strong>Step 2.</strong> Now intervene: set <span class="math inline">\(X\)</span> to <span class="math inline">\(X + 1\)</span> for every unit and recompute <span class="math inline">\(Y\)</span> <strong>with the same noise</strong>, following each world’s equations. Write the four <code>Y_do</code> lines and compute the average change in <span class="math inline">\(Y\)</span> in each world.</p>
+<p><strong>Step 2.</strong> Now intervene: set <span class="math inline">\(X\)</span> to <span class="math inline">\(X + 1\)</span> for every unit and recompute <span class="math inline">\(Y\)</span> <em>with the same noise</em>, following each world’s equations. Write the four <code>Y_do</code> lines and compute the average change in <span class="math inline">\(Y\)</span> in each world.</p>
 <p>Note: recomputing each unit’s <span class="math inline">\(Y\)</span> with its own noise is different from the intervention calculations in the lecture, which use only the distribution of the noise. We will learn more about it later in the course. Here it makes the average change exact, with no simulation noise.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>intervene <span class="ot">&lt;-</span> <span class="cf">function</span>(d) {</span>
@@ -3536,10 +3536,10 @@ Prediction   0   1
 <pre><code># A tibble: 4 x 3
   world slope effect_of_intervention
   &lt;chr&gt; &lt;dbl&gt;                  &lt;dbl&gt;
-1 A      2.01                      2
-2 B      1.95                      0
-3 C      1.96                      0
-4 D     -3.80                     -3</code></pre>
+1 A      1.95                      2
+2 B      2.02                      0
+3 C      1.95                      0
+4 D     -3.77                     -3</code></pre>
 </div>
 </div>
 <p>The average change is the average effect of shifting every unit’s <span class="math inline">\(X\)</span> up by one, computed on these units: exactly <span class="math inline">\(2\)</span>, <span class="math inline">\(0\)</span>, <span class="math inline">\(0\)</span> and <span class="math inline">\(-3\)</span>. Each world’s equations give every unit the same change, and because the noise is reused nothing else moves.</p>
@@ -3577,13 +3577,13 @@ Prediction   0   1
 <pre><code># A tibble: 3 x 5
   term        estimate std.error statistic   p.value
   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-1 (Intercept)     3.71    0.236       15.7 1.89e- 45
-2 X              -2.94    0.0465     -63.3 3.67e-240
-3 Z               2.17    0.107       20.4 1.97e- 67</code></pre>
+1 (Intercept)     3.75    0.236       15.9 2.16e- 46
+2 X              -2.96    0.0459     -64.4 2.51e-243
+3 Z               2.10    0.105       20.0 1.07e- 65</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">predict</span>(fit_d, <span class="at">newdata =</span> <span class="fu">mutate</span>(d, <span class="at">X =</span> X <span class="sc">+</span> <span class="dv">1</span>))) <span class="sc">-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit_d, <span class="at">newdata =</span> d))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -2.943302</code></pre>
+<pre><code>[1] -2.955855</code></pre>
 </div>
 </div>
 </div>
@@ -3602,7 +3602,7 @@ Prediction   0   1
 </div>
 <div id="callout-42" class="callout-42-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The two numbers are equal, and both are near <span class="math inline">\(-3\)</span>. The coefficient: the partialling-out theorem (week 2) says the coefficient on <code>X</code> in the long regression is the slope of <code>Y</code> on what is left of <code>X</code> after <code>Z</code>; in world D what is left is <code>e_x</code>, which is independent of everything else in <code>Y</code>, so the population value is <span class="math inline">\(-3\)</span> and the sample coefficient estimates it. The averaged difference: the adjustment theorem, <span class="math inline">\(\mathbb E[Y \mid do(X = x)] = \mathbb E_Z[\mathbb E[Y \mid X = x, Z]]\)</span>, with the regression as the estimate of the inside. (Step 3 shifts each unit’s own <code>X</code> rather than setting every unit to one value <span class="math inline">\(x\)</span>; in world D the two agree because the effect is the same at every <span class="math inline">\(x\)</span>.) The two numbers coincide exactly because the fitted model is linear in <code>X</code>, so every unit’s difference is the coefficient. Both work because <code>Z</code> holds the only common cause of <code>X</code> and <code>Y</code>, is not a consequence of <code>X</code>, and the noises are independent. In world B the common cause is <code>U</code>, which you would not have: regress <code>Y</code> on <code>X</code> alone and you get the slope of about <span class="math inline">\(2\)</span> from step 1, while the effect is <span class="math inline">\(0\)</span>. With <code>e_u</code> in the regression the coefficient on <code>X</code> is about <span class="math inline">\(0\)</span>: the theorem working, on a variable you have only because you simulated the world.</p>
+<p>The two numbers are equal, and both are near <span class="math inline">\(-3\)</span>. The coefficient: the partialling-out theorem says the coefficient on <code>X</code> in the long regression is the slope of <code>Y</code> on what is left of <code>X</code> after <code>Z</code>; in world D what is left is <code>e_x</code>, which is independent of everything else in <code>Y</code>, so the population value is <span class="math inline">\(-3\)</span> and the sample coefficient estimates it. The averaged difference: the adjustment theorem, <span class="math inline">\(\mathbb E[Y \mid do(X = x)] = \mathbb E_Z[\mathbb E[Y \mid X = x, Z]]\)</span>, with the regression as the estimate of the inside. (Step 3 shifts each unit’s own <code>X</code> rather than setting every unit to one value <span class="math inline">\(x\)</span>; in world D the two agree because the effect is the same at every <span class="math inline">\(x\)</span>.) The two numbers coincide exactly because the fitted model is linear in <code>X</code>, so every unit’s difference is the coefficient. Both work because <code>Z</code> holds the only common cause of <code>X</code> and <code>Y</code>, is not a consequence of <code>X</code>, and the noises are independent. In world B the common cause is <code>U</code>, which you would not have: regress <code>Y</code> on <code>X</code> alone and you get the slope of about <span class="math inline">\(2\)</span> from step 1, while the effect is <span class="math inline">\(0\)</span>. With <code>e_u</code> in the regression the coefficient on <code>X</code> is about <span class="math inline">\(0\)</span>: the theorem working, on a variable you have only because you simulated the world.</p>
 </div>
 </div>
 </div>
@@ -3645,18 +3645,18 @@ Prediction   0   1
 <span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">regression =</span> <span class="fu">coef</span>(<span class="fu">lm</span>(Y <span class="sc">~</span> X <span class="sc">+</span> Z, <span class="at">data =</span> d_e))[[<span class="st">&quot;X&quot;</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     naive  weighting regression 
-  5.295951   1.886063   2.004521 </code></pre>
+  5.144956   2.055601   2.033832 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>d_e <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(w, <span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 x 5
-      X      Y     Z  pi_hat     w
-  &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
-1     1 -4.63  -2.76 0.00898 111. 
-2     0  9.28   2.64 0.966    29.2
-3     1 -1.87  -1.49 0.0568   17.6
-4     1 -2.40  -1.43 0.0618   16.2
-5     1 -0.647 -1.39 0.0657   15.2</code></pre>
+      X       Y     Z pi_hat     w
+  &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+1     1 -3.73   -2.13 0.0282  35.4
+2     1 -3.50   -2.00 0.0341  29.4
+3     1  0.0677 -1.62 0.0572  17.5
+4     1 -2.59   -1.61 0.0584  17.1
+5     1 -1.59   -1.61 0.0585  17.1</code></pre>
 </div>
 </div>
 </div>
@@ -3668,7 +3668,7 @@ Prediction   0   1
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">treated =</span> <span class="fu">sum</span>(d_e<span class="sc">$</span>w[d_e<span class="sc">$</span>X <span class="sc">==</span> <span class="dv">1</span>]), <span class="at">untreated =</span> <span class="fu">sum</span>(d_e<span class="sc">$</span>w[d_e<span class="sc">$</span>X <span class="sc">==</span> <span class="dv">0</span>])) <span class="sc">/</span> <span class="fu">nrow</span>(d_e)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  treated untreated 
-0.9900639 1.0101661 </code></pre>
+0.9939391 1.0029605 </code></pre>
 </div>
 </div>
 <p><strong>Question 6.</strong> What is the effect of treatment in world E, which of the three estimates are near it, and which result explains each one? Which units have the largest weights, and what is unusual about them? If the unit with the largest weight had not been in the sample, and the other weights stayed as they are, by how much would the weighting estimate move?</p>
@@ -3692,7 +3692,7 @@ Prediction   0   1
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">estimate =</span> <span class="fu">mean</span>(s), <span class="at">largest_weight =</span> d_e<span class="sc">$</span>w[i], <span class="at">change_if_left_out =</span> (<span class="fu">mean</span>(s) <span class="sc">-</span> s[i]) <span class="sc">/</span> (<span class="fu">nrow</span>(d_e) <span class="sc">-</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          estimate     largest_weight change_if_left_out 
-         1.8860625        111.3800622          0.2589459 </code></pre>
+        2.05560121        35.43182167         0.06720221 </code></pre>
 </div>
 </div>
 </div>
@@ -3701,7 +3701,7 @@ Prediction   0   1
 </section>
 <section id="optional-can-be-done-at-home-another-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="optional-can-be-done-at-home-another-dataset">Optional, can be done at home: another dataset</h3>
-<p><strong>Attrition</strong> (<code>modeldata::attrition</code>; <strong>fictional</strong>, made up by IBM data scientists, used only as an exercise): whether an employee leaves (<code>Attrition</code>), with a threshold-and-costs story (a missed leaver costs a replacement, a false alarm costs a conversation). Leavers are 16 percent, so the accuracy-against-cost point is sharper: at threshold <span class="math inline">\(\tfrac12\)</span> almost nobody is predicted to leave.</p>
+<p><strong>Attrition</strong> (<code>modeldata::attrition</code>; <em>fictional</em>, made up by IBM data scientists, used only as an exercise): whether an employee leaves (<code>Attrition</code>), with a threshold-and-costs story (a missed leaver costs a replacement, a false alarm costs a conversation). Leavers are 16 percent, so accuracy and cost disagree more: at threshold <span class="math inline">\(\tfrac12\)</span> almost nobody is predicted to leave.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modeldata)</span>
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(attrition)</span>
