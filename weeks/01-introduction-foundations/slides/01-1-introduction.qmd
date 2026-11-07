@@ -317,7 +317,7 @@ We'll use "ML" to refer to the *theory and general methods*
 ## Machine learning, the field
 
 ::: {.notes}
-Two minutes, orientation. Conference papers carry the field. Breiman (2001), the two cultures.
+Two minutes, orientation. Conference papers are the main outlet. Breiman (2001), the two cultures.
 :::
 
 ::: {.columns}
@@ -337,7 +337,7 @@ Breiman (2001) called them the two cultures
 - COLT, 1988
 - *Machine Learning* journal, 1986; JMLR, 2001
 
-Conference papers, not journal articles, are the main currency (unusual among sciences)
+Conference papers, not journal articles, are the main form of publication (unusual among sciences)
 :::
 :::
 
@@ -504,13 +504,13 @@ Winning model chosen by best score
 ## History: common task framework {minutes="3"}
 
 ::: {.notes}
-Three minutes; this buys the name. DARPA speech, mid-1980s, NIST as referee. Donoho (2017): the secret sauce.
+Three minutes; where the name comes from. DARPA speech, mid-1980s, NIST as referee. Donoho (2017): the secret sauce.
 :::
 
 ::: {style="font-size: 1.25em"}
 | | |
 |---|---|
-| **1986** | DARPA funds speech recognition on the condition that every group is scored on the same held-out data by an outside referee (NIST). Progress, measured, for the first time |
+| **1986** | DARPA funds speech recognition on the condition that every group is scored on the same held-out data by an outside referee (NIST) |
 | **2006** | Netflix offers $1,000,000 for a 10% improvement on its own recommender |
 | **2010** | Kaggle opens; ImageNet's first yearly challenge (ILSVRC) |
 
@@ -553,7 +553,7 @@ Netflix said the gain wasn't worth the engineering, and the business had moved t
 The sequel was cancelled: researchers had re-identified "anonymous" users from their ratings
 
 ::: {.leave}
-Winning a competition is not always useful. This course will help you understand why
+Winning a competition is not always useful
 :::
 
 ## Prediction, loss, held-out set
@@ -579,7 +579,7 @@ That number is the leaderboard.
 First item on their project checklist. Returns in the validation week as leakage.
 :::
 
-An input is fair game only if you would have it **at the moment you need the prediction**
+An input is fair game only if you would have it *at the moment you need the prediction*
 
 Predict 2007 life expectancy from GDP: fine
 
@@ -723,7 +723,7 @@ ggplot(err, aes(k, MSE, colour = set)) +
   theme(legend.position = "top")
 ```
 
-At $k = 1$ the training error is **exactly zero**. Is that good news?
+At $k = 1$ the training error is *exactly zero*. Is that good news?
 
 ## The leaderboard {minutes="3"}
 
@@ -795,7 +795,7 @@ $y_i = f^\star(x_i) + \varepsilon_i$, inputs fixed, noise independent, mean $0$,
 We want $\mathbb E\big[(Y_0 - \hat f_k(x_0))^2\big]$, the expected squared error of the $k$-nearest-neighbor prediction at $x_0$.
 
 ::: {.ask}
-Two facts from ST102 do all the work in the proof. Which two? Write them down before we start.
+The proof uses two facts from ST102. Which two? Write them down before we start.
 :::
 
 ## Bias--variance decomposition
@@ -936,7 +936,7 @@ Ask who got 0.63 first. It describes a cube inside the support, not the k neares
 
 In ten dimensions, a cube holding 1% of the population spans 63% of each axis. That is not local.
 
-A nearest-neighbor set is a ball around the query, not a cube, and near the boundary the calculation changes, but the lesson carries: the nearest 1% of the data is far away. So the decomposition's bias term is where dimension bites: the neighbors are far away, and $f^\star$ has room to drift.
+A nearest-neighbor set is a ball around the query, not a cube, and near the boundary the calculation changes, but the conclusion holds: the nearest 1% of the data is far away. So the decomposition's bias term is where dimension enters: the neighbors are far away, and $f^\star$ has room to drift.
 
 ## Distances concentrate {.inverse}
 
