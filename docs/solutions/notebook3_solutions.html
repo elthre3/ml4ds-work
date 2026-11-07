@@ -3319,7 +3319,7 @@ truth   0   1
 </div>
 <div id="callout-36" class="callout-36-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The survey did, by choosing costs 5 and 1; the model contributed only <span class="math inline">\(\hat p\)</span>. On these 219 birds it has a lower cost per bird under those costs, and a lower accuracy: “better” has no meaning until a loss is chosen. The formula gives the population optimum for the true <span class="math inline">\(p(x)\)</span>; the curve is an empirical cost on the birds the model was fitted to, with <span class="math inline">\(\hat p\)</span> plugged in, and its minimum is flat (several thresholds near <span class="math inline">\(1/6\)</span> tie). So the agreement is between an estimate and the formula, not a proof that the formula is right for new birds. That the cost on the training rows underestimates the risk comes up later in the course.</p>
+<p>The survey did, by choosing costs 5 and 1; the model contributed only <span class="math inline">\(\hat p\)</span>. On these 219 birds it has a lower cost per bird under those costs, and a lower accuracy: “better” has no meaning until a loss is chosen. The formula gives the population optimum for the true <span class="math inline">\(p(x)\)</span>; the curve is an empirical cost on the birds the model was fitted to, with <span class="math inline">\(\hat p\)</span> plugged in, and its minimum is flat (several thresholds near <span class="math inline">\(1/6\)</span> tie). So the agreement is between an estimate and the formula, not a proof that the formula is right for new birds. That the cost on the training rows underestimates the risk on average comes up later in the course.</p>
 </div>
 </div>
 </div>
@@ -3442,10 +3442,10 @@ Prediction   0   1
 <pre><code># A tibble: 4 x 2
   world slope
   &lt;chr&gt; &lt;dbl&gt;
-1 A      1.98
-2 B      2.02
-3 C      2.01
-4 D     -3.80</code></pre>
+1 A      2.02
+2 B      2.06
+3 C      2.03
+4 D     -3.77</code></pre>
 </div>
 </div>
 </div>
@@ -3520,10 +3520,10 @@ Prediction   0   1
 <pre><code># A tibble: 4 x 3
   world slope effect_of_intervention
   &lt;chr&gt; &lt;dbl&gt;                  &lt;dbl&gt;
-1 A      1.98                      2
-2 B      2.02                      0
-3 C      2.01                      0
-4 D     -3.80                     -3</code></pre>
+1 A      2.02                      2
+2 B      2.06                      0
+3 C      2.03                      0
+4 D     -3.77                     -3</code></pre>
 </div>
 </div>
 <p>The average change is the average effect of shifting every unit’s <span class="math inline">\(X\)</span> up by one, computed on these units: exactly <span class="math inline">\(2\)</span>, <span class="math inline">\(0\)</span>, <span class="math inline">\(0\)</span> and <span class="math inline">\(-3\)</span>. Each world’s equations give every unit the same change, and because the noise is reused nothing else moves.</p>
@@ -3561,13 +3561,13 @@ Prediction   0   1
 <pre><code># A tibble: 3 x 5
   term        estimate std.error statistic   p.value
   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-1 (Intercept)     3.79    0.234       16.2 7.38e- 48
-2 X              -2.95    0.0452     -65.2 9.67e-246
-3 Z               2.11    0.101       20.9 3.34e- 70</code></pre>
+1 (Intercept)     3.70    0.231       16.0 8.50e- 47
+2 X              -2.95    0.0451     -65.5 1.79e-246
+3 Z               2.01    0.0991      20.3 2.60e- 67</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">predict</span>(fit_d, <span class="at">newdata =</span> <span class="fu">mutate</span>(d, <span class="at">X =</span> X <span class="sc">+</span> <span class="dv">1</span>))) <span class="sc">-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit_d, <span class="at">newdata =</span> d))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -2.94982</code></pre>
+<pre><code>[1] -2.950436</code></pre>
 </div>
 </div>
 </div>
@@ -3629,18 +3629,18 @@ Prediction   0   1
 <span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">regression =</span> <span class="fu">coef</span>(<span class="fu">lm</span>(Y <span class="sc">~</span> X <span class="sc">+</span> Z, <span class="at">data =</span> d_e))[[<span class="st">&quot;X&quot;</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     naive  weighting regression 
-  5.033604   1.743447   1.996915 </code></pre>
+  5.154428   2.077470   2.052515 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>d_e <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(w, <span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 x 5
       X     Y     Z pi_hat     w
   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
-1     1 -7.19 -2.89 0.0149  67.0
-2     1 -4.06 -2.22 0.0351  28.4
-3     1 -3.58 -2.18 0.0372  26.9
-4     0 10.2   2.61 0.953   21.2
-5     1 -4.12 -1.93 0.0505  19.8</code></pre>
+1     1 -3.29 -2.16 0.0286  34.9
+2     1 -1.67 -1.83 0.0446  22.4
+3     1 -1.26 -1.69 0.0545  18.3
+4     0  8.19  2.26 0.942   17.1
+5     1 -1.09 -1.59 0.0618  16.2</code></pre>
 </div>
 </div>
 </div>
@@ -3652,7 +3652,7 @@ Prediction   0   1
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">treated =</span> <span class="fu">sum</span>(d_e<span class="sc">$</span>w[d_e<span class="sc">$</span>X <span class="sc">==</span> <span class="dv">1</span>]), <span class="at">untreated =</span> <span class="fu">sum</span>(d_e<span class="sc">$</span>w[d_e<span class="sc">$</span>X <span class="sc">==</span> <span class="dv">0</span>])) <span class="sc">/</span> <span class="fu">nrow</span>(d_e)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  treated untreated 
-1.0363435 0.9956599 </code></pre>
+0.9890188 1.0030690 </code></pre>
 </div>
 </div>
 <p><strong>Question 6.</strong> What is the effect of treatment in world E, which of the three estimates are near it, and which result explains each one? Which units have the largest weights, and what is unusual about them? If the unit with the largest weight had not been in the sample, and the other weights stayed as they are, by how much would the weighting estimate move?</p>
@@ -3668,7 +3668,7 @@ Prediction   0   1
 </div>
 <div id="callout-44" class="callout-44-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The effect is <span class="math inline">\(2\)</span>: <span class="math inline">\(Y\)</span>’s equation has <span class="math inline">\(2X\)</span>, and nothing else in it depends on <span class="math inline">\(X\)</span>. The naive difference is about <span class="math inline">\(5.2\)</span>: the treated have higher <span class="math inline">\(Z\)</span>, and the confounding gap is <span class="math inline">\(3\,(\mathbb E[Z \mid X = 1] - \mathbb E[Z \mid X = 0]) \approx 3 \cdot 1.07\)</span>. The weighting estimate is centered on <span class="math inline">\(2\)</span> by the inverse propensity weighting theorem, with <span class="math inline">\(\hat\pi\)</span> in place of <span class="math inline">\(\pi\)</span>; the logistic model for <span class="math inline">\(\pi\)</span> is the right one here, because <code>X</code> was generated from a logistic function of <code>Z</code>. The regression coefficient is near <span class="math inline">\(2\)</span> by the adjustment theorem (or the partialling-out theorem), because <span class="math inline">\(\mathbb E[Y \mid X, Z]\)</span> is linear in <code>X</code> and <code>Z</code>. Weighting needs a correct regression model for the treatment; regression adjustment needs a correct regression model for the outcome; both need <code>Z</code> to hold the common causes. Of the three, the weighting estimate varies most from run to run: in about one run in ten it falls outside <span class="math inline">\(1.7\)</span> to <span class="math inline">\(2.3\)</span>, so compare yours with your neighbors’.</p>
+<p>The effect is <span class="math inline">\(2\)</span>: <span class="math inline">\(Y\)</span>’s equation has <span class="math inline">\(2X\)</span>, and nothing else in it depends on <span class="math inline">\(X\)</span>. The naive difference is about <span class="math inline">\(5.2\)</span>: the treated have higher <span class="math inline">\(Z\)</span>, and the confounding gap is <span class="math inline">\(3\,(\mathbb E[Z \mid X = 1] - \mathbb E[Z \mid X = 0]) \approx 3 \cdot 1.07\)</span>. The weighting estimate is near <span class="math inline">\(2\)</span>. The inverse propensity weighting theorem gives exactly <span class="math inline">\(2\)</span> in expectation with the true <span class="math inline">\(\pi\)</span>; with <span class="math inline">\(\hat\pi\)</span> in its place the estimate is consistent, because the logistic model for <span class="math inline">\(\pi\)</span> is the right one here: <code>X</code> was generated from a logistic function of <code>Z</code>. The regression coefficient is near <span class="math inline">\(2\)</span> by the adjustment theorem (or the partialling-out theorem), because <span class="math inline">\(\mathbb E[Y \mid X, Z]\)</span> is linear in <code>X</code> and <code>Z</code>. Weighting needs a correct regression model for the treatment; regression adjustment needs a correct regression model for the outcome; both need <code>Z</code> to hold the common causes. Of the three, the weighting estimate varies most from run to run: in about one run in ten it falls outside <span class="math inline">\(1.7\)</span> to <span class="math inline">\(2.3\)</span>, so compare yours with your neighbors’.</p>
 <p>The largest weights belong to treated units with low <code>Z</code> or untreated units with high <code>Z</code>: units whose treatment was unlikely given their <code>Z</code>. Their <span class="math inline">\(\hat\pi\)</span> (or <span class="math inline">\(1 - \hat\pi\)</span>) is a few percent, so each stands in for tens of units. The largest weight is usually between about 15 and 100, and it changes a lot from run to run. With the other weights held fixed (not refitting <span class="math inline">\(\hat\pi\)</span>), write the estimate as an average, <span class="math inline">\(\hat\tau = \frac1n \sum_i s_i\)</span> with <span class="math inline">\(s_i = (2X_i - 1)\, w_i Y_i\)</span>: a treated unit adds <span class="math inline">\(w_i Y_i\)</span>, an untreated one subtracts it. Leaving unit <span class="math inline">\(i\)</span> out gives <span class="math inline">\((n\hat\tau - s_i)/(n - 1)\)</span>, so the estimate moves by <span class="math inline">\((\hat\tau - s_i)/(n - 1)\)</span>, in either arm. For the unit with the largest weight in your sample:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> (<span class="dv">2</span> <span class="sc">*</span> d_e<span class="sc">$</span>X <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> d_e<span class="sc">$</span>w <span class="sc">*</span> d_e<span class="sc">$</span>Y</span>
@@ -3676,7 +3676,7 @@ Prediction   0   1
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">estimate =</span> <span class="fu">mean</span>(s), <span class="at">largest_weight =</span> d_e<span class="sc">$</span>w[i], <span class="at">change_if_left_out =</span> (<span class="fu">mean</span>(s) <span class="sc">-</span> s[i]) <span class="sc">/</span> (<span class="fu">nrow</span>(d_e) <span class="sc">-</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          estimate     largest_weight change_if_left_out 
-          1.743447          67.010644           0.241838 </code></pre>
+        2.07747044        34.94492508         0.05849168 </code></pre>
 </div>
 </div>
 </div>
