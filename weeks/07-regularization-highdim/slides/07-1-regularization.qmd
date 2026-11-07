@@ -1,0 +1,1097 @@
+---
+title: "Machine learning"
+subtitle: "Week 7: tuning and regularization"
+author: "Joshua Loftus"
+institute: "LSE"
+format:
+  revealjs:
+    theme: [default, ../../../theme/st310.scss]
+    slide-number: c/t
+    width: 1280
+    height: 720
+    margin: 0.06
+    code-line-numbers: false
+    fig-width: 7
+    fig-height: 4.2
+    fig-dpi: 150
+    progress: true
+    history: false
+    footer: "ST310 Machine Learning"
+    # Figures render at their fig-width/fig-height; an overfull slide then shows
+    # as overfull instead of auto-stretch shrinking the figure to fit.
+    auto-stretch: false
+    # Speaker notes are stripped from the public render unless the environment
+    # variable ST310_KEEP_NOTES is set (see _build_env/strip_notes.lua).
+    filters:
+      - ../../../_build_env/strip_notes.lua
+execute:
+  echo: false
+  warning: false
+  message: false
+  freeze: auto
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(knitr)
+library(patchwork)
+library(splines)        # ns(); ships with R
+library(glmnet)
+library(rpart)
+library(mgcv)           # gam() with a penalty on wiggliness
+library(gapminder)
+theme_set(theme_minimal(base_size = 18))
+options(knitr.table.format = "html")
+options(digits = 5)
+# Palette: viridis for the primary scale, magma for the second one.
+v_dark <- "#440154"; v_blue <- "#31688e"; v_teal <- "#21918c"; v_green <- "#5ec962"
+m_pink <- "#b73779"; m_purple <- "#8c2981"; m_orange <- "#fc8961"
+mse <- function(y, pred) mean((y - pred)^2)
+se_loss <- function(y, pred) sd((y - pred)^2) / sqrt(length(y))
+# k-NN regression with several standardized inputs, as in the structures lecture: squared distances
+# by matrix algebra, then the mean outcome of the k nearest training rows.
+knn_predict <- function(Xnew, Xtrain, ytrain, k) {
+  d2 <- outer(rowSums(Xnew^2), rowSums(Xtrain^2), "+") - 2 * Xnew %*% t(Xtrain)
+  apply(d2, 1, function(d) mean(ytrain[order(d)[1:k]]))
+}
+# The task: Spotify tracks (data note: data/spotify.md), one row per track, split three ways exactly
+# as in the structures lecture and its seminar: 5,000 training, 2,000 selection, 3,000 test tracks.
+sp <- read_csv("../../../files/spotify_tracks.csv", show_col_types = FALSE) |>
+  distinct(track_id, .keep_all = TRUE) |>
+  mutate(duration_min = duration_ms / 60000, genre = factor(playlist_genre))
+feat <- c("danceability", "energy", "loudness", "speechiness", "acousticness",
+          "instrumentalness", "liveness", "valence", "tempo", "duration_min", "release_year")
+set.seed(310)   # the deck's only seed: the split (the seminar's), then every random step below, in order
+sp_id <- sample(nrow(sp))
+sp_train <- sp[sp_id[1:5000], ]
+sp_sel   <- sp[sp_id[5001:7000], ]
+sp_test  <- sp[sp_id[7001:10000], ]
+y_tr <- sp_train$track_popularity; y_se <- sp_sel$track_popularity
+# The design with genre as dummies, standardized on the training tracks, for the penalized fits.
+sp_X <- function(d) model.matrix(reformulate(c(feat, "genre"), "track_popularity"), d)[, -1]
+sp_mu <- colMeans(sp_X(sp_train)); sp_sd <- apply(sp_X(sp_train), 2, sd)
+sp_Xtr <- scale(sp_X(sp_train), sp_mu, sp_sd); sp_Xse <- scale(sp_X(sp_sel), sp_mu, sp_sd)
+colnames(sp_Xtr) <- colnames(sp_Xse) <- sub("^genre", "genre: ", colnames(sp_X(sp_train)))
+# The eleven numeric inputs standardized, for k-NN (as in the structures lecture's baselines).
+stdz <- function(d, mu, s) sweep(sweep(as.matrix(d[, feat]), 2, mu), 2, s, "/")
+mu_f <- colMeans(sp_train[, feat]); sd_f <- apply(sp_train[, feat], 2, sd)
+X_tr <- stdz(sp_train, mu_f, sd_f); X_se <- stdz(sp_sel, mu_f, sd_f)
+f_gen <- reformulate(c(feat, "genre"), "track_popularity")
+```
+
+## {.inverse}
+
+::: {.notes}
+The deck on the spine's scale (2 a content slide, 3 a slide with a proof or a pause for the room, 1 a dark slide); the bar at the top of each note is the share done and its denominator the total. Dark = rush or skip; each dark slide's note says skip or gives the compressed phrase. Data: the Spotify tracks and the structures lecture's split (one seed, 310, at the split) for everything with several inputs; week 1's countries and simulated data for the one-input pictures. One proof in the lecture, the k-NN rate (part 2); the ridge form is stated and proved in exercise 1.
+
+Cut order: (1) the zoom on the high-dimensional example, (2) "A fixed lambda is not a chosen lambda" to one sentence on the selection slide, (3) "Ridge in general" to a sentence, (4) "What double descent does and does not change" to the caption of the demonstration. The CV curve, the rate, the orthogonal design and the ridge form do not move.
+
+In the notebook: exercise 1 proves the ridge form, exercise 2 redoes the rate with the slides closed; problems vary soft thresholding, the distance lemma in one dimension and the weighted-ridge form of the smoothing penalty. The seminar writes a CV pipeline, reads a learning-curve figure against the rate, and then breaks CV twice: duplicated tracks across folds and a split in time.
+:::
+
+### Week 7: tuning and regularization
+
+Part 1: cross-validation
+
+Part 2: the price of flexibility
+
+Part 3: ridge and the lasso side by side
+
+Part 4: a penalty on wiggliness
+
+Part 5: more inputs than observations
+
+## Where we left off {minutes="1"}
+
+::: {.notes}
+One minute. Every family had a knob; the selection set chose it. Today: a better way to choose it, what the choice costs as n and the number of inputs change, and the two penalties in detail.
+:::
+
+Five functional structures, each with a knob: $\lambda$, $J$, depth, $M$, and $k$ for nearest neighbors. Each knob was chosen on the selection set, and the test set opened once
+
+This week: **choosing the knob** with less waste (cross-validation); **what the choice costs**, as a formula in $n$ and the number of inputs; and **what two penalties do** to each coefficient, exactly, in the simplest design
+
+## {.inverse .center}
+
+::: {.notes}
+Compress: the selection set used 2,000 tracks once; cross-validation uses every training track for both jobs, in turn.
+:::
+
+### Part 1: cross-validation
+
+## Cross-validation
+
+::: {.notes}
+Legacy slide. The selection set wastes rows: 2,000 tracks never fitted on, 5,000 never scored on. Swap the roles and average; then do it with K pieces. "Independent folds" is not said: the folds are disjoint, not independent.
+:::
+
+The selection set, $D'$, chose the knob: fit $\hat f_\lambda$ on $D$ for a grid of $\lambda$, score each on $D'$, keep the best, refit on $D \cup D'$. *Common when one fit is expensive*
+
+. . .
+
+*When one fit is cheap:*
+
+**Idea**: swap $D$ and $D'$ and get two estimates, $\hat R(\hat f_\lambda)$ and $\hat R(\hat f'_\lambda)$. Average these and choose $\hat\lambda$ using the average
+
+**Idea**: apply the same process with several "folds" of data
+
+#### $K$-fold cross-validation
+
+Each subset used once as the held-out set, and $K - 1$ times for training
+
+## Cross-validation cartoon {minutes="1"}
+
+::: {.notes}
+One minute. K held-out blocks, K fits; every row is scored exactly once, by a fit that did not see it.
+:::
+
+![](img/cv.wikipedia.svg.png){height="330"}
+
+Gives $K$ estimates of the held-out error at each $\lambda$
+
+Credit: [Wikipedia](https://en.wikipedia.org/wiki/Cross-validation)
+
+## $K$-fold cross-validation
+
+::: {.notes}
+Legacy slide. Two things to insist on: it chooses the knob, and the number at each lambda is the average of K scores of K different fits. The refit is why the final model is none of the K.
+:::
+
+Each subset used once as the held-out set, and $K - 1$ times for training
+
+Choose $\hat\lambda$ to minimize
+$$
+\hat R_{K\text{-cv}}(\lambda) = \frac1K\sum_{k=1}^K \hat R_k\big(\hat f^{(k)}_\lambda\big)
+$$
+where $\hat f^{(k)}_\lambda$ is fitted on the data that "holds out" the $k$th fold, and $\hat R_k$ is its error on that fold
+
+Then refit the model $\hat f_{\hat\lambda}$ at that value $\hat\lambda$ on the entire dataset
+
+## CTF competition: the CV curve on the Spotify tracks {minutes="3"}
+
+::: {.notes}
+Three minutes. The 5,000 training tracks, ten folds, the same folds for all three; every fold's fit standardizes its own training rows. Lasso on the eleven numeric inputs and the genre dummies against lambda (large lambda left); k-NN on the standardized numeric inputs against k; a tree against depth. The minimum of each curve is the knob. The selection set is not touched: these 5,000 tracks did both jobs. Same shape as the structures lecture's selection curves, lower waste.
+:::
+
+```{r}
+#| label: cv-curves
+#| fig-height: 3.3
+#| fig-width: 12.5
+K <- 10
+fold <- sample(rep(1:K, length.out = nrow(sp_train)))
+# One function for every pipeline: fit on the fold's training rows, score on its held-out rows, average.
+cv_score <- function(fit_predict) {
+  mean(sapply(1:K, function(k) {
+    tr <- sp_train[fold != k, ]; ho <- sp_train[fold == k, ]
+    mse(ho$track_popularity, fit_predict(tr, ho))
+  }))
+}
+# Lasso: one lambda sequence for every fold, taken from a fit on all 5,000 training tracks.
+lam_seq <- glmnet(sp_Xtr, y_tr, standardize = FALSE)$lambda
+lasso_fp <- function(tr, ho) {   # returns one column of predictions per lambda
+  mu <- colMeans(sp_X(tr)); s <- apply(sp_X(tr), 2, sd)
+  fit <- glmnet(scale(sp_X(tr), mu, s), tr$track_popularity, lambda = lam_seq, standardize = FALSE)
+  predict(fit, scale(sp_X(ho), mu, s))
+}
+cv_lasso <- rowMeans(sapply(1:K, function(k) {
+  tr <- sp_train[fold != k, ]; ho <- sp_train[fold == k, ]
+  apply(lasso_fp(tr, ho), 2, function(pred) mse(ho$track_popularity, pred))
+}))
+# k-NN on the eleven numeric inputs, standardized inside the fold.
+ks <- c(1, 2, 5, 10, 20, 50, 100, 200, 500)
+cv_knn <- sapply(ks, function(k) cv_score(function(tr, ho) {
+  mu <- colMeans(tr[, feat]); s <- apply(tr[, feat], 2, sd)
+  knn_predict(stdz(ho, mu, s), stdz(tr, mu, s), tr$track_popularity, k)
+}))
+# A tree against its depth.
+depths <- 1:10
+cv_tree <- sapply(depths, function(d) cv_score(function(tr, ho)
+  predict(rpart(f_gen, tr, control = rpart.control(maxdepth = d, cp = 0, minbucket = 10)), ho)))
+lam_cv <- lam_seq[which.min(cv_lasso)]; k_cv <- ks[which.min(cv_knn)]; d_cv <- depths[which.min(cv_tree)]
+curve_plot <- function(x, y, xlab, title, logx = FALSE) {
+  d <- tibble(x = x, y = y); best <- d[which.min(d$y), ]
+  g <- ggplot(d, aes(x, y)) + geom_line(colour = v_blue, linewidth = 1.1) + geom_point(colour = v_blue, size = 1.8) +
+    geom_point(data = best, colour = m_orange, size = 4) +
+    labs(x = xlab, y = "10-fold CV MSE", title = title) + theme(plot.title = element_text(size = 15))
+  if (logx) g <- g + scale_x_log10()
+  g
+}
+curve_plot(-log(lam_seq), cv_lasso, expression(-log(lambda) ~ "(large" ~ lambda ~ "on the left)"),
+           paste0("lasso: minimum at lambda = ", signif(lam_cv, 2))) +
+  curve_plot(ks, cv_knn, "k", paste0("k nearest neighbors: minimum at k = ", k_cv), logx = TRUE) +
+  curve_plot(depths, cv_tree, "depth", paste0("tree: minimum at depth ", d_cv))
+```
+
+The 5,000 training tracks, $K = 10$. One curve per family, the knob where each is lowest (orange). Every fold's fit standardizes on its own training rows. The selection set was not used: each track was fitted on nine times and scored once
+
+## Held-out standard error
+
+::: {.notes}
+Derived, one line: a held-out score is a mean of m losses, so its standard error is the sd of the losses over root m, if the units are independent. These are the bars the structures lecture drew. Read the bottom of the curve with them: k = 50, 100 and 200 are within one bar of each other, so "the best k" is three k's. Not the SE of the CV average: the K fold scores share training rows and are not independent, so software's sd over root K is a heuristic.
+:::
+
+::: {.columns}
+::: {.column width="52%"}
+```{r}
+#| label: knn-sel-se
+#| fig-height: 3.6
+#| fig-width: 6
+#| out-width: "100%"
+ks_sel <- c(1, 5, 10, 20, 50, 100, 200, 500)
+sel_knn <- map_dfr(ks_sel, function(k) {
+  pred <- knn_predict(X_se, X_tr, y_tr, k)
+  tibble(k = k, mse = mse(y_se, pred), se = se_loss(y_se, pred))
+})
+ggplot(sel_knn, aes(k, mse)) +
+  geom_errorbar(aes(ymin = mse - se, ymax = mse + se), width = 0.08, colour = "grey55") +
+  geom_line(colour = v_blue, linewidth = 1) + geom_point(colour = v_blue, size = 3) +
+  scale_x_log10() + coord_cartesian(ylim = c(480, 1050)) +
+  labs(x = "k", y = "selection MSE", caption = "2,000 selection tracks; bars: one standard error")
+```
+:::
+::: {.column width="48%"}
+$m$ held-out units, losses $L_j = \ell(y_j^{\text{test}}, \hat f(x_j^{\text{test}}))$, independent if the units are, with $\hat f$ held fixed:
+$$
+\widehat{\text{Err}} = \frac1m\sum_{j=1}^m L_j, \qquad \text{SE} = \frac{\text{sd}(L)}{\sqrt m}
+$$
+The uncertainty of this fit's score on $m$ new units
+:::
+:::
+
+On the selection tracks, $k = 50$, $100$ and $200$ sit within one bar of each other: a flat bottom, and "the best $k$" is any of them
+
+## Lessons about cross-validation
+
+::: {.notes}
+Legacy slide. The quote is the seminar's second half in one sentence: refine on a score often enough and the score stops meaning what it did.
+:::
+
+- Think of it as a way to **choose model complexity**
+
+- **Beware** common cross-validation errors! From Duda and Hart quoted in [MLstory](https://mlstory.org/data.html)
+
+> ... the same data were often used for designing and testing the classifier. This mistake is frequently referred to as "testing on the training data." A related but less obvious problem arises *when a classifier undergoes a long series of refinements guided by the results of repeated testing on the same data. This form of "**training on the testing data**" often escapes attention until new test samples are obtained*.
+
+## Lessons about cross-validation
+
+::: {.notes}
+Legacy slide. "The entire pipeline": standardizing, selecting inputs, tuning, all inside each fold; the seminar breaks this rule on purpose with the duplicated tracks. "Only once": the vault. Choosing K: 5 or 10.
+:::
+
+- **Beware** common cross-validation errors! From ESL:
+
+> Ideally, the test set should be kept in a "vault," and be brought out only at the end of the data analysis. *Suppose instead that we use the test-set repeatedly, choosing the model with smallest test-set error. Then the test set error of the final chosen model will underestimate the true test error*, sometimes substantially.
+
+- Cross-validate the entire model-building pipeline (not just one step), and only do it once -- or at *least* not many times
+
+- Choosing $K$: larger $\to$ $\hat R_{K\text{-cv}}$ has lower bias, more variance. Often use $K = 5$ or $10$
+
+## plot(cv.glmnet)
+
+::: {.notes}
+Legacy slide, on the Spotify lasso with the same ten folds as the by-hand curve. Left dotted line lambda.min, right lambda.1se: the largest lambda whose CV error is within one bar of the minimum, a flat-bottom rule that prefers the simpler model. The bars are sd over root K of the fold scores, a heuristic (the folds share rows). The chosen score is a minimum over about seventy candidates on these same rows: the structures seminar's problem 1, so it is not the number to report.
+:::
+
+`glmnet`'s own cross-validation of the lasso on the training tracks, the same ten folds. Top axis: how many coefficients are nonzero
+
+::: {.columns}
+::: {.column width="52%"}
+```{r}
+#| label: cv-glmnet-code
+#| echo: true
+#| eval: false
+cv_fit <- cv.glmnet(X, y, foldid = fold)
+plot(cv_fit)
+```
+
+```{r}
+#| label: cv-glmnet
+#| fig-width: 6.4
+#| fig-height: 3.6
+#| out-width: "100%"
+# The code shown above, on the deck's training matrix and folds (the names differ).
+par(mar = c(4.2, 4.2, 2.6, 0.5), cex = 1.1)   # the par() in setup does not reach this chunk
+cv_fit <- cv.glmnet(sp_Xtr, y_tr, foldid = fold, standardize = FALSE)
+plot(cv_fit)
+```
+:::
+::: {.column width="48%"}
+Dotted lines: `lambda.min`, the minimum; `lambda.1se`, the largest $\lambda$ within one bar of it, the **one-standard-error rule**: a flat bottom, so take the simpler model
+
+The bars, $\text{sd}/\sqrt K$ of the fold scores, are a heuristic (the folds share rows). The minimum is chosen among `r length(cv_fit$lambda)` candidates on these rows: biased low, a score to choose with, not to report
+:::
+:::
+
+## {.inverse .center}
+
+::: {.notes}
+Compress: the curve's bottom moved between families and would move with n; a formula says where it goes and what it costs.
+:::
+
+### Part 2: the price of flexibility
+
+## What should $k$ be?
+
+::: {.notes}
+Two minutes: an answer per question, with the reason. The decomposition from week 1 in the box: the variance term is explicit, sigma squared over k; the bias term is an average of f-star at the neighbors minus f-star at the point, and says nothing until we assume something about f-star. k-NN was last on two of the structures lecture's three truths, with seven idle inputs: the curse, now to be priced.
+:::
+
+The CV curve put $k$ at `r k_cv` on 5,000 tracks and 11 inputs. Where would it sit with 50,000 tracks? With 110 inputs?
+
+::: {.retrieval}
+Bias--variance decomposition, $k$-NN form: inputs fixed, $y_i = f^\star(x_i) + \varepsilon_i$, noise mean $0$, variance $\sigma^2$, $\hat f_k(x_0)$ the mean of the $k$ nearest training outcomes:
+$$
+\mathbb E\big[(Y_0 - \hat f_k(x_0))^2\big] = \sigma^2 + \Big[f^\star(x_0) - \tfrac1k\textstyle\sum_l f^\star(x_{(l)})\Big]^2 + \sigma^2/k
+$$
+:::
+
+The variance, $\sigma^2/k$, is a formula. The bias is an average of $f^\star$ over the $k$ nearest inputs, and says nothing until we assume something about $f^\star$
+
+::: {.ask}
+What is the smallest assumption on $f^\star$ that bounds the bias? Write it down.
+:::
+
+## $k$-NN rate: bounding the bias {minutes="3"}
+
+::: {.notes}
+The proof, three minutes. Heuristic: the k neighbors all sit within r_k of x_0; if f-star cannot change faster than L per unit of distance, every neighbor's f-star is within L r_k of f-star at x_0, and so is their average. That is the whole proof; the Lipschitz assumption is the smallest one that makes the bias a number. r_k is random (it depends on where the inputs fell), so the bound is conditional on the inputs.
+:::
+
+```{r}
+#| label: lipschitz-picture
+#| include: false
+# One input, f-star = 2 sin(3x), Lipschitz with L = 6; n = 40 uniform points, k = 5 at x0 = 0.5.
+f_lip <- function(x) 2 * sin(3 * x); L_lip <- 6
+lp <- tibble(x = runif(24), y = f_lip(x) + rnorm(24, sd = 0.5))
+x0 <- 0.5; k_lip <- 5
+lp <- lp |> mutate(d = abs(x - x0), near = rank(d) <= k_lip)
+r_k <- max(lp$d[lp$near])
+lip_plot <- ggplot(lp, aes(x, y)) +
+  annotate("rect", xmin = x0 - r_k, xmax = x0 + r_k, ymin = -Inf, ymax = Inf, fill = "grey88", alpha = 0.6) +
+  annotate("polygon", x = c(x0 - r_k, x0, x0 + r_k, x0 + r_k, x0, x0 - r_k),
+           y = c(f_lip(x0) - L_lip * r_k, f_lip(x0), f_lip(x0) - L_lip * r_k, f_lip(x0) + L_lip * r_k, f_lip(x0), f_lip(x0) + L_lip * r_k),
+           fill = m_orange, alpha = 0.3) +
+  stat_function(fun = f_lip, colour = v_dark, linewidth = 1.1) +
+  geom_point(aes(colour = near), size = 2.6) +
+  scale_colour_manual(values = c(`FALSE` = "grey60", `TRUE` = m_pink), guide = "none") +
+  annotate("point", x = x0, y = mean(lp$y[lp$near]), shape = 4, size = 5, stroke = 1.6, colour = m_pink) +
+  annotate("text", x = x0 + r_k + 0.03, y = f_lip(x0) + L_lip * r_k + 0.2, label = "slope at most L", size = 4.4, colour = m_orange, hjust = 0) +
+  labs(x = NULL, y = NULL, title = expression(paste("the ", k == 5, " nearest inputs (pink) sit within ", r[k], " of ", x[0] == 0.5)))
+```
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| label: lipschitz-figure
+#| fig-width: 5.4
+#| fig-height: 3.7
+#| out-width: "100%"
+lip_plot + theme(plot.title = element_text(size = 14))
+```
+:::
+::: {.column width="56%"}
+$r_k(x_0)$: the distance from $x_0$ to its $k$th nearest training input. Every neighbor is within it
+
+**Assume** $f^\star$ is $L$-**Lipschitz**: $|f^\star(x) - f^\star(x')| \le L\,\|x - x'\|$. Then each neighbor's $f^\star$ is within $L\,r_k$ of $f^\star(x_0)$, so their average is too
+:::
+:::
+
+::: {.leave}
+**$k$-NN rate.** Inputs fixed, $f^\star$ $L$-Lipschitz, noise variance $\sigma^2$:
+$\;\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2 \,\big|\, \text{inputs}\big] \;\le\; L^2\, r_k(x_0)^2 + \sigma^2/k$
+:::
+
+**Proof.** The decomposition's bias is $\frac1k\sum_l [f^\star(x_{(l)}) - f^\star(x_0)]$, each term at most $L\,r_k$ in size, so the square is at most $L^2 r_k^2$; the variance is $\sigma^2/k$. $\blacksquare$
+
+## The nearest-neighbor distance lemma
+
+::: {.notes}
+Stated, with the volume argument as the explanation, not the proof. A ball around x_0 that holds k of n uniformly scattered points has volume about k over n, so its radius is about (k/n) to the one over d; square it. "Away from the boundary": near an edge the ball is cut off and the radius is larger. The constant hides the volume of the unit ball. Examinable: the bound and the deduction given this lemma, not the lemma.
+:::
+
+How far away is the $k$th neighbor? Inputs i.i.d. uniform on $[0, 1]^d$. A ball around $x_0$ holding $k$ of the $n$ points has volume about $k/n$, so its radius is about $(k/n)^{1/d}$
+
+::: {.columns}
+::: {.column width="58%"}
+::: {.leave}
+**Nearest-neighbor distance lemma** (stated). For $x_0$ away from the boundary, $\mathbb E\big[r_k(x_0)^2\big] \lesssim (k/n)^{2/d}$, the constant depending on $d$ only.
+:::
+
+In one dimension, $(k/n)^2$: the $k$th neighbor is about $k/2n$ away on each side. In $d = 10$, $(k/n)^{1/5}$: with $k/n = 1/100$, the radius is $0.4$ of the side of the cube
+:::
+::: {.column width="42%"}
+```{r}
+#| label: ball-picture
+#| fig-width: 5
+#| fig-height: 3.6
+#| out-width: "100%"
+# n = 500 uniform points in the unit square, the k = 10 nearest to the center and the ball that holds them;
+# beside it, the radius (k/n)^(1/d) against d at k/n = 1/50.
+ball <- tibble(x1 = runif(500), x2 = runif(500)) |> mutate(d = sqrt((x1 - 0.5)^2 + (x2 - 0.5)^2), near = rank(d) <= 10)
+r_ball <- max(ball$d[ball$near])
+circ <- tibble(t = seq(0, 2 * pi, length.out = 200), x1 = 0.5 + r_ball * cos(t), x2 = 0.5 + r_ball * sin(t))
+p_ball <- ggplot(ball, aes(x1, x2)) + geom_point(aes(colour = near), size = 1.1) +
+  geom_path(data = circ, colour = m_orange, linewidth = 1) +
+  scale_colour_manual(values = c(`FALSE` = "grey70", `TRUE` = m_pink), guide = "none") +
+  coord_equal(expand = FALSE) + labs(x = NULL, y = NULL, title = "d = 2: 10 of 500 points") +
+  theme(axis.text = element_blank(), plot.title = element_text(size = 13))
+p_rad <- ggplot(tibble(d = 1:10, r = (1 / 50)^(1 / d)), aes(d, r)) + geom_line(colour = v_blue, linewidth = 1) + geom_point(colour = v_blue, size = 2.2) +
+  scale_x_continuous(breaks = c(1, 2, 5, 10)) + coord_cartesian(ylim = c(0, 1)) +
+  labs(x = "d", y = NULL, title = expression(paste("radius ", (k/n)^{1/d}, ", ", k/n == 1/50))) + theme(plot.title = element_text(size = 13))
+p_ball + p_rad
+```
+:::
+:::
+
+::: {.retrieval}
+Curse of dimensionality: in many dimensions, the nearest $1\%$ of the data is not near.
+:::
+
+## The rate {minutes="3"}
+
+::: {.notes}
+Put the two together and balance: the bias term grows with k, the variance shrinks with k; they cross at k of order n to the 2 over d+2, and the error there is n to the minus 2 over d+2. Halving the error in d = 10 costs 64 times the data. Stated, as a worst case: no estimator improves this rate uniformly over Lipschitz f-star (Stone 1982). Upper bounds: a constant f-star does better, and so does any f-star with more structure, which is the next slide.
+:::
+
+```{r}
+#| label: rate-figure
+#| include: false
+rates <- expand_grid(d = c(1, 2, 5, 10), n = 10^seq(2, 5, length.out = 100)) |>
+  mutate(rate = (n / 100)^(-2 / (d + 2)))
+rate_plot <- ggplot(rates, aes(n, rate, colour = factor(d))) + geom_line(linewidth = 1.2) +
+  scale_x_log10() + scale_y_log10() +
+  scale_colour_viridis_d(end = 0.85, name = "d =") +
+  labs(x = "n (log scale)", y = "error, relative to n = 100") +
+  theme(legend.position = "top", legend.text = element_text(size = 13))
+halve <- tibble(d = c(1, 2, 5, 10), factor = 2^((d + 2) / 2))
+```
+
+::: {.columns}
+::: {.column width="60%"}
+Put the two together and choose $k$:
+$$
+\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \;\lesssim\; L^2 (k/n)^{2/d} + \sigma^2/k
+$$
+The first term grows with $k$, the second shrinks. They balance at $k \asymp n^{2/(d+2)}$, and there $\text{error} \asymp n^{-2/(d+2)}$
+:::
+::: {.column width="40%"}
+```{r}
+#| label: rate-plot
+#| fig-width: 4.8
+#| fig-height: 3.3
+#| out-width: "100%"
+rate_plot
+```
+:::
+:::
+
+To halve the error, $2^{(d+2)/2}$ times the data: $2.8\times$ in $d = 1$, $4\times$ in $d = 2$, $11\times$ in $d = 5$, $64\times$ in $d = 10$
+
+::: {.leave}
+**Minimax rate** (stated). Over all $L$-Lipschitz $f^\star$ in $d$ dimensions no estimator beats $n^{-2/(d+2)}$ for every $f^\star$ (Stone 1982); a particular $f^\star$, a constant say, does better.
+:::
+
+## What structure buys
+
+::: {.notes}
+Stated, with qualifiers. Each row is a bet on f-star from the structures lecture, priced: assume less, pay the Lipschitz rate in d dimensions; assume a sum of one-input curves, pay the one-dimensional rate (Stone 1985), under conditions on the design; assume a sparse plane, pay about s log p over n (the lasso, stated). No free lunch, now with numbers: the first row is already an assumption, and each row below it is a faster rate that holds only when its assumption does.
+:::
+
+::: {style="font-size: 0.95em"}
+| Assumption on $f^\star$ | Rate (up to constants) | The bet |
+|---|---|---|
+| $L$-Lipschitz in $d$ inputs | $n^{-2/(d+2)}$ | nearest neighbors, a tree, a network: only smoothness |
+| a sum of a fixed number of Lipschitz one-input curves (design conditions) | $n^{-2/3}$, the one-input rate | additive splines: no interactions |
+| linear with $s$ nonzero coefficients among $p$ (sparsity, design and noise conditions) | about $s\log p/n$ | the lasso: a sparse plane |
+
+: {tbl-colwidths="[40,24,36]"}
+:::
+
+Assume less and pay the rate in $d$. Assume more and pay a one-dimensional rate, or $\log p$ instead of $d$: if the assumption holds. The second and third rates are stated, not derived
+
+::: {.retrieval}
+No free lunch theorem, with numbers: the Lipschitz class is already an assumption, and nothing beats its rate for every $f^\star$ in it. A faster rate is bought with a stronger assumption, and is paid back only when the assumption is true.
+:::
+
+## {.inverse .center}
+
+::: {.notes}
+Compress: two penalties; in the simplest design each coefficient has its own one-line problem, and the two answers differ in one word.
+:::
+
+### Part 3: ridge and the lasso side by side
+
+## History: Stein's paradox {.inverse}
+
+::: {.notes}
+Skip if behind. The one-slide version of the legacy opening: shrinking toward a point chosen in advance beats the sample mean in three or more dimensions, for every mu; bias on purpose.
+:::
+
+Estimating $\mu \in \mathbb R^p$ from an i.i.d. sample $\mathbf Y_1, \ldots, \mathbf Y_n \sim N(\mu, \sigma^2 I)$. The MLE is $\bar{\mathbf Y}$ (obvious and best, right?)
+
+[Charles Stein](https://news.stanford.edu/2016/12/01/charles-m-stein-extraordinary-statistician-anti-war-activist-dies-96/) discovered in the 1950's that the MLE is *[inadmissible](https://en.wikipedia.org/wiki/Admissible_decision_rule)* if $p > 2$ 🤯
+
+The [James--Stein estimator](https://en.wikipedia.org/wiki/Stein%27s_example) **shrinks** $\bar{\mathbf Y}$ toward some other point, any other point, chosen *a priori*, e.g. 0:
+$$
+\hat\mu_{\text{JS}} = \Big(1 - \frac{(p-2)\sigma^2/n}{\|\bar{\mathbf Y}\|^2}\Big)\bar{\mathbf Y}, \qquad \text{MSE}(\hat\mu_{\text{JS}}) < \text{MSE}(\bar{\mathbf Y}) \text{ for all } \mu, \text{ if } p > 2
+$$
+
+Statisticians emphasized unbiasedness. After Stein's example, bias is not always bad. Most ML methods use bias this way
+
+## Two penalties, one question
+
+::: {.notes}
+Both objectives in the course's lambda (no 1 over n: glmnet's lambda is this one divided by n, up to a factor 2 on ridge). The paths from the structures lecture, small. The question for the next two slides: what does lambda do to one coefficient, exactly?
+:::
+
+```{r}
+#| label: spotify-paths
+#| include: false
+ridge_sp <- glmnet(sp_Xtr, y_tr, alpha = 0, standardize = FALSE)
+lasso_sp <- glmnet(sp_Xtr, y_tr, alpha = 1, standardize = FALSE)
+path_small <- function(fit, title) {
+  B <- as.matrix(coef(fit))[-1, ]
+  as_tibble(t(B)) |> mutate(loglam = -log(fit$lambda)) |>
+    pivot_longer(-loglam, names_to = "variable", values_to = "coef") |>
+    ggplot(aes(loglam, coef, group = variable)) + geom_line(colour = v_blue, linewidth = 0.8, alpha = 0.8) +
+    labs(x = expression(-log(lambda)), y = "coefficient", title = title) + theme(plot.title = element_text(size = 14))
+}
+```
+
+$$
+\text{ridge: } \min_\beta \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_2^2 \qquad\qquad \text{lasso: } \min_\beta \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_1
+$$
+
+```{r}
+#| label: paths-small
+#| fig-height: 2.5
+#| fig-width: 12
+path_small(ridge_sp, "ridge on the Spotify training tracks") + path_small(lasso_sp, "lasso")
+```
+
+Two norms, two shapes of path: ridge's coefficients shrink and are never zero, the lasso's are exactly zero over whole ranges of $\lambda$. **What does $\lambda$ do to one coefficient?** In general the coefficients interact; in one design they do not
+
+## The orthogonal design: ridge divides, the lasso subtracts {minutes="3"}
+
+::: {.notes}
+Three minutes, derived. Orthonormal columns make the objective a sum of one-coefficient problems, each about its own least-squares coefficient z_j. Ridge: a parabola plus a parabola, solved by one derivative. Lasso: a parabola plus a V with a kink at zero; three cases, the kink absorbs any pull of size at most lambda. The half: the one-coordinate problem is written with a half so that the threshold is lambda itself; in the course's objective, with lambda in front of the l1 norm, the threshold is lambda over 2, which is what "half the last slide's" means. The figure is ESL's 3.11 redrawn.
+:::
+
+$\mathbf X^T\mathbf X = I$ (orthonormal columns, $p \le n$): $\hat\beta = \mathbf X^T\mathbf y$ with $z_j = \mathbf x_j^T\mathbf y$, and $\|\mathbf y - \mathbf X\beta\|^2 = \text{const} + \sum_j (z_j - \beta_j)^2$: **each coefficient has its own problem**
+
+::: {.columns}
+::: {.column width="68%"}
+**Ridge**, one coordinate: $\tfrac12(z - b)^2 + \tfrac\lambda2 b^2$, smooth; derivative zero at $\hat b = z/(1 + \lambda)$
+
+**Lasso**: $\tfrac12(z - b)^2 + \lambda|b|$ (half the last slide's $\lambda$), a kink at $0$. $\hat b > 0$ needs $-(z - b) + \lambda = 0$, so $\hat b = z - \lambda$ and $z > \lambda$; $\hat b < 0$ gives $\hat b = z + \lambda$ and $z < -\lambda$; for $|z| \le \lambda$ neither works: the minimum is at the kink, $\hat b = 0$
+:::
+::: {.column width="32%"}
+```{r}
+#| label: soft-threshold
+#| fig-height: 2.8
+#| fig-width: 3.9
+#| out-width: "100%"
+st <- tibble(z = seq(-3, 3, length.out = 301)) |>
+  mutate(`least squares` = z, ridge = z / 2, lasso = sign(z) * pmax(abs(z) - 1, 0)) |>
+  pivot_longer(-z, names_to = "estimator")
+ggplot(st, aes(z, value, colour = estimator)) + geom_line(linewidth = 1.2) +
+  scale_colour_manual(values = c(`least squares` = "grey55", ridge = v_blue, lasso = m_pink)) +
+  labs(x = expression(paste("z, least squares; ", lambda == 1)), y = "estimate", colour = NULL) +
+  theme(legend.position = "top", legend.text = element_text(size = 12))
+```
+:::
+:::
+
+::: {.leave}
+**Soft thresholding.** $\arg\min_b \tfrac12(z - b)^2 + \lambda|b| = \mathrm{sign}(z)\,(|z| - \lambda)_+$: move $z$ toward zero by $\lambda$, stopping at zero. Ridge divides by $1 + \lambda$ and is zero only at $z = 0$.
+:::
+
+## Bias--variance decomposition, ridge form {minutes="3"}
+
+::: {.notes}
+Stated; exercise 1 proves it. Heuristic first: in this design least squares is unbiased with variance sigma squared per coefficient; dividing by 1 + lambda divides the variance by (1 + lambda) squared and introduces a bias of lambda over 1 + lambda times the truth. Add the squares. The slope at zero is minus 2 p sigma squared, negative whatever beta is: for every beta some lambda beats least squares, which is Stein's lesson in regression. What it does not say: which lambda; the best one here is sigma squared over the mean of beta squared, noise over signal, which you do not know. The figure: p = 10, sigma squared 1; the orange curve a small beta, the blue a large one.
+:::
+
+```{r}
+#| label: ridge-mse-figure
+#| include: false
+p_r <- 10; sig2 <- 1
+mse_ridge <- function(lambda, b2) sum((lambda^2 * b2 + sig2) / (1 + lambda)^2)
+rm <- expand_grid(truth = c("every beta_j = 0.5", "every beta_j = 2"),
+                  lambda = 10^seq(-2, 1.5, length.out = 200)) |>
+  mutate(b2 = if_else(str_detect(truth, "0.5"), 0.5^2, 2^2),
+         mse = map2_dbl(lambda, b2, ~ mse_ridge(.x, rep(.y, p_r))))
+rm_best <- rm |> group_by(truth) |> slice_min(mse, n = 1)
+ridge_mse_plot <- ggplot(rm, aes(lambda, mse, colour = truth)) +
+  geom_hline(yintercept = p_r * sig2, linetype = 2, colour = "grey50") +
+  annotate("text", x = 0.012, y = p_r * sig2 + 0.8, label = "least squares", hjust = 0, size = 4.5, colour = "grey40") +
+  geom_line(linewidth = 1.2) + geom_point(data = rm_best, size = 3.5) +
+  scale_x_log10() + scale_colour_manual(values = c(v_blue, m_orange), name = NULL) +
+  coord_cartesian(ylim = c(0, 16)) +
+  labs(x = expression(paste(lambda, " (log scale); ", p == 10, ", ", sigma^2 == 1)), y = expression(MSE(lambda))) +
+  theme(legend.position = "top", legend.text = element_text(size = 12))
+```
+
+::: {.columns}
+::: {.column width="52%"}
+Same design, noise variance $\sigma^2$. Least squares, $\hat\beta = \mathbf X^T\mathbf y$: unbiased, variance $\sigma^2$ per coefficient. Divide by $1 + \lambda$:
+$$
+\text{bias}_j = -\frac{\lambda\,\beta_j}{1 + \lambda}, \qquad \mathrm{Var}(\hat\beta_{\lambda,j}) = \frac{\sigma^2}{(1 + \lambda)^2}
+$$
+:::
+::: {.column width="48%"}
+```{r}
+#| label: ridge-mse-plot
+#| fig-width: 5.8
+#| fig-height: 3.0
+#| out-width: "100%"
+ridge_mse_plot
+```
+:::
+:::
+
+::: {.leave}
+**Bias--variance decomposition, ridge form.** $\mathbf X^T\mathbf X = I$, $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$, noise mean $0$, variance $\sigma^2$: $\;\mathrm{MSE}(\lambda) = \mathbb E\|\hat\beta_\lambda - \beta\|^2 = \sum_{j=1}^p (\lambda^2\beta_j^2 + \sigma^2)/(1 + \lambda)^2$, with slope $-2p\sigma^2 < 0$ at $\lambda = 0$: for every $\beta$, some $\lambda > 0$ beats least squares.
+:::
+
+**Proof**: exercise 1. Which $\lambda$? The best is $\sigma^2$ over the mean of $\beta_j^2$, noise over signal: unknown
+
+## Ridge in general: shrinks most where the data are thinnest
+
+::: {.notes}
+The general case as a picture, no SVD. Two correlated inputs: the data cloud is long along x1 = x2 and thin across it. Least squares' uncertainty is largest along the thin direction (the long axis of the ellipses in the coefficient plane: many beta pairs fit about equally well). Ridge pulls the estimate toward zero fastest along exactly that axis, so the first thing it removes is the part of the fit the data could not pin down. Two minutes.
+:::
+
+```{r}
+#| label: ridge-general
+#| fig-height: 4.2
+#| fig-width: 12
+n_g <- 60
+x1 <- rnorm(n_g); x2 <- 0.9 * x1 + sqrt(1 - 0.9^2) * rnorm(n_g)
+Xg <- scale(cbind(x1, x2), scale = FALSE); beta_g <- c(1.5, 0.5)
+yg <- as.vector(Xg %*% beta_g + rnorm(n_g, sd = 2)); yg <- yg - mean(yg)
+XtX <- crossprod(Xg); Xty <- crossprod(Xg, yg)
+bls <- solve(XtX, Xty)
+ridge_path <- map_dfr(c(0, 10^seq(-1, 3, length.out = 60)), function(l)
+  tibble(lambda = l, b1 = solve(XtX + l * diag(2), Xty)[1], b2 = solve(XtX + l * diag(2), Xty)[2]))
+grid_g <- expand_grid(b1 = seq(-2.5, 4.5, length.out = 140), b2 = seq(-3.5, 3.5, length.out = 140)) |>
+  mutate(rss = map2_dbl(b1, b2, ~ sum((yg - Xg %*% c(.x, .y))^2)))
+p_cloud <- ggplot(tibble(x1 = Xg[, 1], x2 = Xg[, 2]), aes(x1, x2)) + geom_point(colour = "grey45", size = 1.8) +
+  annotate("segment", x = -1.6, y = 1.6, xend = 1.6, yend = -1.6, colour = m_orange, linewidth = 1.2, arrow = arrow(ends = "both", length = unit(0.12, "inches"))) +
+  annotate("text", x = 1.0, y = -2.2, label = "the thin direction", colour = m_orange, size = 4.5) +
+  coord_equal(xlim = c(-2.6, 2.6), ylim = c(-2.6, 2.6)) + labs(x = expression(x[1]), y = expression(x[2]), title = "two correlated inputs") +
+  theme(plot.title = element_text(size = 14))
+p_coef <- ggplot(grid_g, aes(b1, b2)) + geom_contour(aes(z = rss), colour = "grey70", bins = 12) +
+  geom_path(data = ridge_path, colour = v_blue, linewidth = 1.3) +
+  geom_point(data = tibble(b1 = bls[1], b2 = bls[2]), colour = v_dark, size = 3.5) +
+  annotate("text", x = bls[1] - 0.15, y = bls[2] + 0.45, label = "least squares", colour = v_dark, size = 4.5, hjust = 1) +
+  annotate("text", x = -0.3, y = -1.1, label = expression(paste("ridge path as ", lambda, " grows")), colour = v_blue, size = 4.5, hjust = 0) +
+  geom_point(data = tibble(b1 = 0, b2 = 0), shape = 4, size = 4, stroke = 1.5) +
+  coord_equal(xlim = c(-2.3, 3.8), ylim = c(-3, 3)) + labs(x = expression(beta[1]), y = expression(beta[2]), title = "the coefficients: contours of the residual sum of squares") +
+  theme(plot.title = element_text(size = 14))
+p_cloud + p_coef + plot_layout(widths = c(1, 1.2))
+```
+
+Two correlated inputs: the contours are long along the direction the data cannot pin down (one coefficient up, the other down, the fit barely changes). Ridge's path from least squares to zero moves fastest along it: it first removes what the data say least about
+
+## High-dimensional example
+
+::: {.notes}
+Legacy slide, the one handed on from the structures lecture. n = 100, p = 200, a sparse truth: the truth in dark, the lasso hollow pink, ridge as blue crosses, both at the lambda cv.glmnet chooses by the one-SE rule. Ridge is dense: every coefficient nonzero, small. The lasso's zeros are exact and mostly where the truth is zero.
+:::
+
+```{r}
+#| label: highdim-fit
+#| include: false
+n_h <- 100; p_h <- 200
+X_h <- matrix(rnorm(n_h * p_h), n_h, p_h)
+beta_h <- rnorm(p_h) * rbinom(p_h, 1, 0.1) * rpois(p_h, 1)
+Y_h <- X_h %*% beta_h + rnorm(n_h)
+lasso_h <- glmnet(X_h, Y_h); ridge_h <- glmnet(X_h, Y_h, alpha = 0)
+cv_lasso_h <- cv.glmnet(X_h, Y_h); cv_ridge_h <- cv.glmnet(X_h, Y_h, alpha = 0)
+coef_lasso_h <- coef(lasso_h, s = cv_lasso_h$lambda.1se)[-1]
+coef_ridge_h <- coef(ridge_h, s = cv_ridge_h$lambda.1se)[-1]
+high_dim <- tibble(variable = 1:p_h, truth = beta_h, lasso = coef_lasso_h, ridge = coef_ridge_h)
+n_true <- sum(beta_h != 0); n_lasso <- sum(coef_lasso_h != 0)
+n_hit <- sum(beta_h != 0 & coef_lasso_h != 0); n_false <- sum(beta_h == 0 & coef_lasso_h != 0)
+hd_plot <- function(d, title) ggplot(d, aes(variable)) +
+  geom_point(aes(y = truth), colour = v_dark, size = 2) +
+  geom_point(aes(y = lasso), colour = m_pink, shape = 1, size = 3.2, stroke = 1) +
+  geom_point(aes(y = ridge), colour = v_blue, shape = 3, size = 2.2, stroke = 1) +
+  labs(x = NULL, y = "coefficient", title = title) + theme(plot.title = element_text(size = 14))
+```
+
+$n = 100$ observations, $p = 200$ inputs, $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$ with only `r n_true` nonzero coefficients. Lasso and ridge at the $\lambda$ cross-validation chooses
+
+```{r}
+#| label: highdim-plot
+#| fig-height: 4.0
+#| fig-width: 12
+hd_plot(high_dim, "truth: dark points; lasso: hollow pink circles; ridge: blue crosses")
+```
+
+## Zoom in on variables 50 to 100 {minutes="1"}
+
+::: {.notes}
+Cut first. The same picture, fifty variables: ridge's crosses are all off zero, the lasso's circles sit on zero except where the truth is off it, and one or two where it is not.
+:::
+
+```{r}
+#| label: highdim-zoom
+#| fig-height: 4
+#| fig-width: 12
+hd_plot(filter(high_dim, variable >= 50, variable <= 100), "variables 50 to 100")
+```
+
+## Lasso: cool or extremely cool? {.inverse}
+
+::: {.notes}
+Compress: p > n and least squares cannot be fitted; the truth is sparse; ridge is dense; the lasso's nonzero set largely coincides with the truth.
+:::
+
+- High-dimensional: $p > n$ means we can't fit OLS
+
+But all is not lost! Penalized regression to the rescue
+
+- True model is sparse
+
+Only `r n_true` of `r p_h` variables have nonzero coefficients
+
+- Ridge estimates are dense
+
+All coefficients nonzero 😰
+
+- Lasso estimates are sparse
+
+`r n_lasso` nonzero estimates: `r n_hit` of the `r n_true` true ones, and `r n_false` false positives, most of them small 😎
+
+## Selection is unstable, prediction is not
+
+::: {.notes}
+New slide. The lasso on eight resamples of the training tracks, each with its own cross-validated lambda: which inputs it keeps changes from resample to resample, while the eight fits score within a few points of each other on the selection tracks. Correlated inputs (energy and loudness) take turns. Prediction tolerates this; a claim that "these are the inputs that matter" does not.
+:::
+
+```{r}
+#| label: lasso-stability
+#| fig-height: 3.4
+#| fig-width: 12.5
+stab <- map_dfr(1:8, function(b) {
+  d <- slice_sample(sp_train, n = nrow(sp_train), replace = TRUE)
+  mu <- colMeans(sp_X(d)); s <- apply(sp_X(d), 2, sd)
+  cvb <- cv.glmnet(scale(sp_X(d), mu, s), d$track_popularity, standardize = FALSE)
+  bb <- coef(cvb, s = "lambda.1se")[-1]
+  pred <- predict(cvb, scale(sp_X(sp_sel), mu, s), s = "lambda.1se")
+  tibble(resample = b, variable = sub("^genre", "genre: ", colnames(sp_X(d))), selected = bb != 0,
+         sel_mse = mse(y_se, pred), sel_se = se_loss(y_se, pred))
+})
+stab_sum <- stab |> distinct(resample, sel_mse, sel_se)
+p_stab <- ggplot(stab, aes(factor(resample), fct_rev(variable), fill = selected)) + geom_tile(colour = "white") +
+  scale_fill_manual(values = c(`FALSE` = "grey90", `TRUE` = v_teal), guide = "none") +
+  labs(x = "resample of the 5,000 training tracks", y = NULL, title = "which inputs the lasso keeps (one-SE rule)") +
+  theme(axis.text.y = element_text(size = 10), plot.title = element_text(size = 14))
+p_stab_mse <- ggplot(stab_sum, aes(factor(resample), sel_mse)) +
+  geom_errorbar(aes(ymin = sel_mse - sel_se, ymax = sel_mse + sel_se), width = 0.3, colour = "grey55") +
+  geom_point(size = 3, colour = v_blue) +
+  labs(x = "resample", y = "selection MSE", title = "the eight fits' scores", caption = "bars: one SE") + theme(plot.title = element_text(size = 14))
+p_stab + p_stab_mse + plot_layout(widths = c(3, 1.4))
+```
+
+Eight resamples of the training tracks, the lasso's $\lambda$ chosen by cross-validation on each. The set of kept inputs changes from one resample to the next; the fits' scores barely do. The same instability as a tree's cutoffs: a **prediction** survives it, a list of **the inputs that matter** does not
+
+## A fixed $\lambda$ is not a chosen $\lambda$
+
+::: {.notes}
+Legacy slide's "important note", with the structures seminar's problem 1 behind it. Theory about the lasso at a fixed lambda (the rate on the structure slide, the orthogonal-design formula) is about one estimator; the estimator you use has lambda chosen on the data, by a minimum over a curve, and its score on those data is biased low. Two minutes; cut second.
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+$\hat\beta_{\text{lasso}}(\lambda)$ at a fixed $\lambda$
+:::
+::: {.column width="50%"}
+$\hat\beta_{\text{lasso}}(\hat\lambda)$ at a data-chosen $\hat\lambda$
+:::
+:::
+
+Different in general! Theoretical results about the first (the rate, the orthogonal-design formula) may not apply to the second
+
+::: {.retrieval}
+Choosing on a dataset is empirical risk minimization over a finite class: the winner's score on the rows it was chosen on is biased low (two equal candidates with scores $r \pm 1$: the winner's is $r - \tfrac12$ on average). The CV curve's minimum is such a winner, over `r length(cv_fit$lambda)` candidates.
+:::
+
+So: choose $\lambda$ on the CV curve, report a score from rows the choice never touched (the vault), and read the kept inputs as a prediction's parts, not as a discovery
+
+## {.inverse .center}
+
+::: {.notes}
+Compress: the same idea on a curve: a large basis, a penalty on wiggliness, lambda by cross-validation; it is ridge with weights.
+:::
+
+### Part 4: a penalty on wiggliness
+
+## A penalty on wiggliness
+
+::: {.notes}
+The structures lecture's spline had J as its knob. Take a large J as a ceiling and penalize the integral of f double prime squared: lambda zero gives the J-basis fit, lambda to infinity forces a straight line, and cross-validation (GCV, mgcv's default) chooses in between. Figure: the Spotify release year; the J = 4 fit, the penalized fit, and lambda = 0 at J = 20.
+:::
+
+The spline of the structures lecture: $f(x) = \beta_0 + \sum_{j=1}^J \beta_j b_j(x)$, $J$ the knob. Instead: take a large $J$ as a ceiling, and penalize **wiggliness**
+
+::: {.columns}
+::: {.column width="48%"}
+$$
+\min_f\; \textstyle\sum_{i=1}^n \big(y_i - f(x_i)\big)^2 + \lambda\int f''(x)^2\,dx
+$$
+$\lambda = 0$: the $J$-basis fit. $\lambda \to \infty$: $f'' = 0$, a straight line. In between: $\lambda$ chosen by cross-validation
+:::
+::: {.column width="52%"}
+```{r}
+#| label: gam-year
+#| fig-width: 6.2
+#| fig-height: 3.5
+#| out-width: "100%"
+# The three fits on the release year: the J = 4 natural spline, mgcv's penalized fit (lambda by GCV), and
+# the same 20-function basis with no penalty.
+g_pen <- gam(track_popularity ~ s(release_year, k = 20, bs = "cr"), data = sp_train)
+g_zero <- gam(track_popularity ~ s(release_year, k = 20, bs = "cr"), data = sp_train, sp = 0)
+l_four <- lm(track_popularity ~ ns(release_year, 4), sp_train)
+yr_grid <- tibble(release_year = seq(min(sp_train$release_year), max(sp_train$release_year), length.out = 300))
+fits_yr <- bind_rows(
+  tibble(yr_grid, fit = predict(l_four, yr_grid), method = "J = 4, no penalty"),
+  tibble(yr_grid, fit = as.vector(predict(g_zero, yr_grid)), method = "J = 20, no penalty"),
+  tibble(yr_grid, fit = as.vector(predict(g_pen, yr_grid)), method = "J = 20, penalized, lambda by CV")) |>
+  mutate(method = fct_inorder(method))
+ggplot(sp_train, aes(release_year, track_popularity)) +
+  geom_point(alpha = 0.08, size = 0.6, colour = "grey50") +
+  geom_line(data = fits_yr, aes(y = fit, colour = method), linewidth = 1.3) +
+  scale_colour_manual(values = c("grey35", m_orange, v_dark), name = NULL) +
+  coord_cartesian(ylim = c(10, 75)) +
+  labs(x = "release year", y = "popularity") +
+  theme(legend.position = c(0.3, 0.14), legend.text = element_text(size = 11), legend.background = element_rect(fill = "white", colour = NA))
+```
+:::
+:::
+
+```{r}
+#| label: gam-code
+#| echo: true
+#| eval: false
+library(mgcv)
+gam(track_popularity ~ s(release_year, k = 20, bs = "cr"), sp_train)
+```
+
+## It is ridge, with weights
+
+::: {.notes}
+Stated, no matrix. In the right basis the penalty acts coefficient by coefficient: coefficient j shrunk by one over 1 + lambda w_j, where w_j measures how wiggly the j-th basis function is; the straight line has w = 0 and is never shrunk. That is the orthogonal-design ridge formula with a weight. Left: four of the basis functions in that basis, from the straight line to the wiggliest; right: the shrinkage factors at the chosen lambda, 1 for the line, near 0 for the wiggles. The general form, with a penalty matrix, is in the speaker note of the complete notebook's optional item.
+:::
+
+```{r}
+#| label: gam-weights
+#| fig-height: 3.4
+#| fig-width: 12
+# The basis mgcv fitted, and the penalty it applied: in the basis that diagonalizes both, each coefficient
+# is shrunk by 1 / (1 + lambda w_j). B: the smooth's columns; S: its penalty matrix; lambda: the chosen sp.
+B <- model.matrix(g_pen)[, -1]; S <- g_pen$smooth[[1]]$S[[1]]; lam_g <- g_pen$sp[[1]]
+M <- crossprod(B); Mh <- with(eigen(M, symmetric = TRUE), vectors %*% diag(1 / sqrt(values)) %*% t(vectors))
+eg <- eigen(Mh %*% S %*% Mh, symmetric = TRUE)
+w <- rev(pmax(eg$values, 0)); U <- eg$vectors[, rev(seq_along(eg$values))]     # smoothest first
+shrink <- 1 / (1 + lam_g * w)
+grid_B <- predict(g_pen, yr_grid, type = "lpmatrix")[, -1]
+funs <- grid_B %*% (Mh %*% U)                                                  # the basis in which the penalty is diagonal
+pick <- c(1, 2, 4, ncol(funs))
+fun_df <- map_dfr(pick, function(j) { f <- funs[, j] / max(abs(funs[, j])); tibble(j = j, release_year = yr_grid$release_year, f = f) }) |>
+  mutate(j = factor(j, levels = pick, labels = paste0("j = ", pick, ": kept ", round(100 * shrink[pick]), "%")))
+p_funs <- ggplot(fun_df, aes(release_year, f, colour = j)) + geom_line(linewidth = 1.1) +
+  scale_colour_viridis_d(end = 0.9, name = NULL) + labs(x = "release year", y = NULL, title = "four of the basis functions, smoothest first") +
+  guides(colour = guide_legend(nrow = 2)) +
+  theme(legend.position = "top", legend.text = element_text(size = 11), plot.title = element_text(size = 14), axis.text.y = element_blank())
+p_shrink <- ggplot(tibble(j = seq_along(shrink), factor = shrink), aes(j, factor)) + geom_col(fill = v_blue, width = 0.7) +
+  labs(x = "basis function j, smoothest first", y = "fraction kept", title = expression(paste("1 / (1 + ", lambda, " ", w[j], ") at the chosen ", lambda))) +
+  theme(plot.title = element_text(size = 14))
+p_funs + p_shrink
+```
+
+In the right basis the penalty acts coefficient by coefficient: coefficient $j$ is shrunk by $1/(1 + \lambda w_j)$, $w_j$ the wiggliness of basis function $j$. The straight line ($w = 0$) is never shrunk; the wiggles nearly vanish. Ridge's formula, with a weight
+
+## {.inverse .center}
+
+::: {.notes}
+Compress: with more inputs than observations least squares has infinitely many perfect fits; a penalty picks one, and what happens past p = n is not what the U-curve says.
+:::
+
+### Part 5: more inputs than observations
+
+## What changes when $p > n$ {minutes="3"}
+
+::: {.notes}
+Three minutes. More unknowns than equations: every beta with X beta = y has training error zero, a whole flat set of them, and lm prints NA. Ridge is defined for every positive lambda and its limit as lambda goes to zero is one particular zero-error fit, the one with the smallest norm; it is also where gradient descent from zero stops (week 4, stated). The push-through identity that proves the limit is in the note for the curious: (X'X + lambda I)^{-1} X' = X' (X X' + lambda I)^{-1}.
+:::
+
+::: {.columns}
+::: {.column width="56%"}
+$\mathbf X$ is $n \times p$, $p > n$, full row rank. Every $\beta$ with $\mathbf X\beta = \mathbf y$ solves the normal equations: infinitely many fits, **training error zero** for all of them. `lm` prints `NA`
+
+Ridge is defined for every $\lambda > 0$, and
+$$
+\hat\beta_\lambda \;\longrightarrow\; \hat\beta_{\min} = \mathbf X^T(\mathbf X\mathbf X^T)^{-1}\mathbf y \quad \text{as } \lambda \to 0^+
+$$
+the **minimum-norm interpolant**: of all the zero-error fits, the one with the smallest $\|\beta\|$
+
+Gradient descent on least squares, started at $\beta = \mathbf 0$, stops at the same point (stated)
+:::
+::: {.column width="44%"}
+```{r}
+#| label: minnorm-picture
+#| fig-width: 5.2
+#| fig-height: 4.0
+#| out-width: "100%"
+# One equation, two unknowns: x1 b1 + x2 b2 = y is a line of zero-error fits; the minimum-norm one is the
+# point of the line nearest the origin; ridge's path from large lambda approaches it.
+x_eq <- c(2, 1); y_eq <- 2
+line_df <- tibble(b1 = seq(-0.5, 1.6, length.out = 100)) |> mutate(b2 = (y_eq - x_eq[1] * b1) / x_eq[2])
+b_min <- x_eq * y_eq / sum(x_eq^2)
+rp <- map_dfr(10^seq(1.5, -3, length.out = 80), function(l) {
+  b <- solve(crossprod(t(x_eq)) + l * diag(2), x_eq * y_eq); tibble(lambda = l, b1 = b[1], b2 = b[2]) })
+ggplot() + geom_line(data = line_df, aes(b1, b2), colour = "grey40", linewidth = 1.1) +
+  geom_path(data = rp, aes(b1, b2), colour = v_blue, linewidth = 1.3, arrow = arrow(length = unit(0.14, "inches"))) +
+  annotate("point", x = b_min[1], y = b_min[2], colour = m_orange, size = 4) +
+  annotate("point", x = 0, y = 0, shape = 4, size = 4, stroke = 1.5) +
+  annotate("text", x = 1.0, y = 1.45, label = "every point on this line\nfits the data exactly", size = 4.2, colour = "grey30", hjust = 0) +
+  annotate("text", x = b_min[1] + 0.1, y = b_min[2] + 0.12, label = "smallest norm", colour = m_orange, size = 4.5, hjust = 0) +
+  annotate("text", x = -0.3, y = -0.35, label = expression(paste("ridge path, ", lambda, " falling")), colour = v_blue, size = 4.2, hjust = 0) +
+  coord_equal(xlim = c(-0.5, 2.1), ylim = c(-0.5, 1.8)) + labs(x = expression(beta[1]), y = expression(beta[2]),
+  title = "one observation, two coefficients") + theme(plot.title = element_text(size = 14))
+```
+:::
+:::
+
+## Which zero-error fit?
+
+::: {.notes}
+ISLR's picture: 20 points, one input, natural splines with J = 8, 20, 42 and 80 basis functions, the fit with the smallest coefficient norm once J exceeds n. At J = 20 the curve passes through every point and swings wildly between them; at 42 and 80 it still passes through every point and is calmer. Zero training error does not say which of the zero-error fits you have; the choice of rule (minimum norm here) is an inductive bias, and it is doing the regularizing.
+:::
+
+```{r}
+#| label: interpolants
+#| fig-height: 3.4
+#| fig-width: 12.5
+f_dd <- function(x) sin(2 * pi * x) + 0.5 * x
+n_dd <- 20; sd_dd <- 0.4
+dd <- tibble(x = sort(runif(n_dd)), y = f_dd(x) + rnorm(n_dd, sd = sd_dd))
+x_grid <- seq(min(dd$x), max(dd$x), length.out = 400)   # inside the range of the training inputs
+# Natural-spline basis with J functions (intercept included): the least-squares fit for J <= n and the
+# minimum-norm interpolant for J > n, both from the pseudo-inverse.
+ns_fit <- function(J, d, newx) {
+  Bb <- ns(d$x, df = J, intercept = TRUE); Bn <- predict(Bb, newx)
+  as.vector(Bn %*% (MASS::ginv(Bb) %*% d$y))
+}
+interp <- map_dfr(c(8, 20, 42, 80), function(J) { f <- ns_fit(J, dd, x_grid); tibble(J = J, x = x_grid, fit = f) }) |>
+  mutate(J = factor(J, labels = c("J = 8", "J = 20 = n: interpolates", "J = 42, smallest norm", "J = 80, smallest norm")))
+ggplot(dd, aes(x, y)) + geom_line(data = interp, aes(y = fit), colour = v_blue, linewidth = 1.1) +
+  geom_point(colour = v_dark, size = 2) + stat_function(fun = f_dd, colour = "grey50", linetype = 2) +
+  facet_wrap(~ J, nrow = 1) + coord_cartesian(ylim = c(-3, 3.5)) + scale_x_continuous(breaks = c(0, 0.5, 1)) +
+  theme(strip.text = element_text(size = 13)) + labs(x = NULL, y = NULL)
+```
+
+$n = 20$ points, a natural-spline basis with $J$ functions: least squares up to $J = n$, the smallest-norm zero-error fit beyond. At $J = 20$ the curve passes through every point and swings between them; at $J = 80$ it still passes through every point, and is calmer. **Zero training error does not say which zero-error fit you have.** The rule that picks one (smallest norm) is an *inductive bias*, and it is doing the regularizing
+
+## Double descent, demonstrated {minutes="3"}
+
+::: {.notes}
+Three minutes. Test MSE against J for the setup of the last slide, averaged over fifty draws of the twenty training points: the U-curve up to J = n, a spike at the interpolation threshold, then a second descent. The dashed curve: the same basis with a ridge penalty, lambda chosen by cross-validation, which never interpolates and shows no spike. Demonstrated, not proved; the name is from Belkin and co-authors, 2019.
+:::
+
+```{r}
+#| label: double-descent
+#| fig-height: 3.2
+#| fig-width: 12
+#| out-width: "100%"
+Js <- c(2:19, 20:30, seq(32, 60, by = 4), seq(70, 120, by = 10))
+ridge_fit_ns <- function(J, d, newx) {       # the same basis with a ridge penalty, lambda chosen by 5-fold CV
+  Bb <- ns(d$x, df = J, intercept = TRUE); Bn <- predict(Bb, newx)
+  cvr <- cv.glmnet(Bb, d$y, alpha = 0, intercept = FALSE, standardize = FALSE, nfolds = 5)
+  as.vector(predict(cvr, Bn, s = "lambda.min"))
+}
+dd_curve <- map_dfr(1:50, function(rep) {
+  d <- tibble(x = sort(runif(n_dd)), y = f_dd(x) + rnorm(n_dd, sd = sd_dd))
+  x_test <- runif(2000, min(d$x), max(d$x))   # test inputs inside the range of the training inputs
+  y_test <- f_dd(x_test) + rnorm(2000, sd = sd_dd)
+  map_dfr(Js, function(J) {
+    m_min <- mse(y_test, ns_fit(J, d, x_test))
+    m_ridge <- if (J %in% c(5, 10, 15, 20, 25, 30, 40, 60, 100)) mse(y_test, ridge_fit_ns(J, d, x_test)) else NA
+    tibble(rep = rep, J = J, `smallest norm` = m_min, `ridge, lambda by CV` = m_ridge)
+  })
+}) |> pivot_longer(c(`smallest norm`, `ridge, lambda by CV`), names_to = "rule", values_to = "test_mse") |>
+  group_by(J, rule) |> summarize(test_mse = mean(test_mse, na.rm = TRUE), .groups = "drop") |> filter(is.finite(test_mse))
+ggplot(dd_curve, aes(J, test_mse, colour = rule, linetype = rule)) +
+  geom_vline(xintercept = n_dd, linetype = 3, colour = "grey50") +
+  annotate("text", x = n_dd * 1.08, y = 3, label = "J = n", colour = "grey40", size = 4.5, hjust = 0) +
+  geom_hline(yintercept = sd_dd^2, linetype = 2, colour = "grey60") +
+  geom_line(linewidth = 1.2) + geom_point(size = 1.6) +
+  scale_x_log10() + scale_y_log10() +
+  scale_colour_manual(values = c(`smallest norm` = v_dark, `ridge, lambda by CV` = m_orange), name = NULL) +
+  scale_linetype_manual(values = c(`smallest norm` = 1, `ridge, lambda by CV` = 2), name = NULL) +
+  labs(x = "J, number of basis functions (log scale)", y = "test MSE (log scale)") +
+  theme(legend.position = "top", legend.text = element_text(size = 12))
+```
+
+Test MSE against $J$ (test inputs inside the training range), averaged over 50 draws of the 20 points. Least squares then smallest norm: the U-curve up to $J = n$, a spike at the interpolation threshold, a **second descent** beyond it. The same basis with a ridge penalty chosen by cross-validation never interpolates and has no spike. Dashed: the noise variance
+
+## What this does and does not change
+
+::: {.notes}
+Two minutes; cut fourth. The decomposition is an identity and still holds. What fails is the folk version, "more parameters, more variance", read as a monotone function of the parameter count: it is right for one way of fitting tuned by lambda, and wrong for the smallest-norm rule, whose variance spikes at J = n for the classical reason (the design is nearly singular there) and then falls because the rule itself changes with J. With lambda chosen by CV there is no spike. Four dimensions, not one: the parameter count is not the knob; how the fit is chosen is.
+:::
+
+**Does not change.** The bias--variance decomposition is an identity; it holds on every point of both curves. Training error zero still says nothing about the risk (optimism theorem)
+
+**Changes.** The folk version, "more parameters, more variance", read as a function of the parameter count alone. It is right for one way of fitting with $\lambda$ chosen by cross-validation. It is wrong for a rule that interpolates: the variance of the smallest-norm fit spikes at $J = n$, where the design is nearly singular (the reason ridge was invented), and falls past it, because the rule itself changes with $J$
+
+::: {.retrieval}
+Four dimensions, not one: a family was a bet on the shape of $f^\star$, and no single scale ran from simple to complex. The parameter count is not the knob either. How the fit is chosen is.
+:::
+
+## Does statistics apply to deep learning? {.inverse}
+
+::: {.notes}
+Skip if behind. The figure that gave the phenomenon its name (Belkin, Hsu, Ma and Mandal 2019); the networks that train to zero loss live on the right of it. Anna Karenina: all truly optimal models are alike; each overfit model is overfit in its own way. Later in the course, with learned representations.
+:::
+
+The bias--variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data... or does it?
+
+![](img/doubledescent.jpg){width="70%" fig-align="center"}
+
+Belkin, Hsu, Ma and Mandal (2019). Does zero training error *necessarily* mean the model is overfit? **No.** Anna Karenina principle: all truly optimal models are alike; each overfit model is overfit in its own way
+
+Which zero-error fit, and chosen how: later in the course, where the representation is learned too
+
+## Before the seminar
+
+::: {.notes}
+Say it once: exercise 1 is the stated ridge form, exercise 2 the rate with the slides closed; the seminar's problems vary soft thresholding, the distance lemma in one dimension and the weighted-ridge form of the penalty. Then a CV pipeline on the tracks, a learning-curve figure read against the rate, and two ways CV goes wrong once it has worked.
+:::
+
+- This week: exercises 1 and 2 at the top of the notebook. The ridge form of the bias--variance decomposition, proved in the orthogonal design with numbered hints; and the $k$-NN rate again, with the slides closed
+
+- In the seminar: a cross-validation pipeline on the Spotify tracks, written as one function and run for $k$-NN and the lasso; a learning-curve figure to read against the rate; and then, after it has worked, two ways cross-validation goes wrong
+
+## Conclusion: the knob, its price, and two penalties {.inverse}
+
+::: {.notes}
+Compress: cross-validation chooses the knob and the CV score is not the number to report; the rate prices flexibility in n and d, and structure buys a better rate only when it holds; ridge divides, the lasso subtracts, and the smoothing penalty is ridge with weights; past p = n the rule that picks the fit is the regularizer.
+:::
+
+#### Cross-validation chooses the knob
+
+Every row fitted on and scored on, in turn. The curve's minimum is a chosen number: report a score from the vault
+
+#### Flexibility has a price in $n$ and $d$
+
+$n^{-2/(d+2)}$ for a merely smooth $f^\star$; structure buys a better rate, when the structure is true
+
+#### Ridge divides, the lasso subtracts
+
+Bias on purpose beats least squares for every $\beta$; the lasso's zeros are exact. A penalty on wiggliness is ridge with weights. Past $p = n$, the rule that picks the fit is the regularizer
