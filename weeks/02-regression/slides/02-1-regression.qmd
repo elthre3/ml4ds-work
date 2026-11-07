@@ -379,7 +379,7 @@ $$f^\star = \arg \min_g \mathbb E_{X,Y} \{ [ Y - g(X) ]^2 \}$$
 
 Other examples also fit into this broad framework
 
-For a given **loss function** $\ell(y, \hat y)$ (squared error in the common task framework), find the optimal "regression" function $f^\star$ that minimizes the **risk**, i.e.
+For a given **loss function** $\ell(y, \hat y)$, find the optimal "regression" function $f^\star$ that minimizes the **risk**, i.e.
 
 $$
 R(f) = \mathbb E_{X,Y}\big[\ell(Y, f(X))\big], \qquad f^\star = \arg \min_f R(f)
@@ -402,7 +402,7 @@ Empirical Risk Minimization (ERM)
 
 Algorithms can leverage LLN, CLT, subsampling, etc...
 
-## Risk, training error, test error {minutes="1"}
+## Three errors, three names {minutes="1"}
 
 ::: {.notes}
 One minute: the three names. Plug-in = minimize R-hat. Optimism is week 5, not here.
@@ -414,7 +414,7 @@ $$R(f) = \mathbb E\,\ell(Y, f(X))$$
 **Training error** (empirical risk), the same average over the data we fit on:
 $$\hat R_n(f) = \tfrac{1}{n}\textstyle\sum_{i=1}^n \ell(y_i, f(x_i))$$
 
-**Test error**, the leaderboard in the common task framework, over held-out data:
+**Test error**, the number on the leaderboard, over held-out data:
 $$\widehat{\text{Err}} = \tfrac{1}{m}\textstyle\sum_{j=1}^m \ell(y_j^{\text{test}}, \hat f(x_j^{\text{test}}))$$
 
 ## Optimal model theorem {minutes="4"}

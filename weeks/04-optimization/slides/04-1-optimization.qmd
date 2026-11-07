@@ -80,7 +80,7 @@ contour_plot <- function(path, title = NULL, axis_titles = TRUE) {
 ::: {.notes}
 36 light slides and 8 dark after the title: about 81 at week 2's rough pace (2 min a light slide, 1 a dark), so plan 78 of 90 with cut 1 made from the start; a planning estimate, not a rehearsed time. Dark = rush or skip; each dark slide's note says skip or gives the compressed phrase.
 
-Cut order: (1) ImageNet, (2) the GLM FAQ to its last question, (3) Newton-IRLS to its one line, (4) "Reading the gradient" to its ask. The two paths figure and the descent lemma's proof are last; the three substantial pauses (the normal equations, the step-200 diagnosis, the stopping point) are not cut.
+Cut order: (1) ImageNet, (2) the GLM FAQ to its last question, (3) Newton-IRLS to one line: each iteration is a weighted least-squares fit, (4) "Reading the gradient" to its ask. The two paths figure and the descent lemma's proof are last; the three substantial pauses (the normal equations, the step-200 diagnosis, the stopping point) are not cut.
 
 Pace: the first line of every note is a progress bar, the share of the deck's estimated minutes done before that slide, computed when the deck is rendered. Estimates on the spine's timing scale: 2 min a content slide, 3 a derivation or a slide with a substantial pause ({minutes="3"} on its heading), 1 a dark slide.
 
@@ -183,7 +183,7 @@ Same shape as least squares, with $\mathbf X\hat\beta$ replaced by the fitted pr
 
 No closed form, because $\mathbf p(\beta)$ is not linear in $\beta$
 
-## The score equations: intercept and concavity {minutes="3"}
+## Two things the score equations say {minutes="3"}
 
 ::: {.notes}
 Row one needs an intercept, no penalty, a finite solution. Concavity is a claim here; the Hessian is minus a positive-weighted sum of outer products, which is negative semidefinite; uniqueness needs full column rank; existence is the separable case from week 3. Exercise 3 computes the Hessian.
@@ -517,7 +517,7 @@ pa + pb + plot_layout(widths = c(1.3, 1))
 The saddle: compute the gradient at $(0, 0)$; is it a minimum? One of the three starts is $(0, 1.2)$: where does its path end, and why does it never leave?
 :::
 
-Where you start decides where you end. Least squares and logistic regression have one valley (convex); most of what comes later in the course does not
+Where you start decides where you end. Least squares and logistic regression have one valley (convex); a neural network, later in the course, does not
 
 ## Too big, too small
 
@@ -998,7 +998,7 @@ Stated (Shalev-Shwartz and Ben-David, Theorem 5.1, in expectation form); the fin
 *Does not say*: all methods are equally good
 
 ::: {.ask}
-In the common task framework, a line and $k$ nearest neighbors often scored within a standard error of each other on gapminder. A fact about the methods, or about the data?
+In the gapminder competition, a line and $k$ nearest neighbors often scored within a standard error of each other. A fact about the methods, or about the data?
 :::
 
 ## Conclusion: optimization in ML is a big topic {.inverse}

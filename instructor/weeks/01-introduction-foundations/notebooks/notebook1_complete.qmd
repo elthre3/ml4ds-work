@@ -81,7 +81,7 @@ Hint 2: $\varepsilon_0$ is independent of the training noise, so of $\hat f_k(x_
 $$
 \mathbb E[Z^2] = \big[f^\star(x_0) - \mathbb E\hat f_k(x_0)\big]^2 + \mathrm{Var}\big(\hat f_k(x_0)\big).
 $$
-Hint 4: with the inputs fixed, the $k$ nearest training points are the same $k$ points whatever the noise turns out to be. So $\hat f_k(x_0) = \frac1k\sum_l \big[f^\star(x_{(l)}) + \varepsilon_{(l)}\big]$ is a fixed number plus an average of $k$ independent noise terms: its mean is $\frac1k\sum_l f^\star(x_{(l)})$ and its variance is $\frac{1}{k^2}\cdot k\sigma^2 = \sigma^2/k$. Substitute.
+Hint 4: **with the inputs fixed, the $k$ nearest training points are the same $k$ points whatever the noise turns out to be**. So $\hat f_k(x_0) = \frac1k\sum_l \big[f^\star(x_{(l)}) + \varepsilon_{(l)}\big]$ is a fixed number plus an average of $k$ independent noise terms: its mean is $\frac1k\sum_l f^\star(x_{(l)})$ and its variance is $\frac{1}{k^2}\cdot k\sigma^2 = \sigma^2/k$. Substitute.
 
 Independence is used twice: between $\varepsilon_0$ and the training noise (the cross term vanishes), and among the neighbors' noise terms (the variance of their average is $\sigma^2/k$). Problems 3(b) and 2(b) show what happens when each one fails.
 
@@ -117,7 +117,7 @@ For (c): "some distance falls outside the range" is a union of $n - 1$ events. H
 
 (b) Chebyshev, with the mean and variance from (a).
 
-(c) Let $W_i$ be $W$ computed from the query and point $i$. The query and point $i$ are two independent $N(0, I_d)$ vectors, so (b) holds for each $W_i$. The probability of a union is at most the sum of the probabilities, whether or not the events are independent:
+(c) Let $W_i$ be $W$ computed from the query and point $i$. The query and point $i$ are two independent $N(0, I_d)$ vectors, so (b) holds for each $W_i$. **The probability of a union is at most the sum of the probabilities, whether or not the events are independent**:
 $$
 \Pr\big(\text{some } |W_i - 1| > \varepsilon\big) \le \sum_{i=1}^{n-1} \Pr\big(|W_i - 1| > \varepsilon\big) \le \frac{2(n-1)}{d\varepsilon^2}.
 $$
