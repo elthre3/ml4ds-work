@@ -54,7 +54,7 @@ Given $X = x$, $Y$ is $1$ with probability $p(x)$. If you predict $1$, when is t
 :::
 
 ::: {.callout-note collapse="true" title="Hint 3"}
-(c) Condition on $X$ first (the tower property), as in week 2's exercise 1. What do you know about the inner expectation, at every $x$?
+(c) Condition on $X$ first (the tower property), as in the proof of the optimal model theorem. What do you know about the inner expectation, at every $x$?
 :::
 
 **Exercise 2 (confounding gap).** The lecture's DAG made linear. $Z$, $\varepsilon_T$ and $\varepsilon_Y$ are independent and normal (so that conditioning on $T = 0$ and on $T = 1$ makes sense), $\varepsilon_T$ and $\varepsilon_Y$ have mean $0$, $\mathrm{Var}(T) > 0$, and
@@ -70,7 +70,7 @@ $$
 $$
 Where did you use independence?
 
-(c) Show that the population slope of the least-squares line of $Y$ on $T$ alone, $\mathrm{Cov}(T, Y)/\mathrm{Var}(T)$, is $\tau + \beta\,\delta$ with $\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T)$. Which quantity in week 2's omitted-variable bias plays the role of $\delta$?
+(c) Show that the population slope of the least-squares line of $Y$ on $T$ alone, $\mathrm{Cov}(T, Y)/\mathrm{Var}(T)$, is $\tau + \beta\,\delta$ with $\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T)$. Which quantity in the omitted-variable bias formula plays the role of $\delta$?
 
 (d) When is the gap zero?
 
@@ -214,7 +214,7 @@ stopifnot(inherits(fit_bill, "glm"), length(coef(fit_bill)) == 3,
           all(fitted(fit_bill) >= 0 & fitted(fit_bill) <= 1))
 ```
 
-You may have seen a warning that fitted probabilities are numerically 0 or 1: the two species are nearly separable on these two measurements (step 3 counts the errors). This is the lecture's "Challenges" slide in real life; next week says what it does to the fitting.
+You may have seen a warning that fitted probabilities are numerically 0 or 1: the two species are nearly separable on these two measurements (step 3 counts the errors). This is the lecture's "Challenges" slide in real life; what it does to the fitting comes later in the course.
 
 **Question 1.** Read the exponentiated coefficient on `bill_length_mm`. What happens to the odds of Chinstrap when bill length increases by one millimeter and bill depth is held fixed? Is that the change in the probability? Is it what would happen to a bird whose bill grew by a millimeter?
 
@@ -349,7 +349,7 @@ worlds <- bind_rows(simulate_world("A"), simulate_world("B"), simulate_world("C"
 
 **Question 4.** Before you intervene: for each world, write down what you expect to happen to the average of $Y$ when $X$ is set to $X + 1$ for every unit. Use each world's equations, and exercise 2 for world D.
 
-**Step 2.** Now intervene: set $X$ to $X + 1$ for every unit and recompute $Y$ **with the same noise**, following each world's equations. Write the four `Y_do` lines and compute the average change in $Y$ in each world.
+**Step 2.** Now intervene: set $X$ to $X + 1$ for every unit and recompute $Y$ *with the same noise*, following each world's equations. Write the four `Y_do` lines and compute the average change in $Y$ in each world.
 
 Note: recomputing each unit's $Y$ with its own noise is different from the intervention calculations in the lecture, which use only the distribution of the noise. We will learn more about it later in the course. Here it makes the average change exact, with no simulation noise.
 
@@ -426,7 +426,7 @@ c(treated = sum(d_e$w[d_e$X == 1]), untreated = sum(d_e$w[d_e$X == 0])) / nrow(d
 
 ### Optional, can be done at home: another dataset
 
-**Attrition** (`modeldata::attrition`; **fictional**, made up by IBM data scientists, used only as an exercise): whether an employee leaves (`Attrition`), with a threshold-and-costs story (a missed leaver costs a replacement, a false alarm costs a conversation). Leavers are 16 percent, so the accuracy-against-cost point is sharper: at threshold $\tfrac12$ almost nobody is predicted to leave.
+**Attrition** (`modeldata::attrition`; *fictional*, made up by IBM data scientists, used only as an exercise): whether an employee leaves (`Attrition`), with a threshold-and-costs story (a missed leaver costs a replacement, a false alarm costs a conversation). Leavers are 16 percent, so accuracy and cost disagree more: at threshold $\tfrac12$ almost nobody is predicted to leave.
 
 ```{r}
 #| eval: false

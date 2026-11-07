@@ -1,6 +1,6 @@
 ## Week 4: optimization and model fitting
 
-How a model actually gets fitted. Logistic regression first: maximum likelihood, the score equations read as week 2's orthogonality, and why there is no closed form. Then the method that fits almost everything else: gradient descent, step sizes and the descent lemma, and its stochastic version, whose random steps are unbiased for the full gradient. Empirical risk minimization as the common form of every method so far, the bias--variance decomposition in that form, why no method is best on every problem, and early stopping as a first kind of regularization.
+How a model actually gets fitted. Logistic regression first: maximum likelihood, the score equations read as orthogonality, like the normal equations, and why there is no closed form. Then the method that fits almost everything else: gradient descent, step sizes and the descent lemma, and its stochastic version, whose random steps are unbiased for the full gradient. Empirical risk minimization as the common form of every method so far, the bias--variance decomposition in that form, why no method is best on every problem, and early stopping as a first kind of regularization.
 
 **Reading**
 

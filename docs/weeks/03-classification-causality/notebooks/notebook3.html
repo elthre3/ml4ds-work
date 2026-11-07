@@ -331,7 +331,7 @@ Note
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol start="3" type="a">
-<li>Condition on <span class="math inline">\(X\)</span> first (the tower property), as in week 2’s exercise 1. What do you know about the inner expectation, at every <span class="math inline">\(x\)</span>?</li>
+<li>Condition on <span class="math inline">\(X\)</span> first (the tower property), as in the proof of the optimal model theorem. What do you know about the inner expectation, at every <span class="math inline">\(x\)</span>?</li>
 </ol>
 </div>
 </div>
@@ -344,7 +344,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 <li><p>As observed, show that <span class="math inline">\(\mathbb E[Y \mid T = t] = \tau t + \beta\, \mathbb E[Z \mid T = t]\)</span>, and hence <span class="math display">\[
 \mathbb E[Y \mid T = 1] - \mathbb E[Y \mid T = 0] = \tau + \beta\,\big(\mathbb E[Z \mid T = 1] - \mathbb E[Z \mid T = 0]\big).
 \]</span> Where did you use independence?</p></li>
-<li><p>Show that the population slope of the least-squares line of <span class="math inline">\(Y\)</span> on <span class="math inline">\(T\)</span> alone, <span class="math inline">\(\mathrm{Cov}(T, Y)/\mathrm{Var}(T)\)</span>, is <span class="math inline">\(\tau + \beta\,\delta\)</span> with <span class="math inline">\(\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T)\)</span>. Which quantity in week 2’s omitted-variable bias plays the role of <span class="math inline">\(\delta\)</span>?</p></li>
+<li><p>Show that the population slope of the least-squares line of <span class="math inline">\(Y\)</span> on <span class="math inline">\(T\)</span> alone, <span class="math inline">\(\mathrm{Cov}(T, Y)/\mathrm{Var}(T)\)</span>, is <span class="math inline">\(\tau + \beta\,\delta\)</span> with <span class="math inline">\(\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T)\)</span>. Which quantity in the omitted-variable bias formula plays the role of <span class="math inline">\(\delta\)</span>?</p></li>
 <li><p>When is the gap zero?</p></li>
 </ol>
 <div class="callout callout-style-default callout-note callout-titled" title="Hint 1">
@@ -593,7 +593,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notebook3_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="1050"></p>
+<p><img src="notebook3_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="1050"></p>
 </figure>
 </div>
 </div>
@@ -612,7 +612,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">inherits</span>(fit_bill, <span class="st">"glm"</span>), <span class="fu">length</span>(<span class="fu">coef</span>(fit_bill)) <span class="sc">==</span> <span class="dv">3</span>,</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">all</span>(<span class="fu">fitted</span>(fit_bill) <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> <span class="fu">fitted</span>(fit_bill) <span class="sc">&lt;=</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>You may have seen a warning that fitted probabilities are numerically 0 or 1: the two species are nearly separable on these two measurements (step 3 counts the errors). This is the lecture’s “Challenges” slide in real life; next week says what it does to the fitting.</p>
+<p>You may have seen a warning that fitted probabilities are numerically 0 or 1: the two species are nearly separable on these two measurements (step 3 counts the errors). This is the lecture’s “Challenges” slide in real life; what it does to the fitting comes later in the course.</p>
 <p><strong>Question 1.</strong> Read the exponentiated coefficient on <code>bill_length_mm</code>. What happens to the odds of Chinstrap when bill length increases by one millimeter and bill depth is held fixed? Is that the change in the probability? Is it what would happen to a bird whose bill grew by a millimeter?</p>
 <p><strong>Step 3.</strong> The confusion matrix at threshold <span class="math inline">\(\tfrac12\)</span>, with <code>table()</code>. From it, compute the accuracy, the true positive rate and the false positive rate.</p>
 <div class="cell">
@@ -717,7 +717,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><strong>Question 4.</strong> Before you intervene: for each world, write down what you expect to happen to the average of <span class="math inline">\(Y\)</span> when <span class="math inline">\(X\)</span> is set to <span class="math inline">\(X + 1\)</span> for every unit. Use each world’s equations, and exercise 2 for world D.</p>
-<p><strong>Step 2.</strong> Now intervene: set <span class="math inline">\(X\)</span> to <span class="math inline">\(X + 1\)</span> for every unit and recompute <span class="math inline">\(Y\)</span> <strong>with the same noise</strong>, following each world’s equations. Write the four <code>Y_do</code> lines and compute the average change in <span class="math inline">\(Y\)</span> in each world.</p>
+<p><strong>Step 2.</strong> Now intervene: set <span class="math inline">\(X\)</span> to <span class="math inline">\(X + 1\)</span> for every unit and recompute <span class="math inline">\(Y\)</span> <em>with the same noise</em>, following each world’s equations. Write the four <code>Y_do</code> lines and compute the average change in <span class="math inline">\(Y\)</span> in each world.</p>
 <p>Note: recomputing each unit’s <span class="math inline">\(Y\)</span> with its own noise is different from the intervention calculations in the lecture, which use only the distribution of the noise. We will learn more about it later in the course. Here it makes the average change exact, with no simulation noise.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>intervene <span class="ot">&lt;-</span> <span class="cf">function</span>(d) {</span>
@@ -775,7 +775,7 @@ T = \alpha Z + \varepsilon_T, \qquad Y = \tau T + \beta Z + \varepsilon_Y.
 </section>
 <section id="optional-can-be-done-at-home-another-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="optional-can-be-done-at-home-another-dataset">Optional, can be done at home: another dataset</h3>
-<p><strong>Attrition</strong> (<code>modeldata::attrition</code>; <strong>fictional</strong>, made up by IBM data scientists, used only as an exercise): whether an employee leaves (<code>Attrition</code>), with a threshold-and-costs story (a missed leaver costs a replacement, a false alarm costs a conversation). Leavers are 16 percent, so the accuracy-against-cost point is sharper: at threshold <span class="math inline">\(\tfrac12\)</span> almost nobody is predicted to leave.</p>
+<p><strong>Attrition</strong> (<code>modeldata::attrition</code>; <em>fictional</em>, made up by IBM data scientists, used only as an exercise): whether an employee leaves (<code>Attrition</code>), with a threshold-and-costs story (a missed leaver costs a replacement, a false alarm costs a conversation). Leavers are 16 percent, so accuracy and cost disagree more: at threshold <span class="math inline">\(\tfrac12\)</span> almost nobody is predicted to leave.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modeldata)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(attrition)</span>

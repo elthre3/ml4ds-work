@@ -1,6 +1,6 @@
 ## Week 5: functional structures
 
-Five ways to shape a predictor, introduced together and compared on one task: ridge and the lasso (what a penalty changes, and what $\lambda$ controls), additive models (a spline as regression on basis functions, one curve per input), trees and random forests, and a neural network as a GLM of GLMs. Each has a knob, tuned on held-out data, with a test set opened once. Simulated data with three kinds of truth show that no structure wins everywhere, and the optimism theorem says why training error underestimates the risk of a fitted model. Data: Spotify tracks, what makes a song popular.
+Five ways to shape a predictor, introduced together and compared on one task: ridge and the lasso (what a penalty changes, and what $\lambda$ controls), additive models (a spline as regression on basis functions, one curve per input), trees and random forests, and a neural network as a GLM of GLMs. Each has a knob, tuned on held-out data, with a test set opened once. Simulated data with three kinds of truth show that no structure wins on all three, and the optimism theorem says why training error underestimates the risk of a fitted model. Data: Spotify tracks, what makes a song popular.
 
 **Reading**
 

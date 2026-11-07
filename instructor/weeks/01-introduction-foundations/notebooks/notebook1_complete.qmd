@@ -47,7 +47,7 @@ Exercises 2 and 3 have hints, collapsed below them. Do not open a hint unless yo
 **Exercise 1 (the competition).** Without looking anything up: for the `gapminder` data, write down the four parts of a prediction competition (the unit, the inputs and outcome, the score, how the held-out set is chosen). Then, for each input: would you have it at the moment you need the prediction, for a country whose life expectancy you don't know? "All of them" is an acceptable answer if you can say why.
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-Unit: a country in one year (2007). Inputs: `gdpPercap`, `pop`, `continent` (`year` is constant, so it carries nothing). Outcome: `lifeExp`. Score: mean squared error on the held-out countries (a choice; the classification week asks who made it). Held-out set: a random subset of countries, chosen once, never used for fitting. All of the inputs are available in principle, and a justified "all of them" is a full answer; the sharper point is that `lifeExp` is built from the same national statistics as `pop`, so "we don't know life expectancy but we know population exactly" is a fiction to keep in mind.
+Unit: a country in one year (2007). Inputs: `gdpPercap`, `pop`, `continent` (`year` is constant, so it adds no information). Outcome: `lifeExp`. Score: mean squared error on the held-out countries (a choice; later in the course we ask who made it). Held-out set: a random subset of countries, chosen once, never used for fitting. All of the inputs are available in principle, and a justified "all of them" is a full answer. Still, `lifeExp` is built from the same national statistics as `pop`, so "we don't know life expectancy but we know population exactly" is a fiction to keep in mind.
 :::
 
 **Exercise 2 (bias--variance decomposition).** The lecture proved this one. Close the slides and prove it again. The training data are $y_i = f^\star(x_i) + \varepsilon_i$, $i = 1, \ldots, n$, with the inputs fixed and the noise terms independent, each with mean $0$ and variance $\sigma^2$. A new outcome at the input $x_0$ is $Y_0 = f^\star(x_0) + \varepsilon_0$, where $\varepsilon_0$ has the same mean and variance and is independent of the training noise. The prediction is $\hat f_k(x_0) = \frac1k \sum_{l=1}^k y_{(l)}$, the average outcome of the $k$ training points nearest to $x_0$. Show that
@@ -165,7 +165,7 @@ Common error: writing $\mathbb E[Z^2] = (\mathbb E Z)^2$.
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
 (a) $\mathrm{Var}(\bar Y) = \frac{1}{k^2}\sum_l \mathrm{Var}(Y_l) = \frac{1}{k^2} \cdot k\sigma^2 = \sigma^2/k$. Independence (uncorrelatedness is enough) is what lets the variance of the sum be the sum of the variances: the cross terms $\mathrm{Cov}(Y_l, Y_{l'})$ vanish. This is the variance term of the bias--variance decomposition: the $k$ neighbors' noises are independent, so averaging them divides the variance by $k$.
 
-(b) $\bar Y = Y_1$, so $\mathrm{Var}(\bar Y) = \sigma^2$: no reduction at all. Averaging only helps to the extent that the things averaged carry independent noise. (The tree-methods week returns to the in-between case, positively correlated terms, where the variance of an average is $\rho\sigma^2 + (1 - \rho)\sigma^2/k$.)
+(b) $\bar Y = Y_1$, so $\mathrm{Var}(\bar Y) = \sigma^2$: no reduction at all. Averaging only helps to the extent that the things averaged carry independent noise. (Later in the course we return to the in-between case, positively correlated terms, where the variance of an average is $\rho\sigma^2 + (1 - \rho)\sigma^2/k$.)
 
 Common error: $\mathrm{Var}(\bar Y) = \sigma^2/k$ in (b) too, by applying the formula without its assumption.
 :::
@@ -183,7 +183,7 @@ For (a): what does independence let you do to the expectation of a product?
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
 (a) Independence gives $\mathbb E[\varepsilon_0\, g] = \mathbb E[\varepsilon_0]\,\mathbb E[g] = 0 \cdot \mathbb E[g] = 0$. (Mean zero plus zero correlation would also suffice, since $\mathbb E[\varepsilon_0 g] = \mathrm{Cov}(\varepsilon_0, g) + \mathbb E[\varepsilon_0]\mathbb E[g]$; independence is the assumption in force.) This is line 2 of the lecture's proof: the cross term vanishes.
 
-(b) Take $g = \varepsilon_0$ itself: $\mathbb E[\varepsilon_0 \cdot \varepsilon_0] = \sigma^2 \neq 0$. That is what happens when the point you evaluate on is a training point: $\hat f_k(x_0)$ then contains $\varepsilon_0$, the cross term does not vanish, and the error at that point is *smaller* than the bias--variance decomposition says. With $k = 1$ it is exactly zero. So training error is not the quantity in the bias--variance decomposition. The validation week does the rest.
+(b) Take $g = \varepsilon_0$ itself: $\mathbb E[\varepsilon_0 \cdot \varepsilon_0] = \sigma^2 \neq 0$. That is what happens when the point you evaluate on is a training point: $\hat f_k(x_0)$ then contains $\varepsilon_0$, the cross term does not vanish, and the error at that point is *smaller* than the bias--variance decomposition says. With $k = 1$ it is exactly zero. So training error is not the quantity in the bias--variance decomposition.
 :::
 
 **Problem 4.** Five training points, one input each:
@@ -298,7 +298,7 @@ Typically the line's test MSE is about a third of the baseline's (across random 
 
 <!-- 20 min -->
 
-You may use `abs`, `order`, `mean` and a `for` loop, but not a library that does nearest neighbors for you. The point is to see the mechanism: a prediction is an average of the outcomes of the nearest training points (problem 4, in code).
+You may use `abs`, `order`, `mean` and a `for` loop, but not a library that does nearest neighbors for you. That way you see the mechanism: a prediction is an average of the outcomes of the nearest training points (problem 4, in code).
 
 **Step 1.** Write a function that takes one new input `x0`, the training inputs `x` and outcomes `y`, and a number of neighbors `k`, and returns the average outcome of the `k` training points nearest to `x0`. The distances are computed for you; you write the two lines that pick the neighbors and average their outcomes.
 
@@ -388,12 +388,12 @@ Checkpoint:
 stopifnot(length(pred) == nrow(test), all(is.finite(pred)), mse_knn5 > 0)
 ```
 
-**Step 3.** Wrap step 2 in a function `knn_mse(k, newdata)` that returns the MSE of the `k`-nearest-neighbor predictor on any data frame with columns `lgdp` and `lifeExp`; the skeleton is given, you write the prediction line and the MSE line. Then compute the **training** MSE and the **test** MSE for `k = 1, 2, 3, 5, 10, 25, 50`.
+**Step 3.** Wrap step 2 in a function `knn_mse(k, newdata)` that returns the MSE of the `k`-nearest-neighbor predictor on any data frame with columns `lgdp` and `lifeExp`; the skeleton is given, you write the prediction line and the MSE line. Then compute the *training* MSE and the *test* MSE for `k = 1, 2, 3, 5, 10, 25, 50`.
 
 **Question 2.** Before you run it: what do you expect the training MSE at `k = 1` to be, and why? Write your prediction down first.
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-Exactly zero: every training point is its own nearest neighbor (with distinct inputs). Problems 3(b) and 4(b) are the same point. It tells you nothing about the competition score; the full treatment is the validation week.
+Exactly zero: every training point is its own nearest neighbor (with distinct inputs). Problems 3(b) and 4(b) are the same point. It tells you nothing about the competition score; the full treatment comes later in the course.
 :::
 
 ```{r}
@@ -456,14 +456,14 @@ stopifnot(nrow(results) == 7, results$train_mse[1] == 0 || any(duplicated(train$
 **Question 3.** Which `k` would you submit, and what did you use to decide? You are about to report the same held-out score you chose on: is there a problem with that?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-The `k` with the smallest test MSE. Which one that is depends on the split: across random splits the winner is 5, 10 or 25 about four times in five, occasionally 3, and `k = 1` wins on fewer than one split in a hundred. Two things are wrong. The differences among the middle `k`s are smaller than the standard error computed in part 3, so the fine ranking is mostly noise. And the held-out set was used to *choose* `k`, so its score for the chosen `k` is no longer an untouched evaluation. Both are left open for now: the protocol is the validation week, the reuse problem the regularization week.
+The `k` with the smallest test MSE. Which one that is depends on the split: across random splits the winner is 5, 10 or 25 about four times in five, occasionally 3, and `k = 1` wins on fewer than one split in a hundred. Two things are wrong. The differences among the middle `k`s are smaller than the standard error computed in part 3, so the fine ranking is mostly noise. And the held-out set was used to *choose* `k`, so its score for the chosen `k` is no longer an untouched evaluation. Both are left open for now; they return later in the course.
 :::
 
 ### 3. The score is a random variable
 
 <!-- 7 min -->
 
-Your test MSE is an average of 42 losses. From the split you already have, compute the 42 individual squared errors of the `k = 5` predictor, their mean (the test MSE again) and the standard error of that mean, $\text{sd(losses)}/\sqrt{42}$. (This standard error treats the 42 losses as independent draws; that is an assumption about the countries, not a fact about them.)
+Your test MSE is an average of 42 losses. From the split you already have, compute the 42 individual squared errors of the `k = 5` predictor, their mean (the test MSE again) and the standard error of that mean, $\text{sd(losses)}/\sqrt{42}$. (This standard error treats the 42 losses as independent draws; that is an assumption about the countries.)
 
 ```{r}
 #| eval: false
@@ -482,7 +482,7 @@ c(mean = mean(losses), se = sd(losses) / sqrt(length(losses)))
 **Question 4.** Compare your test MSE and its standard error with your neighbor's. Are the two test MSEs within a standard error of each other? What made them different?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-Usually yes, sometimes no: the standard errors on these data are typically 10–25, and the two scores differ because the two splits differ, in both which 42 countries are held out and which 100 were fitted on. The standard error treats the fitted predictor as fixed and measures only the first kind of variability, the sampling variability of an average of 42 losses; the difference between two students' scores also carries the second. The organizer has one held-out set and one submission per competitor, so can compute only a standard error for each competitor's own score. Whether a *gap* between two competitors is real is a further question, about the difference of their losses on the same units, which we leave open this week.
+Usually yes, sometimes no: the standard errors on these data are typically 10–25, and the two scores differ because the two splits differ, in both which 42 countries are held out and which 100 were fitted on. The standard error treats the fitted predictor as fixed and measures only the first kind of variability, the sampling variability of an average of 42 losses; the difference between two students' scores also includes the second. The organizer has one held-out set and one submission per competitor, so can compute only a standard error for each competitor's own score. Whether a *gap* between two competitors is real is a further question, about the difference of their losses on the same units, which we leave open this week.
 :::
 
 ### 4. Predicting on new data
@@ -511,7 +511,7 @@ mse_lm_1997
 **Question 5.** Is it surprising how well the model does on 1997? The 1997 rows are the *same 142 countries*, ten years earlier. Has the model predicted anything new? What question does this test answer, and what question did the held-out split in part 1 answer?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-Country-level GDP and life expectancy move slowly, so the 1997 rows are nearly the training rows again (100 of them literally the training countries); a low error mostly shows that the same countries barely moved. It does not show the model predicts new countries; the assumption it violates is independence of the test units from the training units. The held-out split in part 1 answers "can we predict a country we have not seen?"; the 1997 test answers a different, also legitimate, question: is the relationship stable over time? Both questions matter; the point is to know which one you asked. This is the lecture's closing question 2, and next week's opener.
+Country-level GDP and life expectancy move slowly, so the 1997 rows are nearly the training rows again (100 of them literally the training countries); a low error mostly shows that the same countries barely moved. It does not show the model predicts new countries; the assumption it violates is independence of the test units from the training units. The held-out split in part 1 answers "can we predict a country we have not seen?"; the 1997 test answers a different, also legitimate, question: is the relationship stable over time? This is the lecture's closing question 2.
 :::
 
 ## Before you leave

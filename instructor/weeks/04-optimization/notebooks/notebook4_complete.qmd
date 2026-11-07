@@ -89,7 +89,7 @@ Common errors: forgetting the $t$ in $\|x_t - x\| = t\|v\|$ (which gives $L\|v\|
 
 (b) Show that $R(\hat f) = R(f^\star) + \big[R(\hat f) - R(f_{\mathcal F})\big] + \big[R(f_{\mathcal F}) - R(f^\star)\big]$, and say which term is random and which is fixed once $\mathcal F$ is chosen.
 
-(c) For squared loss, use week 2's optimal model theorem to write the approximation term as a squared distance.
+(c) For squared loss, use the optimal model theorem to write the approximation term as a squared distance.
 
 (d) The smallest class there is, $\mathcal F = \{\text{constant functions}\}$, squared loss, $\hat f = \bar y$ from an i.i.d. sample of size $n$. Find $f_{\mathcal F}$, show that the approximation error is $\mathrm{Var}(f^\star(X))$, and show that the expected estimation error is $\mathrm{Var}(Y)/n$.
 
@@ -112,7 +112,7 @@ Common errors: forgetting the $t$ in $\|x_t - x\| = t\|v\|$ (which gives $L\|v\|
 
 (c) $R(f_{\mathcal F}) - R(f^\star) = \mathbb E\big[(f_{\mathcal F}(X) - f^\star(X))^2\big]$, the mean squared distance from the class's best member to the truth.
 
-(d) $R(c) = \mathrm{Var}(Y) + (c - \mathbb E Y)^2$ is minimized at $c = \mathbb E Y$, so $f_{\mathcal F} \equiv \mathbb E Y$. By (c) the approximation error is $\mathbb E[(\mathbb E Y - f^\star(X))^2] = \mathrm{Var}(f^\star(X))$, since $\mathbb E f^\star(X) = \mathbb E Y$: a constant cannot follow the part of $Y$ that moves with $X$. The estimation error is $R(\bar y) - R(\mathbb E Y) = (\bar y - \mathbb E Y)^2$, whose expectation over the sample is $\mathrm{Var}(\bar y) = \mathrm{Var}(Y)/n$. One term shrinks with $n$ and does not know $\mathcal F$; the other is fixed by $\mathcal F$ and does not know $n$.
+(d) $R(c) = \mathrm{Var}(Y) + (c - \mathbb E Y)^2$ is minimized at $c = \mathbb E Y$, so $f_{\mathcal F} \equiv \mathbb E Y$. By (c) the approximation error is $\mathbb E[(\mathbb E Y - f^\star(X))^2] = \mathrm{Var}(f^\star(X))$, since $\mathbb E f^\star(X) = \mathbb E Y$: a constant cannot follow the part of $Y$ that moves with $X$. The estimation error is $R(\bar y) - R(\mathbb E Y) = (\bar y - \mathbb E Y)^2$, whose expectation over the sample is $\mathrm{Var}(\bar y) = \mathrm{Var}(Y)/n$. The estimation error shrinks with $n$; the approximation error is fixed by $\mathcal F$ and does not depend on $n$.
 
 Common errors: calling the estimation term "the variance" (here it happens to be one; for a biased $\hat f$ in a larger class it holds bias too); taking $R(f^\star) = 0$ (it is the noise, $\mathbb E[\mathrm{Var}(Y \mid X)]$ for squared loss).
 :::
@@ -156,7 +156,7 @@ $$
 
 (b) Two methods, $A$ and $B$. Suppose $A$'s error on the unseen points is smaller than $B$'s for some labeling. Show that $B$'s is smaller than $A$'s for another labeling.
 
-(c) What would have to be true of the world for some method to do better than $\tfrac12$ on average? Where does that assumption sit in the ERM form of exercise 2?
+(c) What would have to be true of the world for some method to do better than $\tfrac12$ on average? Where does that assumption enter the ERM form of exercise 2?
 
 ::: {.callout-note collapse="true" title="Hint 1"}
 Uniform over all $2^N$ labelings means that the $N$ labels $f(x)$ are independent fair coin flips.
@@ -175,7 +175,7 @@ Fix $x \notin S$. $\hat h(x)$ depends only on the labels on $S$, and $f(x)$ is i
 
 (b) By (a), the average of $\mathrm{err}(\hat h_A, f) - \mathrm{err}(\hat h_B, f)$ over all labelings is $\tfrac12 - \tfrac12 = 0$. A difference that averages to zero and is negative for one labeling must be positive for another.
 
-(c) The labelings must not all be equally likely: the labels on $S$ have to carry information about the labels off $S$, for example because nearby points tend to share a label, or because $f$ is a threshold of a linear score. Every method bets on some such structure (nearest neighbors on the first, logistic regression on the second), and the bet pays off only on the labelings that have it. In the ERM form the bet is the class $\mathcal F$, chosen before the data: on the labelings that have the structure its approximation error is small, and on the others it is not.
+(c) The labelings must not all be equally likely: the labels on $S$ have to carry information about the labels off $S$, for example because nearby points tend to share a label, or because $f$ is a threshold of a linear score. Every method assumes some such structure (nearest neighbors the first, logistic regression the second), and the assumption helps only on the labelings that have it. In the ERM form the assumption is the class $\mathcal F$, chosen before the data: on the labelings that have the structure its approximation error is small, and on the others it is not.
 
 Common errors: forgetting that the claim is about the points the method has not seen (on $S$ itself a method can be perfect); reading it as "all methods are equally good on the problems we meet", which it does not say, because those problems are not uniformly random labelings.
 :::
@@ -199,13 +199,13 @@ Common errors: forgetting that the claim is about the points the method has not 
 :::
 
 ::: {.callout-note .answer collapse="true" title="Hint 2"}
-(c) $\mathbf X^T\mathbf X$ is diagonal here, because $\sum_i x_i = 0$. Then exercise-style: one direction with curvature $a$ converges iff $\gamma < 2/a$.
+(c) $\mathbf X^T\mathbf X$ is diagonal here, because $\sum_i x_i = 0$. Then, as in the lecture: one direction with curvature $a$ converges iff $\gamma < 2/a$.
 :::
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
 (a) $\mathbf X^T\mathbf y = (\sum y_i, \sum x_i y_i) = (4, 3)$, so $\nabla\hat R_n(0) = -\tfrac23(4, 3) = (-8/3, -2)$. One step: $\beta_1 = (0, 0) - 0.1\,(-8/3, -2) = (0.267, 0.2)$.
 
-(b) It stops where the gradient is zero: $\mathbf X^T(\mathbf y - \mathbf X\beta) = \mathbf 0$, the normal equations of week 2. Here $\mathbf X^T\mathbf X = \mathrm{diag}(3, 2)$, so $\hat\beta = (4/3, 3/2)$.
+(b) It stops where the gradient is zero: $\mathbf X^T(\mathbf y - \mathbf X\beta) = \mathbf 0$, the normal equations. Here $\mathbf X^T\mathbf X = \mathrm{diag}(3, 2)$, so $\hat\beta = (4/3, 3/2)$.
 
 (c) $2\mathbf X^T\mathbf X/n = \mathrm{diag}(2, 4/3)$: curvatures $2$ (the intercept direction) and $4/3$ (the slope). Convergence from every start needs $\gamma < 2/a_{\max} = 1$, so $\gamma = 0.5$ is safe.
 
@@ -265,11 +265,11 @@ $$
 $$
 No assumption about the data at all: the only randomness is the index, and the $n$ rows could be anything. $\blacksquare$
 
-The technique is worth keeping: when a random quantity picks one of several cases, write it as a sum over the cases, each multiplied by the indicator of that case. The randomness is then all in the indicators, a linear operation such as expectation passes through the sum, and $\mathbb E\,\mathbb 1[A] = P(A)$. The same move counts expected matches, expected fixed points of a random permutation, and the expected number of distinct rows in a bootstrap sample.
+When a random quantity picks one of several cases, write it as a sum over the cases, each multiplied by the indicator of that case. The randomness is then all in the indicators, a linear operation such as expectation passes through the sum, and $\mathbb E\,\mathbb 1[A] = P(A)$. The same move counts expected matches, expected fixed points of a random permutation, and the expected number of distinct rows in a bootstrap sample.
 
 (b) The batch gradient is the mean of $b$ independent copies of $\nabla\ell_I(\beta)$: mean $\nabla\hat R_n(\beta)$, still unbiased, variance $\sigma^2(\beta)/b$, coordinate by coordinate.
 
-(c) Smaller: without replacement the variance carries the finite-population factor $(n - b)/(n - 1)$, the factor week 2's seminar met in the spread of the slope. At $b = n$ it is zero: the batch is the whole sample and the gradient is exact.
+(c) Smaller: without replacement the variance is multiplied by the finite-population factor $(n - b)/(n - 1)$. At $b = n$ it is zero: the batch is the whole sample and the gradient is exact.
 
 (d) No. With $\ell_1 = (\beta - 1)^2$ and $\ell_2 = (\beta + 1)^2$, $\hat R_n(\beta) = \beta^2 + 1$ is minimized at $\beta = 0$, where $\nabla\hat R_n = 0$ but $\nabla\ell_1(0) = -2$: a step along it moves away from the minimizer and increases $\hat R_n$. The lemma is about the full gradient; a stochastic step is right on average and wrong on any given draw, which is why the step size has to shrink.
 
@@ -306,7 +306,7 @@ Common errors: reading a flat loss curve as convergence (the point of panel C); 
 
 <!-- 26 min: steps 1 to 6, questions 1 to 3 and the step 6 question. -->
 
-Life expectancy on $\log_{10}$ GDP per capita in 2007, as in week 2. The input is centered; step 4 shows why.
+Life expectancy on $\log_{10}$ GDP per capita in 2007, as before. The input is centered; step 4 shows why.
 
 ```{r}
 g07 <- gapminder |> filter(year == 2007) |> mutate(lgdp = log10(gdpPercap))
@@ -591,7 +591,7 @@ sgd_path |>
 **Question 4.** The training MSE goes to zero. Why is that possible, and why should it worry you? The distance to the true coefficients levels off at about $34$, from a starting distance of $39$: what is it that the algorithm cannot learn from these data?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-With $p = 400 > n = 100$ there are infinitely many $\beta$ with $\mathbf X\beta = \mathbf y$ exactly (week 2: the normal equations have a whole affine space of solutions), so the training error can be driven to zero whatever the noise is: a zero training error says nothing about whether the coefficients are right. The distance to the truth stops falling because the data only determine $\beta$ in the $100$-dimensional row space of $\mathbf X$; the component of $\beta_{\text{true}}$ orthogonal to every row is invisible to the loss, and starting from zero the iterates never acquire any such component (every step adds a combination of rows). What is left is exactly that invisible part, about $34$ out of $39$. The optional step at the end checks that this is the minimum-norm solution of week 2.
+With $p = 400 > n = 100$ there are infinitely many $\beta$ with $\mathbf X\beta = \mathbf y$ exactly (the normal equations then have a whole affine space of solutions), so the training error can be driven to zero whatever the noise is: a zero training error says nothing about whether the coefficients are right. The distance to the truth stops falling because the data only determine $\beta$ in the $100$-dimensional row space of $\mathbf X$; the component of $\beta_{\text{true}}$ orthogonal to every row is invisible to the loss, and starting from zero the iterates never acquire any such component (every step adds a combination of rows). What is left is exactly that invisible part, about $34$ out of $39$. The optional step at the end checks that this is the minimum-norm least-squares solution.
 :::
 
 **Step 2.** The lecture's wide regression: $n = 80$, $p = 60$, noisy, and a held-out set of 2,000 rows from the same model. Run full-batch gradient descent from zero for 300 steps with step `0.5 / L`, where `L` is twice the largest eigenvalue of $\mathbf X^T\mathbf X/n$, and record the training and the held-out MSE after every step. Plot both against the step (log scale on the horizontal axis), and find the step at which the held-out MSE is smallest.
@@ -633,15 +633,15 @@ range(es_path$held_out)
 ```
 :::
 
-**Question 5.** The training error falls at every step, as the descent lemma says it must. Where would you have stopped if you had only seen it? You chose the number of steps by looking at the held-out MSE: can you now report that held-out MSE as an honest estimate of the chosen model's error? What would you need instead?
+**Question 5.** The training error falls at every step, as the descent lemma says it must. Where would you have stopped if you had only seen it? You chose the number of steps by looking at the held-out MSE: can you now report that held-out MSE as an unbiased estimate of the chosen model's error? What would you need instead?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-Watching the training error alone, you would have run to the end: it is still falling at step 300, and every diagnostic from the lecture (loss, gradient norm) says "keep going". The held-out error is smallest at step 6 (about $16.5$) and ends at about $25$, worse than at step 1. The training loss is the number the algorithm minimizes, and minimizing it all the way was the wrong thing to do: that is early stopping, and the number of steps is a tuning parameter. Having used the held-out set to pick the step, its MSE at the chosen step is no longer an honest estimate of the chosen model's error: it was the minimum of 300 noisy numbers, selected because it was small, so it is biased downward (the 300 candidates are nearby iterates and far from independent, so the bias is smaller than for 300 unrelated models, but it is there). An honest estimate needs data that were used neither to fit nor to choose: a third set, or next week's cross-validation.
+Watching the training error alone, you would have run to the end: it is still falling at step 300, and every diagnostic from the lecture (loss, gradient norm) says "keep going". The held-out error is smallest at step 6 (about $16.5$) and ends at about $25$, worse than at step 1. The training loss is the number the algorithm minimizes, and minimizing it all the way was the wrong thing to do: that is early stopping, and the number of steps is a tuning parameter. Having used the held-out set to pick the step, its MSE at the chosen step is no longer an unbiased estimate of the chosen model's error: it was the minimum of 300 noisy numbers, selected because it was small, so it is biased downward (the 300 candidates are nearby iterates and far from independent, so the bias is smaller than for 300 unrelated models, but it is there). An unbiased estimate needs data used neither to fit the model nor to choose it: a third set. Cross-validation comes later in the course.
 :::
 
 ### Optional, can be done at home: which of the many solutions
 
-Compare the stochastic gradient descent estimate from part 2, step 1, with week 2's minimum-norm least-squares solution, `MASS::ginv(X_big) %*% y_big`, and compute the norms of the two.
+Compare the stochastic gradient descent estimate from part 2, step 1, with the minimum-norm least-squares solution, `MASS::ginv(X_big) %*% y_big`, and compute the norms of the two.
 
 ```{r}
 #| eval: false
@@ -656,7 +656,7 @@ c(distance = sqrt(sum((beta_sgd - beta_mn)^2)),
   norm_sgd = sqrt(sum(beta_sgd^2)), norm_min_norm = sqrt(sum(beta_mn^2)))
 ```
 
-Of the infinitely many exact fits, stochastic gradient descent from zero landed on the one of smallest norm, to one decimal. Every step adds a multiple of rows of $\mathbf X$, so an iterate that starts at $\mathbf 0$ stays in the row space, and the only exact fit in the row space is the minimum-norm one. The algorithm is part of the method: two algorithms for the same objective can return different fits, and this one carries a preference it was never told about. Week 7 writes that preference down as a penalty.
+Of the infinitely many exact fits, stochastic gradient descent from zero landed on the one of smallest norm, to one decimal. Every step adds a multiple of rows of $\mathbf X$, so an iterate that starts at $\mathbf 0$ stays in the row space, and the only exact fit in the row space is the minimum-norm one. The algorithm is part of the method: two algorithms for the same objective can return different fits, and this one returns the smallest-norm fit although the objective says nothing about the norm. Later in the course a preference for small norms is written into the objective as a penalty.
 :::
 
 ### Optional, can be done at home: saddle points in $p$ dimensions

@@ -62,7 +62,7 @@ Each exercise has hints, collapsed below it. Do not open a hint unless you have 
 
 (b) Show that $R(\hat f) = R(f^\star) + \big[R(\hat f) - R(f_{\mathcal F})\big] + \big[R(f_{\mathcal F}) - R(f^\star)\big]$, and say which term is random and which is fixed once $\mathcal F$ is chosen.
 
-(c) For squared loss, use week 2's optimal model theorem to write the approximation term as a squared distance.
+(c) For squared loss, use the optimal model theorem to write the approximation term as a squared distance.
 
 (d) The smallest class there is, $\mathcal F = \{\text{constant functions}\}$, squared loss, $\hat f = \bar y$ from an i.i.d. sample of size $n$. Find $f_{\mathcal F}$, show that the approximation error is $\mathrm{Var}(f^\star(X))$, and show that the expected estimation error is $\mathrm{Var}(Y)/n$.
 
@@ -105,7 +105,7 @@ $$
 
 (b) Two methods, $A$ and $B$. Suppose $A$'s error on the unseen points is smaller than $B$'s for some labeling. Show that $B$'s is smaller than $A$'s for another labeling.
 
-(c) What would have to be true of the world for some method to do better than $\tfrac12$ on average? Where does that assumption sit in the ERM form of exercise 2?
+(c) What would have to be true of the world for some method to do better than $\tfrac12$ on average? Where does that assumption enter the ERM form of exercise 2?
 
 ::: {.callout-note collapse="true" title="Hint 1"}
 Uniform over all $2^N$ labelings means that the $N$ labels $f(x)$ are independent fair coin flips.
@@ -167,7 +167,7 @@ Fix $x \notin S$. $\hat h(x)$ depends only on the labels on $S$, and $f(x)$ is i
 
 <!-- 26 min: steps 1 to 6, questions 1 to 3 and the step 6 question. -->
 
-Life expectancy on $\log_{10}$ GDP per capita in 2007, as in week 2. The input is centered; step 4 shows why.
+Life expectancy on $\log_{10}$ GDP per capita in 2007, as before. The input is centered; step 4 shows why.
 
 ```{r}
 g07 <- gapminder |> filter(year == 2007) |> mutate(lgdp = log10(gdpPercap))
@@ -333,11 +333,11 @@ es_path <- tibble(step = 1:300, training = NA_real_, held_out = NA_real_)
 # ...
 ```
 
-**Question 5.** The training error falls at every step, as the descent lemma says it must. Where would you have stopped if you had only seen it? You chose the number of steps by looking at the held-out MSE: can you now report that held-out MSE as an honest estimate of the chosen model's error? What would you need instead?
+**Question 5.** The training error falls at every step, as the descent lemma says it must. Where would you have stopped if you had only seen it? You chose the number of steps by looking at the held-out MSE: can you now report that held-out MSE as an unbiased estimate of the chosen model's error? What would you need instead?
 
 ### Optional, can be done at home: which of the many solutions
 
-Compare the stochastic gradient descent estimate from part 2, step 1, with week 2's minimum-norm least-squares solution, `MASS::ginv(X_big) %*% y_big`, and compute the norms of the two.
+Compare the stochastic gradient descent estimate from part 2, step 1, with the minimum-norm least-squares solution, `MASS::ginv(X_big) %*% y_big`, and compute the norms of the two.
 
 ```{r}
 #| eval: false

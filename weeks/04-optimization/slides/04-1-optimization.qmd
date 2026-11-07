@@ -80,7 +80,7 @@ contour_plot <- function(path, title = NULL, axis_titles = TRUE) {
 ::: {.notes}
 36 light slides and 8 dark after the title: about 81 at week 2's rough pace (2 min a light slide, 1 a dark), so plan 78 of 90 with cut 1 made from the start; a planning estimate, not a rehearsed time. Dark = rush or skip; each dark slide's note says skip or gives the compressed phrase.
 
-Cut order: (1) ImageNet, (2) the GLM FAQ to its last question, (3) Newton-IRLS to its one line, (4) "Reading the gradient" to its ask. The two paths figure and the descent lemma's proof are last; the three substantial pauses (the normal equations, the step-200 diagnosis, the stopping point) are not cut.
+Cut order: (1) ImageNet, (2) the GLM FAQ to its last question, (3) Newton-IRLS to one line: each iteration is a weighted least-squares fit, (4) "Reading the gradient" to its ask. The two paths figure and the descent lemma's proof are last; the three substantial pauses (the normal equations, the step-200 diagnosis, the stopping point) are not cut.
 
 Pace: the first line of every note is a progress bar, the share of the deck's estimated minutes done before that slide, computed when the deck is rendered. Estimates on the spine's timing scale: 2 min a content slide, 3 a derivation or a slide with a substantial pause ({minutes="3"} on its heading), 1 a dark slide.
 
@@ -99,15 +99,15 @@ Part 4: stochastic gradient descent
 
 Part 5: when to stop iterating?
 
-## Where week 3 left the fitting {minutes="3"}
+## Where we left the fitting {minutes="3"}
 
 ::: {.notes}
 Two minutes, written, then two people. Expected: X'(y - X beta-hat) = 0, revealed on the score-equations slide; and some guess at a logistic analogue. Do not give the score equations yet.
 :::
 
-Week 2: least squares has a formula for $\hat\beta$, and $\hat\beta$ solves the normal equations. Week 3: logistic regression is fitted by maximum likelihood, and `glm` did it for us
+Least squares has a formula for $\hat\beta$, and $\hat\beta$ solves the normal equations. Logistic regression is fitted by maximum likelihood, and `glm` did it for us
 
-Today's question, in three parts: **what did `glm` do? how can we tell whether fitting is working? should we let it finish?**
+Today: what did `glm` do? How can we tell whether fitting is working? Should we let it finish?
 
 ::: {.ask}
 Write down the normal equations from memory. Then guess: how is it different for logistic regression?
@@ -127,7 +127,7 @@ $$
 (assuming the data is i.i.d.)
 
 ::: {.recall}
-**Maximum likelihood** (Fisher, 1912--1922): choose the parameter that makes the observed data most probable. We maximize the **log**-likelihood because a product of $n$ small numbers underflows and a sum differentiates term by term; log is increasing, so the maximizer is the same. **Least squares is a log-likelihood**: for $y_i \sim N(\mathbf x_i^T\beta, \sigma^2)$ it is $-\frac{1}{2\sigma^2}\sum_i (y_i - \mathbf x_i^T\beta)^2 + \text{const}$. In `glm`, `family` names the distribution whose likelihood is maximized: `gaussian` is `lm`, `binomial` is logistic regression.
+**Maximum likelihood** (Fisher, 1912--1922): choose the parameter that makes the observed data most probable. We maximize the log-likelihood because a product of $n$ small numbers underflows and a sum differentiates term by term; log is increasing, so the maximizer is the same. **Least squares is a log-likelihood**: for $y_i \sim N(\mathbf x_i^T\beta, \sigma^2)$ it is $-\frac{1}{2\sigma^2}\sum_i (y_i - \mathbf x_i^T\beta)^2 + \text{const}$. In `glm`, `family` names the distribution whose likelihood is maximized: `gaussian` is `lm`, `binomial` is logistic regression.
 :::
 
 Next slide: a bit of mathematics
@@ -162,7 +162,7 @@ $$
 
 $$= \sum_{i=1}^n \mathbf x_i \left[ y_i - \left(\frac{1}{1+e^{- \mathbf x_i^T\beta}} \right) \right] = \color{#b73779}{\sum_{i=1}^n \mathbf x_i [y_i - \hat p_i(\beta)]}$$
 
-Set this equal to 0 and solve for $\beta$. How: the rest of today
+Set this equal to 0 and solve for $\beta$
 
 ## The score equations, read as orthogonality {minutes="3"}
 
@@ -171,7 +171,7 @@ Derived, not proved: the derivative is on the previous slide, this slide reads i
 :::
 
 ::: {.retrieval}
-Week 2, least squares: $\mathbf X^T(\mathbf y - \mathbf X\hat\beta) = \mathbf 0$. The residual is orthogonal to every column of $\mathbf X$.
+Least squares, the normal equations: $\mathbf X^T(\mathbf y - \mathbf X\hat\beta) = \mathbf 0$. The residual is orthogonal to every column of $\mathbf X$.
 :::
 
 **Logistic score equations.** Stack the last slide's rows: writing $\mathbf p(\beta) = (\hat p_1(\beta), \ldots, \hat p_n(\beta))^T$, the MLE $\hat\beta$ solves
@@ -197,7 +197,7 @@ $$
 $$
 Each term is $-w_i\, \mathbf x_i\mathbf x_i^T$ with $w_i > 0$. In any direction $v$, $v^T \mathbf x_i\mathbf x_i^T v = (\mathbf x_i^T v)^2 \ge 0$, so the sum curves downward, or is flat, in every direction: the log-likelihood is concave, and any finite solution of the score equations is its global maximum
 
-What concavity does not give: existence (week 3's separable case has no finite solution). **So how do we solve the score equations?**
+What concavity does not give: existence (the separable case has no finite solution). So how do we solve the score equations?
 
 ## Newton-Raphson
 
@@ -218,7 +218,7 @@ Legacy slide; the exercise now asks for the update, since the Hessian is on the 
 Legacy slide. Compress if short: each Newton step is a weighted least squares fit; the weights are largest near one half. g is the logit link from week 3. Recognize, not reconstruct: exercise 3 asks for the Newton update, not IRLS.
 :::
 
-Newton-IRLS (equivalent) steps, $g$ the logit link. The one line to keep: **each iteration is a weighted least-squares fit around the current fit**
+Newton-IRLS (equivalent) steps, $g$ the logit link. Each iteration is a weighted least-squares fit around the current fit
 
 $$
 \begin{eqnarray}
@@ -238,7 +238,7 @@ $$\hat{\beta}_{t+1} \gets \arg \min_{\beta} (\hat{\mathbf{y}}_t - \mathbf X \bet
 
 **Note**: larger weights on observations with $\hat p$ closer to 1/2, i.e. the most difficult to classify (***look for variations of this theme***) [See Section 4.4.1 of [ESL](https://web.stanford.edu/~hastie/ElemStatLearn/)]{.source}
 
-## GLMs in `R`: what you should know {.inverse}
+## GLMs in `R` {.inverse}
 
 ::: {.notes}
 Compress if short: glm fits every family by IRLS (Fisher scoring, which is Newton for these links), in a handful of iterations; a boundary warning means investigate, not necessarily that the MLE does not exist (a finite MLE with a huge slope triggers it too). The reason the rest of the world does not do this is the p by p Hessian: part 2.
@@ -248,7 +248,7 @@ Compress if short: glm fits every family by IRLS (Fisher scoring, which is Newto
 
 **How many iterations?** Usually under ten. `summary()` prints `Number of Fisher Scoring iterations`
 
-**When does it fail?** Mostly when there is no finite MLE, week 3's separable case, with coefficients growing at every iteration. The warning `fitted probabilities numerically 0 or 1 occurred` is a symptom to investigate, not a diagnosis: a finite MLE with a steep slope triggers it too
+**When does it fail?** Mostly when there is no finite MLE, the separable case, with coefficients growing at every iteration. The warning `fitted probabilities numerically 0 or 1 occurred` is a symptom to investigate, not a diagnosis: a finite MLE with a steep slope triggers it too
 
 **Why does the rest of machine learning not do this?** Each step solves a $p \times p$ system. For $p$ in the millions that is the cost that matters; the next part avoids it
 
@@ -425,7 +425,7 @@ $$
 \beta_{t+1} = \beta_t - \gamma a\beta_t = (1 - \gamma a)\,\beta_t, \qquad \beta_t = (1 - \gamma a)^t \beta_0
 $$
 
-Converges iff $|1 - \gamma a| < 1$, i.e. $0 < \gamma < 2/a$. The step $\gamma = 1/a$ lands in one move
+Converges iff $|1 - \gamma a| < 1$, i.e. $0 < \gamma < 2/a$. The step $\gamma = 1/a$ reaches the minimum in one move
 
 . . .
 
@@ -517,7 +517,7 @@ pa + pb + plot_layout(widths = c(1.3, 1))
 The saddle: compute the gradient at $(0, 0)$; is it a minimum? One of the three starts is $(0, 1.2)$: where does its path end, and why does it never leave?
 :::
 
-Where you start decides where you end. Least squares and logistic regression have one valley (convex); most of what comes after week 7 does not
+Where you start decides where you end. Least squares and logistic regression have one valley (convex); a neural network, later in the course, does not
 
 ## Too big, too small
 
@@ -629,7 +629,7 @@ A, the valley: converged. B, the hilly road: its loss fell by `r sprintf("%.3f",
 The gradient gives the slope in every direction v (grad f'v); away from a stationary point that slope is zero on the (d - 1)-dimensional subspace orthogonal to the gradient, and at a stationary point in all d directions. Whether the loss goes down along them is curvature, which the gradient does not give. The figure: plain gradient descent on sum_j a_j (z_j^2 - 1)^2, p = 5, unequal curvatures a_j from 1.5 down to 0.6, a tiny start (10^-2 to 10^-8 from the saddle at 0). Every flat stretch is a near-saddle: some z_j near 0, slope almost zero, curvature negative; the run waits until that coordinate is big enough to see. With the standard shrinking schedule 0.1/(1 + t/25), whose steps still sum to infinity (unlike panel C's), each later saddle is met with a smaller step, so the waits grow: the escapes come at steps 11, 23, 43, 88 and 541, and the last wait holds the loss flat at 0.6 for about 250 steps, with the gradient below 0.06 until step 300: the diagnostics of "Has it converged?" would have said stop. Fixed step 0.05, dashed, is done by step 170. Answer to the ask: the curvature, the Hessian's d eigenvalues (next slide); all positive, a strict local minimum; any negative, not a minimum; some zero, inconclusive. The saddle from "Landscapes" started on u = 0 is the two-dimensional case: u never changes. A constructed example; "long plateaus followed by rapid transitions" are also found in deep linear networks (Saxe, McClelland and Ganguli, ICLR 2014). The optional seminar problem works through a separable version by hand.
 :::
 
-These are some of the issues that make optimization hard. What's more: in $\mathbb R^d$ the slope is zero in $d - 1$ directions; whether they lead down is a question of curvature
+In $\mathbb R^d$ the slope is zero in $d - 1$ directions; whether they lead down is a question of curvature
 
 ```{r}
 #| label: zero-slope
@@ -697,7 +697,7 @@ A quadratic with curvatures $a_j$ has $L = \max_j |a_j|$ (the valley: 10); least
 ## Descent lemma
 
 ::: {.notes}
-The one positive result, and what it does and does not say. Needs no convexity. Says: each step helps, by at least the squared gradient over 2L, so more where the gradient is large. Does not say: that the steps converge (on f(x) = -x they walk off forever); where they end if they do (any stationary point of the landscape); that a small gradient means arrival (the next step gains little: the plateau). Proof: integrate the gradient along the step and let the Lipschitz bound do what the curvature bound did.
+The one positive result, and what it does and does not say. Needs no convexity. Says: each step helps, by at least the squared gradient over 2L, so more where the gradient is large. Does not say: that the steps converge (on f(x) = -x they walk off forever); where they end if they do (any stationary point of the landscape); that a small gradient means arrival (the next step gains little: the plateau). Proof: integrate the gradient along the step; the Lipschitz bound replaces the curvature bound.
 :::
 
 ::: {.leave}
@@ -764,10 +764,10 @@ Compress: one exact gradient per step is too expensive at scale; a random row's 
 
 ### Part 4: stochastic gradient descent
 
-## What a step costs
+## Cost per step
 
 ::: {.notes}
-With the linear cost model: full gradient at the 2012 scale about 7e13 operations, a batch of 128 about 8e9, ten thousand times cheaper. For a network the per-image cost is not p, but the ratio n/b is what matters. The formula's p-cubed is not a computation anyone has done.
+With the linear cost model: full gradient at the 2012 scale about 7e13 operations, a batch of 128 about 8e9, ten thousand times cheaper. For a network the per-image cost is not p, but the ratio of costs is still n/b. The formula's p-cubed is not a computation anyone has done.
 :::
 
 Second-order methods invert the $p \times p$ Hessian; first-order methods compute the $p \times 1$ gradient. For a linear model or a GLM, where one row's gradient costs about $p$ operations:
@@ -813,12 +813,12 @@ $$
 
 Unbiased, whatever the data are. A batch of $b$ rows drawn with replacement averages $b$ such gradients: still unbiased
 
-Compute update using one randomly sampled observation, or a randomly sampled subset ("mini-batch SGD"). Correct on average, cheap, and **not guaranteed to decrease the training loss on any one step**: the descent lemma is about the full gradient
+Compute update using one randomly sampled observation, or a randomly sampled subset ("mini-batch SGD"). Correct on average, cheap, and not guaranteed to decrease the training loss on any one step: the descent lemma is about the full gradient
 
 ## The two paths
 
 ::: {.notes}
-Simulated least squares. An epoch is one pass through the rows, 200 single-row steps, so the orange path is three epochs. Blue is exact and expensive; orange is cheap and noisy, and with a shrinking step the noise ball shrinks. Do not say "SGD is better": say what each costs and what each buys. Cut 2 if short.
+Simulated least squares. An epoch is one pass through the rows, 200 single-row steps, so the orange path is three epochs. Blue is exact and expensive; orange is cheap and noisy, and with a shrinking step the noise ball shrinks. Do not say "SGD is better": say what each costs and what each gives. Cut 2 if short.
 :::
 
 ::: {.columns}
@@ -939,7 +939,7 @@ es_plot(select(es, step, training))
 ::: {.column width="45%"}
 **The wide regression:** simulated least squares, $n = 80$, $p = 60$, noise sd 3, from $\beta_0 = \mathbf 0$ with step $1/2L$
 
-The training error, the number the algorithm sees, falls at every step and is still falling at 300
+The training error, the number the algorithm minimizes, falls at every step and is still falling at 300
 
 ::: {.ask}
 You may stop the algorithm at any step. Which one, and why?
@@ -947,10 +947,10 @@ You may stop the algorithm at any step. Which one, and why?
 :::
 :::
 
-## Stopping early: what the training loss did not show
+## Stopping early: the held-out error
 
 ::: {.notes}
-The picture the whole week points at. The algorithm did what it was asked, minimize the training error, and the training error is the wrong thing to minimize all the way. Nothing in parts 2 to 4 could have shown this: they only ever saw the training loss. Say, do not show: next week measures by how much it lies; the number of steps is a tuning parameter like k or d; week 7 writes the penalty down.
+The algorithm did what it was asked, minimize the training error, and the training error is the wrong thing to minimize all the way. Nothing in parts 2 to 4 could have shown this: they only ever used the training loss. Say, do not show: next week measures by how much it underestimates the risk; the number of steps is a tuning parameter like k or d; week 7 writes the penalty down.
 :::
 
 ::: {.columns}
@@ -966,17 +966,17 @@ es_plot(es)
 ::: {.column width="45%"}
 The wide regression scored on 2,000 new rows from the same model: the held-out error falls, turns at step `r best_step`, and ends far above its minimum
 
-Every diagnostic in part 3 watched the training loss, and every one said "keep going". **Tracking the training loss is not tracking the loss you care about**
+Every diagnostic in part 3 was computed from the training loss, and every one said "keep going"
 :::
 :::
 
 ## Where the error comes from, this time
 
 ::: {.notes}
-Stated; the two-line proof (add and subtract R(f_F); each bracket is nonnegative by the definitions of f_F and f*) is exercise 2. Say: the class was chosen before the data, and so was the approximation error; the estimation error is the sample's, and can hold bias as well as variance; the same trade-off as week 1's, for any method that minimizes over a class; next week starts here. Exercise 2 also shows that for squared loss the approximation term is E[(f_F - f*)^2] by the optimal model theorem. Three functions: the best of all, the best in the class, what the algorithm returns. The class is chosen before the data; so is the approximation error. Next week starts here.
+Stated; the two-line proof (add and subtract R(f_F); each bracket is nonnegative by the definitions of f_F and f*) is exercise 2. Say: the class was chosen before the data, and so was the approximation error; the estimation error is the sample's, and can hold bias as well as variance; the same trade-off as week 1's, for any method that minimizes over a class; next week starts here. Exercise 2 also shows that for squared loss the approximation term is E[(f_F - f*)^2] by the optimal model theorem. Three functions: the best of all, the best in the class, what the algorithm returns.
 :::
 
-Three functions. $f^\star = \arg\min_f R(f)$: the best of all (squared loss: week 2's conditional mean). $f_{\mathcal F} = \arg\min_{f \in \mathcal F} R(f)$: the best in the class, fixed once $\mathcal F$ is. $\hat f = \arg\min_{f \in \mathcal F} \hat R_n(f)$: what the data give, random
+Three functions. $f^\star = \arg\min_f R(f)$: the best of all (squared loss: the conditional mean, by the optimal model theorem). $f_{\mathcal F} = \arg\min_{f \in \mathcal F} R(f)$: the best in the class, fixed once $\mathcal F$ is. $\hat f = \arg\min_{f \in \mathcal F} \hat R_n(f)$: what the data give, random
 
 **Bias--variance decomposition, ERM form.** Both underbraced terms are $\ge 0$:
 $$
@@ -998,22 +998,22 @@ Stated (Shalev-Shwartz and Ben-David, Theorem 5.1, in expectation form); the fin
 *Does not say*: all methods are equally good
 
 ::: {.ask}
-In the week 1 seminar a line and $k$ nearest neighbors often scored within a standard error of each other on gapminder. A fact about the methods, or about the data?
+In the gapminder competition, a line and $k$ nearest neighbors often scored within a standard error of each other. A fact about the methods, or about the data?
 :::
 
 ## Conclusion: optimization in ML is a big topic {.inverse}
 
 ::: {.notes}
-Compress: the one guarantee and its price; training loss is not test loss; stopping at the right complexity is next week.
+Compress: the one guarantee and its assumption; training loss is not test loss; stopping at the right complexity is next week.
 :::
 
-#### What the fitting algorithm does
+#### The fitting algorithm
 
 Each small step helps when curvature is bounded; where it ends, and whether it has ended, the guarantee does not say
 
-#### Training loss is not the loss you care about
+#### Training loss
 
-Every diagnostic today watched the training loss. A lower training loss is numerical progress; whether it is a better model is a different question
+Every diagnostic today was computed from the training loss. A lower training loss is numerical progress; whether it is a better model is a different question
 
 #### Stopping at the right amount of complexity
 

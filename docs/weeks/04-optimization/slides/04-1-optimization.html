@@ -157,10 +157,10 @@ Joshua Loftus
 <p>Part 4: stochastic gradient descent</p>
 <p>Part 5: when to stop iterating?</p>
 </section>
-<section id="where-week-3-left-the-fitting" class="slide level2" data-minutes="3">
-<h2>Where week 3 left the fitting</h2>
-<p>Week 2: least squares has a formula for <span class="math inline">\(\hat\beta\)</span>, and <span class="math inline">\(\hat\beta\)</span> solves the normal equations. Week 3: logistic regression is fitted by maximum likelihood, and <code>glm</code> did it for us</p>
-<p>Today’s question, in three parts: <strong>what did <code>glm</code> do? how can we tell whether fitting is working? should we let it finish?</strong></p>
+<section id="where-we-left-the-fitting" class="slide level2" data-minutes="3">
+<h2>Where we left the fitting</h2>
+<p>Least squares has a formula for <span class="math inline">\(\hat\beta\)</span>, and <span class="math inline">\(\hat\beta\)</span> solves the normal equations. Logistic regression is fitted by maximum likelihood, and <code>glm</code> did it for us</p>
+<p>Today: what did <code>glm</code> do? How can we tell whether fitting is working? Should we let it finish?</p>
 <div class="ask">
 <p>Write down the normal equations from memory. Then guess: how is it different for logistic regression?</p>
 </div>
@@ -172,7 +172,7 @@ Joshua Loftus
 \text{maximize } L(\beta ; \mathbf y | \mathbf X) = \prod_{i=1}^n L(\beta ; y_i | \mathbf x_i)
 \]</span> (assuming the data is i.i.d.)</p>
 <div class="recall">
-<p><strong>Maximum likelihood</strong> (Fisher, 1912–1922): choose the parameter that makes the observed data most probable. We maximize the <strong>log</strong>-likelihood because a product of <span class="math inline">\(n\)</span> small numbers underflows and a sum differentiates term by term; log is increasing, so the maximizer is the same. <strong>Least squares is a log-likelihood</strong>: for <span class="math inline">\(y_i \sim N(\mathbf x_i^T\beta, \sigma^2)\)</span> it is <span class="math inline">\(-\frac{1}{2\sigma^2}\sum_i (y_i - \mathbf x_i^T\beta)^2 + \text{const}\)</span>. In <code>glm</code>, <code>family</code> names the distribution whose likelihood is maximized: <code>gaussian</code> is <code>lm</code>, <code>binomial</code> is logistic regression.</p>
+<p><strong>Maximum likelihood</strong> (Fisher, 1912–1922): choose the parameter that makes the observed data most probable. We maximize the log-likelihood because a product of <span class="math inline">\(n\)</span> small numbers underflows and a sum differentiates term by term; log is increasing, so the maximizer is the same. <strong>Least squares is a log-likelihood</strong>: for <span class="math inline">\(y_i \sim N(\mathbf x_i^T\beta, \sigma^2)\)</span> it is <span class="math inline">\(-\frac{1}{2\sigma^2}\sum_i (y_i - \mathbf x_i^T\beta)^2 + \text{const}\)</span>. In <code>glm</code>, <code>family</code> names the distribution whose likelihood is maximized: <code>gaussian</code> is <code>lm</code>, <code>binomial</code> is logistic regression.</p>
 </div>
 <p>Next slide: a bit of mathematics</p>
 </section>
@@ -194,12 +194,12 @@ L(\beta ; \mathbf y | \mathbf X) = \prod_{i=1}^n \left( \frac{1}{1+e^{-\mathbf x
 \frac{\partial}{\partial \beta} \ell(\beta ; \mathbf y | \mathbf X) = \sum_{i=1}^n \left[ y_i  \left( \frac{\mathbf x_i e^{-\mathbf x_i^T\beta}}{1+e^{-\mathbf x_i^T\beta}} \right) + (1-y_i) \left(\frac{-\mathbf x_i}{1+e^{- \mathbf x_i^T\beta}} \right) \right]
 \]</span></p>
 <p><span class="math display">\[= \sum_{i=1}^n \mathbf x_i \left[ y_i - \left(\frac{1}{1+e^{- \mathbf x_i^T\beta}} \right) \right] = \color{#b73779}{\sum_{i=1}^n \mathbf x_i [y_i - \hat p_i(\beta)]}\]</span></p>
-<p>Set this equal to 0 and solve for <span class="math inline">\(\beta\)</span>. How: the rest of today</p>
+<p>Set this equal to 0 and solve for <span class="math inline">\(\beta\)</span></p>
 </section>
 <section id="the-score-equations-read-as-orthogonality" class="slide level2" data-minutes="3">
 <h2>The score equations, read as orthogonality</h2>
 <div class="retrieval">
-<p>Week 2, least squares: <span class="math inline">\(\mathbf X^T(\mathbf y - \mathbf X\hat\beta) = \mathbf 0\)</span>. The residual is orthogonal to every column of <span class="math inline">\(\mathbf X\)</span>.</p>
+<p>Least squares, the normal equations: <span class="math inline">\(\mathbf X^T(\mathbf y - \mathbf X\hat\beta) = \mathbf 0\)</span>. The residual is orthogonal to every column of <span class="math inline">\(\mathbf X\)</span>.</p>
 </div>
 <p><strong>Logistic score equations.</strong> Stack the last slide’s rows: writing <span class="math inline">\(\mathbf p(\beta) = (\hat p_1(\beta), \ldots, \hat p_n(\beta))^T\)</span>, the MLE <span class="math inline">\(\hat\beta\)</span> solves <span class="math display">\[
 \mathbf X^T\big(\mathbf y - \mathbf p(\hat\beta)\big) = \mathbf 0
@@ -213,7 +213,7 @@ L(\beta ; \mathbf y | \mathbf X) = \prod_{i=1}^n \left( \frac{1}{1+e^{-\mathbf x
 <p><strong>The log-likelihood is concave.</strong> Differentiating once more, <span class="math display">\[
 \frac{\partial^2 \ell}{\partial\beta\,\partial\beta^T} = -\sum_{i=1}^n w_i\, \mathbf x_i\mathbf x_i^T, \qquad w_i = \hat p_i(\beta)\,\big(1 - \hat p_i(\beta)\big) &gt; 0
 \]</span> Each term is <span class="math inline">\(-w_i\, \mathbf x_i\mathbf x_i^T\)</span> with <span class="math inline">\(w_i &gt; 0\)</span>. In any direction <span class="math inline">\(v\)</span>, <span class="math inline">\(v^T \mathbf x_i\mathbf x_i^T v = (\mathbf x_i^T v)^2 \ge 0\)</span>, so the sum curves downward, or is flat, in every direction: the log-likelihood is concave, and any finite solution of the score equations is its global maximum</p>
-<p>What concavity does not give: existence (week 3’s separable case has no finite solution). <strong>So how do we solve the score equations?</strong></p>
+<p>What concavity does not give: existence (the separable case has no finite solution). So how do we solve the score equations?</p>
 </section>
 <section id="newton-raphson" class="slide level2">
 <h2>Newton-Raphson</h2>
@@ -227,7 +227,7 @@ L(\beta ; \mathbf y | \mathbf X) = \prod_{i=1}^n \left( \frac{1}{1+e^{-\mathbf x
 </section>
 <section id="logistic-regression-fitting-multivariate-case" class="slide level2">
 <h2>Logistic regression fitting: multivariate case</h2>
-<p>Newton-IRLS (equivalent) steps, <span class="math inline">\(g\)</span> the logit link. The one line to keep: <strong>each iteration is a weighted least-squares fit around the current fit</strong></p>
+<p>Newton-IRLS (equivalent) steps, <span class="math inline">\(g\)</span> the logit link. Each iteration is a weighted least-squares fit around the current fit</p>
 <p><span class="math display">\[
 \begin{eqnarray}
 \hat{\mathbf p}_t &amp; \gets &amp; g^{-1}(\mathbf X \hat \beta_t)
@@ -243,11 +243,11 @@ L(\beta ; \mathbf y | \mathbf X) = \prod_{i=1}^n \left( \frac{1}{1+e^{-\mathbf x
 <p><strong>Note</strong>: larger weights on observations with <span class="math inline">\(\hat p\)</span> closer to 1/2, i.e.&nbsp;the most difficult to classify (<strong><em>look for variations of this theme</em></strong>) <span class="source">See Section 4.4.1 of <a href="https://web.stanford.edu/~hastie/ElemStatLearn/">ESL</a></span></p>
 </div>
 </section>
-<section id="glms-in-r-what-you-should-know" class="slide level2 inverse">
-<h2>GLMs in <code>R</code>: what you should know</h2>
+<section id="glms-in-r" class="slide level2 inverse">
+<h2>GLMs in <code>R</code></h2>
 <p><strong>Does <code>glm</code> use Newton-Raphson for every family?</strong> Its fitter is IRLS, which is Fisher scoring: Newton with the expected Hessian in place of the actual one. For the default links (<code>binomial</code>-logit, <code>poisson</code>-log, <code>gaussian</code>-identity) the two coincide; for other links it is a close relative. <code>lm</code> is the one-step case</p>
 <p><strong>How many iterations?</strong> Usually under ten. <code>summary()</code> prints <code>Number of Fisher Scoring iterations</code></p>
-<p><strong>When does it fail?</strong> Mostly when there is no finite MLE, week 3’s separable case, with coefficients growing at every iteration. The warning <code>fitted probabilities numerically 0 or 1 occurred</code> is a symptom to investigate, not a diagnosis: a finite MLE with a steep slope triggers it too</p>
+<p><strong>When does it fail?</strong> Mostly when there is no finite MLE, the separable case, with coefficients growing at every iteration. The warning <code>fitted probabilities numerically 0 or 1 occurred</code> is a symptom to investigate, not a diagnosis: a finite MLE with a steep slope triggers it too</p>
 <p><strong>Why does the rest of machine learning not do this?</strong> Each step solves a <span class="math inline">\(p \times p\)</span> system. For <span class="math inline">\(p\)</span> in the millions that is the cost that matters; the next part avoids it</p>
 </section>
 <section id="section-1" class="slide level2 inverse center">
@@ -373,7 +373,7 @@ L(\beta ; \mathbf y | \mathbf X) = \prod_{i=1}^n \left( \frac{1}{1+e^{-\mathbf x
 <p><span class="math display">\[
 \beta_{t+1} = \beta_t - \gamma a\beta_t = (1 - \gamma a)\,\beta_t, \qquad \beta_t = (1 - \gamma a)^t \beta_0
 \]</span></p>
-<p>Converges iff <span class="math inline">\(|1 - \gamma a| &lt; 1\)</span>, i.e.&nbsp;<span class="math inline">\(0 &lt; \gamma &lt; 2/a\)</span>. The step <span class="math inline">\(\gamma = 1/a\)</span> lands in one move</p>
+<p>Converges iff <span class="math inline">\(|1 - \gamma a| &lt; 1\)</span>, i.e.&nbsp;<span class="math inline">\(0 &lt; \gamma &lt; 2/a\)</span>. The step <span class="math inline">\(\gamma = 1/a\)</span> reaches the minimum in one move</p>
 <div class="fragment">
 <p>Several directions with curvatures <span class="math inline">\(a_1 \ge \dots \ge a_d &gt; 0\)</span>, one step size for all of them: <span class="math inline">\(\gamma &lt; 2/a_1\)</span> to converge, and the slowest direction shrinks like <span class="math inline">\(\max_j |1 - \gamma a_j|^t\)</span>, which for <span class="math inline">\(\gamma \le 1/a_1\)</span> is <span class="math inline">\((1 - \gamma a_d)^t\)</span></p>
 <div class="leave">
@@ -414,7 +414,7 @@ L(\beta ; \mathbf y | \mathbf X) = \prod_{i=1}^n \left( \frac{1}{1+e^{-\mathbf x
 <div class="ask">
 <p>The saddle: compute the gradient at <span class="math inline">\((0, 0)\)</span>; is it a minimum? One of the three starts is <span class="math inline">\((0, 1.2)\)</span>: where does its path end, and why does it never leave?</p>
 </div>
-<p>Where you start decides where you end. Least squares and logistic regression have one valley (convex); most of what comes after week 7 does not</p>
+<p>Where you start decides where you end. Least squares and logistic regression have one valley (convex); a neural network, later in the course, does not</p>
 </section>
 <section id="too-big-too-small" class="slide level2">
 <h2>Too big, too small</h2>
@@ -461,7 +461,7 @@ L(\beta ; \mathbf y | \mathbf X) = \prod_{i=1}^n \left( \frac{1}{1+e^{-\mathbf x
 </section>
 <section id="directions-with-zero-slope" class="slide level2">
 <h2>Directions with zero slope</h2>
-<p>These are some of the issues that make optimization hard. What’s more: in <span class="math inline">\(\mathbb R^d\)</span> the slope is zero in <span class="math inline">\(d - 1\)</span> directions; whether they lead down is a question of curvature</p>
+<p>In <span class="math inline">\(\mathbb R^d\)</span> the slope is zero in <span class="math inline">\(d - 1\)</span> directions; whether they lead down is a question of curvature</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -542,8 +542,8 @@ f(y) - f(x) &amp;\le \nabla f(x)^T v + \int_0^1 L\,t\,\|v\|^2\, dt
 <h2></h2>
 <h3 id="part-4-stochastic-gradient-descent">Part 4: stochastic gradient descent</h3>
 </section>
-<section id="what-a-step-costs" class="slide level2">
-<h2>What a step costs</h2>
+<section id="cost-per-step" class="slide level2">
+<h2>Cost per step</h2>
 <p>Second-order methods invert the <span class="math inline">\(p \times p\)</span> Hessian; first-order methods compute the <span class="math inline">\(p \times 1\)</span> gradient. For a linear model or a GLM, where one row’s gradient costs about <span class="math inline">\(p\)</span> operations:</p>
 <table class="caption-top">
 <colgroup>
@@ -599,7 +599,7 @@ f(y) - f(x) &amp;\le \nabla f(x)^T v + \int_0^1 L\,t\,\|v\|^2\, dt
 \mathbb E_I\big[\nabla\ell_I(\beta)\big] = \sum_{i=1}^n \frac1n\,\nabla\ell_i(\beta) = \nabla\hat R_n(\beta)
 \]</span></p>
 <p>Unbiased, whatever the data are. A batch of <span class="math inline">\(b\)</span> rows drawn with replacement averages <span class="math inline">\(b\)</span> such gradients: still unbiased</p>
-<p>Compute update using one randomly sampled observation, or a randomly sampled subset (“mini-batch SGD”). Correct on average, cheap, and <strong>not guaranteed to decrease the training loss on any one step</strong>: the descent lemma is about the full gradient</p>
+<p>Compute update using one randomly sampled observation, or a randomly sampled subset (“mini-batch SGD”). Correct on average, cheap, and not guaranteed to decrease the training loss on any one step: the descent lemma is about the full gradient</p>
 </div>
 </section>
 <section id="the-two-paths" class="slide level2">
@@ -664,14 +664,14 @@ f(y) - f(x) &amp;\le \nabla f(x)^T v + \int_0^1 L\,t\,\|v\|^2\, dt
 </div>
 </div><div class="column" style="width:45%;">
 <p><strong>The wide regression:</strong> simulated least squares, <span class="math inline">\(n = 80\)</span>, <span class="math inline">\(p = 60\)</span>, noise sd 3, from <span class="math inline">\(\beta_0 = \mathbf 0\)</span> with step <span class="math inline">\(1/2L\)</span></p>
-<p>The training error, the number the algorithm sees, falls at every step and is still falling at 300</p>
+<p>The training error, the number the algorithm minimizes, falls at every step and is still falling at 300</p>
 <div class="ask">
 <p>You may stop the algorithm at any step. Which one, and why?</p>
 </div>
 </div></div>
 </section>
-<section id="stopping-early-what-the-training-loss-did-not-show" class="slide level2">
-<h2>Stopping early: what the training loss did not show</h2>
+<section id="stopping-early-the-held-out-error" class="slide level2">
+<h2>Stopping early: the held-out error</h2>
 <div class="columns">
 <div class="column" style="width:55%;">
 <div class="cell">
@@ -685,12 +685,12 @@ f(y) - f(x) &amp;\le \nabla f(x)^T v + \int_0^1 L\,t\,\|v\|^2\, dt
 </div>
 </div><div class="column" style="width:45%;">
 <p>The wide regression scored on 2,000 new rows from the same model: the held-out error falls, turns at step 7, and ends far above its minimum</p>
-<p>Every diagnostic in part 3 watched the training loss, and every one said “keep going”. <strong>Tracking the training loss is not tracking the loss you care about</strong></p>
+<p>Every diagnostic in part 3 was computed from the training loss, and every one said “keep going”</p>
 </div></div>
 </section>
 <section id="where-the-error-comes-from-this-time" class="slide level2">
 <h2>Where the error comes from, this time</h2>
-<p>Three functions. <span class="math inline">\(f^\star = \arg\min_f R(f)\)</span>: the best of all (squared loss: week 2’s conditional mean). <span class="math inline">\(f_{\mathcal F} = \arg\min_{f \in \mathcal F} R(f)\)</span>: the best in the class, fixed once <span class="math inline">\(\mathcal F\)</span> is. <span class="math inline">\(\hat f = \arg\min_{f \in \mathcal F} \hat R_n(f)\)</span>: what the data give, random</p>
+<p>Three functions. <span class="math inline">\(f^\star = \arg\min_f R(f)\)</span>: the best of all (squared loss: the conditional mean, by the optimal model theorem). <span class="math inline">\(f_{\mathcal F} = \arg\min_{f \in \mathcal F} R(f)\)</span>: the best in the class, fixed once <span class="math inline">\(\mathcal F\)</span> is. <span class="math inline">\(\hat f = \arg\min_{f \in \mathcal F} \hat R_n(f)\)</span>: what the data give, random</p>
 <p><strong>Bias–variance decomposition, ERM form.</strong> Both underbraced terms are <span class="math inline">\(\ge 0\)</span>: <span class="math display">\[
 R(\hat f) = R(f^\star) + \underbrace{\big[R(\hat f) - R(f_{\mathcal F})\big]}_{\text{estimation}} + \underbrace{\big[R(f_{\mathcal F}) - R(f^\star)\big]}_{\text{approximation}}
 \]</span></p>
@@ -702,15 +702,15 @@ R(\hat f) = R(f^\star) + \underbrace{\big[R(\hat f) - R(f_{\mathcal F})\big]}_{\
 <p><em>Says</em>: choosing a method is an <em>assumption</em> about the world; the ERM form shows where one such assumption enters, the class <span class="math inline">\(\mathcal F\)</span> chosen before the data</p>
 <p><em>Does not say</em>: all methods are equally good</p>
 <div class="ask">
-<p>In the week 1 seminar a line and <span class="math inline">\(k\)</span> nearest neighbors often scored within a standard error of each other on gapminder. A fact about the methods, or about the data?</p>
+<p>In the gapminder competition, a line and <span class="math inline">\(k\)</span> nearest neighbors often scored within a standard error of each other. A fact about the methods, or about the data?</p>
 </div>
 </section>
 <section id="conclusion-optimization-in-ml-is-a-big-topic" class="slide level2 inverse">
 <h2>Conclusion: optimization in ML is a big topic</h2>
-<h4 id="what-the-fitting-algorithm-does">What the fitting algorithm does</h4>
+<h4 id="the-fitting-algorithm">The fitting algorithm</h4>
 <p>Each small step helps when curvature is bounded; where it ends, and whether it has ended, the guarantee does not say</p>
-<h4 id="training-loss-is-not-the-loss-you-care-about">Training loss is not the loss you care about</h4>
-<p>Every diagnostic today watched the training loss. A lower training loss is numerical progress; whether it is a better model is a different question</p>
+<h4 id="training-loss">Training loss</h4>
+<p>Every diagnostic today was computed from the training loss. A lower training loss is numerical progress; whether it is a better model is a different question</p>
 <h4 id="stopping-at-the-right-amount-of-complexity">Stopping at the right amount of complexity</h4>
 <p><em>Maybe the most important part! Next lecture</em></p>
 
