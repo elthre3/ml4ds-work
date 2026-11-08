@@ -1,0 +1,62 @@
+---
+title: "Teacher note: week 7 seminar"
+subtitle: "For class teachers"
+format:
+  html:
+    toc: false
+    embed-resources: true
+---
+
+## Keep or rush
+
+In seminar order. Planned total 60 minutes; cutting the first item marked gets back to 54, which leaves time for transitions and questions. The simulation at the top of coding part 2 takes about a minute and uses no data from part 1: run its chunk at the very start, during problem 1, so the figure is ready when you reach it.
+
+| Item | Min | | If short |
+|---|---:|---|---|
+| Problem 1(a, b): soft thresholding derived in three cases; the lecture's objective without the $\tfrac12$ moves each coefficient by $\lambda/2$ | 4 | Keep | Write the $b > 0$ case on the board and say the other two are mirror images |
+| Problem 1(c, d): elastic net is threshold then divide; best subset is hard thresholding at $\sqrt{2\lambda}$, the discontinuous rule | 3 | Rush | Say the two answers and sketch the three rules |
+| Problem 2(a, b, c): $\mathbb P(r_1 > r) = (1 - 2r)^n$, $\mathbb E[r_1] = 1/(2(n+1))$, $\mathbb E[r_1^2] = 1/(2(n+1)(n+2))$, the lemma at $k = 1$, $p = 1$ | 4 | Keep | The tail formula and the substitution $u = 1 - 2r$ |
+| Problem 2(d, e): $N(r)$ binomial with mean $2rn$, so $r_k \approx k/(2n)$; in $p$ dimensions $r_k^p \approx k/(c_p n)$; the boundary changes the constant | 3 | Rush; cut second | The count in a ball is $n$ times its volume; set it to $k$ |
+| Problem 3: $\int f''^2 = \beta^T\boldsymbol\Omega\beta$, the equations $(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y$, the diagonal basis gives $z_j/(1 + \lambda w_j)$, the line is never shrunk | 6 | Rush; cut first | Expand the double sum and write the equations; stop before (c) |
+| Coding 1, step 1: `cv_mse()`, the fold loop, the checkpoint against the variance | 4 | Keep | `tr <- d[fold != k, ]`, `ho <- d[fold == k, ]` |
+| Coding 1, step 2 and question 1: the $k$-NN curve, minimum at $k = 100$ (522); the tuning curve from the structures seminar has the same shape and minimum | 6 | Keep | Standardize with `tr`'s means and sds, applied to both `tr` and `ho` |
+| Coding 1, step 3 and question 2: the lasso through the same pipeline, minimum at $\lambda = 0.1$ (531); `cv.glmnet` agrees, `lambda.1se` sets 5 of 11 to zero | 4 | Rush; cut third | Give the `sapply` line; run the `cv.glmnet` chunk and read the two $\lambda$'s |
+| Coding 2, step 4 and question 3: slopes of the learning curves against $-2/(p+2)$; 64 times the data halves the error in $p = 10$; the best $k$ grows with $n$ | 10 | Keep | `coef(lm(log(mse) ~ log(n)))[2]` per $p$; read the four slopes off |
+| Coding 3, step 5 and question 4: copies of a track across folds; $k = 1$ scores 777 with folds by row against 1064 with folds by track | 8 | Keep | `fold_of_track[match(rows$track_id, tracks)]`; the unit of the fold is the unit that repeats |
+| Coding 3, step 6 and question 5: random CV 586 and mean error 0; on 2019--2020 tracks MSE 453 and mean error $+11$; the new tracks' own mean scores 351 | 8 | Keep | A random split cannot see drift; the lower MSE is not good news, compare with the baseline on the same tracks |
+
+: {tbl-colwidths="[32,6,16,46]"}
+
+Minimum seminar, about 35 minutes: problem 1(a, b), coding steps 1, 2, 5 and 6 with their questions. With more time, add step 4 back first, then problem 2(a, b, c).
+
+## If you read on
+
+How it runs
+
+- Students did exercises 1 and 2 at home (the ridge form, and the rate with the slides closed). Open the [complete notebook](https://ml4ds.com/teachers/notebook7_complete.html) on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are answers. Show an exercise's solution only if asked. Each problem's solution stands on its own, so a skipped problem costs nothing later.
+- Everything headed "Optional, can be done at home" is outside the seminar: the wrong way to cross-validate (screening on all rows, from ESL section 7.10.2) and the weighted-ridge equations checked on `mgcv`'s fit.
+- One seed, `set.seed(310)` at the split, and no other: a student who runs the chunks in order gets the numbers below; one who changes the seed gets a different split and slightly different numbers everywhere except step 6, whose split is by year. The data note's `distinct()` is in the loader, so the lecture's and the seminar's numbers agree; step 5 reloads the file to put the copies back.
+
+What students should see
+
+- Problem 1: $\hat b = \mathrm{sign}(z)(|z| - \lambda)_+$; the lecture's objective gives $\lambda/2$; elastic net $\mathrm{sign}(z)(|z| - \lambda_1)_+/(1 + \lambda_2)$; best subset $\hat b = z$ if $|z| > \sqrt{2\lambda}$, else $0$.
+- Problem 2: $(1 - 2r)^n$; $1/(2(n+1))$; $1/(2(n+1)(n+2))$, the lemma's $(1/n)^2$ with constant $\tfrac12$; $r_k \approx k/(2n)$ (exactly $k/(2(n+1))$, an order statistic); $r_k \approx (k/(c_p n))^{1/p}$.
+- Problem 3: $\beta^T\boldsymbol\Omega\beta$ by expanding the double sum; $(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y$, positive definite when $\mathbf B$ has full column rank; $\hat\beta_j = z_j/(1 + \lambda w_j)$; the two functions with $w_j = 0$ are the constant and the line, never shrunk, and the fit tends to the least-squares line.
+- Coding 1: 10 folds of 500. The mean's CV score is within 1 of `var(y_train)`. $k$-NN CV MSE 1026, 773, 614, 557, 537, 524, 522, 524, 533 at $k = 1, 2, 5, 10, 20, 50, 100, 200, 500$; minimum at $k = 100$. The tuning curve: 1002, 732, 581, 556, 531, 525, 523, 523, 530, standard errors 12 to 29, minimum at $k = 100$. Lasso: CV MSE 565 at $\lambda = 3$ falling to 531 at $\lambda = 0.1$ and 532 at the small end; `cv.glmnet` with the same folds gives `lambda.min` 0.13 and `lambda.1se` 0.99, with 1 and 5 zero coefficients.
+- Coding 2: slopes $-0.74$, $-0.61$, $-0.35$, $-0.21$ against the exponents $-0.67$, $-0.5$, $-0.29$, $-0.17$ (a little steeper each; the bound is a worst case). From $n = 100$ to $6400$ the error falls to $0.05$, $0.08$, $0.23$ and $0.4$ of its value, against $0.06$, $0.12$, $0.3$ and $0.5$ predicted. The best $k$ goes from 20 to 500 for $p = 1$ and from 20 to 50 for $p = 10$. Question 3(c): $2^{6.5} \approx 90$ times the data for $p = 11$.
+- Coding 3, step 5: 5,774 rows for the 5,000 training tracks. Folds by row against folds by track: 777 against 1064 at $k = 1$, 609 against 693 at $k = 5$, 555 against 564 at $k = 50$. Step 6: 7,140 tracks up to 2018 and 2,860 from 2019 on; the plane's CV MSE on the old tracks 586; on the new tracks MSE 453 and mean error $+11.4$ (the year coefficient is $-0.19$); the old mean scores 476 on the new tracks and the new mean 351 (their variance), against 613 for the old tracks' variance.
+- Optional: on pure noise the mean scores 0.97, the wrong way 0.39, the right way 0.91; the weighted-ridge equations reproduce `coef(g)` to $10^{-10}$.
+- Run times in the build container (R 4.3): the whole notebook executes in about two and a half minutes; the learning-curve simulation takes 50 seconds, the $k$-NN curve 20, step 5 about 20, step 3 about 10. A laptop may take two or three times as long.
+
+Where they get stuck
+
+- Step 1: filling `fit_predict(tr, ho)` with `d` instead of `tr`, so every fold fits on all rows; the checkpoint passes (the mean is the mean) but the $k$-NN curve then bottoms at $k = 1$ with a score near 0. The curve is the check.
+- Step 2: standardizing `ho` with its own means and sds, or both with the full training set's. The numbers move by a point or two; the procedure is the point, and it is what step 5 and the optional item are about.
+- Question 1: students may expect the two curves to differ more. They differ at the level (CV fits on 4,500 rows, scores 5,000 held out once) and not in the shape; the lesson is that CV cost no rows.
+- Step 3: `predict(fit, ..., s = lam)` returns a one-column matrix; `as.vector()` is in the given code. `cv.glmnet`'s `lambda.min` differs from `lam_cv` because its path is finer and it standardizes once on all rows.
+- Step 4: `coef(lm(log(mse) ~ log(n)))[2]` inside `summarize()`; a student who regresses `mse` on `n` without logs gets a slope with no meaning. The simulation's slopes are steeper than the exponent; say that the bound is a worst case and this truth is one function.
+- Step 5: assigning `fold_track` with `rep(1:K, ...)` over the rows in track order (not random; the checkpoint still passes). The `match()` line is in the hint.
+- Step 6: fitting on `old` and `new` together, or scoring `old`'s mean on `old`. Students read 453 < 586 as improvement; the baseline on the same tracks (351) and the mean error ($+11$) are the answer.
+- In the student file, a chunk with a blank starts with `#| eval: false`; they delete that line once the blank is filled. The `# ...` lines can stay.
+
+Sources: the data note at [ml4ds.com/data/spotify.html](https://ml4ds.com/data/spotify.html); the optional item follows Hastie, Tibshirani and Friedman (2009), *The Elements of Statistical Learning*, 2nd edition, section 7.10.2, pp. 245--247.

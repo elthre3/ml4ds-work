@@ -1,0 +1,638 @@
+---
+title: "Week 7 seminar (complete)"
+author: "Joshua Loftus"
+format:
+  html:
+    toc: true
+    embed-resources: false
+execute:
+  echo: true
+  warning: false
+  message: false
+  error: false
+---
+
+<!-- Teacher version. This file is shown on screen in the seminar, so nothing in it
+is addressed to the teacher except this comment. Boxes: blue "Hint 1, 2, ..." and
+green "Reveal solution/answer", all collapsed; click to open. Hints are revealed in
+order, after the room has had a few minutes, the solution last. Hints and solutions
+carrying the class .answer are removed from the student file notebook7.qmd by
+_build_env/make_incomplete.py; hints without it (the pre-seminar exercises and the
+optional items) stay in the student file, behind a warning not to open them early.
+Do not edit the student file by hand.
+
+How this seminar runs: students do exercises 1 and 2 at home (neither is gone
+through in the room unless asked). In the room: problems 1 to 3 (about 20 minutes:
+7, 7, 6; hints then answers), then the coding (about 40: part 1 14, part 2 10,
+part 3 16). Everything headed "Optional, can be done at home" is outside the
+seminar. The simulation at the top of part 2 takes about 40 seconds and does not
+use the Spotify data: run its chunk at the start of the seminar, during problem 1,
+so the figure is ready. If the room runs slow, protect problem 1, coding steps 1
+and 2, and part 3; problem 3 is the first thing to cut, then problem 2(d, e), then
+question 2. One seed, set at the split: every student who runs the chunks in order
+sees the numbers in the teacher note. -->
+
+```{r}
+#| label: setup
+library(tidyverse)       # should've already install.packages("tidyverse")
+library(glmnet)          # might need to install.packages("glmnet")
+library(mgcv)            # penalized splines; ships with R
+theme_set(theme_minimal())
+mse <- function(y, pred) mean((y - pred)^2)
+se_loss <- function(y, pred) sd((y - pred)^2) / sqrt(length(y))   # standard error of an MSE
+# k-NN regression with several standardized inputs, as in the lecture: squared distances by
+# matrix algebra, then the mean outcome of the k nearest training rows.
+knn_predict <- function(Xnew, Xtrain, ytrain, k) {
+  d2 <- outer(rowSums(Xnew^2), rowSums(Xtrain^2), "+") - 2 * Xnew %*% t(Xtrain)
+  apply(d2, 1, function(d) mean(ytrain[order(d)[1:k]]))
+}
+```
+
+## Before the seminar
+
+<!-- At home, before the seminar. -->
+
+The lecture stated the bias--variance decomposition in ridge form and left its proof to you (exercise 1). It proved the $k$-nearest-neighbor rate from a stated lemma; exercise 2 is that proof again, with the slides closed. Do both on paper before the seminar; the seminar's problems are variations on them. You may use, without proof: linearity of expectation; that the variance of a sum of independent variables is the sum of their variances; that for a symmetric matrix $\mathbf A$ the gradient of $\beta^T\mathbf A\beta$ is $2\mathbf A\beta$ and its Hessian is $2\mathbf A$; and the tower property, $\mathbb E[W] = \mathbb E\big[\mathbb E[W \mid V]\big]$. Throughout, assume that every expectation that appears exists.
+
+::: {.callout-warning title="Hints"}
+Each exercise has hints, collapsed below it. Do not open a hint unless you have been stuck for at least a few minutes, and open them in order. Solutions are shown in the seminar if you ask.
+:::
+
+**Exercise 1 (bias--variance decomposition, ridge form).** $\mathbf X$ is $n \times p$ with orthonormal columns, $\mathbf X^T\mathbf X = \mathbf I$ (so $p \le n$). The outcome is $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$ with $\beta$ fixed and unknown and the $\varepsilon_i$ independent, mean $0$, variance $\sigma^2$. Expectations are over $\boldsymbol\varepsilon$, with $\mathbf X$ fixed. The least-squares estimator solves the normal equations $\mathbf X^T\mathbf X\beta = \mathbf X^T\mathbf y$, so here $\hat\beta = \mathbf X^T\mathbf y$. For $\lambda > 0$ the ridge estimator $\hat\beta_\lambda$ minimizes $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|^2$.
+
+(a) Show that $\hat\beta$ is unbiased, $\mathbb E[\hat\beta] = \beta$, and that each coordinate has variance $\mathrm{Var}(\hat\beta_j) = \sigma^2$. Deduce $\mathbb E\|\hat\beta - \beta\|^2 = p\sigma^2$.
+
+(b) Derive the stationarity condition of the ridge objective, $(\mathbf X^T\mathbf X + \lambda\mathbf I)\beta = \mathbf X^T\mathbf y$, and show that in this design $\hat\beta_\lambda = \hat\beta/(1 + \lambda)$.
+
+(c) Compute the bias $\mathbb E[\hat\beta_{\lambda,j}] - \beta_j$ and the variance $\mathrm{Var}(\hat\beta_{\lambda,j})$ of each coordinate, and show
+$$
+\mathrm{MSE}(\lambda) = \mathbb E\|\hat\beta_\lambda - \beta\|^2 = \sum_{j=1}^p \frac{\lambda^2\beta_j^2 + \sigma^2}{(1 + \lambda)^2}.
+$$
+
+(d) Differentiate $\mathrm{MSE}(\lambda)$ and show that its derivative at $\lambda = 0$ is $-2p\sigma^2$, whatever $\beta$ is. Conclude that for every $\beta$ there is a $\lambda > 0$ with $\mathrm{MSE}(\lambda) < \mathrm{MSE}(0) = p\sigma^2$.
+
+(e) Find the $\lambda$ that minimizes $\mathrm{MSE}(\lambda)$, in terms of $\sigma^2$ and $\|\beta\|^2/p$, and the minimum value. Why can this $\lambda$ not be used in practice?
+
+::: {.callout-note collapse="true" title="Hint 1"}
+(a) $\hat\beta = \mathbf X^T(\mathbf X\beta + \boldsymbol\varepsilon) = \beta + \mathbf X^T\boldsymbol\varepsilon$. What are the mean vector and the covariance matrix of $\mathbf X^T\boldsymbol\varepsilon$? The covariance matrix of $\mathbf A\boldsymbol\varepsilon$ is $\mathbf A\,\mathrm{Cov}(\boldsymbol\varepsilon)\,\mathbf A^T$.
+:::
+
+::: {.callout-note collapse="true" title="Hint 2"}
+(b), (c) With $\mathbf X^T\mathbf X = \mathbf I$ the stationarity condition reads $(1 + \lambda)\beta = \mathbf X^T\mathbf y$. For a constant $c$, the estimator $c\hat\beta_j$ has bias $(c - 1)\beta_j$ and variance $c^2\sigma^2$.
+:::
+
+::: {.callout-note collapse="true" title="Hint 3"}
+(d), (e) Write $\mathrm{MSE}(\lambda) = (\lambda^2\|\beta\|^2 + p\sigma^2)/(1 + \lambda)^2$ and use the quotient rule; after cancelling a factor $(1 + \lambda)$ the numerator of the derivative is $2\lambda\|\beta\|^2 - 2p\sigma^2$.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+(a) $\hat\beta = \mathbf X^T\mathbf y = \mathbf X^T\mathbf X\beta + \mathbf X^T\boldsymbol\varepsilon = \beta + \mathbf X^T\boldsymbol\varepsilon$. Since $\mathbb E[\boldsymbol\varepsilon] = \mathbf 0$, $\mathbb E[\hat\beta] = \beta$. The covariance matrix of $\mathbf X^T\boldsymbol\varepsilon$ is $\mathbf X^T\,\mathrm{Cov}(\boldsymbol\varepsilon)\,\mathbf X = \sigma^2\mathbf X^T\mathbf X = \sigma^2\mathbf I$ (independence with equal variances makes $\mathrm{Cov}(\boldsymbol\varepsilon) = \sigma^2\mathbf I$), so each coordinate has variance $\sigma^2$ and the coordinates are uncorrelated. Then $\mathbb E\|\hat\beta - \beta\|^2 = \sum_j \mathbb E(\hat\beta_j - \beta_j)^2 = \sum_j \mathrm{Var}(\hat\beta_j) = p\sigma^2$.
+
+(b) $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|^2 = \mathbf y^T\mathbf y - 2\beta^T\mathbf X^T\mathbf y + \beta^T\mathbf X^T\mathbf X\beta + \lambda\beta^T\beta$, with gradient $-2\mathbf X^T\mathbf y + 2\mathbf X^T\mathbf X\beta + 2\lambda\beta$. Setting it to zero gives $(\mathbf X^T\mathbf X + \lambda\mathbf I)\beta = \mathbf X^T\mathbf y$. With $\mathbf X^T\mathbf X = \mathbf I$ this is $(1 + \lambda)\beta = \mathbf X^T\mathbf y = \hat\beta$, so $\hat\beta_\lambda = \hat\beta/(1 + \lambda)$. (The Hessian $2(1 + \lambda)\mathbf I$ is positive definite, so the stationary point is the minimizer.)
+
+(c) $\mathbb E[\hat\beta_{\lambda,j}] = \beta_j/(1 + \lambda)$, so the bias is $\beta_j/(1 + \lambda) - \beta_j = -\lambda\beta_j/(1 + \lambda)$: a multiple of $\beta_j$, toward zero. The variance is $\sigma^2/(1 + \lambda)^2$. Each coordinate's mean squared error is bias squared plus variance, $(\lambda^2\beta_j^2 + \sigma^2)/(1 + \lambda)^2$; summing over $j$ gives the formula. $\blacksquare$
+
+(d) $\mathrm{MSE}(\lambda) = (\lambda^2\|\beta\|^2 + p\sigma^2)/(1 + \lambda)^2$. By the quotient rule,
+$$
+\mathrm{MSE}'(\lambda) = \frac{2\lambda\|\beta\|^2(1 + \lambda)^2 - 2(1 + \lambda)(\lambda^2\|\beta\|^2 + p\sigma^2)}{(1 + \lambda)^4} = \frac{2\lambda\|\beta\|^2(1 + \lambda) - 2\lambda^2\|\beta\|^2 - 2p\sigma^2}{(1 + \lambda)^3} = \frac{2\lambda\|\beta\|^2 - 2p\sigma^2}{(1 + \lambda)^3}.
+$$
+At $\lambda = 0$ this is $-2p\sigma^2 < 0$, and $\beta$ does not appear. A differentiable function with a negative derivative at $0$ is below its value at $0$ on some interval $(0, \delta)$, so $\mathrm{MSE}(\lambda) < p\sigma^2$ for every small enough $\lambda > 0$: some bias, on purpose, beats least squares, whatever the truth is.
+
+(e) The derivative is zero at $\lambda^\star = p\sigma^2/\|\beta\|^2 = \sigma^2 / (\|\beta\|^2/p)$, the noise variance over the mean squared coefficient; it is negative below $\lambda^\star$ and positive above, so $\lambda^\star$ is the minimizer. Substituting, with $B = \|\beta\|^2$: $\mathrm{MSE}(\lambda^\star) = \big(p^2\sigma^4/B + p\sigma^2\big)/\big(1 + p\sigma^2/B\big)^2 = p\sigma^2 \cdot B/(B + p\sigma^2) < p\sigma^2$. It cannot be used because $\beta$ and $\sigma^2$ are what we do not know; $\lambda$ is chosen on the data, by cross-validation, and the decomposition is about a fixed $\lambda$, not a data-chosen one.
+
+Common errors: forgetting to square the bias in (c); in (d), claiming $\mathrm{MSE}(\lambda) < \mathrm{MSE}(0)$ for every $\lambda > 0$ (false: as $\lambda \to \infty$, $\mathrm{MSE}(\lambda) \to \|\beta\|^2$, which exceeds $p\sigma^2$ when the signal is strong); writing the variance of $\hat\beta_{\lambda,j}$ as $\sigma^2/(1 + \lambda)$ (a constant $c$ multiplies a variance by $c^2$).
+:::
+
+**Exercise 2 (the $k$-nearest-neighbor rate, with the slides closed).** Inputs $x_1, \ldots, x_n$ i.i.d. uniform on $[0, 1]^p$; outcomes $y_i = f^\star(x_i) + \varepsilon_i$ with the $\varepsilon_i$ independent of each other and of the inputs, mean $0$, variance $\sigma^2$; $f^\star$ is $L$-Lipschitz, $|f^\star(x) - f^\star(x')| \le L\|x - x'\|$. For a point $x_0$, $r_k(x_0)$ is the distance from $x_0$ to its $k$th nearest input, $x_{(1)}, \ldots, x_{(k)}$ are the $k$ nearest inputs, and $\hat f_k(x_0) = \tfrac1k\sum_{l=1}^k y_{(l)}$ is the mean of their outcomes. You may use the lemma stated in the lecture: for $x_0$ away from the boundary, $\mathbb E[r_k(x_0)^2] \le C_p (k/n)^{2/p}$, with $C_p$ depending on $p$ only.
+
+(a) Conditional on the inputs, write $\hat f_k(x_0) - f^\star(x_0)$ as the sum of a term that depends only on $f^\star$ and the inputs and a term that depends on the noise. Show that the first term is at most $L\,r_k(x_0)$ in absolute value.
+
+(b) Show that, conditional on the inputs, the noise term has mean $0$ and variance $\sigma^2/k$.
+
+(c) Deduce $\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2 \mid \text{inputs}\big] \le L^2 r_k(x_0)^2 + \sigma^2/k$, then take the expectation over the inputs and apply the lemma.
+
+(d) Treat $k$ as a continuous variable and minimize the bound $C_p L^2 (k/n)^{2/p} + \sigma^2/k$ over $k$. Show that the minimizer is $k = c\,n^{2/(p+2)}$ for a constant $c$ that depends on $p$, $L$, $\sigma^2$ and $C_p$ but not on $n$, and that the minimized bound is proportional to $n^{-2/(p+2)}$.
+
+(e) By what factor must $n$ grow to halve the bound when $p = 10$? When $p = 1$?
+
+::: {.callout-note collapse="true" title="Hint 1"}
+(a) $\hat f_k(x_0) - f^\star(x_0) = \tfrac1k\sum_l \big(f^\star(x_{(l)}) - f^\star(x_0)\big) + \tfrac1k\sum_l \varepsilon_{(l)}$. Every one of the $k$ nearest inputs is within $r_k(x_0)$ of $x_0$.
+:::
+
+::: {.callout-note collapse="true" title="Hint 2"}
+(b), (c) Given the inputs, which $k$ noise terms are averaged is fixed, and they are independent with variance $\sigma^2$. For (c), expand $(a + b)^2$ with $a$ the first term and $b$ the noise term; what is the conditional mean of the cross term?
+:::
+
+::: {.callout-note collapse="true" title="Hint 3"}
+(d) Write the bound as $A k^{2/p} + B/k$ with $A = C_p L^2 n^{-2/p}$ and $B = \sigma^2$. The derivative is zero when $(2A/p)\,k^{2/p - 1} = B/k^2$, that is, $k^{(p+2)/p} = pB/(2A)$.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+(a) Given the inputs, the $k$ nearest are determined, and $\hat f_k(x_0) = \tfrac1k\sum_l y_{(l)} = \tfrac1k\sum_l f^\star(x_{(l)}) + \tfrac1k\sum_l \varepsilon_{(l)}$. Subtracting $f^\star(x_0)$,
+$$
+\hat f_k(x_0) - f^\star(x_0) = \underbrace{\tfrac1k\textstyle\sum_l \big(f^\star(x_{(l)}) - f^\star(x_0)\big)}_{a} + \underbrace{\tfrac1k\textstyle\sum_l \varepsilon_{(l)}}_{b}.
+$$
+Each $x_{(l)}$ is within $r_k(x_0)$ of $x_0$, so by the Lipschitz condition $|f^\star(x_{(l)}) - f^\star(x_0)| \le L\|x_{(l)} - x_0\| \le L\,r_k(x_0)$, and an average of $k$ numbers each at most $L\,r_k(x_0)$ in absolute value is at most $L\,r_k(x_0)$ in absolute value: $|a| \le L\,r_k(x_0)$.
+
+(b) Given the inputs, $b$ is the mean of $k$ fixed noise variables, independent with mean $0$ and variance $\sigma^2$ (the noise is independent of the inputs, so conditioning on the inputs does not change its distribution). Its conditional mean is $0$ and its conditional variance is $k\sigma^2/k^2 = \sigma^2/k$.
+
+(c) $a$ is fixed given the inputs, so $\mathbb E[(a + b)^2 \mid \text{inputs}] = a^2 + 2a\,\mathbb E[b \mid \text{inputs}] + \mathbb E[b^2 \mid \text{inputs}] = a^2 + 0 + \sigma^2/k \le L^2 r_k(x_0)^2 + \sigma^2/k$. Taking the expectation over the inputs (the tower property) and applying the lemma, $\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \le C_p L^2 (k/n)^{2/p} + \sigma^2/k$. $\blacksquare$
+
+(d) With $A = C_p L^2 n^{-2/p}$ and $B = \sigma^2$, the bound is $g(k) = A k^{2/p} + B/k$: the first term grows with $k$, the second shrinks. $g'(k) = (2A/p) k^{2/p - 1} - B/k^2 = 0$ gives $k^{2/p + 1} = pB/(2A)$, that is, $k^{(p+2)/p} = \big(p\sigma^2/(2C_pL^2)\big)\, n^{2/p}$, so $k = c\,n^{2/(p+2)}$ with $c = \big(p\sigma^2/(2C_pL^2)\big)^{p/(p+2)}$; $g$ is convex for $k > 0$ (both terms are), so this is the minimizer. At this $k$ the two terms are of the same order: $A k^{2/p} \propto n^{-2/p}\,n^{4/(p(p+2))} = n^{-2/(p+2)}$, since $-2/p + 4/(p(p+2)) = -2(p + 2)/(p(p+2)) + 4/(p(p+2)) = -2/(p+2)$, and $B/k \propto n^{-2/(p+2)}$. So the minimized bound is proportional to $n^{-2/(p+2)}$.
+
+(e) The bound halves when $n^{-2/(p+2)}$ halves, that is, when $n$ grows by $2^{(p+2)/2}$: for $p = 10$, $2^6 = 64$ times the data; for $p = 1$, $2^{3/2} \approx 2.8$ times.
+
+Common errors: bounding $|a|$ by $L\,r_k$ without the triangle inequality on the average (each term is bounded, then the average); dropping the cross term in (c) "by independence" (it vanishes because the noise has conditional mean zero); carrying $C_p$ and $L$ into the exponent in (d) (they set the constant $c$; the exponent $2/(p+2)$ does not depend on them).
+:::
+
+## Problems
+
+<!-- About 20 min: problems 1 to 3 (7, 7, 6), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
+
+**Problem 1 (thresholding rules).** One coordinate of an orthonormal design: $z$ is the least-squares coefficient, a number, and $b$ the estimate. The lasso's one-coordinate objective is $\tfrac12(z - b)^2 + \lambda|b|$ with $\lambda > 0$.
+
+(a) Show that the minimizer is $\hat b = \mathrm{sign}(z)\,(|z| - \lambda)_+$: $z$ moved toward zero by $\lambda$, stopping at zero.
+
+(b) The lecture writes the lasso objective as $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|_1$, without the $\tfrac12$. In the orthonormal design, by how much does that lasso move each coefficient toward zero?
+
+(c) The elastic net adds a ridge term. One coordinate: $\tfrac12(z - b)^2 + \lambda_1|b| + \tfrac{\lambda_2}{2}b^2$. Show that $\hat b = \mathrm{sign}(z)\,(|z| - \lambda_1)_+ / (1 + \lambda_2)$: soft thresholding, then ridge's division.
+
+(d) Best subset selection penalizes the count of nonzero coefficients. One coordinate: $\tfrac12(z - b)^2 + \lambda\,\mathbf 1\{b \ne 0\}$. Show that $\hat b = z$ if $|z| > \sqrt{2\lambda}$ and $\hat b = 0$ otherwise (hard thresholding). Sketch the three rules, $\hat b$ against $z$. Which rule is discontinuous in $z$?
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+(a) For $b > 0$ the objective is $\tfrac12(z - b)^2 + \lambda b$, differentiable: set the derivative to zero and check that the solution is positive. Likewise for $b < 0$. If neither case gives a valid solution, the minimum is at the kink.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 2"}
+(c) The same three cases. For $b > 0$ the derivative is $-(z - b) + \lambda_1 + \lambda_2 b$.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 3"}
+(d) If $b \ne 0$, which $b$ is best, and what is the objective there? Compare with the objective at $b = 0$.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) For $b > 0$ the derivative is $-(z - b) + \lambda$, zero at $b = z - \lambda$, which is positive only if $z > \lambda$. For $b < 0$ the derivative is $-(z - b) - \lambda$, zero at $b = z + \lambda$, negative only if $z < -\lambda$. If $|z| \le \lambda$ neither case gives a solution; the objective is convex (a convex quadratic plus $\lambda|b|$), so its minimum is at the one remaining candidate, the kink $b = 0$. Together: $\hat b = z - \lambda$ for $z > \lambda$, $z + \lambda$ for $z < -\lambda$, $0$ between, which is $\mathrm{sign}(z)(|z| - \lambda)_+$.
+
+(b) $(z - b)^2 + \lambda|b| = 2\big[\tfrac12(z - b)^2 + \tfrac\lambda2|b|\big]$, the same problem with $\lambda/2$ in place of $\lambda$: the lecture's lasso moves each coefficient by $\lambda/2$.
+
+(c) For $b > 0$: $-(z - b) + \lambda_1 + \lambda_2 b = 0$ gives $b(1 + \lambda_2) = z - \lambda_1$, so $b = (z - \lambda_1)/(1 + \lambda_2)$, positive only if $z > \lambda_1$. For $b < 0$: $b = (z + \lambda_1)/(1 + \lambda_2)$, valid only if $z < -\lambda_1$. Otherwise $\hat b = 0$ by convexity. So $\hat b = \mathrm{sign}(z)(|z| - \lambda_1)_+/(1 + \lambda_2)$: the threshold is the lasso's and the division is ridge's.
+
+(d) If $b \ne 0$ the penalty is $\lambda$ whatever $b$ is, so the best nonzero $b$ is the one that minimizes $\tfrac12(z - b)^2$, namely $b = z$, with objective $\lambda$. At $b = 0$ the objective is $\tfrac12 z^2$. So $\hat b = z$ when $\tfrac12 z^2 > \lambda$, that is, $|z| > \sqrt{2\lambda}$, and $\hat b = 0$ otherwise. The sketch: soft thresholding is the line $b = z$ shifted toward zero by $\lambda$ and flattened at zero in $[-\lambda, \lambda]$; the elastic net is the same shape with a shallower slope $1/(1 + \lambda_2)$; hard thresholding is zero in $[-\sqrt{2\lambda}, \sqrt{2\lambda}]$ and the line $b = z$ outside, with a jump of $\sqrt{2\lambda}$ at the threshold. Hard thresholding is the discontinuous one: a small change in $z$, or in $\lambda$, can move a coefficient from $0$ to $\pm\sqrt{2\lambda}$. The lasso's set of nonzero coefficients also changes with the data (the lecture's figure of the kept inputs across half-samples), but each estimate moves continuously.
+
+Common errors: forgetting to check the sign condition in (a) ($b = z - \lambda$ with $z < \lambda$ is negative, which is not in the case $b > 0$); in (d), comparing $b = 0$ with some $b \ne 0$ other than $z$.
+:::
+
+**Problem 2 (the distance lemma in one dimension).** $n$ inputs i.i.d. uniform on $[0, 1]$, the point $x_0 = \tfrac12$, and $r_1$ the distance from $x_0$ to the nearest input.
+
+(a) For $0 \le r \le \tfrac12$, show that $\mathbb P(r_1 > r) = (1 - 2r)^n$.
+
+(b) Compute $\mathbb E[r_1]$. You may use $\mathbb E[W] = \int_0^\infty \mathbb P(W > w)\,dw$ for $W \ge 0$.
+
+(c) Compute $\mathbb E[r_1^2]$ (use $\mathbb E[W^2] = \int_0^\infty 2w\,\mathbb P(W > w)\,dw$) and compare it with the lemma's $(k/n)^{2/p}$ at $k = 1$, $p = 1$.
+
+(d) Let $N(r)$ be the number of inputs within distance $r$ of $x_0$. What is its distribution? The distance $r_k$ to the $k$th nearest input satisfies $r_k > r$ exactly when $N(r) < k$. Without computing, explain why $r_k$ is about $k/(2n)$ when $k$ is much smaller than $n$.
+
+(e) In $p$ dimensions a ball of radius $r$ has volume $c_p r^p$. Repeat the argument of (d) to find the order of $r_k$, and hence of $r_k^2$, in $p$ dimensions. Why does the lemma say "away from the boundary"?
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+(a) $r_1 > r$ means that no input landed in the interval $(\tfrac12 - r, \tfrac12 + r)$. Each input falls in it with probability $2r$, independently of the others.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 2"}
+(b), (c) Substitute $u = 1 - 2r$. $\int_0^1 u^n\,du = 1/(n + 1)$ and $\int_0^1 u^n(1 - u)\,du = 1/((n + 1)(n + 2))$.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 3"}
+(d), (e) The expected number of inputs in a region is $n$ times its volume. The $k$th nearest input is at the radius where that count reaches $k$.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) Each input misses the interval $(\tfrac12 - r, \tfrac12 + r)$, of length $2r$, with probability $1 - 2r$; the inputs are independent, so all $n$ miss it with probability $(1 - 2r)^n$, and that is the event $r_1 > r$.
+
+(b) $\mathbb E[r_1] = \int_0^{1/2} (1 - 2r)^n\,dr$ (the tail is zero beyond $\tfrac12$). With $u = 1 - 2r$, $dr = -du/2$: $\tfrac12\int_0^1 u^n\,du = 1/(2(n + 1))$, about $1/(2n)$: the nearest input is half a spacing away, on one side or the other.
+
+(c) $\mathbb E[r_1^2] = \int_0^{1/2} 2r(1 - 2r)^n\,dr$. With the same substitution, $r = (1 - u)/2$: $\int_0^1 (1 - u)\,u^n\,\tfrac{du}{2} = \tfrac12\big[\tfrac1{n+1} - \tfrac1{n+2}\big] = \frac{1}{2(n + 1)(n + 2)}$, about $1/(2n^2)$. The lemma at $k = 1$, $p = 1$ says $\mathbb E[r_1^2] \le C_1 (1/n)^2$: the same order, with $C_1 = \tfrac12$ (and a little better, because of the $+1$ and $+2$).
+
+(d) Each input is within $r$ of $x_0$ with probability $2r$ (for $r \le \tfrac12$), independently, so $N(r) \sim \mathrm{Binomial}(n, 2r)$ with mean $2rn$. The $k$th nearest input is at the radius where the count reaches $k$, and the count is close to its mean when $n$ is large, so $r_k$ is close to the $r$ with $2rn = k$: $r_k \approx k/(2n)$. (Exactly: the distances $|x_i - \tfrac12|$ are i.i.d. uniform on $[0, \tfrac12]$, so $r_k$ is their $k$th order statistic and $\mathbb E[r_k] = k/(2(n + 1))$, $\mathbb E[r_k^2] = k(k + 1)/(4(n + 1)(n + 2))$, which for $k = 1$ is (c).)
+
+(e) The count within radius $r$ has mean $n c_p r^p$; setting it to $k$ gives $r_k \approx (k/(c_p n))^{1/p}$, so $r_k^2 \approx c_p^{-2/p} (k/n)^{2/p}$: the lemma's order, with the constant depending on $p$ through $c_p$. Near the boundary of the cube part of the ball lies outside $[0, 1]^p$ and holds no inputs, so the ball must be bigger to hold $k$ of them: the constant changes (the exponent does not), and the lemma as stated is for interior points.
+
+Common errors: using $\mathbb P(r_1 \le r)$ in the tail formula; forgetting that the interval has length $2r$ (both sides of $x_0$); in (c), computing $\mathbb E[r_1]^2$ instead of $\mathbb E[r_1^2]$.
+:::
+
+**Problem 3 (the smoothing penalty as weighted ridge).** A one-input curve written in a basis, $f(x) = \sum_{j=1}^J \beta_j b_j(x)$, with twice-differentiable basis functions. $\mathbf B$ is the $n \times J$ matrix with $B_{ij} = b_j(x_i)$, and $\boldsymbol\Omega$ the $J \times J$ matrix with $\Omega_{jk} = \int b_j''(x)\,b_k''(x)\,dx$. The smoothing objective is $\sum_{i=1}^n (y_i - f(x_i))^2 + \lambda\int f''(x)^2\,dx$.
+
+(a) Show that $\int f''(x)^2\,dx = \beta^T\boldsymbol\Omega\beta$, so the objective is $\|\mathbf y - \mathbf B\beta\|^2 + \lambda\beta^T\boldsymbol\Omega\beta$. Show that $\boldsymbol\Omega$ is symmetric and positive semidefinite.
+
+(b) Show that the minimizer satisfies $(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y$, and that $\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega$ is invertible when $\mathbf B$ has full column rank.
+
+(c) Suppose the basis has been chosen so that $\mathbf B^T\mathbf B = \mathbf I$ and $\boldsymbol\Omega = \mathrm{diag}(w_1, \ldots, w_J)$ with every $w_j \ge 0$ (such a basis exists; the lecture's figure showed four of its functions, ordered by wiggliness). With $\mathbf z = \mathbf B^T\mathbf y$, show that $\hat\beta_j = z_j/(1 + \lambda w_j)$.
+
+(d) Which basis functions have $w_j = 0$? What happens to their coefficients as $\lambda \to \infty$, and to the others? What does the fit tend to?
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+(a) $f''(x) = \sum_j \beta_j b_j''(x)$; square it (a double sum) and integrate term by term. For semidefiniteness, what is $\beta^T\boldsymbol\Omega\beta$ as an integral?
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 2"}
+(b) Expand $\|\mathbf y - \mathbf B\beta\|^2 + \lambda\beta^T\boldsymbol\Omega\beta$ and take the gradient; the gradient of $\beta^T\boldsymbol\Omega\beta$ is $2\boldsymbol\Omega\beta$. For invertibility, show $v^T(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)v > 0$ for $v \ne \mathbf 0$.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 3"}
+(c) With $\mathbf B^T\mathbf B = \mathbf I$ and a diagonal $\boldsymbol\Omega$, the system in (b) is $J$ separate equations, one per coefficient.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) $f''(x) = \sum_j \beta_j b_j''(x)$, so $f''(x)^2 = \sum_j\sum_k \beta_j\beta_k\,b_j''(x)b_k''(x)$, and integrating, $\int f''^2 = \sum_j\sum_k \beta_j\beta_k\Omega_{jk} = \beta^T\boldsymbol\Omega\beta$. Since $f(x_i) = (\mathbf B\beta)_i$, the sum of squares is $\|\mathbf y - \mathbf B\beta\|^2$. $\Omega_{jk} = \Omega_{kj}$ because the integrand is symmetric in $j$ and $k$; and $\beta^T\boldsymbol\Omega\beta = \int f''^2 \ge 0$ for every $\beta$, which is positive semidefiniteness. (It is not positive definite: a $\beta$ whose curve $f$ is a straight line gives $0$.)
+
+(b) $\|\mathbf y - \mathbf B\beta\|^2 + \lambda\beta^T\boldsymbol\Omega\beta = \mathbf y^T\mathbf y - 2\beta^T\mathbf B^T\mathbf y + \beta^T\mathbf B^T\mathbf B\beta + \lambda\beta^T\boldsymbol\Omega\beta$, with gradient $-2\mathbf B^T\mathbf y + 2\mathbf B^T\mathbf B\beta + 2\lambda\boldsymbol\Omega\beta$; zero when $(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y$: ridge regression's equations with the penalty matrix $\boldsymbol\Omega$ in place of $\mathbf I$. For $v \ne \mathbf 0$, $v^T(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)v = \|\mathbf Bv\|^2 + \lambda v^T\boldsymbol\Omega v \ge \|\mathbf Bv\|^2 > 0$ when $\mathbf B$ has full column rank, so the matrix is positive definite and invertible, and the Hessian is positive definite, so the stationary point is the minimizer.
+
+(c) With $\mathbf B^T\mathbf B = \mathbf I$ and $\boldsymbol\Omega = \mathrm{diag}(w)$ the system is $(\mathbf I + \lambda\,\mathrm{diag}(w))\beta = \mathbf z$, that is, $(1 + \lambda w_j)\beta_j = z_j$ for each $j$: $\hat\beta_j = z_j/(1 + \lambda w_j)$, the orthonormal-design ridge formula with its own $\lambda w_j$ per coefficient. A wiggly basis function (large $w_j$) is shrunk hard; a smooth one barely.
+
+(d) $w_j = \int b_j''^2 = 0$ exactly when $b_j'' \equiv 0$, that is, when $b_j$ is a straight line (constant or linear). Those coefficients are $\hat\beta_j = z_j$ for every $\lambda$: never shrunk. Every coefficient with $w_j > 0$ goes to $0$ as $\lambda \to \infty$. The fit tends to the least-squares fit on the unpenalized functions alone: the straight line through the data, which is what the lecture's slide said $\lambda \to \infty$ gives.
+
+Common errors: writing $\int f''^2 = \sum_j \beta_j^2\int b_j''^2$, dropping the cross terms (making them vanish is what the diagonal basis in (c) arranges); claiming $\boldsymbol\Omega$ is positive definite; in (d), saying the fit tends to zero (the line is not penalized).
+:::
+
+## Coding
+
+<!-- About 40 min: part 1 14, part 2 10, part 3 16. Skeleton lines in comments are scaffolds: the statistical operation is what you write. Everything headed "Optional, can be done at home" is outside the seminar. -->
+
+### 1. The cross-validation pipeline
+
+<!-- 14 min: steps 1 and 2, questions 1 and 2. -->
+
+The structures seminar's task: predict a track's popularity from ten audio features and its release year, squared loss ([data note](https://ml4ds.com/data/spotify.html)), genre left out. The same split as there: 5,000 training, 2,000 tuning and 3,000 test tracks, one seed. Today the tuning tracks are a check on cross-validation and the test tracks are not opened.
+
+```{r}
+feat <- c("danceability", "energy", "loudness", "speechiness", "acousticness",
+          "instrumentalness", "liveness", "valence", "tempo", "duration_min", "release_year")
+sp_file <- read_csv("https://ml4ds.com/files/spotify_tracks.csv", show_col_types = FALSE) |>
+  distinct(track_id, .keep_all = TRUE) |>          # one row per track
+  mutate(duration_min = duration_ms / 60000)
+sp <- sp_file |> select(track_popularity, all_of(feat))   # the outcome and the eleven inputs
+set.seed(310)   # change this number: a different split, and different numbers below
+id <- sample(nrow(sp))
+sp_train <- sp[id[1:5000], ]
+sp_tune <- sp[id[5001:7000], ]
+sp_test <- sp[id[7001:10000], ]
+y_train <- sp_train$track_popularity
+y_tune <- sp_tune$track_popularity
+K <- 10          # folds, for the whole seminar
+```
+
+**Step 1.** One function for every pipeline. `cv_mse(fit_predict, d, fold)` takes a function `fit_predict(tr, ho)` that fits on the rows `tr` and returns predictions for the rows `ho`, the data `d`, and a vector `fold` giving each row's fold. For each fold it fits on the other folds, predicts the held-out fold, and stores each held-out row's squared loss; it returns the mean of all the losses, so every row is scored once. Assign the folds at random, the same folds for every method today.
+
+```{r}
+#| eval: false
+fold <- sample(rep(1:K, length.out = nrow(sp_train)))   # each row's fold, 500 rows in each
+cv_mse <- function(fit_predict, d, fold) {
+  loss <- rep(NA, nrow(d))
+  for (k in 1:K) {
+    # tr <- ____                        # the rows whose fold is not k
+    # ho <- ____                        # the rows whose fold is k
+    # loss[fold == k] <- (ho$track_popularity - ____)^2
+  }
+  mean(loss)
+}
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+fold <- sample(rep(1:K, length.out = nrow(sp_train)))
+cv_mse <- function(fit_predict, d, fold) {
+  loss <- rep(NA, nrow(d))
+  for (k in 1:K) {
+    tr <- d[fold != k, ]
+    ho <- d[fold == k, ]
+    loss[fold == k] <- (ho$track_popularity - fit_predict(tr, ho))^2
+  }
+  mean(loss)
+}
+```
+:::
+
+Checkpoint (run it; if it stops, fix step 1 before going on): the mean of the training rows, as a pipeline, should score close to the variance of `y_train`.
+
+```{r}
+#| eval: !expr exists("cv_mse")
+mean_fp <- function(tr, ho) rep(mean(tr$track_popularity), nrow(ho))
+stopifnot(abs(cv_mse(mean_fp, sp_train, fold) - var(y_train)) < 5)
+```
+
+**Step 2.** The CV curve for $k$ nearest neighbors. `knn_fp(k)` returns a `fit_predict` function for one value of $k$: it standardizes the inputs with the fold's training rows (the means and standard deviations of `tr`, applied to both `tr` and `ho`), then calls `knn_predict()`. Run it over `ks`, find the $k$ at the minimum, and draw the curve.
+
+```{r}
+#| eval: false
+ks <- c(1, 2, 5, 10, 20, 50, 100, 200, 500)
+knn_fp <- function(k) function(tr, ho) {
+  mu <- colMeans(tr[, feat]); s <- apply(tr[, feat], 2, sd)
+  # knn_predict(____, ____, tr$track_popularity, k)
+}
+# cv_knn <- sapply(ks, function(k) ____)
+# k_cv <- ____
+# plot: cv_knn against ks, log scale on k
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+ks <- c(1, 2, 5, 10, 20, 50, 100, 200, 500)
+knn_fp <- function(k) function(tr, ho) {
+  mu <- colMeans(tr[, feat]); s <- apply(tr[, feat], 2, sd)
+  knn_predict(scale(ho[, feat], mu, s), scale(tr[, feat], mu, s), tr$track_popularity, k)
+}
+cv_knn <- sapply(ks, function(k) cv_mse(knn_fp(k), sp_train, fold))
+k_cv <- ks[which.min(cv_knn)]
+rbind(k = ks, cv_mse = round(cv_knn))
+ggplot(tibble(k = ks, mse = cv_knn), aes(k, mse)) + geom_line() + geom_point() + scale_x_log10() +
+  labs(y = "10-fold CV MSE", title = paste0("k nearest neighbors: minimum at k = ", k_cv))
+```
+:::
+
+**Question 1.** The structures seminar chose $k$ on the 2,000 tuning tracks instead. The chunk below scores the same `ks` that way, from fits on all 5,000 training tracks. Compare the two curves: where is each minimum, and how far apart are the two curves at the bottom? Which curve do you trust more, and what did each cost in rows? The tuning scores come with a standard error (the lecture's formula); why does `cv_mse()` not return one?
+
+```{r}
+#| eval: !expr exists("cv_knn")
+mu <- colMeans(sp_train[, feat]); s <- apply(sp_train[, feat], 2, sd)
+X_train <- scale(sp_train[, feat], mu, s); X_tune <- scale(sp_tune[, feat], mu, s)
+tune_knn <- sapply(ks, function(k) mse(y_tune, knn_predict(X_tune, X_train, y_train, k)))
+tune_se <- sapply(ks, function(k) se_loss(y_tune, knn_predict(X_tune, X_train, y_train, k)))
+rbind(k = ks, cv = round(cv_knn), tune = round(tune_knn), tune_se = round(tune_se))
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+Both curves have the same shape, a steep fall from $k = 1$ and a flat bottom from about $k = 20$ to $200$; the CV minimum is at $k = `r k_cv`$ and the tuning minimum at $k = `r ks[which.min(tune_knn)]`$, within the flat part, where the two curves differ by less than a tuning standard error. The CV curve costs no rows: every training track is fitted on nine times and scored once, and the tuning tracks are still unused. The tuning curve left 2,000 tracks out of every fit and scored on them alone. The CV curve is the one to trust for the shape, because its scores average over 5,000 held-out rows rather than 2,000; its level is a little different because each CV fit used 4,500 rows, not 5,000.
+
+`cv_mse()` returns no standard error because the formula needs the losses to be independent, and the pooled CV losses are not: the ten fits share rows. A standard error from them, or from the ten fold scores, is a heuristic (the lecture's `plot(cv.glmnet)` bars are the second kind); the tuning set's standard error is the real thing, because its rows were held out of every fit.
+:::
+
+**Step 3.** The lasso through the same pipeline. `lasso_fp(lam)` standardizes inside the fold, fits the path on the training rows and predicts at the one $\lambda$ `lam`. The sequence `lam_seq` comes from a fit on all 5,000 training tracks, so every fold uses the same values. Run the pipeline over `lam_seq` and find $\lambda$ at the minimum.
+
+```{r}
+#| eval: false
+lam_seq <- glmnet(X_train, y_train, standardize = FALSE, nlambda = 20)$lambda
+lasso_fp <- function(lam) function(tr, ho) {
+  mu <- colMeans(tr[, feat]); s <- apply(tr[, feat], 2, sd)
+  fit <- glmnet(scale(tr[, feat], mu, s), tr$track_popularity, lambda = lam_seq, standardize = FALSE)
+  as.vector(predict(fit, scale(ho[, feat], mu, s), s = lam))
+}
+# cv_lasso <- ____
+# lam_cv <- ____
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+lam_seq <- glmnet(X_train, y_train, standardize = FALSE, nlambda = 20)$lambda
+lasso_fp <- function(lam) function(tr, ho) {
+  mu <- colMeans(tr[, feat]); s <- apply(tr[, feat], 2, sd)
+  fit <- glmnet(scale(tr[, feat], mu, s), tr$track_popularity, lambda = lam_seq, standardize = FALSE)
+  as.vector(predict(fit, scale(ho[, feat], mu, s), s = lam))
+}
+cv_lasso <- sapply(lam_seq, function(lam) cv_mse(lasso_fp(lam), sp_train, fold))
+lam_cv <- lam_seq[which.min(cv_lasso)]
+setNames(round(cv_lasso), signif(lam_seq, 2))     # the CV MSE at each lambda, large to small
+```
+
+The minimum is at $\lambda = `r signif(lam_cv, 2)`$ (glmnet's scale), near the small end of the path, as in the structures seminar: with 5,000 tracks and eleven inputs the data can afford every coefficient, and the lasso's score is least squares'.
+:::
+
+**Question 2.** `cv.glmnet()` does the same with its own code. Run it with the same folds (`foldid = fold`) and compare `lambda.min` with your `lam_cv`. Its `lambda.1se` is larger: what rule chose it, and how many coefficients does the lasso set to zero at each of the two?
+
+```{r}
+#| eval: !expr exists("lam_cv")
+cvg <- cv.glmnet(X_train, y_train, foldid = fold, standardize = FALSE)
+c(lambda.min = signif(cvg$lambda.min, 2), lambda.1se = signif(cvg$lambda.1se, 2), lam_cv = signif(lam_cv, 2))
+c(zero_at_min = sum(coef(cvg, s = "lambda.min")[-1] == 0), zero_at_1se = sum(coef(cvg, s = "lambda.1se")[-1] == 0))
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+`lambda.min` and `lam_cv` agree up to the coarseness of the two sequences (`cv.glmnet` uses a finer path, and standardizes once on all 5,000 rows rather than inside each fold, which changes the numbers very little here). `lambda.1se` is the one-standard-error rule: the largest $\lambda$ whose CV error is within one (heuristic) standard error of the minimum, a flat-bottom rule that prefers the simpler model. At `lambda.min` the lasso keeps every input (`r sum(coef(cvg, s = "lambda.min")[-1] == 0)` zeros); at `lambda.1se` it sets `r sum(coef(cvg, s = "lambda.1se")[-1] == 0)` of the eleven to zero.
+:::
+
+### 2. Learning curves and the rate
+
+<!-- 10 min: the simulation (started earlier), step 4, question 3. -->
+
+The lecture's rate says how the error of $k$ nearest neighbors falls with $n$: the bound on the squared estimation error at a point is proportional to $n^{-2/(p+2)}$, with $p$ the number of inputs, at the best $k$. The simulation below checks it. Inputs uniform on $[0, 1]^p$ for $p = 1, 2, 5, 10$; the truth $f^\star(x) = \sum_{j=1}^p \sin(2\pi x_j)/\sqrt p$, which depends on every input and is Lipschitz; noise with variance $1$. For each $n$ it fits $k$-NN at every $k$ in `ks`, measures the squared estimation error $\tfrac1{400}\sum (\hat f_k(x_0) - f^\star(x_0))^2$ on 400 new points (against the truth, not the noisy outcome), averages over three draws of the training data, and keeps the best $k$. The chunk takes about 40 seconds.
+
+```{r}
+#| label: learning-curves
+f_star <- function(X) rowSums(sin(2 * pi * X)) / sqrt(ncol(X))
+ps <- c(1, 2, 5, 10)
+ns <- c(100, 200, 400, 800, 1600, 3200, 6400)
+ks_lc <- c(1, 2, 5, 10, 20, 50, 100, 200, 500)
+lc <- map_dfr(ps, function(p) map_dfr(ns, function(n) {
+  err <- rowMeans(sapply(1:3, function(rep) {
+    X <- matrix(runif(n * p), n, p); y <- f_star(X) + rnorm(n)
+    X0 <- matrix(runif(400 * p), 400, p); f0 <- f_star(X0)
+    sapply(ks_lc, function(k) if (k <= n / 2) mean((knn_predict(X0, X, y, k) - f0)^2) else NA)
+  }))
+  tibble(p = p, n = n, k_best = ks_lc[which.min(err)], mse = min(err, na.rm = TRUE))
+}))
+ggplot(lc, aes(n, mse, colour = factor(p))) + geom_line() + geom_point() +
+  scale_x_log10() + scale_y_log10() +
+  labs(colour = "p", y = "squared estimation error at the best k (log scale)", x = "n (log scale)")
+```
+
+**Step 4.** On log scales a rate is a slope: if the error is $c\,n^{-a}$ then $\log(\text{error}) = \log c - a\log n$. For each $p$, fit a line of `log(mse)` on `log(n)` and read off the slope. Put the slopes next to the rate's exponent, $-2/(p + 2)$.
+
+```{r}
+#| eval: false
+# slopes <- lc |> group_by(p) |> summarize(slope = ____)
+# slopes |> mutate(rate = ____)
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+slopes <- lc |> group_by(p) |> summarize(slope = coef(lm(log(mse) ~ log(n)))[2])
+slopes |> mutate(rate = -2 / (p + 2), across(c(slope, rate), ~ round(.x, 2)))
+```
+
+The fitted slopes, `r paste(round(slopes$slope, 2), collapse = ", ")`, sit beside the exponents `r paste(round(-2 / (slopes$p + 2), 2), collapse = ", ")`: the same order and about the same size, each a little steeper. The bound is a worst case over Lipschitz truths, so this one truth is allowed to do a little better than the exponent; what the theorem promises is that no estimator beats the exponent for every Lipschitz $f^\star$.
+:::
+
+**Question 3.** Read the figure against the lecture. (a) From $n = 100$ to $n = 6400$ is 64 times the data. By what factor did the error fall for $p = 1$, and for $p = 10$? What does the rate predict for each? (b) Look at `lc$k_best`: how does the best $k$ move with $n$ for $p = 1$ and for $p = 10$, and what does the rate's derivation say it should do? (c) The Spotify task has $p = 11$ and $n = 5{,}000$. If the rate applied to it as a worst case, how much data would halve the error of $k$-NN?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+```{r}
+lc_ratio <- lc |> group_by(p) |> summarize(ratio = round(mse[n == 6400] / mse[n == 100], 2), predicted = round(64^(-2 / (p[1] + 2)), 2),
+                                           k_at_100 = k_best[n == 100], k_at_6400 = k_best[n == 6400])
+lc_ratio
+```
+
+(a) For $p = 1$ the error fell to `r lc_ratio$ratio[1]` of its value (the rate: $64^{-2/3} = 0.06$); for $p = 10$ to `r lc_ratio$ratio[4]` ($64^{-1/6} = 0.5$). Sixty-four times the data about halves the error in ten dimensions. (b) The best $k$ grows with $n$, fast for $p = 1$ and slowly for $p = 10$: the derivation balances the two terms at $k \propto n^{2/(p+2)}$, which is $n^{2/3}$ in one dimension and $n^{1/6}$ in ten. (c) $2^{(11+2)/2} = 2^{6.5} \approx 90$ times the data, about 450,000 tracks, to halve the error, if popularity were only a Lipschitz function of the eleven inputs. The curve on the Spotify tracks bottoms at about 520 against a variance of about 600, so most of that error is noise the rate does not address, and the lesson is the other one: with only smoothness assumed, more data helps slowly in many dimensions, and a method that assumes more (additive, sparse) can do better when the assumption holds.
+:::
+
+### 3. Two ways cross-validation goes wrong
+
+<!-- 16 min: step 5 and question 4 (8), step 6 and question 5 (8). Mandatory: this is the complication the lecture deferred. -->
+
+Cross-validation has worked. It assumes that the rows are exchangeable: that a held-out row is a fresh draw from the same population as the rows it was fitted on. Two ways that fails on these tracks.
+
+**Step 5. The same track on both sides of a fold.** The file has 11,554 rows for 10,000 tracks: 1,101 tracks are in more than one playlist, and every copy has the same audio features, year and popularity. The loader removed the copies with `distinct()`. Load the rows again without it, keep the 5,000 training tracks with all their copies, and build two fold assignments: `fold_row`, at random over rows, and `fold_track`, at random over tracks, so that every copy of a track is in the same fold. Then run the $k$-NN pipeline at $k = 1$, $5$ and $50$ with each.
+
+```{r}
+#| eval: false
+rows <- read_csv("https://ml4ds.com/files/spotify_tracks.csv", show_col_types = FALSE) |>
+  mutate(duration_min = duration_ms / 60000) |>
+  filter(track_id %in% sp_file$track_id[id[1:5000]]) |>   # the training tracks, copies kept
+  select(track_id, track_popularity, all_of(feat))
+fold_row <- sample(rep(1:K, length.out = nrow(rows)))
+tracks <- unique(rows$track_id)
+fold_of_track <- sample(rep(1:K, length.out = length(tracks)))   # one fold per track
+# fold_track <- ____                                              # each row gets its track's fold
+# cv_row <- sapply(c(1, 5, 50), function(k) ____)
+# cv_track <- sapply(c(1, 5, 50), function(k) ____)
+# rbind(k = c(1, 5, 50), by_row = round(cv_row), by_track = round(cv_track))
+```
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+`match(rows$track_id, tracks)` gives each row the position of its track in `tracks`; index `fold_of_track` by it.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+rows <- read_csv("https://ml4ds.com/files/spotify_tracks.csv", show_col_types = FALSE) |>
+  mutate(duration_min = duration_ms / 60000) |>
+  filter(track_id %in% sp_file$track_id[id[1:5000]]) |>
+  select(track_id, track_popularity, all_of(feat))
+c(rows = nrow(rows), tracks = n_distinct(rows$track_id))
+fold_row <- sample(rep(1:K, length.out = nrow(rows)))
+tracks <- unique(rows$track_id)
+fold_of_track <- sample(rep(1:K, length.out = length(tracks)))
+fold_track <- fold_of_track[match(rows$track_id, tracks)]
+cv_row <- sapply(c(1, 5, 50), function(k) cv_mse(knn_fp(k), rows, fold_row))
+cv_track <- sapply(c(1, 5, 50), function(k) cv_mse(knn_fp(k), rows, fold_track))
+rbind(k = c(1, 5, 50), by_row = round(cv_row), by_track = round(cv_track))
+```
+:::
+
+Checkpoint:
+
+```{r}
+#| eval: !expr exists("fold_track")
+stopifnot(length(fold_track) == nrow(rows), all(tapply(fold_track, rows$track_id, function(f) length(unique(f))) == 1))
+```
+
+**Question 4.** What happened to the scores at $k = 1$, and why is the effect smaller at $k = 50$? Which of the two numbers is the one to believe, and what is the rule? About a quarter of these rows have a copy; in a dataset of patients with several visits each, or of songs in many playlists, what would you expect?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+With folds over rows, a copied track can have one copy in the held-out fold and another among the fitting rows. At $k = 1$ its nearest neighbor is then its own copy, at distance zero and with the same popularity, so its loss is zero, and the CV score at $k = 1$ drops from about `r round(cv_track[1])` (folds by track) to about `r round(cv_row[1])`: cross-validation is scoring the method's memory of the fitting rows, which is exactly what it was meant not to do. At $k = 50$ the copy is one neighbor among fifty, so the effect is small (`r round(cv_row[3])` against `r round(cv_track[3])`). The number to believe is the one with folds by track, which is also what `distinct()` gave the lecture: the unit of the fold is the unit that repeats, and anything that is the same unit must stay on one side. With one row per track the question does not arise; with several visits per patient or a song in many playlists, most rows have a twin, and the row-level CV score of a flexible method can be far too good, enough to choose the wrong method or the wrong knob.
+
+Common errors: assigning `fold_track` by `rep(1:K, ...)` over rows sorted by track, which puts consecutive tracks in consecutive folds (not random, though copies do stay together); concluding that the copies should be removed from the fitting rows too (they can stay; the rule is that a track is not scored against itself).
+:::
+
+**Step 6. A random split against a split in time.** Popularity is Spotify's score in January 2020, and it rewards recent plays: the mean popularity by release year, below, rises through the 2010s. A random split mixes the years, so cross-validation answers "how well does this predict a track like the ones we have?". The question a user of the model might ask is "how well will it predict this year's releases?". Fit least squares on the eleven inputs to the tracks released up to 2018 (`old`), and score it two ways: by cross-validation on `old`, and on the tracks released in 2019 and 2020 (`new`). For each, report the MSE and the mean error, $\tfrac1m\sum_j (y_j - \hat f(x_j))$.
+
+```{r}
+sp |> filter(release_year >= 2012) |> group_by(release_year) |>
+  summarize(tracks = n(), mean_popularity = round(mean(track_popularity), 1)) |> t()
+old <- sp |> filter(release_year <= 2018)
+new <- sp |> filter(release_year >= 2019)
+fold_old <- sample(rep(1:K, length.out = nrow(old)))
+plane_fp <- function(tr, ho) predict(lm(track_popularity ~ ., tr), ho)
+```
+
+```{r}
+#| eval: false
+# cv_plane <- ____                                     # the MSE by cross-validation on old
+# pred_new <- ____                                     # the plane fitted on old, predicting new
+# c(cv_mse = cv_plane, new_mse = ____, new_mean_error = ____)
+# the two baselines on new: the mean of old, and the mean of new itself
+# c(old_mean = ____, new_mean = ____)
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+cv_plane <- cv_mse(plane_fp, old, fold_old)
+pred_new <- plane_fp(old, new)
+round(c(cv_mse = cv_plane, new_mse = mse(new$track_popularity, pred_new), new_mean_error = mean(new$track_popularity - pred_new)), 1)
+round(c(old_mean = mse(new$track_popularity, mean(old$track_popularity)), new_mean = mse(new$track_popularity, mean(new$track_popularity))))
+```
+:::
+
+**Question 5.** The plane's predictions for the new tracks are too low by about 11 points on average, and nothing in the cross-validation score hinted at it. Why can a random split not see this? Its MSE on the new tracks is lower than its CV score; is that good news? Which of the two scores answers the user's question?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+Cross-validation's held-out rows are drawn from the same years as the fitting rows, so the mean error over a fold is near zero by construction (least squares fits the mean), and the drift in popularity from one year to the next is averaged away. The new tracks are all from after the fitting rows, where popularity is higher than the fitted trend predicts (the plane's year coefficient is `r round(coef(lm(track_popularity ~ ., old))["release_year"], 2)` per year, estimated on 1957 to 2018, and it extrapolates), so the predictions are biased low by about `r round(mean(new$track_popularity - pred_new))`. The lower MSE on the new tracks is not good news: the 2019 tracks are more alike (their popularity has variance about `r round(var(new$track_popularity))`, against about `r round(var(old$track_popularity))` for the older ones), so the comparison to make is with a baseline on the same tracks. On random folds the plane beat the mean by about `r round(var(old$track_popularity) - cv_plane)`; on the new tracks it scores `r round(mse(new$track_popularity, pred_new))` against `r round(mse(new$track_popularity, mean(new$track_popularity)))` for the new tracks' own mean, which no model fitted on the old tracks can know. The split in time answers the user's question; the random split answers a different one. Which to report depends on which question is being asked, and cross-validation cannot tell you that.
+
+Common errors: fitting the plane on `old` and `new` together before scoring on `new` (the fit must not see the future); reading the lower MSE on `new` as "the model does better on new tracks".
+:::
+
+### Optional, can be done at home: the wrong way to cross-validate
+
+Cross-validate the entire pipeline, the lecture said. Here is the classic way to get that wrong (ESL, section 7.10.2). Pure noise: $n = 100$ rows, $p = 1{,}000$ inputs and an outcome, all independent standard normal, so the best possible risk is $1$ and no method can do better than the mean. The wrong way: screen the 20 inputs most correlated with the outcome on all 100 rows, then cross-validate least squares on those 20. The right way: screen inside each fold, on the fitting rows only. Write both as `fit_predict` functions for `cv_mse()` and compare the two CV scores with the mean's.
+
+```{r}
+#| eval: false
+n_w <- 100; p_w <- 1000
+noise <- as_tibble(matrix(rnorm(n_w * p_w), n_w, p_w), .name_repair = ~ paste0("x", seq_along(.x))) |>
+  mutate(track_popularity = rnorm(n_w))              # named so that cv_mse() finds the outcome
+fold_w <- sample(rep(1:K, length.out = n_w))
+top20 <- function(d) {                               # the 20 inputs most correlated with the outcome in d
+  r <- cor(select(d, -track_popularity), d$track_popularity)
+  rownames(r)[order(-abs(r))[1:20]]
+}
+# wrong: screened once, on all rows, before cross-validation
+# keep <- top20(noise)
+# wrong_fp <- function(tr, ho) predict(lm(____), ho)
+# right: screened inside the fold
+# right_fp <- function(tr, ho) { keep <- top20(tr); predict(lm(____), ho) }
+# c(wrong = cv_mse(wrong_fp, noise, fold_w), right = cv_mse(right_fp, noise, fold_w), mean = cv_mse(mean_fp, noise, fold_w))
+```
+
+::: {.callout-note collapse="true" title="Hint 1"}
+A formula from a character vector of names: `reformulate(keep, "track_popularity")`, or paste the names with `+`.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+n_w <- 100; p_w <- 1000
+noise <- as_tibble(matrix(rnorm(n_w * p_w), n_w, p_w), .name_repair = ~ paste0("x", seq_along(.x))) |>
+  mutate(track_popularity = rnorm(n_w))
+fold_w <- sample(rep(1:K, length.out = n_w))
+top20 <- function(d) {
+  r <- cor(select(d, -track_popularity), d$track_popularity)
+  rownames(r)[order(-abs(r))[1:20]]
+}
+keep <- top20(noise)
+wrong_fp <- function(tr, ho) predict(lm(reformulate(keep, "track_popularity"), tr), ho)
+right_fp <- function(tr, ho) { keep <- top20(tr); predict(lm(reformulate(keep, "track_popularity"), tr), ho) }
+cv_w <- round(c(wrong = cv_mse(wrong_fp, noise, fold_w), right = cv_mse(right_fp, noise, fold_w), mean = cv_mse(mean_fp, noise, fold_w)), 2)
+cv_w
+```
+
+The mean of the fitting rows is the best any method can do on pure noise, and it scores `r cv_w["mean"]`. The wrong way scores `r cv_w["wrong"]`, far below it: the twenty inputs were chosen for their correlation with the outcome on the very rows that are later held out, so the held-out rows are not fresh. The right way scores `r cv_w["right"]`, above the mean's score, as a least-squares fit of 20 noise inputs on 90 rows should. Screening is a step of the pipeline; the lecture's rule is that every step that looks at the outcome happens inside the fold.
+:::
+
+### Optional, can be done at home: the weighted-ridge form on a real fit
+
+Problem 3 says the penalized spline's coefficients solve $(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y$. Check it on `mgcv`'s fit of popularity on the release year, as in the lecture: `model.matrix()` gives $\mathbf B$ (the intercept and nineteen smooth columns), `g$smooth[[1]]$S[[1]]` gives the penalty matrix of the smooth columns, and `g$sp` the $\lambda$ that GCV chose. Build $\boldsymbol\Omega$ with a row and column of zeros for the intercept, solve, and compare with `coef(g)`.
+
+```{r}
+#| eval: false
+g <- gam(track_popularity ~ s(release_year, k = 20, bs = "cr"), data = sp_train)
+B <- model.matrix(g)
+S <- g$smooth[[1]]$S[[1]]
+Omega <- matrix(0, ncol(B), ncol(B)); Omega[-1, -1] <- S
+# beta <- solve(____, ____)
+# max(abs(beta - coef(g)))
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+g <- gam(track_popularity ~ s(release_year, k = 20, bs = "cr"), data = sp_train)
+B <- model.matrix(g)
+S <- g$smooth[[1]]$S[[1]]
+Omega <- matrix(0, ncol(B), ncol(B)); Omega[-1, -1] <- S
+beta <- solve(t(B) %*% B + g$sp * Omega, t(B) %*% sp_train$track_popularity)
+max(abs(as.vector(beta) - coef(g)))
+```
+
+The two agree to rounding: `mgcv`'s fit is ridge regression with the penalty matrix $\boldsymbol\Omega$, at the $\lambda$ it chose. (`mgcv` scales its penalty matrix, so `g$sp` is $\lambda$ on that scale, not the one of $\int f''^2$; the equations are the same.)
+:::
+
+## References
+
+- Hastie, T., Tibshirani, R. and Friedman, J. (2009). *The Elements of Statistical Learning: Data Mining, Inference, and Prediction*, 2nd edition. Springer, New York. Section 7.10.2, "The Wrong and Right Way to Do Cross-validation", pp. 245--247. [hastie.su.domains/ElemStatLearn](https://hastie.su.domains/ElemStatLearn/)
