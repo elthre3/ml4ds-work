@@ -3458,10 +3458,10 @@ Prediction   0   1
 <pre><code># A tibble: 4 x 2
   world slope
   &lt;chr&gt; &lt;dbl&gt;
-1 A      1.98
-2 B      2.05
-3 C      1.96
-4 D     -3.78</code></pre>
+1 A      1.95
+2 B      1.94
+3 C      1.97
+4 D     -3.76</code></pre>
 </div>
 </div>
 </div>
@@ -3536,10 +3536,10 @@ Prediction   0   1
 <pre><code># A tibble: 4 x 3
   world slope effect_of_intervention
   &lt;chr&gt; &lt;dbl&gt;                  &lt;dbl&gt;
-1 A      1.98                      2
-2 B      2.05                      0
-3 C      1.96                      0
-4 D     -3.78                     -3</code></pre>
+1 A      1.95                      2
+2 B      1.94                      0
+3 C      1.97                      0
+4 D     -3.76                     -3</code></pre>
 </div>
 </div>
 <p>The average change is the average effect of shifting every unit’s <span class="math inline">\(X\)</span> up by one, computed on these units: exactly <span class="math inline">\(2\)</span>, <span class="math inline">\(0\)</span>, <span class="math inline">\(0\)</span> and <span class="math inline">\(-3\)</span>. Each world’s equations give every unit the same change, and because the noise is reused nothing else moves.</p>
@@ -3577,13 +3577,13 @@ Prediction   0   1
 <pre><code># A tibble: 3 x 5
   term        estimate std.error statistic   p.value
   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-1 (Intercept)     4.13    0.224       18.5 2.75e- 58
-2 X              -3.02    0.0437     -69.1 6.49e-257
-3 Z               1.88    0.0953      19.7 3.30e- 64</code></pre>
+1 (Intercept)     3.92    0.216       18.2 5.75e- 57
+2 X              -2.98    0.0417     -71.6 7.13e-264
+3 Z               1.98    0.0950      20.8 1.10e- 69</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">predict</span>(fit_d, <span class="at">newdata =</span> <span class="fu">mutate</span>(d, <span class="at">X =</span> X <span class="sc">+</span> <span class="dv">1</span>))) <span class="sc">-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit_d, <span class="at">newdata =</span> d))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -3.018663</code></pre>
+<pre><code>[1] -2.984188</code></pre>
 </div>
 </div>
 </div>
@@ -3645,18 +3645,18 @@ Prediction   0   1
 <span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">regression =</span> <span class="fu">coef</span>(<span class="fu">lm</span>(Y <span class="sc">~</span> X <span class="sc">+</span> Z, <span class="at">data =</span> d_e))[[<span class="st">&quot;X&quot;</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     naive  weighting regression 
-  5.221517   2.056224   2.043137 </code></pre>
+  5.247273   1.988782   2.012180 </code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>d_e <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(w, <span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 x 5
       X     Y     Z pi_hat     w
   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
-1     1 -3.27 -2.48 0.0180  55.6
-2     1 -2.12 -2.03 0.0336  29.7
-3     1 -1.86 -2.00 0.0349  28.6
-4     1 -3.23 -1.94 0.0379  26.4
-5     1 -4.81 -1.90 0.0400  25.0</code></pre>
+1     0  8.11  2.50 0.966   29.8
+2     1 -3.92 -1.68 0.0440  22.7
+3     0  7.64  2.20 0.947   18.9
+4     0  6.77  2.15 0.944   17.7
+5     1 -1.84 -1.50 0.0574  17.4</code></pre>
 </div>
 </div>
 </div>
@@ -3668,7 +3668,7 @@ Prediction   0   1
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">treated =</span> <span class="fu">sum</span>(d_e<span class="sc">$</span>w[d_e<span class="sc">$</span>X <span class="sc">==</span> <span class="dv">1</span>]), <span class="at">untreated =</span> <span class="fu">sum</span>(d_e<span class="sc">$</span>w[d_e<span class="sc">$</span>X <span class="sc">==</span> <span class="dv">0</span>])) <span class="sc">/</span> <span class="fu">nrow</span>(d_e)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  treated untreated 
-1.0271199 0.9855742 </code></pre>
+0.9980121 1.0038151 </code></pre>
 </div>
 </div>
 <p><strong>Question 6.</strong> What is the effect of treatment in world E, which of the three estimates are near it, and which result explains each one? Which units have the largest weights, and what is unusual about them? If the unit with the largest weight had not been in the sample, and the other weights stayed as they are, by how much would the weighting estimate move?</p>
@@ -3692,7 +3692,7 @@ Prediction   0   1
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">estimate =</span> <span class="fu">mean</span>(s), <span class="at">largest_weight =</span> d_e<span class="sc">$</span>w[i], <span class="at">change_if_left_out =</span> (<span class="fu">mean</span>(s) <span class="sc">-</span> s[i]) <span class="sc">/</span> (<span class="fu">nrow</span>(d_e) <span class="sc">-</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          estimate     largest_weight change_if_left_out 
-        2.05622438        55.61657620         0.09195029 </code></pre>
+         1.9887816         29.7548157          0.1217403 </code></pre>
 </div>
 </div>
 </div>

@@ -407,20 +407,23 @@ p(x) = P(Y = 1 \mid X = x) = \mathbb E[Y \mid X = x]
 <p>Named for radar receivers in the 1940s. It does not answer the operator’s question: <em>which</em> point?</p>
 </div></div>
 </section>
-<section id="what-does-a-mistake-cost" class="slide level2" data-minutes="3">
+<section id="what-does-a-mistake-cost" class="slide level2" data-minutes="2">
 <h2>What does a mistake cost?</h2>
 <p>Predicting <span class="math inline">\(1\)</span> when the truth is <span class="math inline">\(0\)</span> costs <span class="math inline">\(c_{FP}\)</span>; predicting <span class="math inline">\(0\)</span> when the truth is <span class="math inline">\(1\)</span> costs <span class="math inline">\(c_{FN}\)</span>; a correct prediction costs nothing</p>
+<div class="ask">
+<p>A miss costs ten times a false alarm and the model says <span class="math inline">\(\hat p = 0.3\)</span>. Predict <span class="math inline">\(1\)</span> or <span class="math inline">\(0\)</span>?</p>
+</div>
+</section>
+<section id="cost-at-each-threshold" class="slide level2" data-minutes="1">
+<h2>Cost at each threshold</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="03-1-classification-causality_files/figure-revealjs/cost-curve-1.png" class="quarto-figure quarto-figure-center" style="width:76.0%"></p>
+<p><img data-src="03-1-classification-causality_files/figure-revealjs/cost-curve-1.png" class="quarto-figure quarto-figure-center" style="width:92.0%"></p>
 </figure>
 </div>
 </div>
-</div>
-<div class="ask">
-<p>A miss costs ten times a false alarm and the model says <span class="math inline">\(\hat p = 0.3\)</span>. Predict <span class="math inline">\(1\)</span> or <span class="math inline">\(0\)</span>?</p>
 </div>
 </section>
 <section id="optimal-threshold-theorem" class="slide level2">

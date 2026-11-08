@@ -430,19 +430,29 @@ Named for radar receivers in the 1940s. It does not answer the operator's questi
 :::
 :::
 
-## What does a mistake cost? {minutes="3"}
+## What does a mistake cost? {minutes="2"}
 
 ::: {.notes}
-Show of hands for 1 and for 0 before saying anything. Dashed lines: the next slide's formula.
+Show of hands for 1 and for 0 before saying anything. The answer is on the next two slides.
 :::
 
 Predicting $1$ when the truth is $0$ costs $c_{FP}$; predicting $0$ when the truth is $1$ costs $c_{FN}$; a correct prediction costs nothing
 
+::: {.ask}
+A miss costs ten times a false alarm and the model says $\hat p = 0.3$. Predict $1$ or $0$?
+:::
+
+## Cost at each threshold {minutes="1"}
+
+::: {.notes}
+Dashed lines: the next slide's formula.
+:::
+
 ```{r}
 #| label: cost-curve
-#| fig-height: 2.7
+#| fig-height: 4.4
 #| fig-width: 10
-#| out-width: "76%"
+#| out-width: "92%"
 #| fig-align: center
 cost_curve <- function(cfn, cfp) {
   roc1 |> mutate(cost = (cfn * (1 - tpr) * sum(y01 == 1) + cfp * fpr * sum(y01 == 0)) / length(y01),
@@ -460,10 +470,6 @@ ggplot(cc, aes(t, cost, colour = costs)) +
        y = "cost per unit", colour = NULL,
        caption = "averaged over the 80 training points; dashed: the thresholds the next slide's formula gives, 1/2 and 1/11")
 ```
-
-::: {.ask}
-A miss costs ten times a false alarm and the model says $\hat p = 0.3$. Predict $1$ or $0$?
-:::
 
 ## Optimal threshold theorem
 

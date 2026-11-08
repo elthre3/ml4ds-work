@@ -449,7 +449,7 @@ R(f) = R(f^\star) + \mathbb E\big[(f^\star(X) - f(X))^2\big].
 </ol>
 <section id="optional-can-be-done-at-home" class="level3">
 <h3 class="anchored" data-anchor-id="optional-can-be-done-at-home">Optional, can be done at home</h3>
-<!-- Not in the seminar. The hat-matrix facts are checked numerically in coding part 1 and reused in the validation week. Hints are in the student file. -->
+<!-- Not in the seminar. The hat-matrix facts are checked numerically in coding part 1. Hints are in the student file. -->
 <p><strong>Problem 3 (normal equations, and centering).</strong> Simple regression, from the lecture’s “nice geometry” slide. The training error is <span class="math inline">\(\hat R_n(\alpha, \beta) = \frac1n\sum_{i=1}^n (y_i - \alpha - \beta x_i)^2\)</span>.</p>
 <ol type="a">
 <li><p>Compute <span class="math inline">\(\partial \hat R_n/\partial\alpha\)</span> and <span class="math inline">\(\partial \hat R_n/\partial\beta\)</span>, set both to zero, and show that the residuals <span class="math inline">\(r_i = y_i - \hat\alpha - \hat\beta x_i\)</span> satisfy <span class="math inline">\(\sum_i r_i = 0\)</span> and <span class="math inline">\(\sum_i x_i r_i = 0\)</span>. Write the same two equations as <span class="math inline">\(\mathbf X^T \mathbf r = \mathbf 0\)</span> with <span class="math inline">\(\mathbf X = [\mathbf 1 \;\; \mathbf x]\)</span>.</p></li>

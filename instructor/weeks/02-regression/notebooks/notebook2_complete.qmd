@@ -203,7 +203,7 @@ Common errors: raw vectors in place of centered ones; believing (a) needs an exp
 
 ### Optional, can be done at home
 
-<!-- Not in the seminar. The hat-matrix facts are checked numerically in coding part 1 and reused in the validation week. Hints are in the student file. -->
+<!-- Not in the seminar. The hat-matrix facts are checked numerically in coding part 1. Hints are in the student file. -->
 
 **Problem 3 (normal equations, and centering).** Simple regression, from the lecture's "nice geometry" slide. The training error is $\hat R_n(\alpha, \beta) = \frac1n\sum_{i=1}^n (y_i - \alpha - \beta x_i)^2$.
 

@@ -445,7 +445,7 @@
     "href": "weeks/01-introduction-foundations/slides/01-1-introduction.html#history-common-task-framework",
     "title": "Machine learning",
     "section": "History: common task framework",
-    "text": "History: common task framework\n\n\n\n\n\n\n\n\n1986\nDARPA funds speech recognition on the condition that every group is scored on the same held-out data by an outside referee (NIST)\n\n\n2006\nNetflix offers $1,000,000 for a 10% improvement on its own recommender\n\n\n2010\nKaggle opens; ImageNet’s first yearly challenge (ILSVRC)\n\n\n\n\nDonoho (2017) called the recipe the common task framework and credited it with most of what “machine learning” has achieved since"
+    "text": "History: common task framework\n\n\n\n\n\n\n\n\n1986\nDARPA funds speech recognition on the condition that every group is scored on the same held-out data by an outside referee (NIST)\n\n\n2006\nNetflix offers $1,000,000 for a 10% improvement on its own recommender\n\n\n2010\nKaggle opens; ImageNet’s first yearly challenge (ILSVRC)\n\n\n\n\nDonoho (2017), crediting Mark Liberman for the name common task framework, argued that this recipe drives the success of predictive modeling"
   },
   {
     "objectID": "weeks/01-introduction-foundations/slides/01-1-introduction.html#netflix-challenge",
@@ -620,7 +620,7 @@
     "href": "weeks/01-introduction-foundations/slides/01-1-introduction.html#two-things-to-think-about",
     "title": "Machine learning",
     "section": "Two things to think about",
-    "text": "Two things to think about\n1. Your 1-NN submission had training error zero. What is that number measuring, and what would the competition have scored instead?\n2. Suppose we fit a model to the 142 countries in 2002 and test it on the same 142 countries in 1997, and it does well. Has it predicted anything new?"
+    "text": "Two things to think about\n1. Your 1-NN submission had training error zero. What is that number measuring, and what would the competition have scored instead?\n2. Suppose we fit a model to the 142 countries in 2007 and test it on the same 142 countries in 1997, and it does well. Has it predicted anything new?"
   },
   {
     "objectID": "weeks/01-introduction-foundations/slides/01-1-introduction.html#before-the-seminar",
@@ -1040,7 +1040,14 @@
     "href": "weeks/03-classification-causality/slides/03-1-classification-causality.html#what-does-a-mistake-cost",
     "title": "Machine learning",
     "section": "What does a mistake cost?",
-    "text": "What does a mistake cost?\nPredicting \\(1\\) when the truth is \\(0\\) costs \\(c_{FP}\\); predicting \\(0\\) when the truth is \\(1\\) costs \\(c_{FN}\\); a correct prediction costs nothing\n\n\n\n\n\n\n\n\n\n\nA miss costs ten times a false alarm and the model says \\(\\hat p = 0.3\\). Predict \\(1\\) or \\(0\\)?"
+    "text": "What does a mistake cost?\nPredicting \\(1\\) when the truth is \\(0\\) costs \\(c_{FP}\\); predicting \\(0\\) when the truth is \\(1\\) costs \\(c_{FN}\\); a correct prediction costs nothing\n\nA miss costs ten times a false alarm and the model says \\(\\hat p = 0.3\\). Predict \\(1\\) or \\(0\\)?"
+  },
+  {
+    "objectID": "weeks/03-classification-causality/slides/03-1-classification-causality.html#cost-at-each-threshold",
+    "href": "weeks/03-classification-causality/slides/03-1-classification-causality.html#cost-at-each-threshold",
+    "title": "Machine learning",
+    "section": "Cost at each threshold",
+    "text": "Cost at each threshold"
   },
   {
     "objectID": "weeks/03-classification-causality/slides/03-1-classification-causality.html#optimal-threshold-theorem",
@@ -1579,7 +1586,7 @@
     "href": "weeks/05-validation/slides/05-1-structures.html#where-we-left-off",
     "title": "Machine learning",
     "section": "Where we left off",
-    "text": "Where we left off\nLast week: optimization, the general concepts and the methods that fit a model\nThis week: a few specific families of supervised models, each with its own functional structure, each introduced briefly. Every one of them gets more detail later in the course\nEach family is a bet on the shape of \\(f^\\star\\). To compare the bets we need one task"
+    "text": "Where we left off\nOptimization: the general concepts and the methods that fit a model\nThis week: a few specific families of supervised models, each with its own functional structure, each introduced briefly. Every one of them gets more detail later in the course\nEach family is a bet on the shape of \\(f^\\star\\). To compare the bets we need one task"
   },
   {
     "objectID": "weeks/05-validation/slides/05-1-structures.html#the-task-10000-spotify-tracks",

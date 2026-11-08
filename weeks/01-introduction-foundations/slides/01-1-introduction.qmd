@@ -504,7 +504,7 @@ Winning model chosen by best score
 ## History: common task framework {minutes="3"}
 
 ::: {.notes}
-Three minutes; where the name comes from. DARPA speech, mid-1980s, NIST as referee. Donoho (2017): the secret sauce.
+Three minutes; where the name comes from. DARPA speech, mid-1980s, NIST as referee. The name is Liberman's; Donoho (2017): the secret sauce.
 :::
 
 ::: {style="font-size: 1.25em"}
@@ -517,7 +517,7 @@ Three minutes; where the name comes from. DARPA speech, mid-1980s, NIST as refer
 : {tbl-colwidths="[12,88]"}
 :::
 
-Donoho (2017) called the recipe the *common task framework* and credited it with most of what "machine learning" has achieved since
+Donoho (2017), crediting Mark Liberman for the name *common task framework*, argued that this recipe drives the success of predictive modeling
 
 ## Netflix challenge
 
@@ -576,7 +576,7 @@ That number is the leaderboard.
 ## One rule before we start
 
 ::: {.notes}
-First item on their project checklist. Returns in the validation week as leakage.
+First item on their project checklist. Returns in week 7 as leakage.
 :::
 
 An input is fair game only if you would have it *at the moment you need the prediction*
@@ -700,7 +700,7 @@ ggplot(train, aes(lgdp, lifeExp)) +
 ## The score, for every $k$
 
 ::: {.notes}
-Let them say why it is zero. Leave open what the number tells you; that is the validation week.
+Let them say why it is zero. Leave open what the number tells you; that is week 5.
 :::
 
 ```{r}
@@ -974,12 +974,12 @@ and by a union bound over the $n-1$ distances from a query point, every neighbor
 ## Two things to think about
 
 ::: {.notes}
-Both withheld. 1 is the validation week; 2 is the seminar's last question.
+Both withheld. 1 returns in week 5; 2 is the seminar's last question.
 :::
 
 **1.** Your 1-NN submission had training error zero. What is that number measuring, and what would the competition have scored instead?
 
-**2.** Suppose we fit a model to the 142 countries in 2002 and test it on the *same 142 countries in 1997*, and it does well. Has it predicted anything new?
+**2.** Suppose we fit a model to the 142 countries in 2007 and test it on the *same 142 countries in 1997*, and it does well. Has it predicted anything new?
 
 ## Before the seminar
 

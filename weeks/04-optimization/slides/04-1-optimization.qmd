@@ -479,7 +479,7 @@ Your loss has stopped falling. Which of the four places are you at, and how woul
 ## Landscapes {minutes="3"}
 
 ::: {.notes}
-Left, the hilly road again: three starts, same step size, three places after 60 steps; the start at -1 barely moves on the plateau and reaches the global minimum only after about 450 steps (panel B later). Right, a second example, the saddle: a start on the line u = 0 runs into the saddle point and stays, because the u-gradient is zero on that whole line. Convex losses have none of this; most of what comes after week 7 has all of it.
+Left, the hilly road again: three starts, same step size, three places after 60 steps; the start at -1 barely moves on the plateau and reaches the global minimum only after about 450 steps (panel B later). Right, a second example, the saddle: a start on the line u = 0 runs into the saddle point and stays, because the u-gradient is zero on that whole line. Convex losses have none of this; week 5's neural network and week 11's learned representations have all of it.
 :::
 
 ```{r}
@@ -950,7 +950,7 @@ You may stop the algorithm at any step. Which one, and why?
 ## Stopping early: the held-out error
 
 ::: {.notes}
-The algorithm did what it was asked, minimize the training error, and the training error is the wrong thing to minimize all the way. Nothing in parts 2 to 4 could have shown this: they only ever used the training loss. Say, do not show: next week measures by how much it underestimates the risk; the number of steps is a tuning parameter like k or d; week 7 writes the penalty down.
+The algorithm did what it was asked, minimize the training error, and the training error is the wrong thing to minimize all the way. Nothing in parts 2 to 4 could have shown this: they only ever used the training loss. Say, do not show: week 5 states that it underestimates the risk; the number of steps is a tuning parameter like k or d; week 5 writes a penalty down.
 :::
 
 ::: {.columns}

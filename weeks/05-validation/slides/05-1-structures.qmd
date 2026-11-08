@@ -131,7 +131,7 @@ Part 6: which structure?
 One minute. Last week how a model is fitted; this week what shapes a model can have. Each family briefly; each gets its own detail later.
 :::
 
-Last week: optimization, the general concepts and the methods that fit a model
+Optimization: the general concepts and the methods that fit a model
 
 This week: a few specific families of supervised models, each with its own **functional structure**, each introduced briefly. Every one of them gets more detail later in the course
 
