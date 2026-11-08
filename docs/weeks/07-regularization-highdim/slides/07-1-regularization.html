@@ -291,13 +291,13 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p><span class="math inline">\(k = 50\)</span> to <span class="math inline">\(200\)</span> are within one bar: a flat bottom, and “the best <span class="math inline">\(k\)</span>” is any of them</p>
+<p>A flat bottom: <span class="math inline">\(k = 50\)</span> and <span class="math inline">\(200\)</span> differ by 1.6, with a paired SE of 3.3</p>
 </div><div class="column" style="width:48%;">
 <p>Losses <span class="math inline">\(L_j = \ell(y_j, \hat f(x_j))\)</span> on <span class="math inline">\(m\)</span> held-out units, independent with <span class="math inline">\(\hat f\)</span> held fixed: <span class="math display">\[
 \widehat{\text{Err}} = \frac1m\sum_{j=1}^m L_j, \qquad \text{SE} = \frac{\text{sd}(L)}{\sqrt m}
 \]</span> The uncertainty of this fit’s score on <span class="math inline">\(m\)</span> new units; here the <span class="math inline">\(m = 2{,}000\)</span> selection tracks</p>
 </div></div>
-<p>In <span class="math inline">\(K\)</span>-fold CV each fit uses <span class="math inline">\(n(1 - 1/K)\)</span> rows and is scored on the other <span class="math inline">\(n/K\)</span>; pooled over the folds every row is scored once, so <span class="math inline">\(m = n\)</span>, but by fits that share rows</p>
+<p>In <span class="math inline">\(K\)</span>-fold CV each fit uses <span class="math inline">\(n(1 - 1/K)\)</span> rows and is scored on the other <span class="math inline">\(n/K\)</span>; pooled over the folds, <span class="math inline">\(m = n\)</span>, but by fits that share rows, so there the formula is a heuristic</p>
 </section>
 <section id="lessons-about-cross-validation" class="slide level2">
 <h2>Lessons about cross-validation</h2>
@@ -351,7 +351,7 @@ Joshua Loftus
 </section>
 <section id="why-care-about-rates" class="slide level2">
 <h2>Why care about rates?</h2>
-<p>Trillions of dollars are going into scaling up AI models: more data, more parameters. What if this is mathematically guaranteed to fail?</p>
+<p>Over a trillion dollars is going into scaling up AI models. What if this is mathematically guaranteed to fail?</p>
 <div class="fragment">
 <p>A <strong>rate</strong> says how fast the error falls as <span class="math inline">\(n\)</span> grows. With only smoothness assumed, this part shows the exponent is <span class="math inline">\(2/(p+2)\)</span>, <span class="math inline">\(p\)</span> the number of inputs. Then ten times the data cuts the error by a factor <span class="math inline">\(10^{-2/(p+2)}\)</span>:</p>
 <table class="caption-top">
@@ -383,13 +383,13 @@ Joshua Loftus
 <h2>The best <span class="math inline">\(k\)</span> as <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span> grow</h2>
 <p>The CV curve put <span class="math inline">\(k\)</span> at 100 on 5,000 tracks and <span class="math inline">\(p = 11\)</span> inputs. Where would the minimum be with 50,000 tracks? With 110 inputs?</p>
 <div class="retrieval">
-<p>Bias–variance decomposition, <span class="math inline">\(k\)</span>-NN form: inputs fixed, <span class="math inline">\(y_i = f^\star(x_i) + \varepsilon_i\)</span>, noise mean <span class="math inline">\(0\)</span>, variance <span class="math inline">\(\sigma^2\)</span>, <span class="math inline">\(\hat f_k(x_0)\)</span> the mean of the <span class="math inline">\(k\)</span> nearest training outcomes: <span class="math display">\[
+<p>Bias–variance decomposition, <span class="math inline">\(k\)</span>-NN form: inputs fixed, <span class="math inline">\(y_i = f^\star(x_i) + \varepsilon_i\)</span>, <span class="math inline">\(\varepsilon_i\)</span> independent, mean <span class="math inline">\(0\)</span>, variance <span class="math inline">\(\sigma^2\)</span>; <span class="math inline">\(\hat f_k(x_0)\)</span> the mean of the <span class="math inline">\(k\)</span> nearest <span class="math inline">\(y_i\)</span>: <span class="math display">\[
 \mathbb E\big[(Y_0 - \hat f_k(x_0))^2\big] = \sigma^2 + \Big[f^\star(x_0) - \tfrac1k\textstyle\sum_l f^\star(x_{(l)})\Big]^2 + \sigma^2/k
 \]</span></p>
 </div>
 <p>The variance term is explicit, <span class="math inline">\(\sigma^2/k\)</span>. The bias term depends on <span class="math inline">\(f^\star\)</span> at the <span class="math inline">\(k\)</span> nearest inputs, and can be bounded only by an assumption on <span class="math inline">\(f^\star\)</span></p>
 <div class="ask">
-<p>What is the smallest assumption on <span class="math inline">\(f^\star\)</span> that bounds the bias? Write it down.</p>
+<p>What assumption on <span class="math inline">\(f^\star\)</span> makes the bias term a number? Write it down.</p>
 </div>
 </section>
 <section id="k-nn-rate-bounding-the-bias" class="slide level2" data-minutes="3">
@@ -422,7 +422,7 @@ Joshua Loftus
 <div class="leave">
 <p><strong>Nearest-neighbor distance lemma</strong> (stated). For <span class="math inline">\(x_0\)</span> away from the boundary, <span class="math inline">\(\mathbb E\big[r_k(x_0)^2\big] \lesssim (k/n)^{2/p}\)</span>, the constant depending on <span class="math inline">\(p\)</span> only.</p>
 </div>
-<p>In one dimension, <span class="math inline">\((k/n)^2\)</span>: the <span class="math inline">\(k\)</span>th neighbor is about <span class="math inline">\(k/2n\)</span> away on each side. In <span class="math inline">\(p = 10\)</span>, <span class="math inline">\((k/n)^{1/5}\)</span>: with <span class="math inline">\(k/n = 1/100\)</span>, the radius is <span class="math inline">\(0.4\)</span> of the side of the cube</p>
+<p>In one dimension the <span class="math inline">\(k\)</span>th neighbor is about <span class="math inline">\(k/2n\)</span> away on each side. In <span class="math inline">\(p = 10\)</span> the radius is about <span class="math inline">\((k/n)^{1/10}\)</span>: with <span class="math inline">\(k/n = 1/100\)</span>, <span class="math inline">\(0.63\)</span> of the side of the cube</p>
 </div><div class="column" style="width:42%;">
 <div class="cell">
 <div class="cell-output-display">
@@ -443,7 +443,7 @@ Joshua Loftus
 <p>Put the two together and choose <span class="math inline">\(k\)</span>: <span class="math display">\[
 \mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \;\lesssim\; L^2 (k/n)^{2/p} + \sigma^2/k
 \]</span> The first term grows with <span class="math inline">\(k\)</span>, the second shrinks. They balance at <span class="math inline">\(k \asymp n^{2/(p+2)}\)</span>, and there <span class="math display">\[
-\text{error} \asymp n^{-2/(p+2)}
+\text{error} \lesssim n^{-2/(p+2)}
 \]</span></p>
 <p>To halve the error, <span class="math inline">\(2^{(p+2)/2}\)</span> times the data: <span class="math inline">\(2.8\times\)</span> in <span class="math inline">\(p = 1\)</span>, <span class="math inline">\(4\times\)</span> in <span class="math inline">\(p = 2\)</span>, <span class="math inline">\(11\times\)</span> in <span class="math inline">\(p = 5\)</span>, <span class="math inline">\(64\times\)</span> in <span class="math inline">\(p = 10\)</span></p>
 <div class="leave">
@@ -455,14 +455,14 @@ Joshua Loftus
 <div style="font-size: 0.95em">
 <table class="caption-top">
 <colgroup>
-<col style="width: 40%">
-<col style="width: 24%">
-<col style="width: 36%">
+<col style="width: 38%">
+<col style="width: 28%">
+<col style="width: 34%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Assumption on <span class="math inline">\(f^\star\)</span></th>
-<th>Rate (up to constants)</th>
+<th>Squared error (up to constants)</th>
 <th>The family</th>
 </tr>
 </thead>
@@ -479,13 +479,13 @@ Joshua Loftus
 </tr>
 <tr class="odd">
 <td>linear with <span class="math inline">\(s\)</span> nonzero coefficients among <span class="math inline">\(p\)</span> (sparsity, plus design and noise conditions)</td>
-<td>about <span class="math inline">\(s\log p/n\)</span> (Hastie et al.&nbsp;2015)</td>
+<td>about <span class="math inline">\(s\log p/n\)</span> (Hastie et al.&nbsp;2015, Theorem 11.2)</td>
 <td>the lasso: a sparse plane</td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>With smoothness alone, <span class="math inline">\(p\)</span> is in the exponent. An additive assumption gives the one-input exponent; a sparse linear one moves <span class="math inline">\(p\)</span> out of the exponent into a <span class="math inline">\(\log p\)</span>. Each faster rate holds only when its assumption does; the second and third are stated, not derived</p>
+<p>Smoothness alone: <span class="math inline">\(p\)</span> in the exponent. Additivity: the one-input exponent. Sparsity: <span class="math inline">\(p\)</span> out of the exponent, into a <span class="math inline">\(\log p\)</span>. Rows 2 and 3 are stated, not derived</p>
 <div class="retrieval">
 <p>No free lunch theorem, with numbers: the Lipschitz class is already an assumption, and nothing beats its rate for every <span class="math inline">\(f^\star\)</span> in it. A faster rate needs a stronger assumption, and holds only when that assumption is true.</p>
 </div>
@@ -540,11 +540,11 @@ Joshua Loftus
 \|\beta\|_1 = \sum_{j=1}^p |\beta_j|
 \]</span></p>
 </div></div>
-<p>Ridge’s coefficients shrink and are never zero; the lasso’s are exactly zero over whole ranges of <span class="math inline">\(\lambda\)</span>. What <span class="math inline">\(\lambda\)</span> does to one coefficient is hidden in general, because the coefficients interact; in one design they do not</p>
+<p>Ridge’s estimates are dense: every coefficient nonzero, in general; the lasso’s are exactly zero over whole ranges of <span class="math inline">\(\lambda\)</span>. What <span class="math inline">\(\lambda\)</span> does to one coefficient is hidden in general, because the coefficients interact; in one design they do not</p>
 </section>
 <section id="the-orthogonal-design" class="slide level2" data-minutes="3">
 <h2>The orthogonal design</h2>
-<p><span class="math inline">\(\mathbf X^T\mathbf X = I\)</span> (orthonormal columns, <span class="math inline">\(p \le n\)</span>): <span class="math inline">\(\hat\beta = \mathbf X^T\mathbf y\)</span> with <span class="math inline">\(z_j = \mathbf x_j^T\mathbf y\)</span>, and <span class="math inline">\(\|\mathbf y - \mathbf X\beta\|^2 = \text{const} + \sum_j (z_j - \beta_j)^2\)</span>: a <strong>separable objective</strong>, one term per coefficient</p>
+<p><span class="math inline">\(\mathbf X^T\mathbf X = I\)</span> (orthonormal columns, <span class="math inline">\(p \le n\)</span>): <span class="math inline">\(\hat\beta = \mathbf X^T\mathbf y\)</span> with <span class="math inline">\(z_j = \mathbf x_j^T\mathbf y\)</span>, <span class="math inline">\(\mathbf x_j\)</span> the <span class="math inline">\(j\)</span>th column, and <span class="math inline">\(\|\mathbf y - \mathbf X\beta\|^2 = \text{const} + \sum_j (z_j - \beta_j)^2\)</span>: a <strong>separable objective</strong>, one term per coefficient</p>
 <div class="fragment">
 <p><strong>Ridge</strong>, one coordinate: <span class="math inline">\(\tfrac12(z - b)^2 + \tfrac\lambda2 b^2\)</span>, smooth; derivative zero at <span class="math inline">\(\hat b = z/(1 + \lambda)\)</span></p>
 </div>
@@ -591,7 +591,7 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p>Contours are long where the data determine least precisely; ridge moves fastest along it</p>
+<p>Ridge shrinks most, in proportion, where the data determine least precisely</p>
 </section>
 <section id="high-dimensional-example" class="slide level2">
 <h2>High-dimensional example</h2>
@@ -648,7 +648,7 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p>Eight resamples of the training tracks, the lasso’s <span class="math inline">\(\lambda\)</span> chosen by cross-validation on each. The set of kept inputs changes from one resample to the next; the fits’ scores barely do. The same instability as a tree’s cutoffs. The predictions survive it; a list of selected inputs does not</p>
+<p>Eight half-samples of the training tracks, the lasso’s <span class="math inline">\(\lambda\)</span> chosen by cross-validation on each. The set of kept inputs changes from one sample to the next; the fits’ scores barely do. The same instability as a tree’s cutoffs. A score tolerates it; a list of “the inputs that matter” does not</p>
 </section>
 <section id="a-fixed-lambda-and-a-data-chosen-hatlambda" class="slide level2">
 <h2>A fixed <span class="math inline">\(\lambda\)</span> and a data-chosen <span class="math inline">\(\hat\lambda\)</span></h2>
@@ -658,7 +658,7 @@ Joshua Loftus
 </div><div class="column" style="width:50%;">
 <p><span class="math inline">\(\hat\beta_{\text{lasso}}(\hat\lambda)\)</span> at a data-chosen <span class="math inline">\(\hat\lambda\)</span></p>
 </div></div>
-<p>Different in general! Theoretical results about the first (the rate, the orthogonal-design formula) may not apply to the second</p>
+<p>Different in general! Theoretical results about the first (the rate, the ridge-form decomposition at a fixed <span class="math inline">\(\lambda\)</span>) may not apply to the second</p>
 <div class="retrieval">
 <p>Choosing on a dataset is empirical risk minimization over a finite class: the winner’s score on the rows it was chosen on is biased low (two equal candidates with scores <span class="math inline">\(r \pm 1\)</span>: the winner’s is <span class="math inline">\(r - \tfrac12\)</span> on average). The CV curve’s minimum is such a winner, over 67 candidates.</p>
 </div>
@@ -675,7 +675,7 @@ Joshua Loftus
 <div class="column" style="width:48%;">
 <p><span class="math display">\[
 \min_f\; \textstyle\sum_{i=1}^n \big(y_i - f(x_i)\big)^2 + \lambda\int f''(x)^2\,dx
-\]</span> <span class="math inline">\(\lambda = 0\)</span>: the <span class="math inline">\(J\)</span>-basis fit. <span class="math inline">\(\lambda \to \infty\)</span>: <span class="math inline">\(f'' = 0\)</span>, a straight line. In between: <span class="math inline">\(\lambda\)</span> chosen by cross-validation</p>
+\]</span> <span class="math inline">\(\lambda = 0\)</span>: the <span class="math inline">\(J\)</span>-basis fit. <span class="math inline">\(\lambda \to \infty\)</span>: <span class="math inline">\(f'' = 0\)</span>, a straight line. In between: <span class="math inline">\(\lambda\)</span> chosen by generalized cross-validation (GCV, <code>mgcv</code>’s default)</p>
 </div><div class="column" style="width:52%;">
 <div class="cell">
 <div class="cell-output-display">
@@ -689,7 +689,7 @@ Joshua Loftus
 </div></div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
-<span id="cb2-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">gam</span>(track_popularity <span class="sc">~</span> <span class="fu">s</span>(release_year, <span class="at">k =</span> <span class="dv">20</span>, <span class="at">bs =</span> <span class="st">"cr"</span>), sp_train)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">gam</span>(track_popularity <span class="sc">~</span> <span class="fu">s</span>(release_year, <span class="at">k =</span> <span class="dv">20</span>, <span class="at">bs =</span> <span class="st">"cr"</span>), <span class="at">data =</span> sp_train)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="the-smoothing-penalty-as-weighted-ridge" class="slide level2">
@@ -717,7 +717,7 @@ Joshua Loftus
 <p>Ridge is defined for every <span class="math inline">\(\lambda &gt; 0\)</span>, and <span class="math display">\[
 \hat\beta_\lambda \;\longrightarrow\; \hat\beta_{\min} = \mathbf X^T(\mathbf X\mathbf X^T)^{-1}\mathbf y \quad \text{as } \lambda \to 0^+
 \]</span> the <strong>minimum-norm interpolant</strong>: of all the zero-error fits, the one with the smallest <span class="math inline">\(\|\beta\|\)</span></p>
-<p>Gradient descent on least squares, started at <span class="math inline">\(\beta = \mathbf 0\)</span>, stops at the same point (stated)</p>
+<p>Gradient descent on least squares from <span class="math inline">\(\beta = \mathbf 0\)</span>, small step, converges to the same point (stated)</p>
 </div><div class="column" style="width:44%;">
 <div class="cell">
 <div class="cell-output-display">
@@ -759,7 +759,7 @@ Joshua Loftus
 <section id="double-descent-and-the-biasvariance-decomposition" class="slide level2">
 <h2>Double descent and the bias–variance decomposition</h2>
 <p><strong>Does not change.</strong> The bias–variance decomposition is an identity; it holds on every point of both curves. Training error zero still says nothing about the risk (optimism theorem)</p>
-<p><strong>Changes.</strong> The folk version, “more parameters, more variance”, read as a function of the parameter count alone. It is right for one way of fitting with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. It is wrong for a rule that interpolates: the variance of the smallest-norm fit spikes at <span class="math inline">\(J = n\)</span>, where the design is nearly singular (the reason ridge was invented), and falls past it, because the rule itself changes with <span class="math inline">\(J\)</span></p>
+<p><strong>Changes.</strong> The folk version, “more parameters, more variance”, read as a function of the parameter count alone. It is right for one way of fitting with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. It is wrong for a rule that interpolates: with the inputs fixed, the variance of the smallest-norm fit over 50 replicates is 0.26 at <span class="math inline">\(J = 15\)</span>, 42 at <span class="math inline">\(J = n = 20\)</span>, where the design is nearly singular (the reason ridge was invented), and 0.048 at <span class="math inline">\(J = 80\)</span>: it spikes and falls, because the rule itself changes with <span class="math inline">\(J\)</span></p>
 <div class="retrieval">
 <p>Four dimensions: each family assumed a shape for <span class="math inline">\(f^\star\)</span>, and no single scale ran from simple to complex. The parameter count is not that scale either. The rule that chooses the fit is what regularizes.</p>
 </div>
@@ -787,16 +787,25 @@ Joshua Loftus
 <h4 id="cross-validation-chooses-the-knob">Cross-validation chooses the knob</h4>
 <p>Every row fitted on and scored on, in turn. The curve’s minimum is a chosen number: report a score from the vault</p>
 <h4 id="the-error-of-a-smooth-fstar-in-n-and-p">The error of a smooth <span class="math inline">\(f^\star\)</span>, in <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span></h4>
-<p><span class="math inline">\(n^{-2/(p+2)}\)</span> with smoothness alone; a stronger assumption gives a faster rate, when it holds</p>
+<p>The worst-case rate is <span class="math inline">\(n^{-2/(p+2)}\)</span> with smoothness alone; a stronger assumption gives a faster rate, when it holds</p>
 <h4 id="ridge-divides-the-lasso-subtracts">Ridge divides, the lasso subtracts</h4>
-<p>Bias on purpose beats least squares for every <span class="math inline">\(\beta\)</span>; the lasso’s zeros are exact. A penalty on wiggliness is ridge with weights. Past <span class="math inline">\(p = n\)</span>, the rule that picks the fit is the regularizer</p>
+<p>Bias on purpose: for every <span class="math inline">\(\beta\)</span> some <span class="math inline">\(\lambda &gt; 0\)</span> beats least squares; the lasso’s zeros are exact. A penalty on wiggliness is ridge with weights. Past <span class="math inline">\(p = n\)</span>, the rule that picks the fit is the regularizer</p>
 </section>
 <section id="references" class="slide level2 inverse" data-minutes="0">
 <h2>References</h2>
 <div style="font-size: 0.78em">
 <ul>
 <li>Belkin, M., Hsu, D., Ma, S. and Mandal, S. (2019). Reconciling modern machine-learning practice and the classical bias–variance trade-off. <em>Proceedings of the National Academy of Sciences</em> 116(32), 15849–15854. <a href="https://doi.org/10.1073/pnas.1903070116">doi:10.1073/pnas.1903070116</a></li>
-<li>Hastie, T., Tibshirani, R. and Wainwright, M. (2015). <em>Statistical Learning with Sparsity: The Lasso and Generalizations</em>. Chapman and Hall/CRC. Theorem 11.1 and Example 11.1, pp.&nbsp;295–296. <a href="https://doi.org/10.1201/b18401">doi:10.1201/b18401</a>; free PDF at <a href="https://hastie.su.domains/StatLearnSparsity/">hastie.su.domains/StatLearnSparsity</a></li>
+<li>Hastie, T., Tibshirani, R. and Friedman, J. (2009). <em>The Elements of Statistical Learning: Data Mining, Inference, and Prediction</em>, 2nd edition. Springer, New York. Section 7.10.2, p.&nbsp;222 (the quotation). <a href="https://hastie.su.domains/ElemStatLearn/">hastie.su.domains/ElemStatLearn</a></li>
+<li>Hastie, T., Tibshirani, R. and Wainwright, M. (2015). <em>Statistical Learning with Sparsity: The Lasso and Generalizations</em>. Chapman and Hall/CRC. Theorem 11.2(b), equation (11.26b), p.&nbsp;300 (prediction error); Theorem 11.1 and Example 11.1, pp.&nbsp;295–296 (coefficient error). <a href="https://doi.org/10.1201/b18401">doi:10.1201/b18401</a>; free PDF at <a href="https://hastie.su.domains/StatLearnSparsity/">hastie.su.domains/StatLearnSparsity</a></li>
+</ul>
+</div>
+</section>
+<section id="references-continued" class="slide level2 inverse" data-minutes="0">
+<h2>References, continued</h2>
+<div style="font-size: 0.78em">
+<ul>
+<li>James, G., Witten, D., Hastie, T. and Tibshirani, R. (2021). <em>An Introduction to Statistical Learning with Applications in R</em>, 2nd edition. Springer, New York. Section 10.8 and Figure 10.21, pp.&nbsp;439–443 (the zero-error fits, adapted). <a href="https://www.statlearning.com">statlearning.com</a></li>
 <li>Stone, C. J. (1980). Optimal rates of convergence for nonparametric estimators. <em>Annals of Statistics</em> 8(6), 1348–1360. <a href="https://doi.org/10.1214/aos/1176345206">doi:10.1214/aos/1176345206</a></li>
 <li>Stone, C. J. (1982). Optimal global rates of convergence for nonparametric regression. <em>Annals of Statistics</em> 10(4), 1040–1053. <a href="https://doi.org/10.1214/aos/1176345969">doi:10.1214/aos/1176345969</a></li>
 <li>Stone, C. J. (1985). Additive regression and other nonparametric models. <em>Annals of Statistics</em> 13(2), 689–705. <a href="https://doi.org/10.1214/aos/1176349548">doi:10.1214/aos/1176349548</a></li>

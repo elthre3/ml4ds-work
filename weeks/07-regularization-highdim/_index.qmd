@@ -4,8 +4,8 @@ Every method so far had a knob. This week: choosing it by $K$-fold cross-validat
 
 **Reading**
 
-- ISLR Chapter 5 (Resampling Methods), section 5.1, pp. 197–209: the validation set, leave-one-out and $K$-fold cross-validation, and the bias--variance trade-off in choosing $K$. Skim 5.1.5 (classification), pp. 206–208. Section 5.2, the bootstrap, is not needed this week.
-- ISLR Chapter 6, section 6.2.3, pp. 250–252 (choosing the tuning parameter by cross-validation), picking up where the last reading stopped. Re-read "A simple special case for ridge regression and the lasso", pp. 247–249: the lecture works in that design.
+- ISLR Chapter 5 (Resampling Methods), section 5.1, pp. 198–208: the validation set, leave-one-out and $K$-fold cross-validation, and the bias--variance trade-off in choosing $K$. Skim 5.1.5 (classification), pp. 206–208. Section 5.2, the bootstrap, is not needed this week.
+- ISLR Chapter 6, section 6.2.3, pp. 250–251 (choosing the tuning parameter by cross-validation), picking up where the last reading stopped. Re-read "A simple special case for ridge regression and the lasso", pp. 247–249: the lecture works in that design.
 - ISLR Chapter 6, section 6.4, pp. 261–267 (what changes when $p > n$). Section 6.3, which comes between them, is not part of the course.
 - ISLR Chapter 7, section 7.5.1, pp. 301–302 (smoothing splines: a penalty on wiggliness instead of a basis size). Skim 7.5.2, pp. 302–304.
 
