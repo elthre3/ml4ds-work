@@ -1852,7 +1852,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#where-we-left-off",
     "title": "Machine learning",
     "section": "Where we left off",
-    "text": "Where we left off\nFive functional structures, each with a knob: \\(\\lambda\\), \\(J\\), depth, \\(M\\), and \\(k\\) for nearest neighbors. Each knob was chosen on the selection set, and the test set opened once\nThis week: choosing the knob with less waste (cross-validation); how the error depends on \\(n\\) and the number of inputs; and what the two penalties do to each coefficient, in closed form, in the simplest design"
+    "text": "Where we left off\nFive functional structures, each with a knob: \\(\\lambda\\), \\(J\\), depth, \\(M\\), and \\(k\\) for nearest neighbors. Each knob was chosen on the selection set, and the test set opened once\nThis week: how much flexibility should we allow?\n\ncross-validation chooses the knob\nthe nearest-neighbor rate: how the error depends on \\(n\\) and \\(p\\)\nridge and the lasso, one coefficient at a time"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#section-1",
@@ -1873,7 +1873,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#cross-validation-cartoon",
     "title": "Machine learning",
     "section": "Cross-validation cartoon",
-    "text": "Cross-validation cartoon\n\nGives \\(K\\) estimates of the held-out error at each \\(\\lambda\\)\nCredit: Wikipedia"
+    "text": "Cross-validation cartoon\n\n\n\n\n\nGives \\(K\\) estimates of the held-out error at each \\(\\lambda\\). Credit: Wikipedia"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#k-fold-cross-validation-1",
@@ -1894,7 +1894,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#held-out-standard-error",
     "title": "Machine learning",
     "section": "Held-out standard error",
-    "text": "Held-out standard error\n\n\n\n\n\n\n\n\n\n\n\n\n\\(m\\) held-out units, losses \\(L_j = \\ell(y_j^{\\text{test}}, \\hat f(x_j^{\\text{test}}))\\), independent if the units are, with \\(\\hat f\\) held fixed: \\[\n\\widehat{\\text{Err}} = \\frac1m\\sum_{j=1}^m L_j, \\qquad \\text{SE} = \\frac{\\text{sd}(L)}{\\sqrt m}\n\\] The uncertainty of this fit’s score on \\(m\\) new units\n\nOn the selection tracks, \\(k = 50\\), \\(100\\) and \\(200\\) sit within one bar of each other: a flat bottom, and “the best \\(k\\)” is any of them"
+    "text": "Held-out standard error\n\n\n\n\n\n\n\n\n\n\n\n\\(k = 50\\) to \\(200\\) are within one bar: a flat bottom, and “the best \\(k\\)” is any of them\n\nLosses \\(L_j = \\ell(y_j, \\hat f(x_j))\\) on \\(m\\) held-out units, independent with \\(\\hat f\\) held fixed: \\[\n\\widehat{\\text{Err}} = \\frac1m\\sum_{j=1}^m L_j, \\qquad \\text{SE} = \\frac{\\text{sd}(L)}{\\sqrt m}\n\\] The uncertainty of this fit’s score on \\(m\\) new units; here the \\(m = 2{,}000\\) selection tracks\n\nIn \\(K\\)-fold CV each fit uses \\(n(1 - 1/K)\\) rows and is scored on the other \\(n/K\\); pooled over the folds every row is scored once, so \\(m = n\\), but by fits that share rows"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#lessons-about-cross-validation",
@@ -1915,7 +1915,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#plotcv.glmnet",
     "title": "Machine learning",
     "section": "plot(cv.glmnet)",
-    "text": "plot(cv.glmnet)\nglmnet’s own cross-validation of the lasso on the training tracks, the same ten folds. Top axis: how many coefficients are nonzero\n\n\n\ncv_fit &lt;- cv.glmnet(X, y, foldid = fold)\nplot(cv_fit)\n\n\n\n\n\n\n\n\n\n\n\nDotted lines: lambda.min, the minimum; lambda.1se, the largest \\(\\lambda\\) within one bar of it, the one-standard-error rule: a flat bottom, so take the simpler model\nThe bars, \\(\\text{sd}/\\sqrt K\\) of the fold scores, are a heuristic (the folds share rows). The minimum is chosen among 67 candidates on these rows: biased low, a score to choose with, not to report"
+    "text": "plot(cv.glmnet)\nglmnet’s own cross-validation of the lasso on the training tracks, the same ten folds. Top axis: how many coefficients are nonzero\n\n\n\ncv_fit &lt;- cv.glmnet(X, y, foldid = fold)\nplot(cv_fit)\n\n\n\n\n\n\n\n\n\n\n\nDotted lines: lambda.min, the minimum; lambda.1se, the largest \\(\\lambda\\) within one bar of it, the one-standard-error rule\nThe bars, \\(\\text{sd}/\\sqrt K\\) of the fold scores, are a heuristic (the folds share rows). The minimum is chosen among 67 candidates on these rows: biased low, a score to choose with, not to report"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#section-2",
@@ -1925,11 +1925,18 @@
     "text": "Part 2: the nearest-neighbor rate"
   },
   {
-    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-best-k-as-n-and-d-grow",
-    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-best-k-as-n-and-d-grow",
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#why-care-about-rates",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#why-care-about-rates",
     "title": "Machine learning",
-    "section": "The best \\(k\\) as \\(n\\) and \\(d\\) grow",
-    "text": "The best \\(k\\) as \\(n\\) and \\(d\\) grow\nThe CV curve put \\(k\\) at 100 on 5,000 tracks and 11 inputs. Where would the minimum be with 50,000 tracks? With 110 inputs?\n\nBias–variance decomposition, \\(k\\)-NN form: inputs fixed, \\(y_i = f^\\star(x_i) + \\varepsilon_i\\), noise mean \\(0\\), variance \\(\\sigma^2\\), \\(\\hat f_k(x_0)\\) the mean of the \\(k\\) nearest training outcomes: \\[\n\\mathbb E\\big[(Y_0 - \\hat f_k(x_0))^2\\big] = \\sigma^2 + \\Big[f^\\star(x_0) - \\tfrac1k\\textstyle\\sum_l f^\\star(x_{(l)})\\Big]^2 + \\sigma^2/k\n\\]\n\nThe variance, \\(\\sigma^2/k\\), is a formula. The bias is an average of \\(f^\\star\\) over the \\(k\\) nearest inputs, and says nothing until we assume something about \\(f^\\star\\)\n\nWhat is the smallest assumption on \\(f^\\star\\) that bounds the bias? Write it down."
+    "section": "Why care about rates?",
+    "text": "Why care about rates?\nTrillions of dollars are going into scaling up AI models: more data, more parameters. What if this is mathematically guaranteed to fail?\n\nA rate says how fast the error falls as \\(n\\) grows. With only smoothness assumed, this part shows the exponent is \\(2/(p+2)\\), \\(p\\) the number of inputs. Then ten times the data cuts the error by a factor \\(10^{-2/(p+2)}\\):\n\n\n\n\\(p\\)\n1\n10\n100\n\\(10^6\\) (a megapixel image)\n\n\n\n\nerror, relative\n\\(0.22\\)\n\\(0.68\\)\n\\(0.96\\)\n\\(0.999995\\)\n\n\n\n\n\nSo either scaling fails, or the problems it works on have structure that the rate does not assume. The rate first; what changes its exponent at the end of the part"
+  },
+  {
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-best-k-as-n-and-p-grow",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-best-k-as-n-and-p-grow",
+    "title": "Machine learning",
+    "section": "The best \\(k\\) as \\(n\\) and \\(p\\) grow",
+    "text": "The best \\(k\\) as \\(n\\) and \\(p\\) grow\nThe CV curve put \\(k\\) at 100 on 5,000 tracks and \\(p = 11\\) inputs. Where would the minimum be with 50,000 tracks? With 110 inputs?\n\nBias–variance decomposition, \\(k\\)-NN form: inputs fixed, \\(y_i = f^\\star(x_i) + \\varepsilon_i\\), noise mean \\(0\\), variance \\(\\sigma^2\\), \\(\\hat f_k(x_0)\\) the mean of the \\(k\\) nearest training outcomes: \\[\n\\mathbb E\\big[(Y_0 - \\hat f_k(x_0))^2\\big] = \\sigma^2 + \\Big[f^\\star(x_0) - \\tfrac1k\\textstyle\\sum_l f^\\star(x_{(l)})\\Big]^2 + \\sigma^2/k\n\\]\n\nThe variance term is explicit, \\(\\sigma^2/k\\). The bias term depends on \\(f^\\star\\) at the \\(k\\) nearest inputs, and can be bounded only by an assumption on \\(f^\\star\\)\n\nWhat is the smallest assumption on \\(f^\\star\\) that bounds the bias? Write it down."
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#k-nn-rate-bounding-the-bias",
@@ -1943,21 +1950,21 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-nearest-neighbor-distance-lemma",
     "title": "Machine learning",
     "section": "The nearest-neighbor distance lemma",
-    "text": "The nearest-neighbor distance lemma\nHow far away is the \\(k\\)th neighbor? Inputs i.i.d. uniform on \\([0, 1]^d\\). A ball around \\(x_0\\) holding \\(k\\) of the \\(n\\) points has volume about \\(k/n\\), so its radius is about \\((k/n)^{1/d}\\)\n\n\n\nNearest-neighbor distance lemma (stated). For \\(x_0\\) away from the boundary, \\(\\mathbb E\\big[r_k(x_0)^2\\big] \\lesssim (k/n)^{2/d}\\), the constant depending on \\(d\\) only.\n\nIn one dimension, \\((k/n)^2\\): the \\(k\\)th neighbor is about \\(k/2n\\) away on each side. In \\(d = 10\\), \\((k/n)^{1/5}\\): with \\(k/n = 1/100\\), the radius is \\(0.4\\) of the side of the cube\n\n\n\n\n\n\n\n\n\n\n\n\nCurse of dimensionality: in many dimensions, the nearest \\(1\\%\\) of the data is not near."
+    "text": "The nearest-neighbor distance lemma\nHow far away is the \\(k\\)th neighbor? Inputs i.i.d. uniform on \\([0, 1]^p\\). A ball around \\(x_0\\) holding \\(k\\) of the \\(n\\) points has volume about \\(k/n\\), so its radius is about \\((k/n)^{1/p}\\)\n\n\n\nNearest-neighbor distance lemma (stated). For \\(x_0\\) away from the boundary, \\(\\mathbb E\\big[r_k(x_0)^2\\big] \\lesssim (k/n)^{2/p}\\), the constant depending on \\(p\\) only.\n\nIn one dimension, \\((k/n)^2\\): the \\(k\\)th neighbor is about \\(k/2n\\) away on each side. In \\(p = 10\\), \\((k/n)^{1/5}\\): with \\(k/n = 1/100\\), the radius is \\(0.4\\) of the side of the cube\n\n\n\n\n\n\n\n\n\n\n\n\nCurse of dimensionality: in many dimensions, the nearest \\(1\\%\\) of the data is not near."
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-rate",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-rate",
     "title": "Machine learning",
     "section": "The rate",
-    "text": "The rate\n\n\nPut the two together and choose \\(k\\): \\[\n\\mathbb E\\big[(\\hat f_k(x_0) - f^\\star(x_0))^2\\big] \\;\\lesssim\\; L^2 (k/n)^{2/d} + \\sigma^2/k\n\\] The first term grows with \\(k\\), the second shrinks. They balance at \\(k \\asymp n^{2/(d+2)}\\), and there \\(\\text{error} \\asymp n^{-2/(d+2)}\\)\n\n\n\n\n\n\n\n\n\n\n\nTo halve the error, \\(2^{(d+2)/2}\\) times the data: \\(2.8\\times\\) in \\(d = 1\\), \\(4\\times\\) in \\(d = 2\\), \\(11\\times\\) in \\(d = 5\\), \\(64\\times\\) in \\(d = 10\\)\n\nMinimax rate (stated). Over all \\(L\\)-Lipschitz \\(f^\\star\\) in \\(d\\) dimensions no estimator beats \\(n^{-2/(d+2)}\\) for every \\(f^\\star\\) (Stone 1980, 1982); a particular \\(f^\\star\\), a constant say, does better."
+    "text": "The rate\nPut the two together and choose \\(k\\): \\[\n\\mathbb E\\big[(\\hat f_k(x_0) - f^\\star(x_0))^2\\big] \\;\\lesssim\\; L^2 (k/n)^{2/p} + \\sigma^2/k\n\\] The first term grows with \\(k\\), the second shrinks. They balance at \\(k \\asymp n^{2/(p+2)}\\), and there \\[\n\\text{error} \\asymp n^{-2/(p+2)}\n\\]\nTo halve the error, \\(2^{(p+2)/2}\\) times the data: \\(2.8\\times\\) in \\(p = 1\\), \\(4\\times\\) in \\(p = 2\\), \\(11\\times\\) in \\(p = 5\\), \\(64\\times\\) in \\(p = 10\\)\n\nMinimax rate (stated). Over all \\(L\\)-Lipschitz \\(f^\\star\\) in \\(p\\) dimensions no estimator beats \\(n^{-2/(p+2)}\\) for every \\(f^\\star\\) (Stone 1980, 1982); a particular \\(f^\\star\\), a constant say, does better."
   },
   {
-    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#what-structure-buys",
-    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#what-structure-buys",
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-cost-of-a-non-free-lunch",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-cost-of-a-non-free-lunch",
     "title": "Machine learning",
-    "section": "What structure buys",
-    "text": "What structure buys\n\n\n\n\n\n\n\n\n\nAssumption on \\(f^\\star\\)\nRate (up to constants)\nThe family\n\n\n\n\n\\(L\\)-Lipschitz in \\(d\\) inputs\n\\(n^{-2/(d+2)}\\)\nnearest neighbors, a tree, a network: smoothness only\n\n\na sum of a fixed number of Lipschitz one-input curves (design conditions)\n\\(n^{-2/3}\\), the one-input rate (Stone 1985)\nadditive splines: no interactions\n\n\nlinear with \\(s\\) nonzero coefficients among \\(p\\) (sparsity, design and noise conditions)\nabout \\(s\\log p/n\\) (Hastie et al. 2015)\nthe lasso: a sparse plane\n\n\n\n\nWith smoothness alone, \\(d\\) is in the exponent. An additive assumption gives the one-input exponent; a sparse linear one replaces \\(d\\) by \\(\\log p\\). Each faster rate holds only when its assumption does; the second and third are stated, not derived\n\nNo free lunch theorem, with numbers: the Lipschitz class is already an assumption, and nothing beats its rate for every \\(f^\\star\\) in it. A faster rate needs a stronger assumption, and holds only when that assumption is true."
+    "section": "The cost of a non-free lunch",
+    "text": "The cost of a non-free lunch\n\n\n\n\n\n\n\n\n\nAssumption on \\(f^\\star\\)\nRate (up to constants)\nThe family\n\n\n\n\n\\(L\\)-Lipschitz in \\(p\\) inputs\n\\(n^{-2/(p+2)}\\)\nnearest neighbors, a tree, a network: smoothness only\n\n\na sum of a fixed number of Lipschitz one-input curves (additivity, plus design conditions)\n\\(n^{-2/3}\\), the one-input rate (Stone 1985)\nadditive splines: no interactions\n\n\nlinear with \\(s\\) nonzero coefficients among \\(p\\) (sparsity, plus design and noise conditions)\nabout \\(s\\log p/n\\) (Hastie et al. 2015)\nthe lasso: a sparse plane\n\n\n\n\nWith smoothness alone, \\(p\\) is in the exponent. An additive assumption gives the one-input exponent; a sparse linear one moves \\(p\\) out of the exponent into a \\(\\log p\\). Each faster rate holds only when its assumption does; the second and third are stated, not derived\n\nNo free lunch theorem, with numbers: the Lipschitz class is already an assumption, and nothing beats its rate for every \\(f^\\star\\) in it. A faster rate needs a stronger assumption, and holds only when that assumption is true."
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#section-3",
@@ -1974,39 +1981,46 @@
     "text": "History: Stein’s paradox\nEstimating \\(\\mu \\in \\mathbb R^p\\) from an i.i.d. sample \\(\\mathbf Y_1, \\ldots, \\mathbf Y_n \\sim N(\\mu, \\sigma^2 I)\\). The MLE is \\(\\bar{\\mathbf Y}\\) (obvious and best, right?)\nCharles Stein discovered in the 1950’s that the MLE is inadmissible if \\(p &gt; 2\\) 🤯\nThe James–Stein estimator shrinks \\(\\bar{\\mathbf Y}\\) toward some other point, any other point, chosen a priori, e.g. 0: \\[\n\\hat\\mu_{\\text{JS}} = \\Big(1 - \\frac{(p-2)\\sigma^2/n}{\\|\\bar{\\mathbf Y}\\|^2}\\Big)\\bar{\\mathbf Y}, \\qquad \\text{MSE}(\\hat\\mu_{\\text{JS}}) &lt; \\text{MSE}(\\bar{\\mathbf Y}) \\text{ for all } \\mu, \\text{ if } p &gt; 2\n\\]\nStatisticians emphasized unbiasedness. After Stein’s example, bias is not always bad. Most ML methods use bias this way"
   },
   {
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#shrinkage-less-variance-more-bias",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#shrinkage-less-variance-more-bias",
+    "title": "Machine learning",
+    "section": "Shrinkage: less variance, more bias",
+    "text": "Shrinkage: less variance, more bias\n\n\n\n\n\n\n\n\n\n\n\n\nSolid points are improved by shrinking, hollow pink points do worse\nIf \\(\\bar Y\\) is between \\(\\mu\\) and 0 then shrinking does worse\nIn higher dimensions, a greater portion of space is not between \\(\\mu\\) and 0\ne.g. \\(2^p\\) orthants in \\(p\\)-dimensional space, and only 1 contains \\(\\mu - 0\\)\n(Not meant to be a proof)"
+  },
+  {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#ridge-and-the-lasso-again",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#ridge-and-the-lasso-again",
     "title": "Machine learning",
     "section": "Ridge and the lasso, again",
-    "text": "Ridge and the lasso, again\n\\[\n\\text{ridge: } \\min_\\beta \\|\\mathbf y - \\mathbf X\\beta\\|_2^2 + \\lambda\\|\\beta\\|_2^2 \\qquad\\qquad \\text{lasso: } \\min_\\beta \\|\\mathbf y - \\mathbf X\\beta\\|_2^2 + \\lambda\\|\\beta\\|_1\n\\]\n\n\n\n\n\n\n\n\n\nRidge’s coefficients shrink and are never zero; the lasso’s are exactly zero over whole ranges of \\(\\lambda\\). What \\(\\lambda\\) does to one coefficient is hidden in general, because the coefficients interact; in one design they do not"
+    "text": "Ridge and the lasso, again\n\n\n\\[\n\\text{ridge: } \\min_\\beta\\ \\|\\mathbf y - \\mathbf X\\beta\\|_2^2 + \\lambda\\|\\beta\\|_2^2\n\\] \\[\n\\|\\beta\\|_2^2 = \\sum_{j=1}^p \\beta_j^2\n\\]\n\n\\[\n\\text{lasso: } \\min_\\beta\\ \\|\\mathbf y - \\mathbf X\\beta\\|_2^2 + \\lambda\\|\\beta\\|_1\n\\] \\[\n\\|\\beta\\|_1 = \\sum_{j=1}^p |\\beta_j|\n\\]\n\nRidge’s coefficients shrink and are never zero; the lasso’s are exactly zero over whole ranges of \\(\\lambda\\). What \\(\\lambda\\) does to one coefficient is hidden in general, because the coefficients interact; in one design they do not"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-orthogonal-design",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-orthogonal-design",
     "title": "Machine learning",
     "section": "The orthogonal design",
-    "text": "The orthogonal design\n\\(\\mathbf X^T\\mathbf X = I\\) (orthonormal columns, \\(p \\le n\\)): \\(\\hat\\beta = \\mathbf X^T\\mathbf y\\) with \\(z_j = \\mathbf x_j^T\\mathbf y\\), and \\(\\|\\mathbf y - \\mathbf X\\beta\\|^2 = \\text{const} + \\sum_j (z_j - \\beta_j)^2\\): each coefficient has its own problem\n\n\nRidge, one coordinate: \\(\\tfrac12(z - b)^2 + \\tfrac\\lambda2 b^2\\), smooth; derivative zero at \\(\\hat b = z/(1 + \\lambda)\\)\nLasso: \\(\\tfrac12(z - b)^2 + \\lambda|b|\\) (half the last slide’s \\(\\lambda\\)), a kink at \\(0\\). \\(\\hat b &gt; 0\\) needs \\(-(z - b) + \\lambda = 0\\), so \\(\\hat b = z - \\lambda\\) and \\(z &gt; \\lambda\\); \\(\\hat b &lt; 0\\) gives \\(\\hat b = z + \\lambda\\) and \\(z &lt; -\\lambda\\); for \\(|z| \\le \\lambda\\) neither works: the minimum is at the kink, \\(\\hat b = 0\\)\n\n\n\n\n\n\n\n\n\n\n\n\nSoft thresholding. \\(\\arg\\min_b \\tfrac12(z - b)^2 + \\lambda|b| = \\mathrm{sign}(z)\\,(|z| - \\lambda)_+\\): move \\(z\\) toward zero by \\(\\lambda\\), stopping at zero. Ridge divides by \\(1 + \\lambda\\) and is zero only at \\(z = 0\\)."
+    "text": "The orthogonal design\n\\(\\mathbf X^T\\mathbf X = I\\) (orthonormal columns, \\(p \\le n\\)): \\(\\hat\\beta = \\mathbf X^T\\mathbf y\\) with \\(z_j = \\mathbf x_j^T\\mathbf y\\), and \\(\\|\\mathbf y - \\mathbf X\\beta\\|^2 = \\text{const} + \\sum_j (z_j - \\beta_j)^2\\): a separable objective, one term per coefficient\n\nRidge, one coordinate: \\(\\tfrac12(z - b)^2 + \\tfrac\\lambda2 b^2\\), smooth; derivative zero at \\(\\hat b = z/(1 + \\lambda)\\)\n\n\nLasso: \\(\\tfrac12(z - b)^2 + \\lambda|b|\\) (half the last slide’s \\(\\lambda\\)), a kink at \\(0\\). \\(\\hat b &gt; 0\\) needs \\(-(z - b) + \\lambda = 0\\), so \\(\\hat b = z - \\lambda\\) and \\(z &gt; \\lambda\\); \\(\\hat b &lt; 0\\) gives \\(\\hat b = z + \\lambda\\) and \\(z &lt; -\\lambda\\); for \\(|z| \\le \\lambda\\) neither works: the minimum is at the kink, \\(\\hat b = 0\\)\n\n\n\nSoft thresholding. \\(\\arg\\min_b \\tfrac12(z - b)^2 + \\lambda|b| = \\mathrm{sign}(z)\\,(|z| - \\lambda)_+\\): move \\(z\\) toward zero by \\(\\lambda\\), stopping at zero. Ridge divides by \\(1 + \\lambda\\) and is zero only at \\(z = 0\\)."
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#biasvariance-decomposition-ridge-form",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#biasvariance-decomposition-ridge-form",
     "title": "Machine learning",
     "section": "Bias–variance decomposition, ridge form",
-    "text": "Bias–variance decomposition, ridge form\n\n\nSame design, noise variance \\(\\sigma^2\\). Least squares, \\(\\hat\\beta = \\mathbf X^T\\mathbf y\\): unbiased, variance \\(\\sigma^2\\) per coefficient. Divide by \\(1 + \\lambda\\): \\[\n\\text{bias}_j = -\\frac{\\lambda\\,\\beta_j}{1 + \\lambda}, \\qquad \\mathrm{Var}(\\hat\\beta_{\\lambda,j}) = \\frac{\\sigma^2}{(1 + \\lambda)^2}\n\\]\n\n\n\n\n\n\n\n\n\n\n\n\nBias–variance decomposition, ridge form. \\(\\mathbf X^T\\mathbf X = I\\), \\(\\mathbf y = \\mathbf X\\beta + \\boldsymbol\\varepsilon\\), noise mean \\(0\\), variance \\(\\sigma^2\\): \\(\\;\\mathrm{MSE}(\\lambda) = \\mathbb E\\|\\hat\\beta_\\lambda - \\beta\\|^2 = \\sum_{j=1}^p (\\lambda^2\\beta_j^2 + \\sigma^2)/(1 + \\lambda)^2\\), with slope \\(-2p\\sigma^2 &lt; 0\\) at \\(\\lambda = 0\\): for every \\(\\beta\\), some \\(\\lambda &gt; 0\\) beats least squares.\n\nProof: exercise 1. Which \\(\\lambda\\)? The best is \\(\\sigma^2\\) over the mean of \\(\\beta_j^2\\), noise over signal: unknown"
+    "text": "Bias–variance decomposition, ridge form\n\n\nSame design, noise variance \\(\\sigma^2\\). Least squares, \\(\\hat\\beta = \\mathbf X^T\\mathbf y\\): unbiased, variance \\(\\sigma^2\\) per coefficient. Divide by \\(1 + \\lambda\\): \\[\n\\text{bias}_j = -\\frac{\\lambda}{1 + \\lambda}\\,\\beta_j, \\qquad \\mathrm{Var}(\\hat\\beta_{\\lambda,j}) = \\frac{\\sigma^2}{(1 + \\lambda)^2}\n\\]\n\n\n\n\n\n\n\n\n\n\n\n\nBias–variance decomposition, ridge form. \\(\\mathbf X^T\\mathbf X = I\\), \\(\\mathbf y = \\mathbf X\\beta + \\boldsymbol\\varepsilon\\), noise mean \\(0\\), variance \\(\\sigma^2\\): \\(\\;\\mathrm{MSE}(\\lambda) = \\mathbb E\\|\\hat\\beta_\\lambda - \\beta\\|^2 = \\sum_{j=1}^p (\\lambda^2\\beta_j^2 + \\sigma^2)/(1 + \\lambda)^2\\), with slope \\(-2p\\sigma^2 &lt; 0\\) at \\(\\lambda = 0\\): for every \\(\\beta\\), some \\(\\lambda &gt; 0\\) beats least squares.\n\nProof: exercise 1. Which \\(\\lambda\\)? The best is \\(\\sigma^2\\) over the mean of \\(\\beta_j^2\\), noise over signal: unknown"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#ridge-in-general",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#ridge-in-general",
     "title": "Machine learning",
     "section": "Ridge in general",
-    "text": "Ridge in general\n\n\n\n\n\n\n\n\n\nTwo correlated inputs: the contours are long along the direction the data cannot pin down (one coefficient up, the other down, the fit barely changes). Ridge’s path from least squares to zero moves fastest along it: it first removes the component the data determine least precisely"
+    "text": "Ridge in general\n\n\n\n\n\n\n\n\n\nContours are long where the data determine least precisely; ridge moves fastest along it"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#high-dimensional-example",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#high-dimensional-example",
     "title": "Machine learning",
     "section": "High-dimensional example",
-    "text": "High-dimensional example\n\\(n = 100\\) observations, \\(p = 200\\) inputs, \\(\\mathbf y = \\mathbf X\\beta + \\boldsymbol\\varepsilon\\) with only 7 nonzero coefficients. Lasso and ridge at the \\(\\lambda\\) cross-validation chooses"
+    "text": "High-dimensional example\n\\(n = 100\\) observations, \\(p = 200\\) inputs, \\(\\mathbf y = \\mathbf X\\beta + \\boldsymbol\\varepsilon\\) with only 12 nonzero coefficients. Lasso and ridge at the \\(\\lambda\\) cross-validation chooses"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#zoom-in-on-variables-50-to-100",
@@ -2020,7 +2034,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#lasso-cool-or-extremely-cool",
     "title": "Machine learning",
     "section": "Lasso: cool or extremely cool?",
-    "text": "Lasso: cool or extremely cool?\n\nHigh-dimensional: \\(p &gt; n\\) means we can’t fit OLS\n\nBut all is not lost! Penalized regression to the rescue\n\nTrue model is sparse\n\nOnly 7 of 200 variables have nonzero coefficients\n\nRidge estimates are dense\n\nAll coefficients nonzero 😰\n\nLasso estimates are sparse\n\n10 nonzero estimates: 5 of the 7 true ones, and 5 false positives, most of them small 😎"
+    "text": "Lasso: cool or extremely cool?\n\nHigh-dimensional: \\(p &gt; n\\) means we can’t fit OLS\n\nBut all is not lost! Penalized regression to the rescue\n\nTrue model is sparse\n\nOnly 12 of 200 variables have nonzero coefficients\n\nRidge estimates are dense\n\nAll coefficients nonzero 😰\n\nLasso estimates are sparse\n\n22 nonzero: 11 of the 12 true ones and 11 false positives, all below 0.5 😎"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-lassos-selected-inputs-under-resampling",
@@ -2111,7 +2125,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#conclusion",
     "title": "Machine learning",
     "section": "Conclusion",
-    "text": "Conclusion\nCross-validation chooses the knob\nEvery row fitted on and scored on, in turn. The curve’s minimum is a chosen number: report a score from the vault\nThe error of a smooth \\(f^\\star\\), in \\(n\\) and \\(d\\)\n\\(n^{-2/(d+2)}\\) with smoothness alone; a stronger assumption gives a faster rate, when it holds\nRidge divides, the lasso subtracts\nBias on purpose beats least squares for every \\(\\beta\\); the lasso’s zeros are exact. A penalty on wiggliness is ridge with weights. Past \\(p = n\\), the rule that picks the fit is the regularizer"
+    "text": "Conclusion\nCross-validation chooses the knob\nEvery row fitted on and scored on, in turn. The curve’s minimum is a chosen number: report a score from the vault\nThe error of a smooth \\(f^\\star\\), in \\(n\\) and \\(p\\)\n\\(n^{-2/(p+2)}\\) with smoothness alone; a stronger assumption gives a faster rate, when it holds\nRidge divides, the lasso subtracts\nBias on purpose beats least squares for every \\(\\beta\\); the lasso’s zeros are exact. A penalty on wiggliness is ridge with weights. Past \\(p = n\\), the rule that picks the fit is the regularizer"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#references",

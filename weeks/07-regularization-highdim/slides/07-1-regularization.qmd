@@ -111,7 +111,11 @@ One minute. Every family had a knob and we chose it on the selection set. Today:
 
 Five functional structures, each with a knob: $\lambda$, $J$, depth, $M$, and $k$ for nearest neighbors. Each knob was chosen on the selection set, and the test set opened once
 
-This week: choosing the knob with less waste (cross-validation); how the error depends on $n$ and the number of inputs; and what the two penalties do to each coefficient, in closed form, in the simplest design
+This week: how much flexibility should we allow?
+
+- cross-validation chooses the knob
+- the nearest-neighbor rate: how the error depends on $n$ and $p$
+- ridge and the lasso, one coefficient at a time
 
 ## {.inverse .center}
 
@@ -147,11 +151,9 @@ Each subset used once as the held-out set, and $K - 1$ times for training
 One minute. K held-out blocks, K fits; every row is scored exactly once, by a fit that did not see it.
 :::
 
-![](img/cv.wikipedia.svg.png){height="330"}
+![](img/cv.wikipedia.svg.png){height="500" fig-align="center"}
 
-Gives $K$ estimates of the held-out error at each $\lambda$
-
-Credit: [Wikipedia](https://en.wikipedia.org/wiki/Cross-validation)
+Gives $K$ estimates of the held-out error at each $\lambda$. Credit: [Wikipedia](https://en.wikipedia.org/wiki/Cross-validation)
 
 ## $K$-fold cross-validation
 
@@ -236,7 +238,7 @@ Derived, one line: a held-out score is a mean of m losses, so its standard error
 ::: {.column width="52%"}
 ```{r}
 #| label: knn-sel-se
-#| fig-height: 3.6
+#| fig-height: 3.4
 #| fig-width: 6
 #| out-width: "100%"
 ks_sel <- c(1, 5, 10, 20, 50, 100, 200, 500)
@@ -250,17 +252,19 @@ ggplot(sel_knn, aes(k, mse)) +
   scale_x_log10() + coord_cartesian(ylim = c(480, 1050)) +
   labs(x = "k", y = "selection MSE", caption = "2,000 selection tracks; bars: one standard error")
 ```
+
+$k = 50$ to $200$ are within one bar: a flat bottom, and "the best $k$" is any of them
 :::
 ::: {.column width="48%"}
-$m$ held-out units, losses $L_j = \ell(y_j^{\text{test}}, \hat f(x_j^{\text{test}}))$, independent if the units are, with $\hat f$ held fixed:
+Losses $L_j = \ell(y_j, \hat f(x_j))$ on $m$ held-out units, independent with $\hat f$ held fixed:
 $$
 \widehat{\text{Err}} = \frac1m\sum_{j=1}^m L_j, \qquad \text{SE} = \frac{\text{sd}(L)}{\sqrt m}
 $$
-The uncertainty of this fit's score on $m$ new units
+The uncertainty of this fit's score on $m$ new units; here the $m = 2{,}000$ selection tracks
 :::
 :::
 
-On the selection tracks, $k = 50$, $100$ and $200$ sit within one bar of each other: a flat bottom, and "the best $k$" is any of them
+In $K$-fold CV each fit uses $n(1 - 1/K)$ rows and is scored on the other $n/K$; pooled over the folds every row is scored once, so $m = n$, but by fits that share rows
 
 ## Lessons about cross-validation
 
@@ -318,7 +322,7 @@ plot(cv_fit)
 ```
 :::
 ::: {.column width="48%"}
-Dotted lines: `lambda.min`, the minimum; `lambda.1se`, the largest $\lambda$ within one bar of it, the **one-standard-error rule**: a flat bottom, so take the simpler model
+Dotted lines: `lambda.min`, the minimum; `lambda.1se`, the largest $\lambda$ within one bar of it, the **one-standard-error rule**
 
 The bars, $\text{sd}/\sqrt K$ of the fold scores, are a heuristic (the folds share rows). The minimum is chosen among `r length(cv_fit$lambda)` candidates on these rows: biased low, a score to choose with, not to report
 :::
@@ -327,18 +331,38 @@ The bars, $\text{sd}/\sqrt K$ of the fold scores, are a heuristic (the folds sha
 ## {.inverse .center}
 
 ::: {.notes}
-Compress: the curve's bottom moved between families and would move with n; a formula says how the best k and its error depend on n and d.
+Compress: the curve's bottom moved between families and would move with n; a formula says how the best k and its error depend on n and p.
 :::
 
 ### Part 2: the nearest-neighbor rate
 
-## The best $k$ as $n$ and $d$ grow
+## Why care about rates?
 
 ::: {.notes}
-Two minutes: an answer per question, with the reason. The decomposition from week 1 in the box: the variance term is explicit, sigma squared over k; the bias term is an average of f-star at the neighbors minus f-star at the point, and says nothing until we assume something about f-star. k-NN was last on two of the structures lecture's three truths, with seven idle inputs: the curse, now with a formula.
+Two minutes. The figure: the four largest US cloud companies spent about 410 billion dollars on capital expenditure in 2025 and guided to roughly 700 billion or more for 2026 (company earnings guidance as reported in 2026), with multi-year plans in the trillions; not all of it is model training, most of it is AI infrastructure. The exponent is the whole story: ten times the data cuts the error by a factor 10 to the minus 2 over p + 2. In ten dimensions that is a third; in a hundred, four percent; for a megapixel image, nothing. Either scaling fails or the problem has structure the rate does not assume. Part 2 derives the exponent; the last slide says what changes it.
 :::
 
-The CV curve put $k$ at `r k_cv` on 5,000 tracks and 11 inputs. Where would the minimum be with 50,000 tracks? With 110 inputs?
+Trillions of dollars are going into scaling up AI models: more data, more parameters. What if this is mathematically guaranteed to fail?
+
+. . .
+
+A **rate** says how fast the error falls as $n$ grows. With only smoothness assumed, this part shows the exponent is $2/(p+2)$, $p$ the number of inputs. Then ten times the data cuts the error by a factor $10^{-2/(p+2)}$:
+
+| $p$ | 1 | 10 | 100 | $10^6$ (a megapixel image) |
+|:---|:---|:---|:---|:---|
+| error, relative | $0.22$ | $0.68$ | $0.96$ | $0.999995$ |
+
+. . .
+
+So either scaling fails, or the problems it works on have structure that the rate does not assume. The rate first; what changes its exponent at the end of the part
+
+## The best $k$ as $n$ and $p$ grow
+
+::: {.notes}
+Two minutes: an answer per question, with the reason. The decomposition from week 1 in the box: the variance term is explicit, sigma squared over k; the bias term is an average of f-star at the neighbors minus f-star at the point, bounded only by an assumption on f-star. k-NN was last on two of the structures lecture's three truths, with seven idle inputs: the curse, now with a formula.
+:::
+
+The CV curve put $k$ at `r k_cv` on 5,000 tracks and $p = 11$ inputs. Where would the minimum be with 50,000 tracks? With 110 inputs?
 
 ::: {.retrieval}
 Bias--variance decomposition, $k$-NN form: inputs fixed, $y_i = f^\star(x_i) + \varepsilon_i$, noise mean $0$, variance $\sigma^2$, $\hat f_k(x_0)$ the mean of the $k$ nearest training outcomes:
@@ -347,7 +371,7 @@ $$
 $$
 :::
 
-The variance, $\sigma^2/k$, is a formula. The bias is an average of $f^\star$ over the $k$ nearest inputs, and says nothing until we assume something about $f^\star$
+The variance term is explicit, $\sigma^2/k$. The bias term depends on $f^\star$ at the $k$ nearest inputs, and can be bounded only by an assumption on $f^\star$
 
 ::: {.ask}
 What is the smallest assumption on $f^\star$ that bounds the bias? Write it down.
@@ -408,18 +432,18 @@ $\;\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2 \,\big|\, \text{inputs}\big] \
 ## The nearest-neighbor distance lemma
 
 ::: {.notes}
-Stated, with the volume argument as the explanation, not the proof. A ball around x_0 that holds k of n uniformly scattered points has volume about k over n, so its radius is about (k/n) to the one over d; square it. "Away from the boundary": near an edge the ball is cut off and the radius is larger. The constant hides the volume of the unit ball. Examinable: the bound and the deduction given this lemma, not the lemma.
+Stated, with the volume argument as the explanation, not the proof. A ball around x_0 that holds k of n uniformly scattered points has volume about k over n, so its radius is about (k/n) to the one over p; square it. "Away from the boundary": near an edge the ball is cut off and the radius is larger. The constant hides the volume of the unit ball; p for the number of inputs, as everywhere in the course. Examinable: the bound and the deduction given this lemma, not the lemma.
 :::
 
-How far away is the $k$th neighbor? Inputs i.i.d. uniform on $[0, 1]^d$. A ball around $x_0$ holding $k$ of the $n$ points has volume about $k/n$, so its radius is about $(k/n)^{1/d}$
+How far away is the $k$th neighbor? Inputs i.i.d. uniform on $[0, 1]^p$. A ball around $x_0$ holding $k$ of the $n$ points has volume about $k/n$, so its radius is about $(k/n)^{1/p}$
 
 ::: {.columns}
 ::: {.column width="58%"}
 ::: {.leave}
-**Nearest-neighbor distance lemma** (stated). For $x_0$ away from the boundary, $\mathbb E\big[r_k(x_0)^2\big] \lesssim (k/n)^{2/d}$, the constant depending on $d$ only.
+**Nearest-neighbor distance lemma** (stated). For $x_0$ away from the boundary, $\mathbb E\big[r_k(x_0)^2\big] \lesssim (k/n)^{2/p}$, the constant depending on $p$ only.
 :::
 
-In one dimension, $(k/n)^2$: the $k$th neighbor is about $k/2n$ away on each side. In $d = 10$, $(k/n)^{1/5}$: with $k/n = 1/100$, the radius is $0.4$ of the side of the cube
+In one dimension, $(k/n)^2$: the $k$th neighbor is about $k/2n$ away on each side. In $p = 10$, $(k/n)^{1/5}$: with $k/n = 1/100$, the radius is $0.4$ of the side of the cube
 :::
 ::: {.column width="42%"}
 ```{r}
@@ -428,18 +452,18 @@ In one dimension, $(k/n)^2$: the $k$th neighbor is about $k/2n$ away on each sid
 #| fig-height: 3.6
 #| out-width: "100%"
 # n = 500 uniform points in the unit square, the k = 10 nearest to the center and the ball that holds them;
-# beside it, the radius (k/n)^(1/d) against d at k/n = 1/50.
+# beside it, the radius (k/n)^(1/p) against p at k/n = 1/50.
 ball <- tibble(x1 = runif(500), x2 = runif(500)) |> mutate(d = sqrt((x1 - 0.5)^2 + (x2 - 0.5)^2), near = rank(d) <= 10)
 r_ball <- max(ball$d[ball$near])
 circ <- tibble(t = seq(0, 2 * pi, length.out = 200), x1 = 0.5 + r_ball * cos(t), x2 = 0.5 + r_ball * sin(t))
 p_ball <- ggplot(ball, aes(x1, x2)) + geom_point(aes(colour = near), size = 1.1) +
   geom_path(data = circ, colour = m_orange, linewidth = 1) +
   scale_colour_manual(values = c(`FALSE` = "grey70", `TRUE` = m_pink), guide = "none") +
-  coord_equal(expand = FALSE) + labs(x = NULL, y = NULL, title = "d = 2: 10 of 500 points") +
+  coord_equal(expand = FALSE) + labs(x = NULL, y = NULL, title = "p = 2: 10 of 500 points") +
   theme(axis.text = element_blank(), plot.title = element_text(size = 13))
-p_rad <- ggplot(tibble(d = 1:10, r = (1 / 50)^(1 / d)), aes(d, r)) + geom_line(colour = v_blue, linewidth = 1) + geom_point(colour = v_blue, size = 2.2) +
+p_rad <- ggplot(tibble(p = 1:10, r = (1 / 50)^(1 / p)), aes(p, r)) + geom_line(colour = v_blue, linewidth = 1) + geom_point(colour = v_blue, size = 2.2) +
   scale_x_continuous(breaks = c(1, 2, 5, 10)) + coord_cartesian(ylim = c(0, 1)) +
-  labs(x = "d", y = NULL, title = expression(paste("radius ", (k/n)^{1/d}, ", ", k/n == 1/50))) + theme(plot.title = element_text(size = 13))
+  labs(x = "p", y = NULL, title = "radius at k/n = 1/50") + theme(plot.title = element_text(size = 13))
 p_ball + p_rad
 ```
 :::
@@ -452,64 +476,41 @@ Curse of dimensionality: in many dimensions, the nearest $1\%$ of the data is no
 ## The rate {minutes="3"}
 
 ::: {.notes}
-Put the two together and balance: the bias term grows with k, the variance shrinks with k; they cross at k of order n to the 2 over d+2, and the error there is n to the minus 2 over d+2. Halving the error in d = 10 costs 64 times the data. Stated, as a worst case: no estimator improves this rate uniformly over Lipschitz f-star (Stone 1980 for the error at a point, 1982 for the whole curve; both checked). Upper bounds: a constant f-star does better, and so does any f-star with more structure, which is the next slide.
+Put the two together and balance: the bias term grows with k, the variance shrinks with k; they cross at k of order n to the 2 over p+2, and the error there is n to the minus 2 over p+2. Halving the error in p = 10 costs 64 times the data. Stated, as a worst case: no estimator improves this rate uniformly over Lipschitz f-star (Stone 1980 for the error at a point, 1982 for the whole curve; both checked). Upper bounds: a constant f-star does better, and so does any f-star with more structure, which is the next slide.
 :::
 
-```{r}
-#| label: rate-figure
-#| include: false
-rates <- expand_grid(d = c(1, 2, 5, 10), n = 10^seq(2, 5, length.out = 100)) |>
-  mutate(rate = (n / 100)^(-2 / (d + 2)))
-rate_plot <- ggplot(rates, aes(n, rate, colour = factor(d))) + geom_line(linewidth = 1.2) +
-  scale_x_log10() + scale_y_log10() +
-  scale_colour_viridis_d(end = 0.85, name = "d =") +
-  labs(x = "n (log scale)", y = "error, relative to n = 100") +
-  theme(legend.position = "top", legend.text = element_text(size = 13))
-halve <- tibble(d = c(1, 2, 5, 10), factor = 2^((d + 2) / 2))
-```
-
-::: {.columns}
-::: {.column width="60%"}
 Put the two together and choose $k$:
 $$
-\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \;\lesssim\; L^2 (k/n)^{2/d} + \sigma^2/k
+\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \;\lesssim\; L^2 (k/n)^{2/p} + \sigma^2/k
 $$
-The first term grows with $k$, the second shrinks. They balance at $k \asymp n^{2/(d+2)}$, and there $\text{error} \asymp n^{-2/(d+2)}$
-:::
-::: {.column width="40%"}
-```{r}
-#| label: rate-plot
-#| fig-width: 4.8
-#| fig-height: 3.3
-#| out-width: "100%"
-rate_plot
-```
-:::
-:::
+The first term grows with $k$, the second shrinks. They balance at $k \asymp n^{2/(p+2)}$, and there
+$$
+\text{error} \asymp n^{-2/(p+2)}
+$$
 
-To halve the error, $2^{(d+2)/2}$ times the data: $2.8\times$ in $d = 1$, $4\times$ in $d = 2$, $11\times$ in $d = 5$, $64\times$ in $d = 10$
+To halve the error, $2^{(p+2)/2}$ times the data: $2.8\times$ in $p = 1$, $4\times$ in $p = 2$, $11\times$ in $p = 5$, $64\times$ in $p = 10$
 
 ::: {.leave}
-**Minimax rate** (stated). Over all $L$-Lipschitz $f^\star$ in $d$ dimensions no estimator beats $n^{-2/(d+2)}$ for every $f^\star$ (Stone 1980, 1982); a particular $f^\star$, a constant say, does better.
+**Minimax rate** (stated). Over all $L$-Lipschitz $f^\star$ in $p$ dimensions no estimator beats $n^{-2/(p+2)}$ for every $f^\star$ (Stone 1980, 1982); a particular $f^\star$, a constant say, does better.
 :::
 
-## What structure buys
+## The cost of a non-free lunch
 
 ::: {.notes}
-Stated, with qualifiers. Each row is an assumption on f-star from the structures lecture, with its rate: smoothness alone gives the rate in d; a sum of one-input curves gives the one-input rate (Stone 1985: checked against its abstract, the full text could not be opened from the container), under conditions on the design; a sparse linear truth gives about s log p over n (Hastie, Tibshirani and Wainwright 2015, Theorem 11.1 with Example 11.1). No free lunch, now with numbers: the first row is already an assumption, and each row below it is a faster rate that holds only when its assumption does.
+Stated, with qualifiers. Each row is an assumption on f-star from the structures lecture, with its rate: smoothness alone gives the rate in p; a sum of one-input curves gives the one-input rate (Stone 1985: checked against its abstract, the full text could not be opened from the container), under conditions on the design; a sparse linear truth gives about s log p over n (Hastie, Tibshirani and Wainwright 2015, Theorem 11.1 with Example 11.1). No free lunch, now with numbers: the first row is already an assumption, and each row below it is a faster rate that holds only when its assumption does.
 :::
 
 ::: {style="font-size: 0.95em"}
 | Assumption on $f^\star$ | Rate (up to constants) | The family |
 |---|---|---|
-| $L$-Lipschitz in $d$ inputs | $n^{-2/(d+2)}$ | nearest neighbors, a tree, a network: smoothness only |
-| a sum of a fixed number of Lipschitz one-input curves (design conditions) | $n^{-2/3}$, the one-input rate (Stone 1985) | additive splines: no interactions |
-| linear with $s$ nonzero coefficients among $p$ (sparsity, design and noise conditions) | about $s\log p/n$ (Hastie et al. 2015) | the lasso: a sparse plane |
+| $L$-Lipschitz in $p$ inputs | $n^{-2/(p+2)}$ | nearest neighbors, a tree, a network: smoothness only |
+| a sum of a fixed number of Lipschitz one-input curves (additivity, plus design conditions) | $n^{-2/3}$, the one-input rate (Stone 1985) | additive splines: no interactions |
+| linear with $s$ nonzero coefficients among $p$ (sparsity, plus design and noise conditions) | about $s\log p/n$ (Hastie et al. 2015) | the lasso: a sparse plane |
 
 : {tbl-colwidths="[40,24,36]"}
 :::
 
-With smoothness alone, $d$ is in the exponent. An additive assumption gives the one-input exponent; a sparse linear one replaces $d$ by $\log p$. Each faster rate holds only when its assumption does; the second and third are stated, not derived
+With smoothness alone, $p$ is in the exponent. An additive assumption gives the one-input exponent; a sparse linear one moves $p$ out of the exponent into a $\log p$. Each faster rate holds only when its assumption does; the second and third are stated, not derived
 
 ::: {.retrieval}
 No free lunch theorem, with numbers: the Lipschitz class is already an assumption, and nothing beats its rate for every $f^\star$ in it. A faster rate needs a stronger assumption, and holds only when that assumption is true.
@@ -540,69 +541,96 @@ $$
 
 Statisticians emphasized unbiasedness. After Stein's example, bias is not always bad. Most ML methods use bias this way
 
+## Shrinkage: less variance, more bias
+
+::: {.notes}
+Legacy slide. Points are draws of the sample mean around the truth (the big circle's center); each is pulled toward zero. Solid points end up closer to the truth, hollow pink ones farther. Not a proof: a picture of why more dimensions leave less room between the truth and zero.
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| label: js-shrinkage
+#| fig-width: 5.5
+#| fig-height: 5
+#| out-width: "100%"
+# The legacy figure (06-1-regularization, "Shrinkage: less variance, more bias"), recolored; the chunk's own
+# its own seed call removed under the one-seed rule.
+n_js <- 150; x0_js <- 1.7; y0_js <- 1.2
+circ1 <- data.frame(x = rnorm(n_js) + x0_js, y = rnorm(n_js) + y0_js)
+circ2 <- circ1 %>%
+  mutate(dx = x - x0_js, dy = y - x0_js, d = x^2 + y^2,
+         newx = max(1 - 2 / d, 0) * x, newy = max(1 - 2 / d, 0) * y,
+         se = (x - x0_js)^2 + (y - y0_js)^2, newse = (newx - x0_js)^2 + (newy - y0_js)^2,
+         worse = newse > se)
+ggplot(circ2, aes(x, y)) +
+  geom_point(data = data.frame(x = 0, y = 0), size = 40, pch = 1) +
+  geom_point(data = data.frame(x = x0_js, y = y0_js), size = 70, pch = 1) +
+  geom_point(data = filter(circ2, !worse), alpha = .6) +
+  geom_segment(aes(x = x, y = y, xend = newx, yend = newy), alpha = .3) +
+  geom_point(data = filter(circ2, worse), pch = 1, colour = m_pink, alpha = .6) +
+  xlab("") + ylab("") +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+```
+:::
+::: {.column width="50%"}
+Solid points are improved by shrinking, hollow pink points do worse
+
+If $\bar Y$ is between $\mu$ and 0 then shrinking does worse
+
+In higher dimensions, a greater portion of space is *not* between $\mu$ and 0
+
+e.g. $2^p$ orthants in $p$-dimensional space, and only 1 contains $\mu - 0$
+
+(*Not meant to be a [proof](https://statweb.stanford.edu/~candes/teaching/stats300c/Lectures/Lecture18.pdf)*)
+:::
+:::
+
 ## Ridge and the lasso, again
 
 ::: {.notes}
-Both objectives in the course's lambda (no 1 over n: glmnet's lambda is this one divided by n, up to a factor 2 on ridge). The paths from the structures lecture, small. The question for the next two slides: what does lambda do to one coefficient, exactly?
+Both objectives in the course's lambda (no 1 over n: glmnet's lambda is this one divided by n, up to a factor 2 on ridge), each with its norm written out. The question for the next two slides: what does lambda do to one coefficient, exactly?
 :::
 
-```{r}
-#| label: spotify-paths
-#| include: false
-ridge_sp <- glmnet(sp_Xtr, y_tr, alpha = 0, standardize = FALSE)
-lasso_sp <- glmnet(sp_Xtr, y_tr, alpha = 1, standardize = FALSE)
-path_small <- function(fit, title) {
-  B <- as.matrix(coef(fit))[-1, ]
-  as_tibble(t(B)) |> mutate(loglam = -log(fit$lambda)) |>
-    pivot_longer(-loglam, names_to = "variable", values_to = "coef") |>
-    ggplot(aes(loglam, coef, group = variable)) + geom_line(colour = v_blue, linewidth = 0.8, alpha = 0.8) +
-    labs(x = expression(-log(lambda)), y = "coefficient", title = title) + theme(plot.title = element_text(size = 14))
-}
-```
-
+::: {.columns}
+::: {.column width="50%"}
 $$
-\text{ridge: } \min_\beta \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_2^2 \qquad\qquad \text{lasso: } \min_\beta \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_1
+\text{ridge: } \min_\beta\ \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_2^2
 $$
-
-```{r}
-#| label: paths-small
-#| fig-height: 2.5
-#| fig-width: 12
-path_small(ridge_sp, "ridge on the Spotify training tracks") + path_small(lasso_sp, "lasso")
-```
+$$
+\|\beta\|_2^2 = \sum_{j=1}^p \beta_j^2
+$$
+:::
+::: {.column width="50%"}
+$$
+\text{lasso: } \min_\beta\ \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_1
+$$
+$$
+\|\beta\|_1 = \sum_{j=1}^p |\beta_j|
+$$
+:::
+:::
 
 Ridge's coefficients shrink and are never zero; the lasso's are exactly zero over whole ranges of $\lambda$. What $\lambda$ does to one coefficient is hidden in general, because the coefficients interact; in one design they do not
 
 ## The orthogonal design {minutes="3"}
 
 ::: {.notes}
-Three minutes, derived. Orthonormal columns make the objective a sum of one-coefficient problems, each about its own least-squares coefficient z_j. Ridge: a parabola plus a parabola, solved by one derivative. Lasso: a parabola plus a V with a kink at zero; three cases, the kink absorbs any pull of size at most lambda. The half: the one-coordinate problem is written with a half so that the threshold is lambda itself; in the course's objective, with lambda in front of the l1 norm, the threshold is lambda over 2, which is what "half the last slide's" means. The figure is ESL's 3.11 redrawn.
+Three minutes, derived. Orthonormal columns make the objective a sum of one-coefficient problems, each about its own least-squares coefficient z_j. Ridge: a parabola plus a parabola, solved by one derivative. Lasso: a parabola plus a V with a kink at zero; three cases, the kink absorbs any pull of size at most lambda. The half: the one-coordinate problem is written with a half so that the threshold is lambda itself; in the course's objective, with lambda in front of the l1 norm, the threshold is lambda over 2, which is what "half the last slide's" means.
 :::
 
-$\mathbf X^T\mathbf X = I$ (orthonormal columns, $p \le n$): $\hat\beta = \mathbf X^T\mathbf y$ with $z_j = \mathbf x_j^T\mathbf y$, and $\|\mathbf y - \mathbf X\beta\|^2 = \text{const} + \sum_j (z_j - \beta_j)^2$: each coefficient has its own problem
+$\mathbf X^T\mathbf X = I$ (orthonormal columns, $p \le n$): $\hat\beta = \mathbf X^T\mathbf y$ with $z_j = \mathbf x_j^T\mathbf y$, and $\|\mathbf y - \mathbf X\beta\|^2 = \text{const} + \sum_j (z_j - \beta_j)^2$: a **separable objective**, one term per coefficient
 
-::: {.columns}
-::: {.column width="68%"}
+. . .
+
 **Ridge**, one coordinate: $\tfrac12(z - b)^2 + \tfrac\lambda2 b^2$, smooth; derivative zero at $\hat b = z/(1 + \lambda)$
 
+. . .
+
 **Lasso**: $\tfrac12(z - b)^2 + \lambda|b|$ (half the last slide's $\lambda$), a kink at $0$. $\hat b > 0$ needs $-(z - b) + \lambda = 0$, so $\hat b = z - \lambda$ and $z > \lambda$; $\hat b < 0$ gives $\hat b = z + \lambda$ and $z < -\lambda$; for $|z| \le \lambda$ neither works: the minimum is at the kink, $\hat b = 0$
-:::
-::: {.column width="32%"}
-```{r}
-#| label: soft-threshold
-#| fig-height: 2.8
-#| fig-width: 3.9
-#| out-width: "100%"
-st <- tibble(z = seq(-3, 3, length.out = 301)) |>
-  mutate(`least squares` = z, ridge = z / 2, lasso = sign(z) * pmax(abs(z) - 1, 0)) |>
-  pivot_longer(-z, names_to = "estimator")
-ggplot(st, aes(z, value, colour = estimator)) + geom_line(linewidth = 1.2) +
-  scale_colour_manual(values = c(`least squares` = "grey55", ridge = v_blue, lasso = m_pink)) +
-  labs(x = expression(paste("z, least squares; ", lambda == 1)), y = "estimate", colour = NULL) +
-  theme(legend.position = "top", legend.text = element_text(size = 12))
-```
-:::
-:::
+
+. . .
 
 ::: {.leave}
 **Soft thresholding.** $\arg\min_b \tfrac12(z - b)^2 + \lambda|b| = \mathrm{sign}(z)\,(|z| - \lambda)_+$: move $z$ toward zero by $\lambda$, stopping at zero. Ridge divides by $1 + \lambda$ and is zero only at $z = 0$.
@@ -638,7 +666,7 @@ ridge_mse_plot <- ggplot(rm, aes(lambda, mse, colour = truth)) +
 ::: {.column width="52%"}
 Same design, noise variance $\sigma^2$. Least squares, $\hat\beta = \mathbf X^T\mathbf y$: unbiased, variance $\sigma^2$ per coefficient. Divide by $1 + \lambda$:
 $$
-\text{bias}_j = -\frac{\lambda\,\beta_j}{1 + \lambda}, \qquad \mathrm{Var}(\hat\beta_{\lambda,j}) = \frac{\sigma^2}{(1 + \lambda)^2}
+\text{bias}_j = -\frac{\lambda}{1 + \lambda}\,\beta_j, \qquad \mathrm{Var}(\hat\beta_{\lambda,j}) = \frac{\sigma^2}{(1 + \lambda)^2}
 $$
 :::
 ::: {.column width="48%"}
@@ -666,8 +694,10 @@ The general case as a picture, no SVD. Two correlated inputs: the data cloud is 
 
 ```{r}
 #| label: ridge-general
-#| fig-height: 3.9
-#| fig-width: 12
+#| fig-height: 4.7
+#| fig-width: 10
+#| out-width: "82%"
+#| fig-align: center
 n_g <- 60
 x1 <- rnorm(n_g); x2 <- 0.9 * x1 + sqrt(1 - 0.9^2) * rnorm(n_g)
 Xg <- scale(cbind(x1, x2), scale = FALSE); beta_g <- c(1.5, 0.5)
@@ -689,12 +719,12 @@ p_coef <- ggplot(grid_g, aes(b1, b2)) + geom_contour(aes(z = rss), colour = "gre
   annotate("text", x = bls[1] - 0.15, y = bls[2] + 0.45, label = "least squares", colour = v_dark, size = 4.5, hjust = 1) +
   annotate("text", x = -0.3, y = -1.1, label = expression(paste("ridge path as ", lambda, " grows")), colour = v_blue, size = 4.5, hjust = 0) +
   geom_point(data = tibble(b1 = 0, b2 = 0), shape = 4, size = 4, stroke = 1.5) +
-  coord_equal(xlim = c(-2.3, 3.8), ylim = c(-3, 3)) + labs(x = expression(beta[1]), y = expression(beta[2]), title = "the coefficients: contours of the residual sum of squares") +
+  coord_equal(xlim = c(-2.3, 3.8), ylim = c(-3, 3)) + labs(x = expression(beta[1]), y = expression(beta[2]), title = "contours of the residual sum of squares") +
   theme(plot.title = element_text(size = 14))
-p_cloud + p_coef + plot_layout(widths = c(1, 1.2))
+p_cloud + p_coef + plot_layout(widths = c(1, 1.05))
 ```
 
-Two correlated inputs: the contours are long along the direction the data cannot pin down (one coefficient up, the other down, the fit barely changes). Ridge's path from least squares to zero moves fastest along it: it first removes the component the data determine least precisely
+Contours are long where the data determine least precisely; ridge moves fastest along it
 
 ## High-dimensional example
 
@@ -716,6 +746,7 @@ coef_ridge_h <- coef(ridge_h, s = cv_ridge_h$lambda.1se)[-1]
 high_dim <- tibble(variable = 1:p_h, truth = beta_h, lasso = coef_lasso_h, ridge = coef_ridge_h)
 n_true <- sum(beta_h != 0); n_lasso <- sum(coef_lasso_h != 0)
 n_hit <- sum(beta_h != 0 & coef_lasso_h != 0); n_false <- sum(beta_h == 0 & coef_lasso_h != 0)
+n_small <- sum(beta_h == 0 & coef_lasso_h != 0 & abs(coef_lasso_h) < 0.5)
 hd_plot <- function(d, title) ggplot(d, aes(variable)) +
   geom_point(aes(y = truth), colour = v_dark, size = 2) +
   geom_point(aes(y = lasso), colour = m_pink, shape = 1, size = 3.2, stroke = 1) +
@@ -765,7 +796,7 @@ All coefficients nonzero 😰
 
 - Lasso estimates are sparse
 
-`r n_lasso` nonzero estimates: `r n_hit` of the `r n_true` true ones, and `r n_false` false positives, most of them small 😎
+`r n_lasso` nonzero: `r n_hit` of the `r n_true` true ones and `r n_false` false positives, `r if (n_small == n_false) "all" else n_small` below 0.5 😎
 
 ## The lasso's selected inputs under resampling
 
@@ -1081,16 +1112,16 @@ Say it once: exercise 1 is the stated ridge form, exercise 2 the rate with the s
 ## Conclusion {.inverse}
 
 ::: {.notes}
-Compress: cross-validation chooses the knob and the CV score is not the number to report; the rate gives the error in n and d, and a stronger assumption gives a faster rate only when it holds; ridge divides, the lasso subtracts, and the smoothing penalty is ridge with weights; past p = n the rule that picks the fit is the regularizer.
+Compress: cross-validation chooses the knob and the CV score is not the number to report; the rate gives the error in n and p, and a stronger assumption gives a faster rate only when it holds; ridge divides, the lasso subtracts, and the smoothing penalty is ridge with weights; past p = n the rule that picks the fit is the regularizer.
 :::
 
 #### Cross-validation chooses the knob
 
 Every row fitted on and scored on, in turn. The curve's minimum is a chosen number: report a score from the vault
 
-#### The error of a smooth $f^\star$, in $n$ and $d$
+#### The error of a smooth $f^\star$, in $n$ and $p$
 
-$n^{-2/(d+2)}$ with smoothness alone; a stronger assumption gives a faster rate, when it holds
+$n^{-2/(p+2)}$ with smoothness alone; a stronger assumption gives a faster rate, when it holds
 
 #### Ridge divides, the lasso subtracts
 

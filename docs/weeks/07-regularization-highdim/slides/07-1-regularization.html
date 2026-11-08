@@ -226,7 +226,12 @@ Joshua Loftus
 <section id="where-we-left-off" class="slide level2" data-minutes="1">
 <h2>Where we left off</h2>
 <p>Five functional structures, each with a knob: <span class="math inline">\(\lambda\)</span>, <span class="math inline">\(J\)</span>, depth, <span class="math inline">\(M\)</span>, and <span class="math inline">\(k\)</span> for nearest neighbors. Each knob was chosen on the selection set, and the test set opened once</p>
-<p>This week: choosing the knob with less waste (cross-validation); how the error depends on <span class="math inline">\(n\)</span> and the number of inputs; and what the two penalties do to each coefficient, in closed form, in the simplest design</p>
+<p>This week: how much flexibility should we allow?</p>
+<ul>
+<li>cross-validation chooses the knob</li>
+<li>the nearest-neighbor rate: how the error depends on <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span></li>
+<li>ridge and the lasso, one coefficient at a time</li>
+</ul>
 </section>
 <section id="section-1" class="slide level2 inverse center">
 <h2></h2>
@@ -245,9 +250,12 @@ Joshua Loftus
 </section>
 <section id="cross-validation-cartoon" class="slide level2" data-minutes="1">
 <h2>Cross-validation cartoon</h2>
-<p><img data-src="img/cv.wikipedia.svg.png" height="330"></p>
-<p>Gives <span class="math inline">\(K\)</span> estimates of the held-out error at each <span class="math inline">\(\lambda\)</span></p>
-<p>Credit: <a href="https://en.wikipedia.org/wiki/Cross-validation">Wikipedia</a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="img/cv.wikipedia.svg.png" class="quarto-figure quarto-figure-center" height="500"></p>
+</figure>
+</div>
+<p>Gives <span class="math inline">\(K\)</span> estimates of the held-out error at each <span class="math inline">\(\lambda\)</span>. Credit: <a href="https://en.wikipedia.org/wiki/Cross-validation">Wikipedia</a></p>
 </section>
 <section id="k-fold-cross-validation-1" class="slide level2">
 <h2><span class="math inline">\(K\)</span>-fold cross-validation</h2>
@@ -283,12 +291,13 @@ Joshua Loftus
 </div>
 </div>
 </div>
+<p><span class="math inline">\(k = 50\)</span> to <span class="math inline">\(200\)</span> are within one bar: a flat bottom, and “the best <span class="math inline">\(k\)</span>” is any of them</p>
 </div><div class="column" style="width:48%;">
-<p><span class="math inline">\(m\)</span> held-out units, losses <span class="math inline">\(L_j = \ell(y_j^{\text{test}}, \hat f(x_j^{\text{test}}))\)</span>, independent if the units are, with <span class="math inline">\(\hat f\)</span> held fixed: <span class="math display">\[
+<p>Losses <span class="math inline">\(L_j = \ell(y_j, \hat f(x_j))\)</span> on <span class="math inline">\(m\)</span> held-out units, independent with <span class="math inline">\(\hat f\)</span> held fixed: <span class="math display">\[
 \widehat{\text{Err}} = \frac1m\sum_{j=1}^m L_j, \qquad \text{SE} = \frac{\text{sd}(L)}{\sqrt m}
-\]</span> The uncertainty of this fit’s score on <span class="math inline">\(m\)</span> new units</p>
+\]</span> The uncertainty of this fit’s score on <span class="math inline">\(m\)</span> new units; here the <span class="math inline">\(m = 2{,}000\)</span> selection tracks</p>
 </div></div>
-<p>On the selection tracks, <span class="math inline">\(k = 50\)</span>, <span class="math inline">\(100\)</span> and <span class="math inline">\(200\)</span> sit within one bar of each other: a flat bottom, and “the best <span class="math inline">\(k\)</span>” is any of them</p>
+<p>In <span class="math inline">\(K\)</span>-fold CV each fit uses <span class="math inline">\(n(1 - 1/K)\)</span> rows and is scored on the other <span class="math inline">\(n/K\)</span>; pooled over the folds every row is scored once, so <span class="math inline">\(m = n\)</span>, but by fits that share rows</p>
 </section>
 <section id="lessons-about-cross-validation" class="slide level2">
 <h2>Lessons about cross-validation</h2>
@@ -332,7 +341,7 @@ Joshua Loftus
 </div>
 </div>
 </div><div class="column" style="width:48%;">
-<p>Dotted lines: <code>lambda.min</code>, the minimum; <code>lambda.1se</code>, the largest <span class="math inline">\(\lambda\)</span> within one bar of it, the <strong>one-standard-error rule</strong>: a flat bottom, so take the simpler model</p>
+<p>Dotted lines: <code>lambda.min</code>, the minimum; <code>lambda.1se</code>, the largest <span class="math inline">\(\lambda\)</span> within one bar of it, the <strong>one-standard-error rule</strong></p>
 <p>The bars, <span class="math inline">\(\text{sd}/\sqrt K\)</span> of the fold scores, are a heuristic (the folds share rows). The minimum is chosen among 67 candidates on these rows: biased low, a score to choose with, not to report</p>
 </div></div>
 </section>
@@ -340,15 +349,45 @@ Joshua Loftus
 <h2></h2>
 <h3 id="part-2-the-nearest-neighbor-rate">Part 2: the nearest-neighbor rate</h3>
 </section>
-<section id="the-best-k-as-n-and-d-grow" class="slide level2">
-<h2>The best <span class="math inline">\(k\)</span> as <span class="math inline">\(n\)</span> and <span class="math inline">\(d\)</span> grow</h2>
-<p>The CV curve put <span class="math inline">\(k\)</span> at 100 on 5,000 tracks and 11 inputs. Where would the minimum be with 50,000 tracks? With 110 inputs?</p>
+<section id="why-care-about-rates" class="slide level2">
+<h2>Why care about rates?</h2>
+<p>Trillions of dollars are going into scaling up AI models: more data, more parameters. What if this is mathematically guaranteed to fail?</p>
+<div class="fragment">
+<p>A <strong>rate</strong> says how fast the error falls as <span class="math inline">\(n\)</span> grows. With only smoothness assumed, this part shows the exponent is <span class="math inline">\(2/(p+2)\)</span>, <span class="math inline">\(p\)</span> the number of inputs. Then ten times the data cuts the error by a factor <span class="math inline">\(10^{-2/(p+2)}\)</span>:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: left;">1</th>
+<th style="text-align: left;">10</th>
+<th style="text-align: left;">100</th>
+<th style="text-align: left;"><span class="math inline">\(10^6\)</span> (a megapixel image)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">error, relative</td>
+<td style="text-align: left;"><span class="math inline">\(0.22\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(0.68\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(0.96\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(0.999995\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="fragment">
+<p>So either scaling fails, or the problems it works on have structure that the rate does not assume. The rate first; what changes its exponent at the end of the part</p>
+</div>
+</section>
+<section id="the-best-k-as-n-and-p-grow" class="slide level2">
+<h2>The best <span class="math inline">\(k\)</span> as <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span> grow</h2>
+<p>The CV curve put <span class="math inline">\(k\)</span> at 100 on 5,000 tracks and <span class="math inline">\(p = 11\)</span> inputs. Where would the minimum be with 50,000 tracks? With 110 inputs?</p>
 <div class="retrieval">
 <p>Bias–variance decomposition, <span class="math inline">\(k\)</span>-NN form: inputs fixed, <span class="math inline">\(y_i = f^\star(x_i) + \varepsilon_i\)</span>, noise mean <span class="math inline">\(0\)</span>, variance <span class="math inline">\(\sigma^2\)</span>, <span class="math inline">\(\hat f_k(x_0)\)</span> the mean of the <span class="math inline">\(k\)</span> nearest training outcomes: <span class="math display">\[
 \mathbb E\big[(Y_0 - \hat f_k(x_0))^2\big] = \sigma^2 + \Big[f^\star(x_0) - \tfrac1k\textstyle\sum_l f^\star(x_{(l)})\Big]^2 + \sigma^2/k
 \]</span></p>
 </div>
-<p>The variance, <span class="math inline">\(\sigma^2/k\)</span>, is a formula. The bias is an average of <span class="math inline">\(f^\star\)</span> over the <span class="math inline">\(k\)</span> nearest inputs, and says nothing until we assume something about <span class="math inline">\(f^\star\)</span></p>
+<p>The variance term is explicit, <span class="math inline">\(\sigma^2/k\)</span>. The bias term depends on <span class="math inline">\(f^\star\)</span> at the <span class="math inline">\(k\)</span> nearest inputs, and can be bounded only by an assumption on <span class="math inline">\(f^\star\)</span></p>
 <div class="ask">
 <p>What is the smallest assumption on <span class="math inline">\(f^\star\)</span> that bounds the bias? Write it down.</p>
 </div>
@@ -377,13 +416,13 @@ Joshua Loftus
 </section>
 <section id="the-nearest-neighbor-distance-lemma" class="slide level2">
 <h2>The nearest-neighbor distance lemma</h2>
-<p>How far away is the <span class="math inline">\(k\)</span>th neighbor? Inputs i.i.d. uniform on <span class="math inline">\([0, 1]^d\)</span>. A ball around <span class="math inline">\(x_0\)</span> holding <span class="math inline">\(k\)</span> of the <span class="math inline">\(n\)</span> points has volume about <span class="math inline">\(k/n\)</span>, so its radius is about <span class="math inline">\((k/n)^{1/d}\)</span></p>
+<p>How far away is the <span class="math inline">\(k\)</span>th neighbor? Inputs i.i.d. uniform on <span class="math inline">\([0, 1]^p\)</span>. A ball around <span class="math inline">\(x_0\)</span> holding <span class="math inline">\(k\)</span> of the <span class="math inline">\(n\)</span> points has volume about <span class="math inline">\(k/n\)</span>, so its radius is about <span class="math inline">\((k/n)^{1/p}\)</span></p>
 <div class="columns">
 <div class="column" style="width:58%;">
 <div class="leave">
-<p><strong>Nearest-neighbor distance lemma</strong> (stated). For <span class="math inline">\(x_0\)</span> away from the boundary, <span class="math inline">\(\mathbb E\big[r_k(x_0)^2\big] \lesssim (k/n)^{2/d}\)</span>, the constant depending on <span class="math inline">\(d\)</span> only.</p>
+<p><strong>Nearest-neighbor distance lemma</strong> (stated). For <span class="math inline">\(x_0\)</span> away from the boundary, <span class="math inline">\(\mathbb E\big[r_k(x_0)^2\big] \lesssim (k/n)^{2/p}\)</span>, the constant depending on <span class="math inline">\(p\)</span> only.</p>
 </div>
-<p>In one dimension, <span class="math inline">\((k/n)^2\)</span>: the <span class="math inline">\(k\)</span>th neighbor is about <span class="math inline">\(k/2n\)</span> away on each side. In <span class="math inline">\(d = 10\)</span>, <span class="math inline">\((k/n)^{1/5}\)</span>: with <span class="math inline">\(k/n = 1/100\)</span>, the radius is <span class="math inline">\(0.4\)</span> of the side of the cube</p>
+<p>In one dimension, <span class="math inline">\((k/n)^2\)</span>: the <span class="math inline">\(k\)</span>th neighbor is about <span class="math inline">\(k/2n\)</span> away on each side. In <span class="math inline">\(p = 10\)</span>, <span class="math inline">\((k/n)^{1/5}\)</span>: with <span class="math inline">\(k/n = 1/100\)</span>, the radius is <span class="math inline">\(0.4\)</span> of the side of the cube</p>
 </div><div class="column" style="width:42%;">
 <div class="cell">
 <div class="cell-output-display">
@@ -401,29 +440,18 @@ Joshua Loftus
 </section>
 <section id="the-rate" class="slide level2" data-minutes="3">
 <h2>The rate</h2>
-<div class="columns">
-<div class="column" style="width:60%;">
 <p>Put the two together and choose <span class="math inline">\(k\)</span>: <span class="math display">\[
-\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \;\lesssim\; L^2 (k/n)^{2/d} + \sigma^2/k
-\]</span> The first term grows with <span class="math inline">\(k\)</span>, the second shrinks. They balance at <span class="math inline">\(k \asymp n^{2/(d+2)}\)</span>, and there <span class="math inline">\(\text{error} \asymp n^{-2/(d+2)}\)</span></p>
-</div><div class="column" style="width:40%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="07-1-regularization_files/figure-revealjs/rate-plot-1.png" style="width:100.0%"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<p>To halve the error, <span class="math inline">\(2^{(d+2)/2}\)</span> times the data: <span class="math inline">\(2.8\times\)</span> in <span class="math inline">\(d = 1\)</span>, <span class="math inline">\(4\times\)</span> in <span class="math inline">\(d = 2\)</span>, <span class="math inline">\(11\times\)</span> in <span class="math inline">\(d = 5\)</span>, <span class="math inline">\(64\times\)</span> in <span class="math inline">\(d = 10\)</span></p>
+\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \;\lesssim\; L^2 (k/n)^{2/p} + \sigma^2/k
+\]</span> The first term grows with <span class="math inline">\(k\)</span>, the second shrinks. They balance at <span class="math inline">\(k \asymp n^{2/(p+2)}\)</span>, and there <span class="math display">\[
+\text{error} \asymp n^{-2/(p+2)}
+\]</span></p>
+<p>To halve the error, <span class="math inline">\(2^{(p+2)/2}\)</span> times the data: <span class="math inline">\(2.8\times\)</span> in <span class="math inline">\(p = 1\)</span>, <span class="math inline">\(4\times\)</span> in <span class="math inline">\(p = 2\)</span>, <span class="math inline">\(11\times\)</span> in <span class="math inline">\(p = 5\)</span>, <span class="math inline">\(64\times\)</span> in <span class="math inline">\(p = 10\)</span></p>
 <div class="leave">
-<p><strong>Minimax rate</strong> (stated). Over all <span class="math inline">\(L\)</span>-Lipschitz <span class="math inline">\(f^\star\)</span> in <span class="math inline">\(d\)</span> dimensions no estimator beats <span class="math inline">\(n^{-2/(d+2)}\)</span> for every <span class="math inline">\(f^\star\)</span> (Stone 1980, 1982); a particular <span class="math inline">\(f^\star\)</span>, a constant say, does better.</p>
+<p><strong>Minimax rate</strong> (stated). Over all <span class="math inline">\(L\)</span>-Lipschitz <span class="math inline">\(f^\star\)</span> in <span class="math inline">\(p\)</span> dimensions no estimator beats <span class="math inline">\(n^{-2/(p+2)}\)</span> for every <span class="math inline">\(f^\star\)</span> (Stone 1980, 1982); a particular <span class="math inline">\(f^\star\)</span>, a constant say, does better.</p>
 </div>
 </section>
-<section id="what-structure-buys" class="slide level2">
-<h2>What structure buys</h2>
+<section id="the-cost-of-a-non-free-lunch" class="slide level2">
+<h2>The cost of a non-free lunch</h2>
 <div style="font-size: 0.95em">
 <table class="caption-top">
 <colgroup>
@@ -440,24 +468,24 @@ Joshua Loftus
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(L\)</span>-Lipschitz in <span class="math inline">\(d\)</span> inputs</td>
-<td><span class="math inline">\(n^{-2/(d+2)}\)</span></td>
+<td><span class="math inline">\(L\)</span>-Lipschitz in <span class="math inline">\(p\)</span> inputs</td>
+<td><span class="math inline">\(n^{-2/(p+2)}\)</span></td>
 <td>nearest neighbors, a tree, a network: smoothness only</td>
 </tr>
 <tr class="even">
-<td>a sum of a fixed number of Lipschitz one-input curves (design conditions)</td>
+<td>a sum of a fixed number of Lipschitz one-input curves (additivity, plus design conditions)</td>
 <td><span class="math inline">\(n^{-2/3}\)</span>, the one-input rate (Stone 1985)</td>
 <td>additive splines: no interactions</td>
 </tr>
 <tr class="odd">
-<td>linear with <span class="math inline">\(s\)</span> nonzero coefficients among <span class="math inline">\(p\)</span> (sparsity, design and noise conditions)</td>
+<td>linear with <span class="math inline">\(s\)</span> nonzero coefficients among <span class="math inline">\(p\)</span> (sparsity, plus design and noise conditions)</td>
 <td>about <span class="math inline">\(s\log p/n\)</span> (Hastie et al.&nbsp;2015)</td>
 <td>the lasso: a sparse plane</td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>With smoothness alone, <span class="math inline">\(d\)</span> is in the exponent. An additive assumption gives the one-input exponent; a sparse linear one replaces <span class="math inline">\(d\)</span> by <span class="math inline">\(\log p\)</span>. Each faster rate holds only when its assumption does; the second and third are stated, not derived</p>
+<p>With smoothness alone, <span class="math inline">\(p\)</span> is in the exponent. An additive assumption gives the one-input exponent; a sparse linear one moves <span class="math inline">\(p\)</span> out of the exponent into a <span class="math inline">\(\log p\)</span>. Each faster rate holds only when its assumption does; the second and third are stated, not derived</p>
 <div class="retrieval">
 <p>No free lunch theorem, with numbers: the Lipschitz class is already an assumption, and nothing beats its rate for every <span class="math inline">\(f^\star\)</span> in it. A faster rate needs a stronger assumption, and holds only when that assumption is true.</p>
 </div>
@@ -475,42 +503,58 @@ Joshua Loftus
 \]</span></p>
 <p>Statisticians emphasized unbiasedness. After Stein’s example, bias is not always bad. Most ML methods use bias this way</p>
 </section>
-<section id="ridge-and-the-lasso-again" class="slide level2">
-<h2>Ridge and the lasso, again</h2>
-<p><span class="math display">\[
-\text{ridge: } \min_\beta \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_2^2 \qquad\qquad \text{lasso: } \min_\beta \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_1
-\]</span></p>
+<section id="shrinkage-less-variance-more-bias" class="slide level2">
+<h2>Shrinkage: less variance, more bias</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="07-1-regularization_files/figure-revealjs/paths-small-1.png" width="1800"></p>
+<p><img data-src="07-1-regularization_files/figure-revealjs/js-shrinkage-1.png" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
 </div>
+</div><div class="column" style="width:50%;">
+<p>Solid points are improved by shrinking, hollow pink points do worse</p>
+<p>If <span class="math inline">\(\bar Y\)</span> is between <span class="math inline">\(\mu\)</span> and 0 then shrinking does worse</p>
+<p>In higher dimensions, a greater portion of space is <em>not</em> between <span class="math inline">\(\mu\)</span> and 0</p>
+<p>e.g.&nbsp;<span class="math inline">\(2^p\)</span> orthants in <span class="math inline">\(p\)</span>-dimensional space, and only 1 contains <span class="math inline">\(\mu - 0\)</span></p>
+<p>(<em>Not meant to be a <a href="https://statweb.stanford.edu/~candes/teaching/stats300c/Lectures/Lecture18.pdf">proof</a></em>)</p>
+</div></div>
+</section>
+<section id="ridge-and-the-lasso-again" class="slide level2">
+<h2>Ridge and the lasso, again</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="math display">\[
+\text{ridge: } \min_\beta\ \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_2^2
+\]</span> <span class="math display">\[
+\|\beta\|_2^2 = \sum_{j=1}^p \beta_j^2
+\]</span></p>
+</div><div class="column" style="width:50%;">
+<p><span class="math display">\[
+\text{lasso: } \min_\beta\ \|\mathbf y - \mathbf X\beta\|_2^2 + \lambda\|\beta\|_1
+\]</span> <span class="math display">\[
+\|\beta\|_1 = \sum_{j=1}^p |\beta_j|
+\]</span></p>
+</div></div>
 <p>Ridge’s coefficients shrink and are never zero; the lasso’s are exactly zero over whole ranges of <span class="math inline">\(\lambda\)</span>. What <span class="math inline">\(\lambda\)</span> does to one coefficient is hidden in general, because the coefficients interact; in one design they do not</p>
 </section>
 <section id="the-orthogonal-design" class="slide level2" data-minutes="3">
 <h2>The orthogonal design</h2>
-<p><span class="math inline">\(\mathbf X^T\mathbf X = I\)</span> (orthonormal columns, <span class="math inline">\(p \le n\)</span>): <span class="math inline">\(\hat\beta = \mathbf X^T\mathbf y\)</span> with <span class="math inline">\(z_j = \mathbf x_j^T\mathbf y\)</span>, and <span class="math inline">\(\|\mathbf y - \mathbf X\beta\|^2 = \text{const} + \sum_j (z_j - \beta_j)^2\)</span>: each coefficient has its own problem</p>
-<div class="columns">
-<div class="column" style="width:68%;">
+<p><span class="math inline">\(\mathbf X^T\mathbf X = I\)</span> (orthonormal columns, <span class="math inline">\(p \le n\)</span>): <span class="math inline">\(\hat\beta = \mathbf X^T\mathbf y\)</span> with <span class="math inline">\(z_j = \mathbf x_j^T\mathbf y\)</span>, and <span class="math inline">\(\|\mathbf y - \mathbf X\beta\|^2 = \text{const} + \sum_j (z_j - \beta_j)^2\)</span>: a <strong>separable objective</strong>, one term per coefficient</p>
+<div class="fragment">
 <p><strong>Ridge</strong>, one coordinate: <span class="math inline">\(\tfrac12(z - b)^2 + \tfrac\lambda2 b^2\)</span>, smooth; derivative zero at <span class="math inline">\(\hat b = z/(1 + \lambda)\)</span></p>
+</div>
+<div class="fragment">
 <p><strong>Lasso</strong>: <span class="math inline">\(\tfrac12(z - b)^2 + \lambda|b|\)</span> (half the last slide’s <span class="math inline">\(\lambda\)</span>), a kink at <span class="math inline">\(0\)</span>. <span class="math inline">\(\hat b &gt; 0\)</span> needs <span class="math inline">\(-(z - b) + \lambda = 0\)</span>, so <span class="math inline">\(\hat b = z - \lambda\)</span> and <span class="math inline">\(z &gt; \lambda\)</span>; <span class="math inline">\(\hat b &lt; 0\)</span> gives <span class="math inline">\(\hat b = z + \lambda\)</span> and <span class="math inline">\(z &lt; -\lambda\)</span>; for <span class="math inline">\(|z| \le \lambda\)</span> neither works: the minimum is at the kink, <span class="math inline">\(\hat b = 0\)</span></p>
-</div><div class="column" style="width:32%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="07-1-regularization_files/figure-revealjs/soft-threshold-1.png" style="width:100.0%"></p>
-</figure>
 </div>
-</div>
-</div>
-</div></div>
+<div class="fragment">
 <div class="leave">
 <p><strong>Soft thresholding.</strong> <span class="math inline">\(\arg\min_b \tfrac12(z - b)^2 + \lambda|b| = \mathrm{sign}(z)\,(|z| - \lambda)_+\)</span>: move <span class="math inline">\(z\)</span> toward zero by <span class="math inline">\(\lambda\)</span>, stopping at zero. Ridge divides by <span class="math inline">\(1 + \lambda\)</span> and is zero only at <span class="math inline">\(z = 0\)</span>.</p>
+</div>
 </div>
 </section>
 <section id="biasvariance-decomposition-ridge-form" class="slide level2" data-minutes="3">
@@ -518,7 +562,7 @@ Joshua Loftus
 <div class="columns">
 <div class="column" style="width:52%;">
 <p>Same design, noise variance <span class="math inline">\(\sigma^2\)</span>. Least squares, <span class="math inline">\(\hat\beta = \mathbf X^T\mathbf y\)</span>: unbiased, variance <span class="math inline">\(\sigma^2\)</span> per coefficient. Divide by <span class="math inline">\(1 + \lambda\)</span>: <span class="math display">\[
-\text{bias}_j = -\frac{\lambda\,\beta_j}{1 + \lambda}, \qquad \mathrm{Var}(\hat\beta_{\lambda,j}) = \frac{\sigma^2}{(1 + \lambda)^2}
+\text{bias}_j = -\frac{\lambda}{1 + \lambda}\,\beta_j, \qquad \mathrm{Var}(\hat\beta_{\lambda,j}) = \frac{\sigma^2}{(1 + \lambda)^2}
 \]</span></p>
 </div><div class="column" style="width:48%;">
 <div class="cell">
@@ -538,20 +582,20 @@ Joshua Loftus
 </section>
 <section id="ridge-in-general" class="slide level2">
 <h2>Ridge in general</h2>
-<div class="cell">
+<div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="07-1-regularization_files/figure-revealjs/ridge-general-1.png" width="1800"></p>
+<p><img data-src="07-1-regularization_files/figure-revealjs/ridge-general-1.png" class="quarto-figure quarto-figure-center" style="width:82.0%"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Two correlated inputs: the contours are long along the direction the data cannot pin down (one coefficient up, the other down, the fit barely changes). Ridge’s path from least squares to zero moves fastest along it: it first removes the component the data determine least precisely</p>
+<p>Contours are long where the data determine least precisely; ridge moves fastest along it</p>
 </section>
 <section id="high-dimensional-example" class="slide level2">
 <h2>High-dimensional example</h2>
-<p><span class="math inline">\(n = 100\)</span> observations, <span class="math inline">\(p = 200\)</span> inputs, <span class="math inline">\(\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon\)</span> with only 7 nonzero coefficients. Lasso and ridge at the <span class="math inline">\(\lambda\)</span> cross-validation chooses</p>
+<p><span class="math inline">\(n = 100\)</span> observations, <span class="math inline">\(p = 200\)</span> inputs, <span class="math inline">\(\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon\)</span> with only 12 nonzero coefficients. Lasso and ridge at the <span class="math inline">\(\lambda\)</span> cross-validation chooses</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -583,7 +627,7 @@ Joshua Loftus
 <ul>
 <li>True model is sparse</li>
 </ul>
-<p>Only 7 of 200 variables have nonzero coefficients</p>
+<p>Only 12 of 200 variables have nonzero coefficients</p>
 <ul>
 <li>Ridge estimates are dense</li>
 </ul>
@@ -591,7 +635,7 @@ Joshua Loftus
 <ul>
 <li>Lasso estimates are sparse</li>
 </ul>
-<p>10 nonzero estimates: 5 of the 7 true ones, and 5 false positives, most of them small 😎</p>
+<p>22 nonzero: 11 of the 12 true ones and 11 false positives, all below 0.5 😎</p>
 </section>
 <section id="the-lassos-selected-inputs-under-resampling" class="slide level2">
 <h2>The lasso’s selected inputs under resampling</h2>
@@ -742,8 +786,8 @@ Joshua Loftus
 <h2>Conclusion</h2>
 <h4 id="cross-validation-chooses-the-knob">Cross-validation chooses the knob</h4>
 <p>Every row fitted on and scored on, in turn. The curve’s minimum is a chosen number: report a score from the vault</p>
-<h4 id="the-error-of-a-smooth-fstar-in-n-and-d">The error of a smooth <span class="math inline">\(f^\star\)</span>, in <span class="math inline">\(n\)</span> and <span class="math inline">\(d\)</span></h4>
-<p><span class="math inline">\(n^{-2/(d+2)}\)</span> with smoothness alone; a stronger assumption gives a faster rate, when it holds</p>
+<h4 id="the-error-of-a-smooth-fstar-in-n-and-p">The error of a smooth <span class="math inline">\(f^\star\)</span>, in <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span></h4>
+<p><span class="math inline">\(n^{-2/(p+2)}\)</span> with smoothness alone; a stronger assumption gives a faster rate, when it holds</p>
 <h4 id="ridge-divides-the-lasso-subtracts">Ridge divides, the lasso subtracts</h4>
 <p>Bias on purpose beats least squares for every <span class="math inline">\(\beta\)</span>; the lasso’s zeros are exact. A penalty on wiggliness is ridge with weights. Past <span class="math inline">\(p = n\)</span>, the rule that picks the fit is the regularizer</p>
 </section>
