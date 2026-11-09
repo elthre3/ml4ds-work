@@ -9,7 +9,7 @@ format:
 
 ## Keep or rush
 
-In seminar order. Planned total 60 minutes; cutting the first item marked gets back to 54, which leaves time for transitions and questions. The simulation at the top of coding part 2 takes about a minute and uses no data from part 1: run its chunk at the very start, during problem 1, so the figure is ready when you reach it. Run that way it draws different random numbers from a run in order, so its slopes will differ a little from the ones below; the lesson does not depend on them.
+In seminar order. Planned total 60 minutes; cutting the first item marked gets back to 54, which leaves time for transitions and questions. The simulation at the top of coding part 2 takes about a minute and uses no data from part 1: run its chunk at the very start, during problem 1, so the figure is ready when you reach it. Run that way, it and every random step after question 2 (the folds of steps 5 and 6, the optional items) draw different numbers from a run in order, so those numbers will differ a little from the ones below, which are for a run in order; the lessons do not depend on them.
 
 | Item | Min | | If short |
 |---|---:|---|---|
@@ -23,7 +23,7 @@ In seminar order. Planned total 60 minutes; cutting the first item marked gets b
 | Coding 1, step 3 and question 3: the lasso through the same pipeline, minimum at $\lambda = 0.1$ (531); `cv.glmnet` agrees, `lambda.1se` sets 5 of 11 to zero | 4 | Rush; cut third | Give the `sapply` line; run the `cv.glmnet` chunk and read the two $\lambda$'s |
 | Coding 2, step 4 and question 4: slopes of the learning curves against $-2/(p+2)$; 64 times the data halves the error in $p = 10$; the best $k$ grows with $n$ | 7 | Keep | `coef(lm(log(mse) ~ log(n)))[2]` per $p$; read the four slopes off |
 | Coding 3, step 5 and question 5: copies of a track across folds; $k = 1$ scores 768 with folds by row against 1068 with folds by track | 8 | Keep | `fold_of_track[match(rows$track_id, tracks)]`; the unit of the fold is the unit that repeats |
-| Coding 3, step 6 and question 6: random CV on the development tracks up to 2018 gives MSE 587 and mean error 0; on the 2019--2020 tracks MSE 436 and mean error $+11$; the new tracks' own mean scores 348 | 8 | Keep | A random split cannot see drift; the lower MSE is not evidence of a better model, compare with the baseline on the same tracks |
+| Coding 3, step 6 and question 6: random CV on the development tracks up to 2018 gives MSE 587 and mean error 0; on the 2019--2020 tracks MSE 436, against 469 for the old tracks' mean, and mean error $+11$; the new tracks' own mean (348) is a diagnostic, not a baseline | 8 | Keep | A random split cannot see drift; on the same tracks the plane still beats the old mean, and the mean error shows the calibration |
 
 : {tbl-colwidths="[32,6,16,46]"}
 
@@ -54,11 +54,11 @@ Where they get stuck
 - Step 1: filling `fit_predict(tr, ho)` with `d` instead of `tr`, so every fold fits on all rows; the checkpoint passes (the mean is the mean) but the $k$-NN curve then bottoms at $k = 1$ with a score near 0. The curve is the check.
 - Step 2: standardizing `ho` with its own means and sds, or both with the full training set's. The numbers move by a point or two; the procedure is the point, and it is what step 5 and the optional item are about.
 - Question 1: students may expect the two curves to differ more. They differ at the level (CV fits on 4,500 rows, scores 5,000 held out once) and not in the shape; the lesson is that CV cost no rows.
-- Question 2: students read the gap between 2 folds and 50 as noise; it is bias, from fitting on half the tracks. The chunk is slow on a laptop; start it before discussing.
+- Question 2: students read the gap between 2 folds and 50 as noise; both draws show it at every $k$, so it is mostly the pessimism of fitting on half the tracks, though two draws cannot rule noise out entirely. The chunk is slow on a laptop; start it before discussing.
 - Step 3: `predict(fit, ..., s = lam)` returns a one-column matrix; `as.vector()` is in the given code. `cv.glmnet`'s `lambda.min` differs from `lam_cv` because its path is finer and it standardizes once on all rows.
 - Step 4: `coef(lm(log(mse) ~ log(n)))[2]` inside `summarize()`; a student who regresses `mse` on `n` without logs gets a slope with no meaning. The simulation's slopes are steeper than the exponent; say that the bound is a worst case and this truth is one function.
 - Step 5: assigning `fold_track` with `rep(1:K, ...)` over the rows in track order, which puts a track's copies in different folds; the checkpoint catches it. The `match()` line is in the hint.
-- Step 6: fitting on `old` and `new` together, or scoring `old`'s mean on `old`. Students read 436 < 587 as improvement; the baseline on the same tracks (348) and the mean error ($+11$) are the answer.
+- Step 6: fitting on `old` and `new` together, or scoring `old`'s mean on `old`. Students read 436 < 587 as improvement; the answer is the old tracks' mean on the same tracks (469: the plane still wins) and the mean error ($+11$: the calibration). The new tracks' own mean (348) uses the outcomes being predicted, so it is a diagnostic, not a baseline.
 - In the student file, a chunk with a blank starts with `#| eval: false`; they delete that line once the blank is filled. The `# ...` lines can stay.
 
 Sources: the data note at [ml4ds.com/data/spotify.html](https://ml4ds.com/data/spotify.html); the optional item follows Hastie, Tibshirani and Friedman (2009), *The Elements of Statistical Learning*, 2nd edition, section 7.10.2, pp. 245--247.

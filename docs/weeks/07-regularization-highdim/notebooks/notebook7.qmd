@@ -284,7 +284,7 @@ ggplot(lc, aes(n, mse, colour = factor(p))) + geom_line() + geom_point() +
 
 <!-- 16 min: step 5 and question 5 (8), step 6 and question 6 (8). Mandatory: this is the complication the lecture deferred. -->
 
-Cross-validation has worked. It assumes that the rows are exchangeable: that a held-out row is a fresh draw from the same population as the rows it was fitted on. Two ways that fails on these tracks.
+Cross-validation has worked. It assumes that a held-out row is like a new draw: independent of the rows it was fitted on, and from the same population. Two ways that fails on these tracks: copies of a track break the independence, and drift over time breaks the same population.
 
 **Step 5. The same track on both sides of a fold.** The file has 11,554 rows for 10,000 tracks: 1,101 tracks are in more than one playlist, and every copy has the same audio features, year and popularity. The loader removed the copies with `distinct()`. Load the rows again without it, keep the 5,000 training tracks with all their copies, and build two fold assignments: `fold_row`, at random over rows, and `fold_track`, at random over tracks, so that every copy of a track is in the same fold. Then run the $k$-NN pipeline at $k = 1$, $5$ and $50$ with each.
 
@@ -387,3 +387,4 @@ Omega <- matrix(0, ncol(B), ncol(B)); Omega[-1, -1] <- S
 ## References
 
 - Hastie, T., Tibshirani, R. and Friedman, J. (2009). *The Elements of Statistical Learning: Data Mining, Inference, and Prediction*, 2nd edition. Springer, New York. Section 7.10.2, "The Wrong and Right Way to Do Cross-validation", pp. 245--247. [hastie.su.domains/ElemStatLearn](https://hastie.su.domains/ElemStatLearn/)
+- James, G., Witten, D., Hastie, T. and Tibshirani, R. (2021). *An Introduction to Statistical Learning with Applications in R*, 2nd edition. Springer, New York. Section 5.1.4, "Bias-Variance Trade-Off for k-Fold Cross-Validation", pp. 205--206, and equation (5.2), p. 202. [statlearning.com](https://www.statlearning.com)

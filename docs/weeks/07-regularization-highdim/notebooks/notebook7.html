@@ -564,7 +564,7 @@ Note
 <section id="two-ways-cross-validation-goes-wrong" class="level3">
 <h3 class="anchored" data-anchor-id="two-ways-cross-validation-goes-wrong">3. Two ways cross-validation goes wrong</h3>
 <!-- 16 min: step 5 and question 5 (8), step 6 and question 6 (8). Mandatory: this is the complication the lecture deferred. -->
-<p>Cross-validation has worked. It assumes that the rows are exchangeable: that a held-out row is a fresh draw from the same population as the rows it was fitted on. Two ways that fails on these tracks.</p>
+<p>Cross-validation has worked. It assumes that a held-out row is like a new draw: independent of the rows it was fitted on, and from the same population. Two ways that fails on these tracks: copies of a track break the independence, and drift over time breaks the same population.</p>
 <p><strong>Step 5. The same track on both sides of a fold.</strong> The file has 11,554 rows for 10,000 tracks: 1,101 tracks are in more than one playlist, and every copy has the same audio features, year and popularity. The loader removed the copies with <code>distinct()</code>. Load the rows again without it, keep the 5,000 training tracks with all their copies, and build two fold assignments: <code>fold_row</code>, at random over rows, and <code>fold_track</code>, at random over tracks, so that every copy of a track is in the same fold. Then run the <span class="math inline">\(k\)</span>-NN pipeline at <span class="math inline">\(k = 1\)</span>, <span class="math inline">\(5\)</span> and <span class="math inline">\(50\)</span> with each.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rows <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"https://ml4ds.com/files/spotify_tracks.csv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
@@ -671,6 +671,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <ul>
 <li>Hastie, T., Tibshirani, R. and Friedman, J. (2009). <em>The Elements of Statistical Learning: Data Mining, Inference, and Prediction</em>, 2nd edition. Springer, New York. Section 7.10.2, “The Wrong and Right Way to Do Cross-validation”, pp.&nbsp;245–247. <a href="https://hastie.su.domains/ElemStatLearn/">hastie.su.domains/ElemStatLearn</a></li>
+<li>James, G., Witten, D., Hastie, T. and Tibshirani, R. (2021). <em>An Introduction to Statistical Learning with Applications in R</em>, 2nd edition. Springer, New York. Section 5.1.4, “Bias-Variance Trade-Off for k-Fold Cross-Validation”, pp.&nbsp;205–206, and equation (5.2), p.&nbsp;202. <a href="https://www.statlearning.com">statlearning.com</a></li>
 </ul>
 
 
