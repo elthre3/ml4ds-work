@@ -1999,7 +1999,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#why-care-about-rates",
     "title": "Machine learning",
     "section": "Why care about rates?",
-    "text": "Why care about rates?\nOver a trillion dollars is going into scaling up AI models. What if this is mathematically guaranteed to fail?\nCNET: data centers, AI and climate change"
+    "text": "Why care about rates?\nOver a trillion dollars is going into scaling up AI models. What if this is mathematically guaranteed to fail?\nData Centers Are Burning Fossil Fuels. It’s Destroying Big Tech’s Climate Goals"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-best-k-as-n-and-p-grow",
@@ -2048,49 +2048,42 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#history-steins-paradox",
     "title": "Machine learning",
     "section": "History: Stein’s paradox",
-    "text": "History: Stein’s paradox\nEstimating \\(\\mu \\in \\mathbb R^p\\) from an i.i.d. sample \\(\\mathbf Y_1, \\ldots, \\mathbf Y_n \\sim N(\\mu, \\sigma^2 I)\\). The MLE is \\(\\bar{\\mathbf Y}\\) (obvious and best, right?)\nCharles Stein discovered in the 1950’s that the MLE is inadmissible if \\(p &gt; 2\\) 🤯\nThe James–Stein estimator shrinks \\(\\bar{\\mathbf Y}\\) toward some other point, any other point, chosen a priori, e.g. 0: \\[\n\\hat\\mu_{\\text{JS}} = \\Big(1 - \\frac{(p-2)\\sigma^2/n}{\\|\\bar{\\mathbf Y}\\|^2}\\Big)\\bar{\\mathbf Y}, \\qquad \\text{MSE}(\\hat\\mu_{\\text{JS}}) &lt; \\text{MSE}(\\bar{\\mathbf Y}) \\text{ for all } \\mu, \\text{ if } p &gt; 2\n\\]\nStatisticians emphasized unbiasedness. After Stein’s example, bias is not always bad. Most ML methods use bias this way"
+    "text": "History: Stein’s paradox\nEstimating \\(\\mu \\in \\mathbb R^p\\) from an i.i.d. sample \\(\\mathbf Y_1, \\ldots, \\mathbf Y_n \\sim N(\\mu, \\sigma^2 I)\\). The MLE is \\(\\bar{\\mathbf Y}\\) (obvious and best, right?)\nCharles Stein discovered in the 1950’s that the MLE is inadmissible if \\(p &gt; 2\\) 🤯\nThe James–Stein estimator shrinks \\(\\bar{\\mathbf Y}\\) toward some other point, any other point, chosen a priori, e.g. 0: \\[\n\\hat\\mu_{\\text{JS}} = \\Big(1 - \\frac{(p-2)\\sigma^2/n}{\\|\\bar{\\mathbf Y}\\|^2}\\Big)\\bar{\\mathbf Y}, \\qquad \\text{MSE}(\\hat\\mu_{\\text{JS}}) &lt; \\text{MSE}(\\bar{\\mathbf Y}) \\text{ for all } \\mu, \\text{ if } p &gt; 2\n\\]"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#shrinkage-less-variance-more-bias",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#shrinkage-less-variance-more-bias",
     "title": "Machine learning",
     "section": "Shrinkage: less variance, more bias",
-    "text": "Shrinkage: less variance, more bias\n\n\n\n\n\n\n\n\n\n\n\n\nSolid points are improved by shrinking, hollow pink points do worse\nIf \\(\\bar Y\\) is between \\(\\mu\\) and 0 then shrinking does worse\nIn higher dimensions, a greater portion of space is not between \\(\\mu\\) and 0\ne.g. \\(2^p\\) orthants in \\(p\\)-dimensional space, and only 1 contains \\(\\mu - 0\\)\n(Not meant to be a proof)"
+    "text": "Shrinkage: less variance, more bias\nStatisticians emphasized unbiasedness. After Stein’s example, bias is not always bad. Most ML methods use bias this way\nJames–Stein shrinkage, a picture: where shrinking toward zero helps and where it hurts, in two and three dimensions"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#ridge-and-the-lasso-again",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#ridge-and-the-lasso-again",
     "title": "Machine learning",
     "section": "Ridge and the lasso, again",
-    "text": "Ridge and the lasso, again\n\n\n\\[\n\\text{ridge: } \\min_\\beta\\ \\|\\mathbf y - \\mathbf X\\beta\\|_2^2 + \\lambda\\|\\beta\\|_2^2\n\\] \\[\n\\|\\beta\\|_2^2 = \\sum_{j=1}^p \\beta_j^2\n\\]\n\n\\[\n\\text{lasso: } \\min_\\beta\\ \\|\\mathbf y - \\mathbf X\\beta\\|_2^2 + \\lambda\\|\\beta\\|_1\n\\] \\[\n\\|\\beta\\|_1 = \\sum_{j=1}^p |\\beta_j|\n\\]\n\nRidge’s estimates are dense: every coefficient nonzero, in general; the lasso’s are exactly zero over whole ranges of \\(\\lambda\\). What \\(\\lambda\\) does to one coefficient is hidden in general, because the coefficients interact; in one design they do not"
+    "text": "Ridge and the lasso, again\n\n\n\\[\n\\text{ridge: } \\min_\\beta\\ \\|\\mathbf y - \\mathbf X\\beta\\|_2^2 + \\lambda\\|\\beta\\|_2^2\n\\] \\[\n\\|\\beta\\|_2^2 = \\sum_{j=1}^p \\beta_j^2\n\\]\n\n\\[\n\\text{lasso: } \\min_\\beta\\ \\|\\mathbf y - \\mathbf X\\beta\\|_2^2 + \\lambda\\|\\beta\\|_1\n\\] \\[\n\\|\\beta\\|_1 = \\sum_{j=1}^p |\\beta_j|\n\\]\n\nRidge’s estimates are dense: every coefficient nonzero, in general; the lasso’s are exactly zero over whole ranges of \\(\\lambda\\). What \\(\\lambda\\) does to one coefficient is hidden in general, because the coefficients interact; in the simplest design they do not"
   },
   {
-    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-orthogonal-design",
-    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-orthogonal-design",
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-identity-design",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-identity-design",
     "title": "Machine learning",
-    "section": "The orthogonal design",
-    "text": "The orthogonal design\n\\(\\mathbf X^T\\mathbf X = I\\) (orthonormal columns, \\(p \\le n\\)): \\(\\hat\\beta = \\mathbf X^T\\mathbf y\\) with \\(z_j = \\mathbf x_j^T\\mathbf y\\), \\(\\mathbf x_j\\) the \\(j\\)th column, and \\(\\|\\mathbf y - \\mathbf X\\beta\\|^2 = \\text{const} + \\sum_j (z_j - \\beta_j)^2\\): a separable objective, one term per coefficient\n\nRidge, one coordinate: \\(\\tfrac12(z - b)^2 + \\tfrac\\lambda2 b^2\\), smooth; derivative zero at \\(\\hat b = z/(1 + \\lambda)\\)\n\n\nLasso: \\(\\tfrac12(z - b)^2 + \\lambda|b|\\) (half the last slide’s \\(\\lambda\\)), a kink at \\(0\\). \\(\\hat b &gt; 0\\) needs \\(-(z - b) + \\lambda = 0\\), so \\(\\hat b = z - \\lambda\\) and \\(z &gt; \\lambda\\); \\(\\hat b &lt; 0\\) gives \\(\\hat b = z + \\lambda\\) and \\(z &lt; -\\lambda\\); for \\(|z| \\le \\lambda\\) neither works: the minimum is at the kink, \\(\\hat b = 0\\)\n\n\n\nSoft thresholding. \\(\\arg\\min_b \\tfrac12(z - b)^2 + \\lambda|b| = \\mathrm{sign}(z)\\,(|z| - \\lambda)_+\\): move \\(z\\) toward zero by \\(\\lambda\\), stopping at zero. Ridge divides by \\(1 + \\lambda\\) and is zero only at \\(z = 0\\)."
+    "section": "The identity design",
+    "text": "The identity design\n\\(\\mathbf X = I\\) (\\(n = p\\)), so \\(\\mathbf y = \\beta + \\boldsymbol\\varepsilon\\): one observation per coefficient, least squares \\(\\hat\\beta = \\mathbf y\\), and \\(\\|\\mathbf y - \\beta\\|_2^2 + \\lambda\\,\\text{pen}(\\beta) = \\sum_j \\big[(y_j - \\beta_j)^2 + \\lambda\\,\\text{pen}(\\beta_j)\\big]\\): one problem per coefficient\n\nRidge: \\(\\hat\\beta_{\\lambda, j} = \\dfrac{y_j}{1 + \\lambda}\\), every coefficient shrunk by the same factor, zero only if \\(y_j = 0\\)\n\n\nLasso: \\(\\hat\\beta_{\\lambda, j} = \\mathrm{sign}(y_j)\\,\\big(|y_j| - \\tfrac{\\lambda}{2}\\big)_+\\), each \\(y_j\\) moved toward zero by \\(\\lambda/2\\), stopping at zero: exactly zero whenever \\(|y_j| \\le \\lambda/2\\)\n\n\n\nSoft thresholding. \\(\\arg\\min_b\\ (y - b)^2 + \\lambda|b| = \\mathrm{sign}(y)\\,(|y| - \\lambda/2)_+\\). Derivations of both minimizers: the notebook (exercise 1 and problem 1)."
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#biasvariance-decomposition-ridge-form",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#biasvariance-decomposition-ridge-form",
     "title": "Machine learning",
     "section": "Bias–variance decomposition, ridge form",
-    "text": "Bias–variance decomposition, ridge form\n\n\nSame design, noise variance \\(\\sigma^2\\). Least squares, \\(\\hat\\beta = \\mathbf X^T\\mathbf y\\): unbiased, variance \\(\\sigma^2\\) per coefficient. Divide by \\(1 + \\lambda\\): \\[\n\\text{bias}_j = -\\frac{\\lambda}{1 + \\lambda}\\,\\beta_j, \\qquad \\mathrm{Var}(\\hat\\beta_{\\lambda,j}) = \\frac{\\sigma^2}{(1 + \\lambda)^2}\n\\]\n\n\n\n\n\n\n\n\n\n\n\n\nBias–variance decomposition, ridge form. \\(\\mathbf X^T\\mathbf X = I\\), \\(\\mathbf y = \\mathbf X\\beta + \\boldsymbol\\varepsilon\\), noise independent, mean \\(0\\), variance \\(\\sigma^2 &gt; 0\\): \\(\\;\\mathrm{MSE}(\\lambda) = \\mathbb E\\|\\hat\\beta_\\lambda - \\beta\\|^2 = \\sum_{j=1}^p (\\lambda^2\\beta_j^2 + \\sigma^2)/(1 + \\lambda)^2\\), with slope \\(-2p\\sigma^2 &lt; 0\\) at \\(\\lambda = 0\\): for every \\(\\beta\\), some \\(\\lambda &gt; 0\\) beats least squares.\n\nProof: exercise 1. Which \\(\\lambda\\)? The best is \\(\\sigma^2\\) over the mean of \\(\\beta_j^2\\), noise over signal: unknown"
-  },
-  {
-    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#ridge-in-general",
-    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#ridge-in-general",
-    "title": "Machine learning",
-    "section": "Ridge in general",
-    "text": "Ridge in general\n\n\n\n\n\n\n\n\n\nRidge shrinks most, in proportion, where the data determine least precisely"
+    "text": "Bias–variance decomposition, ridge form\n\n\nSame design, noise variance \\(\\sigma^2\\). Least squares, \\(\\hat\\beta = \\mathbf y\\): unbiased, variance \\(\\sigma^2\\) per coefficient. Divide by \\(1 + \\lambda\\): \\[\n\\text{bias}_j = -\\frac{\\lambda}{1 + \\lambda}\\,\\beta_j, \\qquad \\mathrm{Var}(\\hat\\beta_{\\lambda,j}) = \\frac{\\sigma^2}{(1 + \\lambda)^2}\n\\]\n\n\n\n\n\n\n\n\n\n\n\n\nBias–variance decomposition, ridge form. \\(\\mathbf X = I\\), \\(\\mathbf y = \\beta + \\boldsymbol\\varepsilon\\), noise independent, mean \\(0\\), variance \\(\\sigma^2 &gt; 0\\): \\(\\;\\mathrm{MSE}(\\lambda) = \\mathbb E\\|\\hat\\beta_\\lambda - \\beta\\|^2 = \\sum_{j=1}^p (\\lambda^2\\beta_j^2 + \\sigma^2)/(1 + \\lambda)^2\\), with slope \\(-2p\\sigma^2 &lt; 0\\) at \\(\\lambda = 0\\): for every \\(\\beta\\), some \\(\\lambda &gt; 0\\) beats least squares.\n\nProof: exercise 1. Which \\(\\lambda\\)? The best is \\(\\sigma^2\\) over the mean of \\(\\beta_j^2\\), noise over signal: unknown"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#high-dimensional-example",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#high-dimensional-example",
     "title": "Machine learning",
     "section": "High-dimensional example",
-    "text": "High-dimensional example\n\\(n = 100\\) observations, \\(p = 200\\) inputs, \\(\\mathbf y = \\mathbf X\\beta + \\boldsymbol\\varepsilon\\) with only 12 nonzero coefficients. Lasso and ridge at the \\(\\lambda\\) cross-validation chooses"
+    "text": "High-dimensional example\n\\(n = 100\\) observations, \\(p = 200\\) inputs, \\(\\mathbf y = \\mathbf X\\beta + \\boldsymbol\\varepsilon\\) with only 16 nonzero coefficients. Lasso and ridge at the \\(\\lambda\\) cross-validation chooses"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#zoom-in-on-variables-50-to-100",
@@ -2104,21 +2097,21 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#lasso-cool-or-extremely-cool",
     "title": "Machine learning",
     "section": "Lasso: cool or extremely cool?",
-    "text": "Lasso: cool or extremely cool?\n\nHigh-dimensional: \\(p &gt; n\\) means we can’t fit OLS\n\nBut all is not lost! Penalized regression to the rescue\n\nTrue model is sparse\n\nOnly 12 of 200 variables have nonzero coefficients\n\nRidge estimates are dense\n\nAll coefficients nonzero 😰\n\nLasso estimates are sparse\n\n22 nonzero: 11 of the 12 true ones and 11 false positives, all below 0.5 😎"
+    "text": "Lasso: cool or extremely cool?\nPenalized regression biases coefficients toward zero\nThe lasso usually sets some of them all the way to zero, so it does variable selection as it fits\nPeople like sparser, simpler models: they can be easier to interpret"
   },
   {
-    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-lassos-selected-inputs-under-resampling",
-    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-lassos-selected-inputs-under-resampling",
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#lasso-downside-instability",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#lasso-downside-instability",
     "title": "Machine learning",
-    "section": "The lasso’s selected inputs under resampling",
-    "text": "The lasso’s selected inputs under resampling\n\n\n\n\n\n\n\n\n\nEight half-samples of the training tracks, the lasso’s \\(\\lambda\\) chosen by cross-validation on each. The set of kept inputs changes from one sample to the next; the fits’ scores barely do. The same instability as a tree’s cutoffs. A score tolerates it; a list of “the inputs that matter” does not"
+    "section": "Lasso downside: instability",
+    "text": "Lasso downside: instability\n\n\n\n\n\n\n\n\n\nThe ten models cross-validation fit, each on nine folds, at lambda.min: the kept inputs change from fold to fold, their scores on the same 2,000 selection tracks barely do. The same instability as a tree’s cutoffs. At the one-SE \\(\\lambda\\) the ten sets agree"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#a-fixed-lambda-and-a-data-chosen-hatlambda",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#a-fixed-lambda-and-a-data-chosen-hatlambda",
     "title": "Machine learning",
     "section": "A fixed \\(\\lambda\\) and a data-chosen \\(\\hat\\lambda\\)",
-    "text": "A fixed \\(\\lambda\\) and a data-chosen \\(\\hat\\lambda\\)\n\n\n\\(\\hat\\beta_{\\text{lasso}}(\\lambda)\\) at a fixed \\(\\lambda\\)\n\n\\(\\hat\\beta_{\\text{lasso}}(\\hat\\lambda)\\) at a data-chosen \\(\\hat\\lambda\\)\n\nDifferent in general! Theoretical results about the first (the rate, the ridge-form decomposition at a fixed \\(\\lambda\\)) may not apply to the second\n\nChoosing on a dataset is empirical risk minimization over a finite class: the winner’s score on the rows it was chosen on is biased low (two equal candidates with scores \\(r \\pm 1\\): the winner’s is \\(r - \\tfrac12\\) on average). The CV curve’s minimum is such a winner, over 67 candidates.\n\nChoose \\(\\lambda\\) on the CV curve, and report a score from rows the choice did not use (the vault). The kept inputs are parts of one prediction, from one sample"
+    "text": "A fixed \\(\\lambda\\) and a data-chosen \\(\\hat\\lambda\\)\n\n\n\\(\\hat\\beta_{\\text{lasso}}(\\lambda)\\) at a fixed \\(\\lambda\\)\n\n\\(\\hat\\beta_{\\text{lasso}}(\\hat\\lambda)\\) at a data-chosen \\(\\hat\\lambda\\)\n\nDifferent in general! Theoretical results about the first (the rate, the ridge-form decomposition at a fixed \\(\\lambda\\)) may not apply to the second\n\nChoosing on a dataset is empirical risk minimization over a finite class: the winner’s score on the rows it was chosen on is biased low."
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#section-4",
@@ -2153,35 +2146,35 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#least-squares-when-p-n",
     "title": "Machine learning",
     "section": "Least squares when \\(p > n\\)",
-    "text": "Least squares when \\(p &gt; n\\)\n\n\n\\(\\mathbf X\\) is \\(n \\times p\\), \\(p &gt; n\\), full row rank. Every \\(\\beta\\) with \\(\\mathbf X\\beta = \\mathbf y\\) solves the normal equations: infinitely many fits, training error zero for all of them. lm prints NA\nRidge is defined for every \\(\\lambda &gt; 0\\), and \\[\n\\hat\\beta_\\lambda \\;\\longrightarrow\\; \\hat\\beta_{\\min} = \\mathbf X^T(\\mathbf X\\mathbf X^T)^{-1}\\mathbf y \\quad \\text{as } \\lambda \\to 0^+\n\\] the minimum-norm interpolant: of all the zero-error fits, the one with the smallest \\(\\|\\beta\\|\\)\nGradient descent on least squares from \\(\\beta = \\mathbf 0\\), small step, converges to the same point (stated)"
+    "text": "Least squares when \\(p &gt; n\\)\n\n\n\\(\\mathbf X\\) is \\(n \\times p\\), \\(p &gt; n\\), full row rank. Every \\(\\beta\\) with \\(\\mathbf X\\beta = \\mathbf y\\) is a least-squares fit: infinitely many, all with training error zero. lm prints NA\nRidge is defined for every \\(\\lambda &gt; 0\\), and \\[\n\\hat\\beta_\\lambda \\;\\longrightarrow\\; \\hat\\beta_{\\min} = \\mathbf X^T(\\mathbf X\\mathbf X^T)^{-1}\\mathbf y \\quad \\text{as } \\lambda \\to 0^+\n\\] the minimum-norm interpolant: of all the zero-error fits, the one with the smallest \\(\\|\\beta\\|\\)\nGradient descent on least squares from \\(\\beta = \\mathbf 0\\), small step, converges to the same point (stated)"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-zero-error-fits",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-zero-error-fits",
     "title": "Machine learning",
     "section": "The zero-error fits",
-    "text": "The zero-error fits\n\n\n\n\n\n\n\n\n\n\\(n = 20\\) points, a natural-spline basis with \\(J\\) functions: least squares up to \\(J = n\\), the smallest-norm zero-error fit beyond. At \\(J = 20\\) the curve passes through every point and swings between them; at \\(J = 80\\) it still passes through every point, and is calmer. Zero training error does not say which zero-error fit you have. The rule that picks one, smallest norm here, is an inductive bias: that rule is the regularization"
+    "text": "The zero-error fits\n\n\n\n\n\n\n\n\n\n\\(n = 20\\) points, natural splines with \\(J\\) basis functions: least squares up to \\(J = n\\), the smallest-norm zero-error fit beyond. At \\(J = 20\\) the curve swings between the points; at \\(J = 80\\) it still passes through every one, and is calmer. Zero training error does not say which zero-error fit you have; the rule that picks one, smallest norm here, is the regularization"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#double-descent-demonstrated",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#double-descent-demonstrated",
     "title": "Machine learning",
     "section": "Double descent, demonstrated",
-    "text": "Double descent, demonstrated\n\n\n\n\n\n\n\n\n\nTest MSE against \\(J\\) (test inputs inside the training range), averaged over 50 draws of the 20 points. Least squares then smallest norm: the U-curve up to \\(J = n\\), a spike at the interpolation threshold, a second descent beyond it (the name is from Belkin, Hsu, Ma and Mandal 2019). The same basis with a ridge penalty chosen by cross-validation never interpolates and has no spike. Dashed: the noise variance"
+    "text": "Double descent, demonstrated\n\n\n\n\n\n\n\n\n\nTest MSE against \\(J\\), averaged over 50 draws of the 20 points: the U-curve up to \\(J = n\\), a spike at the interpolation threshold, a second descent beyond it (Belkin, Hsu, Ma and Mandal 2019). Ridge on the same basis, \\(\\lambda\\) by cross-validation, never interpolates and has no spike. Dashed: the noise variance"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#double-descent-and-the-biasvariance-decomposition",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#double-descent-and-the-biasvariance-decomposition",
     "title": "Machine learning",
     "section": "Double descent and the bias–variance decomposition",
-    "text": "Double descent and the bias–variance decomposition\nDoes not change. The bias–variance decomposition is an identity; it holds on every point of both curves. Training error zero still says nothing about the risk (optimism theorem)\nChanges. The folk version, “more parameters, more variance”, read as a function of the parameter count alone. With the inputs fixed and 50 replicates, the variance of the smallest-norm fit is 0.26 at \\(J = 15\\), 42 at \\(J = n = 20\\), where the design is nearly singular (the reason ridge was invented), and 0.048 at \\(J = 80\\): it spikes and falls, because the rule itself changes with \\(J\\). Ridge with \\(\\lambda\\) by cross-validation, same inputs: 0.078, 0.14, 0.037\n\nFour dimensions: each family assumed a shape for \\(f^\\star\\), and no single scale ran from simple to complex. The parameter count is not that scale either. The rule that chooses the fit is what regularizes."
+    "text": "Double descent and the bias–variance decomposition\nDoes not change. The bias–variance decomposition is an identity and holds at every point of both curves. Zero training error still says nothing about the risk\nChanges. The folk version, “more parameters, more variance”. Inputs fixed, 50 replicates: the variance of the smallest-norm fit is 0.76 at \\(J = 15\\), 1.9 at \\(J = n = 20\\) (a nearly singular design) and 0.04 at \\(J = 80\\). It spikes and falls because the rule changes with \\(J\\). Ridge by cross-validation on the same inputs: 0.083, 0.081, 0.04\n\nFour dimensions, again: the parameter count is not the scale from simple to complex. The rule that chooses the fit is what regularizes."
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#does-statistics-apply-to-deep-learning",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#does-statistics-apply-to-deep-learning",
     "title": "Machine learning",
     "section": "Does statistics apply to deep learning?",
-    "text": "Does statistics apply to deep learning?\nThe bias–variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data… or does it?\n\n\n\n\n\nBelkin, Hsu, Ma and Mandal (2019). Does zero training error necessarily mean the model is overfit? No. Anna Karenina principle: all truly optimal models are alike; each overfit model is overfit in its own way\nWhich zero-error fit, and chosen how: later in the course, where the representation is learned too"
+    "text": "Does statistics apply to deep learning?\nThe bias–variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data… or does it?\n\n\n\n\n\nBelkin, Hsu, Ma and Mandal (2019). Does zero training error necessarily mean the model is overfit? No. Anna Karenina principle: all truly optimal models are alike; each overfit model is overfit in its own way"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#before-the-seminar",
