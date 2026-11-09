@@ -218,10 +218,10 @@ Joshua Loftus
 <h2></h2>
 <h3 id="part-1-classification-logistic-regression-and-asymmetric-costs">Part 1: classification, logistic regression, and asymmetric costs</h3>
 </section>
-<section id="where-week-2-left-the-target" class="slide level2" data-minutes="3">
-<h2>Where week 2 left the target</h2>
+<section id="where-the-optimal-model-theorem-left-the-target" class="slide level2" data-minutes="3">
+<h2>Where the optimal model theorem left the target</h2>
 <div class="retrieval">
-<p>Week 2, the optimal model theorem: under squared loss the best predictor of <span class="math inline">\(Y\)</span> from <span class="math inline">\(X\)</span> is the conditional mean, <span class="math inline">\(f^\star(x) = \mathbb E[Y \mid X = x]\)</span>, and any other <span class="math inline">\(f\)</span> pays <span class="math inline">\(\mathbb E[(f^\star(X) - f(X))^2]\)</span> on top of it.</p>
+<p>The optimal model theorem: under squared loss the best predictor of <span class="math inline">\(Y\)</span> from <span class="math inline">\(X\)</span> is the conditional mean, <span class="math inline">\(f^\star(x) = \mathbb E[Y \mid X = x]\)</span>, and any other <span class="math inline">\(f\)</span> pays <span class="math inline">\(\mathbb E[(f^\star(X) - f(X))^2]\)</span> on top of it.</p>
 </div>
 <p>Today the outcome is a label: <span class="math inline">\(Y \in \{0, 1\}\)</span>.</p>
 <div class="ask">
@@ -344,7 +344,7 @@ p(x) = P(Y = 1 \mid X = x) = \mathbb E[Y \mid X = x]
 <section id="interpretation-inference-and-diagnostics" class="slide level2">
 <h2>Interpretation: inference and diagnostics</h2>
 <ul>
-<li><p>Fitted by maximum likelihood; how <code>glm</code> does it: next week</p></li>
+<li><p>Fitted by maximum likelihood; how <code>glm</code> does it: later in the course</p></li>
 <li><p>MLEs <span class="math inline">\(\to\)</span> asymptotic normality for intervals/tests (fixed <span class="math inline">\(p\)</span>, regularity conditions)</p></li>
 </ul>
 <p><code>summary()</code>, <code>coef()</code>, <code>confint()</code>, <code>anova()</code>, etc in <code>R</code></p>
@@ -403,7 +403,7 @@ p(x) = P(Y = 1 \mid X = x) = \mathbb E[Y \mid X = x]
 </div><div class="column" style="width:55%;">
 <p>The <strong>receiver operating characteristic</strong>: one point per threshold <span class="math inline">\(c\)</span>, from <span class="math inline">\(c = 1\)</span> (predict <span class="math inline">\(0\)</span> for everyone, bottom left) to <span class="math inline">\(c = 0\)</span> (top right)</p>
 <p>Lower <span class="math inline">\(c\)</span>: catch more of the 1s, raise more false alarms</p>
-<p><strong>AUC</strong>, the area under it: the probability that a random 1 scores above a random 0 (a tie counts half), a ranking quality that never asks where <span class="math inline">\(c\)</span> is</p>
+<p><strong>AUC</strong>, the area under it: the probability that a random 1 scores above a random 0 (a tie counts half), a ranking quality that does not depend on <span class="math inline">\(c\)</span></p>
 <p>Named for radar receivers in the 1940s. It does not answer the operator’s question: <em>which</em> point?</p>
 </div></div>
 </section>
@@ -454,7 +454,7 @@ p(x) &gt; c^\star = \frac{c_{FP}}{c_{FP} + c_{FN}},
 <section id="causality-part-1" class="slide level2 center">
 <h2>Causality, part 1</h2>
 <div class="retrieval">
-<p>Week 1, concepts that keep coming back: prediction <span class="math inline">\(\neq\)</span> explanation <span class="math inline">\(\neq\)</span> intervention.</p>
+<p>Concepts that keep coming back: prediction <span class="math inline">\(\neq\)</span> explanation <span class="math inline">\(\neq\)</span> intervention.</p>
 </div>
 <div class="ask">
 <p>A model predicts life expectancy from GDP per capita well on held-out countries. A minister raises GDP per capita by ten percent. What does the model say happens to life expectancy? Do you believe it?</p>
@@ -560,7 +560,7 @@ p(x) &gt; c^\star = \frac{c_{FP}}{c_{FP} + c_{FN}},
 <h4 id="fundamental-problem-of-interpreting-regression-coefficients">Fundamental problem of interpreting regression coefficients:</h4>
 <div class="fragment">
 <p>“holding all other predictors constant” is (almost) never applicable in the real world, i.e.&nbsp;ceteris is (almost) never paribus</p>
-<p>Reasons we’ll highlight: <strong>causality</strong> (today) and <strong>nonlinearity</strong> (the additive-models week)</p>
+<p>Reasons we’ll highlight: <strong>causality</strong> (today) and <strong>nonlinearity</strong> (later in the course)</p>
 </div>
 </section>
 <section id="interpreting-causality" class="slide level2">
@@ -797,7 +797,7 @@ T = h(Z, \varepsilon_T), \qquad Y = g(T, Z, \varepsilon_Y), \qquad Z,\ \varepsil
 \mathbb E[Y \mid T = 1] - \mathbb E[Y \mid T = 0] = \tau + \beta\,\big(\mathbb E[Z \mid T = 1] - \mathbb E[Z \mid T = 0]\big)
 \]</span></p>
 <div class="retrieval">
-<p>Week 2, omitted-variable bias, inputs fixed: regressing on <span class="math inline">\(\mathbf x_1\)</span> alone gives <span class="math inline">\(\mathbb E\hat\beta_{\text{short}} = \beta_1 + \beta_2\hat\delta\)</span>, with <span class="math inline">\(\hat\delta\)</span> the slope of <span class="math inline">\(\mathbf x_2\)</span> on <span class="math inline">\(\mathbf x_1\)</span>.</p>
+<p>Omitted-variable bias, inputs fixed: regressing on <span class="math inline">\(\mathbf x_1\)</span> alone gives <span class="math inline">\(\mathbb E\hat\beta_{\text{short}} = \beta_1 + \beta_2\hat\delta\)</span>, with <span class="math inline">\(\hat\delta\)</span> the slope of <span class="math inline">\(\mathbf x_2\)</span> on <span class="math inline">\(\mathbf x_1\)</span>.</p>
 </div>
 <div class="leave">
 <p>The naive difference is the effect plus what <span class="math inline">\(Z\)</span> contributes through selection: omitted-variable bias, read causally. Derivation: exercise 2.</p>
@@ -846,7 +846,7 @@ T = h(Z, \varepsilon_T), \qquad Y = g(T, Z, \varepsilon_Y), \qquad Z,\ \varepsil
 \mathbb E[Y \mid do(T = 1)] = \mathbb E\Big[\frac{T\,Y}{\pi(Z)}\Big], \qquad \mathbb E[Y \mid do(T = 0)] = \mathbb E\Big[\frac{(1 - T)\,Y}{1 - \pi(Z)}\Big]
 \]</span></p>
 <div class="leave">
-<p>Weight each treated unit by <span class="math inline">\(1/\pi(Z)\)</span>: it stands in for <span class="math inline">\(1/\pi(Z)\)</span> units with the same <span class="math inline">\(Z\)</span>. The adjustment theorem needs a regression model for <span class="math inline">\(Y\)</span>. This one needs a regression model for <span class="math inline">\(T\)</span>, and logistic regression gives one.</p>
+<p>Weight each treated unit by <span class="math inline">\(1/\pi(Z)\)</span>: it stands in for <span class="math inline">\(1/\pi(Z)\)</span> units with the same <span class="math inline">\(Z\)</span>. In practice, the adjustment theorem needs a regression model for <span class="math inline">\(Y\)</span>. This one needs a regression model for <span class="math inline">\(T\)</span>, and logistic regression gives one.</p>
 </div>
 </section>
 <section id="inverse-propensity-weighting-theorem-proof-1-of-2" class="slide level2" data-minutes="3">

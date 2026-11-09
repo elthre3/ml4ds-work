@@ -1076,7 +1076,7 @@ Joshua Loftus
 <aside class="notes">
 <p><code>[--------------------]</code> 0%  0 of 76 min</p>
 <p>The deck on the spine’s scale (2 a content slide, 3 a slide with a pause for the room, 1 a dark slide); the bar at the top of each note is the share done and its denominator the total. Dark = rush or skip; each dark slide’s note says skip or gives the compressed phrase. Datasets: Spotify for everything with several inputs; week 1’s countries for the one-input pictures (the curves, the tree-variance picture); the three simulated truths in part 6. Handed on (convenor, 25 October): the legacy high-dimensional lasso example and its dark slide, for the lasso’s own lecture. Cut for time (convenor, 26 October): the legacy vaccine-rules dark slide, the forest’s own slide (merged into the instability slide) and the loess panel of the curves slide.</p>
-<p>Cut order: (1) “Recursive rectangular splitting” to one sentence, (2) “What to know about networks today” to its first line, (3) truth A’s wide panel to a sentence, (4) “The basis size is the knob” to a sentence. The Spotify leaderboard, the four-dimensions slide and the theorem do not move.</p>
+<p>Cut order: (1) “Recursive rectangular splitting” to one sentence, (2) “Fitting and tuning a network” to its first line, (3) truth A’s wide panel to a sentence, (4) “The basis size is the knob” to a sentence. The Spotify leaderboard, the four-dimensions slide and the theorem do not move.</p>
 <p>In the notebook: the optimism theorem proved (ex. 1), ridge’s normal equations (ex. 2). The seminar refits every family on training plus selection and opens the Spotify test set once.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
@@ -1309,7 +1309,7 @@ display:block!important;
 </tbody>
 </table>
 </div>
-<p>and <strong>tune each model so that it is the best version of its kind</strong>: every knob chosen on the selection tracks, as <span class="math inline">\(k\)</span> was. Then compare the best of each kind</p>
+<p>and tune each model so that it is the best version of its kind: every knob chosen on the selection tracks, as <span class="math inline">\(k\)</span> was. Then compare the best of each kind</p>
 </section>
 <section id="section-1" class="slide level2 inverse center">
 <h2></h2>
@@ -1378,11 +1378,11 @@ display:block!important;
 <p>For some constant <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math display">\[\text{minimize } \| \mathbf y - \mathbf X \beta \|^2_2 + \lambda \| \beta \|^2\]</span> <strong>Shrinks</strong> coefficients <span class="math inline">\(\hat \beta\)</span> toward 0</p>
 <p>Larger coefficients are penalized more (squared penalty)</p>
 </section>
-<section id="what-lambda-controls" class="slide level2" data-minutes="3">
-<h2>What <span class="math inline">\(\lambda\)</span> controls</h2>
+<section id="the-ridge-estimator" class="slide level2" data-minutes="3">
+<h2>The ridge estimator</h2>
 <aside class="notes">
 <p><code>[####----------------]</code> 22%  17 of 76 min</p>
-<p>Exercise 2 derives the equations: the gradient of the penalized objective. Invertible for every positive lambda because X’X is positive semidefinite and lambda I adds lambda to every eigenvalue; that is “fitting when p &gt; n”. The figure: ridge on the Spotify training tracks, the eleven numeric inputs and five genre dummies, standardized; minus log lambda on glmnet’s scale, so large lambda is on the left, every coefficient near zero; lambda to zero on the right, least squares (p = 16 &lt; n here). The pop and rock genres, energy and loudness carry the largest coefficients.</p>
+<p>Exercise 2 derives the equations: the gradient of the penalized objective. Invertible for every positive lambda because X’X is positive semidefinite and lambda I adds lambda to every eigenvalue; that is “fitting when p &gt; n”. The figure: ridge on the Spotify training tracks, the eleven numeric inputs and five genre dummies, standardized; minus log lambda on glmnet’s scale, so large lambda is on the left, every coefficient near zero; lambda to zero on the right, least squares (p = 16 &lt; n here). The pop and rock genres, energy and loudness have the largest coefficients.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1588,7 +1588,7 @@ display:block!important;
 <h2>Additive modeling assumption</h2>
 <aside class="notes">
 <p><code>[########------------]</code> 41%  31 of 76 min</p>
-<p>Legacy slide. g is the link, identity today. One function per input, added up; a coefficient is the special case. Only the sum is determined, so each f_j is centered and the level sits in beta_0.</p>
+<p>Legacy slide. g is the link, identity today. One function per input, added up; a coefficient is the special case. Only the sum is determined, so each f_j is centered and the level is in beta_0.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1615,7 +1615,7 @@ display:block!important;
 <h2>An additive model for popularity</h2>
 <aside class="notes">
 <p><code>[#########-----------]</code> 43%  33 of 76 min</p>
-<p>Spotify, the training tracks: six of the numeric inputs as splines with J = 4, genre as a factor, one least-squares fit on 30 columns. R squared about 0.17: most of popularity is not in these inputs, which is the honest state of affairs. Each panel is a fitted component, centered, over the middle 98 percent of its input. Read two: loudness (louder tracks score higher, about 18 points across the range), release year (the oldest tracks score high, a low around 2012, then the steep rise into 2019 and 2020: recency, as the data note says). Energy falls once loudness is in the model: the two are correlated, and the component is what energy adds with loudness held fixed, week 2’s reading. Backfitting, later in the course, is how these components are found when the one-input fits are not least squares.</p>
+<p>Spotify, the training tracks: six of the numeric inputs as splines with J = 4, genre as a factor, one least-squares fit on 30 columns. R squared about 0.17: most of popularity is not in these inputs. Each panel is a fitted component, centered, over the middle 98 percent of its input. Read two: loudness (louder tracks score higher, about 18 points across the range), release year (the oldest tracks score high, a low around 2012, then the steep rise into 2019 and 2020: recency, as the data note says). Energy falls once loudness is in the model: the two are correlated, and the component is what energy adds with loudness held fixed, week 2’s reading. Backfitting, later in the course, is how these components are found when the one-input fits are not least squares.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1779,7 +1779,7 @@ Output: the predictor and cutoff with the best improvement</code></pre>
 <h2>A tree is unstable; a forest averages many</h2>
 <aside class="notes">
 <p><code>[############--------]</code> 58%  44 of 76 min</p>
-<p>New slide, before the fix. Gapminder, where 142 points make it visible: eight resamples of the countries (draws with replacement, the same size), a depth-3 tree and a J = 4 spline on each. The trees’ cutoffs jump between resamples and their steps jump with them; the splines barely move. Across the grid the eight trees’ predictions have an average standard deviation of about 1.8 years, the splines’ about 0.8. A tree has high variance; the orange line, the average of the eight trees, is already smoother than any of them. Said, not derived: a random forest grows hundreds of trees, each on a resample of the training rows (these draws with replacement) with a random subset of the inputs offered at each split, and averages them: the orange line with hundreds of trees instead of eight. One model, more stable than any one tree, and no knob to tune today (the defaults). What the resampling and the random subsets do, how much averaging buys and what correlation costs: later in the course.</p>
+<p>New slide, before the fix. Gapminder, where 142 points make it visible: eight resamples of the countries (draws with replacement, the same size), a depth-3 tree and a J = 4 spline on each. The trees’ cutoffs jump between resamples and their steps jump with them; the splines barely move. Across the grid the eight trees’ predictions have an average standard deviation of about 1.8 years, the splines’ about 0.8. A tree has high variance; the orange line, the average of the eight trees, is already smoother than any of them. Said, not derived: a random forest grows hundreds of trees, each on a resample of the training rows (these draws with replacement) with a random subset of the inputs offered at each split, and averages them: the orange line with hundreds of trees instead of eight. One model, more stable than any one tree, and no knob to tune today (the defaults). What the resampling and the random subsets do, how much averaging reduces the variance and how correlation between the trees limits that: later in the course.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1825,7 +1825,7 @@ display:block!important;
 <h2>A GLM of GLMs</h2>
 <aside class="notes">
 <p><code>[############--------]</code> 62%  47 of 76 min</p>
-<p>The whole idea on one slide, by analogy with what students know. A GLM (weeks 3 and 4): the inverse link applied to a linear predictor, g<sup>{-1}(x</sup>T beta). Iterate: feed the inputs into M logistic regressions, take their outputs as new inputs, and run a linear regression (or a logistic one, for a label) on those; all the weights are fitted together. The hidden units are a basis like part 3’s, except that the basis is fitted to the data rather than fixed in advance, and each basis function uses all the inputs at once. Iterate again and the network is deep. Symbols: M hidden units, w_k the k-th unit’s weights, g the logit link of week 4. Said, not on the slide: the hidden units are a basis like part 3’s, fitted to the data along with the coefficients, each unit using every input at once.</p>
+<p>By analogy with what students know. A GLM (weeks 3 and 4): the inverse link applied to a linear predictor, g<sup>{-1}(x</sup>T beta). Iterate: feed the inputs into M logistic regressions, take their outputs as new inputs, and run a linear regression (or a logistic one, for a label) on those; all the weights are fitted together. Iterate again and the network is deep. Symbols: M hidden units, w_k the k-th unit’s weights, g the logit link of week 4. Said, not on the slide: the hidden units are a basis like part 3’s, fitted to the data along with the coefficients, each unit using every input at once.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1855,8 +1855,8 @@ display:block!important;
 <p>A GLM whose inputs are <span class="math inline">\(M\)</span> GLMs. Iterate again: a <em>deep</em> network</p>
 </div></div>
 </section>
-<section id="what-to-know-about-networks-today" class="slide level2">
-<h2>What to know about networks today</h2>
+<section id="fitting-and-tuning-a-network" class="slide level2">
+<h2>Fitting and tuning a network</h2>
 <aside class="notes">
 <p><code>[#############-------]</code> 66%  50 of 76 min</p>
 <p>Two things and no more. Fit: every weight at once, by gradient-based optimization on a loss with every feature of week 4’s part 3 (not convex: the hilly road, the saddle); nnet() uses BFGS, a quasi-Newton method, rather than stochastic gradient descent, and linout = TRUE for a numeric outcome. The knob: M, chosen on the selection tracks; depth, and the penalty on the weights, are later knobs. nnet() ships with the base install; the rest of networks comes later in the course and in ST311.</p>
@@ -1925,7 +1925,7 @@ display:block!important;
 <h2>Truth A: sparse linear, tall and then wide</h2>
 <aside class="notes">
 <p><code>[###############-----]</code> 74%  56 of 76 min</p>
-<p>Left, tall: 300 training rows, 100 selection, refit on the 400. Least squares and the lasso sit on the floor (dotted line, the noise variance, the smallest population MSE; a realized test MSE on 2,000 rows can sit a little below it); the additive fit and the two-unit network are close, each with many more parameters to estimate; the forest and the tree pay for a shape they do not need; k-NN in ten dimensions is last. Right, wide: 100 training rows, 50 selection, refit on the 150, p = 200, the same truth. Least squares and the additive fit have no unique fit; the lasso is far ahead of the rest; the forest and the tree next; ridge and k-NN near the mean’s score (about 3.4); the network, M = 16 chosen, over 3,000 weights for 150 rows, fits the training rows exactly and is last, worse than the mean. The hollow points: the forest’s training error is under a fifth of its test error on both panels.</p>
+<p>Left, tall: 300 training rows, 100 selection, refit on the 400. Least squares and the lasso sit on the floor (dotted line, the noise variance, the smallest population MSE; a realized test MSE on 2,000 rows can sit a little below it); the additive fit and the two-unit network are close, each with many more parameters to estimate; the forest and the tree approximate the plane with steps and do worse; k-NN in ten dimensions is last. Right, wide: 100 training rows, 50 selection, refit on the 150, p = 200, the same truth. Least squares and the additive fit have no unique fit; the lasso is far ahead of the rest; the forest and the tree next; ridge and k-NN near the mean’s score (about 3.4); the network, M = 16 chosen, over 3,000 weights for 150 rows, fits the training rows exactly and is last, worse than the mean. The hollow points: the forest’s training error is under a fifth of its test error on both panels.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -2006,7 +2006,7 @@ display:block!important;
 <h2>CTF competition: everyone on Spotify</h2>
 <aside class="notes">
 <p><code>[################----]</code> 82%  62 of 76 min</p>
-<p>The baselines slide asked whether a shape could beat both; this is the answer on the selection tracks, the knobs chosen there. The forest 477 and additive splines 485 (J = 4) lead; the tree (depth 6) 501; the network (M = 8) 513, level with the planes in this run, its fit depending on its random starting weights; the lasso and least squares with genre 515; k-NN 522; least squares without genre 526; the mean 564. Least squares with genre is the fair comparison for the bending fits: same inputs, so the gap is the structure. The bars are each method’s own standard error, not that of a difference, and the knobs were chosen on these same tracks, so the ranking is descriptive; the seminar’s test set, with paired losses, is where differences get a standard error. The hollow points are the training scores: the forest’s is 86, and that is right, not a bug: predict() on the training rows uses the trees that had each row in-bag, grown to leaves of five rows, so the forest nearly reproduces its training rows; its out-of-bag score, the honest in-sample number, is 475. The vault stays shut: the seminar refits on training plus selection and opens it once. What these data have: a nonlinear year effect and loudness, which the plane cannot bend to, and little else the inputs can see.</p>
+<p>The baselines slide asked whether a shape could beat both; this is the answer on the selection tracks, the knobs chosen there. The forest 477 and additive splines 485 (J = 4) lead; the tree (depth 6) 501; the network (M = 8) 513, level with the planes in this run, its fit depending on its random starting weights; the lasso and least squares with genre 515; k-NN 522; least squares without genre 526; the mean 564. Least squares with genre is the fair comparison for the bending fits: same inputs, so the gap is the structure. The bars are each method’s own standard error, not that of a difference, and the knobs were chosen on these same tracks, so the ranking is descriptive; the seminar’s test set, with paired losses, is where differences get a standard error. The hollow points are the training scores: the forest’s is 86, because predict() on the training rows uses the trees that had each row in-bag, grown to leaves of five rows, so the forest nearly reproduces its training rows; its out-of-bag score, each row predicted only by the trees that did not use it, is 475. The vault stays shut: the seminar refits on training plus selection and opens it once. What these data have: a nonlinear year effect and loudness, which the plane cannot bend to, and little else that these inputs explain.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -2033,7 +2033,7 @@ display:block!important;
 <h2>Four dimensions, not one</h2>
 <aside class="notes">
 <p><code>[#################---]</code> 84%  64 of 76 min</p>
-<p>Three minutes. Four questions about the world, not one scale from simple to complex: a truth can be tall and interactive, or wide and smooth. Each family is a bet on an answer; week 4’s no free lunch says the bet is doing the work, and the selection set says which bet paid on these data (Spotify: smooth in year and loudness, roughly additive, so the forest and the splines). k-NN last on truths A and B: ten inputs of which seven are idle, 300 points, week 1’s curse with a price on it; a rate on that price comes later in the course.</p>
+<p>Three minutes. Four questions about the world, not one scale from simple to complex: a truth can be tall and interactive, or wide and smooth. Each family is a bet on an answer; week 4’s no free lunch says any advantage comes from the bet, and the selection set says which bet paid on these data (Spotify: smooth in year and loudness, roughly additive, so the forest and the splines). k-NN last on truths A and B: ten inputs of which seven are idle, 300 points, week 1’s curse, seen in test MSE; a rate for it comes later in the course.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -2068,7 +2068,7 @@ display:block!important;
 <tr class="even">
 <td><strong>sparse or dense</strong></td>
 <td>how many inputs matter</td>
-<td>the lasso bets few; least squares and ridge spread the fit over all; a forest tolerates idle inputs, <span class="math inline">\(k\)</span>-NN pays for them</td>
+<td>the lasso bets few; least squares and ridge spread the fit over all; a forest tolerates idle inputs, <span class="math inline">\(k\)</span>-NN is hurt by them</td>
 </tr>
 <tr class="odd">
 <td><strong>smooth or discontinuous</strong></td>
@@ -2083,13 +2083,13 @@ display:block!important;
 </tbody>
 </table>
 </div>
-<p>Four separate questions, not one scale from simple to complex. A family is a bet on the answers; a selection set says which bet paid</p>
+<p>Four separate questions, not one scale from simple to complex. A family is a bet on the answers. A selection set shows which bet did best on these data</p>
 <div class="retrieval">
 <p>Curse of dimensionality: <span class="math inline">\(k\)</span>-NN last on truths A and B, seven idle inputs. No free lunch theorem: no family won every truth, and none can.</p>
 </div>
 </section>
-<section id="what-the-training-error-hides" class="slide level2" data-minutes="3">
-<h2>What the training error hides</h2>
+<section id="training-error-and-risk" class="slide level2" data-minutes="3">
+<h2>Training error and risk</h2>
 <aside class="notes">
 <p><code>[##################--]</code> 88%  67 of 76 min</p>
 <p>Two minutes for the ask; collect two orderings before the reveal. Why anyone cared: the training error is the only error you can compute without new data. The hollow points sat left of the filled ones on most rows, the forest’s by a factor of about five (seven on the wide panel), and right of them on a few (the network and both planes on truth C; on Spotify the plane without genre and the mean, by 1 or 2); the question is whether the usual direction is a law, and what the exceptions are. Expected answer after the theorem: it is a statement about averages over training sets, and one realization of 300 rows can go either way by a little; the test MSE is itself a noisy number. Week 4’s symbols: a class, the best in it, what the data return.</p>
@@ -2131,7 +2131,7 @@ display:block!important;
 \mathbb E\big[\hat R_n(\hat f)\big] \;\le\; R(f_{\mathcal F}) \;\le\; \mathbb E\big[R(\hat f)\big]
 \]</span></p>
 <div class="leave">
-<p>Training error underestimates the risk: on average it sits below the best risk the class can reach, and the fitted model’s risk above it. A test set estimates <span class="math inline">\(R(\hat f)\)</span>; its average is the right end.</p>
+<p>Training error underestimates the risk: on average it is below the best risk the class can reach, and the fitted model’s risk above it. A test set estimates <span class="math inline">\(R(\hat f)\)</span>; its average is the right end.</p>
 </div>
 <p><strong>Proof</strong>: exercise 1</p>
 </section>
@@ -2156,11 +2156,11 @@ display:block!important;
 <li><p>In the seminar: the Spotify task with every family. Each knob chosen on the selection tracks, then the vault opened once for the leaderboard</p></li>
 </ul>
 </section>
-<section id="conclusion-five-bets-one-task" class="slide level2 inverse">
-<h2>Conclusion: five bets, one task</h2>
+<section id="conclusion" class="slide level2 inverse">
+<h2>Conclusion</h2>
 <aside class="notes">
 <p><code>[####################]</code> 99%  75 of 76 min</p>
-<p>Compress: each family is a bet on the shape of f-star; the selection set says which bet paid; the training error says nothing you can trust, by a theorem. Next: how much flexibility, and how to choose it.</p>
+<p>Compress: each family is a bet on the shape of f-star; the selection set says which bet paid; the training error underestimates the risk on average, by a theorem. Next: how much flexibility, and how to choose it.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;

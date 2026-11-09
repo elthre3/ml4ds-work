@@ -183,7 +183,7 @@ Compress: absolute, maximum, any even power.
 ## Gauss's answer {.inverse}
 
 ::: {.notes}
-Compress: the simplest calculations. The better reason (loss chooses the target) in 15 min.
+Compress: the simplest calculations. The better reason (loss determines the target) in 15 min.
 :::
 
 > of all these principles ours [least squares] is the **most simple**; by the others we shall be led into the most complicated calculations
@@ -379,7 +379,7 @@ $$f^\star = \arg \min_g \mathbb E_{X,Y} \{ [ Y - g(X) ]^2 \}$$
 
 Other examples also fit into this broad framework
 
-For a given **loss function** $\ell(y, \hat y)$ (last week: squared error), find the optimal "regression" function $f^\star$ that minimizes the **risk**, i.e.
+For a given **loss function** $\ell(y, \hat y)$, find the optimal "regression" function $f^\star$ that minimizes the **risk**, i.e.
 
 $$
 R(f) = \mathbb E_{X,Y}\big[\ell(Y, f(X))\big], \qquad f^\star = \arg \min_f R(f)
@@ -414,13 +414,13 @@ $$R(f) = \mathbb E\,\ell(Y, f(X))$$
 **Training error** (empirical risk), the same average over the data we fit on:
 $$\hat R_n(f) = \tfrac{1}{n}\textstyle\sum_{i=1}^n \ell(y_i, f(x_i))$$
 
-**Test error**, last week's leaderboard, over held-out data:
+**Test error**, the number on the leaderboard, over held-out data:
 $$\widehat{\text{Err}} = \tfrac{1}{m}\textstyle\sum_{j=1}^m \ell(y_j^{\text{test}}, \hat f(x_j^{\text{test}}))$$
 
 ## Optimal model theorem {minutes="4"}
 
 ::: {.notes}
-4 min. Statement, leave box, exercise. Do not give the method. Loss chooses the target: median for absolute loss (stated), 0-1 next week.
+4 min. Statement, leave box, exercise. Do not give the method. Loss determines the target: median for absolute loss (stated), 0-1 next week.
 :::
 
 Squared loss, any function of $X$ allowed, not only lines:
@@ -431,10 +431,10 @@ R(f) = R(f^\star) + \mathbb E\big[(f^\star(X) - f(X))^2\big]
 $$
 
 ::: {.leave}
-Squared loss: the target is the conditional mean. Week 1's $f^\star$ is $\mathbb E[Y \mid X]$, and the excess risk of any $f$, any method, is one number.
+Squared loss: the target is the conditional mean. The best function $f^\star$ is $\mathbb E[Y \mid X]$, and the excess risk of any $f$, any method, is one number.
 :::
 
-**Proof**: exercise 1 in the notebook, before the seminar. Corollaries: absolute loss, the conditional median (stated, not proved); zero--one loss, next week.
+**Proof**: exercise 1 in the notebook, before the seminar. Corollaries: absolute loss, the conditional median (stated, not proved); zero--one loss, later in the course.
 
 ## Our focus
 
@@ -657,13 +657,13 @@ Economists were "detrending" time series by hand before regressing one on anothe
 Exactly the same, they proved. Lovell (1963) generalized it to any set of columns
 
 ::: {.leave}
-Why care: it relates multiple regression coefficients to an intuitive univariate regression
+It relates multiple regression coefficients to an intuitive univariate regression
 :::
 
 ## Partialling-out theorem (Frisch--Waugh--Lovell) {minutes="3"}
 
 ::: {.notes}
-Statement, picture, proof. Two facts do the work: normal equations (r orthogonal to columns); projection symmetric + idempotent. Full rank: denominator > 0, else NA. Gram-Schmidt column by column; backfitting, boosting, causal ML reuse it.
+Statement, picture, proof. Proof uses two facts: normal equations (r orthogonal to columns); projection symmetric + idempotent. Full rank: denominator > 0, else NA. Gram-Schmidt column by column; backfitting, boosting, causal ML reuse it.
 :::
 
 $\mathbf X = [\mathbf X_1 \;\; \mathbf x_2]$, full column rank, the intercept column inside $\mathbf X_1$. $\mathbf M_1 = \mathbf I - \mathbf X_1(\mathbf X_1^T\mathbf X_1)^{-1}\mathbf X_1^T$ projects onto the orthogonal complement of $\mathrm{col}(\mathbf X_1)$, so $\tilde{\mathbf x}_2 = \mathbf M_1 \mathbf x_2$ is the residual of $\mathbf x_2$ after regressing it on $\mathbf X_1$. The coefficient on $\mathbf x_2$ in the regression of $\mathbf y$ on $\mathbf X$ is
@@ -673,7 +673,7 @@ $$
 (and the same number comes from regressing $\mathbf M_1 \mathbf y$ on $\tilde{\mathbf x}_2$: residual on residual).
 
 ::: {.leave}
-The coefficient on $x_2$ is the slope of $y$ on *what is left of $x_2$ after $\mathbf X_1$ has explained what it can*. Fitting to residuals: additive models, boosting and causal ML share the mechanism, not a guarantee.
+The coefficient on $x_2$ is the slope of $y$ on *what is left of $x_2$ after $\mathbf X_1$ has explained what it can*. Additive models, boosting and causal ML also fit to residuals, without the theorem's guarantee.
 :::
 
 ## Visualizing orthogonal subspaces
@@ -740,7 +740,7 @@ g <- ggplot() +
 g
 ```
 
-Project everything onto the orthogonal complement of $\mathrm{col}(\mathbf X_1)$, the grey plane. There, regress $\tilde{\mathbf y}$ on $\tilde{\mathbf x}_2$ through the origin: the slope is $\hat\beta_2$ and $\mathbf r$ is the full regression's residual
+Project everything onto the orthogonal complement of $\mathrm{col}(\mathbf X_1)$, the gray plane. There, regress $\tilde{\mathbf y}$ on $\tilde{\mathbf x}_2$ through the origin: the slope is $\hat\beta_2$ and $\mathbf r$ is the full regression's residual
 
 ## Partialling-out theorem, lines 1--2 {minutes="3"}
 
@@ -819,7 +819,7 @@ $$
 Say it twice: exercises are what the seminar varies; teachers give one hint. Standing expectation.
 :::
 
-- This week: exercises 1 to 3 at the top of the notebook. The proof of the optimal model theorem; omitted-variable bias: what the normal equations say when a relevant column is left out; and today's partialling-out proof again, with the slides closed
+- This week: exercises 1 to 3 at the top of the notebook. The proof of the optimal model theorem; omitted-variable bias (what the normal equations say when a relevant column is left out); and today's partialling-out proof again, with the slides closed
 
 - Every week: the notebook opens with a "Before the seminar" section. Do it before you arrive; the seminar's problems start from it
 

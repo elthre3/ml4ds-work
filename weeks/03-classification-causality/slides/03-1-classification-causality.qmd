@@ -98,14 +98,14 @@ In the notebook: threshold proof (ex. 1), confounding gap (ex. 2), adjustment pr
 
 ### Part 1: classification, logistic regression, and asymmetric costs
 
-## Where week 2 left the target {minutes="3"}
+## Where the optimal model theorem left the target {minutes="3"}
 
 ::: {.notes}
 Two minutes, written, then two people. Expected: a probability; a line leaves [0, 1]. Do not say "probability" first.
 :::
 
 ::: {.retrieval}
-Week 2, the optimal model theorem: under squared loss the best predictor of $Y$ from $X$ is the conditional mean, $f^\star(x) = \mathbb E[Y \mid X = x]$, and any other $f$ pays $\mathbb E[(f^\star(X) - f(X))^2]$ on top of it.
+The optimal model theorem: under squared loss the best predictor of $Y$ from $X$ is the conditional mean, $f^\star(x) = \mathbb E[Y \mid X = x]$, and any other $f$ pays $\mathbb E[(f^\star(X) - f(X))^2]$ on top of it.
 :::
 
 Today the outcome is a label: $Y \in \{0, 1\}$.
@@ -315,7 +315,7 @@ broom::tidy(model_fit, exponentiate = TRUE) |> select(term, estimate)
 How glm finds the MLE (likelihood, score equations) is week 4's opener.
 :::
 
-- Fitted by maximum likelihood; how `glm` does it: next week
+- Fitted by maximum likelihood; how `glm` does it: later in the course
 
 - MLEs $\to$ asymptotic normality for intervals/tests (fixed $p$, regularity conditions)
 
@@ -353,7 +353,7 @@ With Gaussian inputs: biased MLE and wrong variance/asymp. dist. if $n/p \to \te
 ## Two kinds of mistake
 
 ::: {.notes}
-All on the training points: apparent performance; week 5 says what that flatters. The accuracy line is about baselines.
+All on the training points: training error underestimates the risk (week 5). The accuracy line is about baselines.
 :::
 
 ```{r}
@@ -424,7 +424,7 @@ The **receiver operating characteristic**: one point per threshold $c$, from $c 
 
 Lower $c$: catch more of the 1s, raise more false alarms
 
-**AUC**, the area under it: the probability that a random 1 scores above a random 0 (a tie counts half), a ranking quality that never asks where $c$ is
+**AUC**, the area under it: the probability that a random 1 scores above a random 0 (a tie counts half), a ranking quality that does not depend on $c$
 
 Named for radar receivers in the 1940s. It does not answer the operator's question: *which* point?
 :::
@@ -468,7 +468,7 @@ A miss costs ten times a false alarm and the model says $\hat p = 0.3$. Predict 
 ## Optimal threshold theorem
 
 ::: {.notes}
-2 min. Ten to one: 1/11, about 0.09, so p-hat = 0.3 is "predict 1". The threshold was never a statistical question.
+2 min. Ten to one: 1/11, about 0.09, so p-hat = 0.3 is "predict 1". The threshold comes from the costs.
 :::
 
 **Optimal threshold theorem.** Let $p(x) = P(Y = 1 \mid X = x)$, and let a false positive cost $c_{FP}$ and a false negative $c_{FN}$, both $\ge 0$ and not both $0$. The rule that minimizes expected cost at $x$ predicts $1$ exactly when
@@ -513,7 +513,7 @@ Collect two or three answers. Today: why the model's answer can be wrong, and wh
 :::
 
 ::: {.retrieval}
-Week 1, concepts that keep coming back: prediction $\neq$ explanation $\neq$ intervention.
+Concepts that keep coming back: prediction $\neq$ explanation $\neq$ intervention.
 :::
 
 ::: {.ask}
@@ -641,7 +641,7 @@ i.e. "**ceteris paribus**" or "other things equal" (unchanged)
 
 "holding all other predictors constant" is (almost) never applicable in the real world, i.e. ceteris is (almost) never paribus
 
-Reasons we'll highlight: **causality** (today) and **nonlinearity** (the additive-models week)
+Reasons we'll highlight: **causality** (today) and **nonlinearity** (later in the course)
 
 ## Interpreting causality
 
@@ -908,7 +908,7 @@ $$
 $$
 
 ::: {.retrieval}
-Week 2, omitted-variable bias, inputs fixed: regressing on $\mathbf x_1$ alone gives $\mathbb E\hat\beta_{\text{short}} = \beta_1 + \beta_2\hat\delta$, with $\hat\delta$ the slope of $\mathbf x_2$ on $\mathbf x_1$.
+Omitted-variable bias, inputs fixed: regressing on $\mathbf x_1$ alone gives $\mathbb E\hat\beta_{\text{short}} = \beta_1 + \beta_2\hat\delta$, with $\hat\delta$ the slope of $\mathbf x_2$ on $\mathbf x_1$.
 :::
 
 ::: {.leave}
@@ -982,7 +982,7 @@ $$
 $$
 
 ::: {.leave}
-Weight each treated unit by $1/\pi(Z)$: it stands in for $1/\pi(Z)$ units with the same $Z$. The adjustment theorem needs a regression model for $Y$. This one needs a regression model for $T$, and logistic regression gives one.
+Weight each treated unit by $1/\pi(Z)$: it stands in for $1/\pi(Z)$ units with the same $Z$. In practice, the adjustment theorem needs a regression model for $Y$. This one needs a regression model for $T$, and logistic regression gives one.
 :::
 
 ## Inverse propensity weighting theorem, proof (1 of 2) {minutes="3"}

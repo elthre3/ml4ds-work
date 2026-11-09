@@ -67,7 +67,7 @@ Given $X = x$, $Y$ is $1$ with probability $p(x)$. If you predict $1$, when is t
 :::
 
 ::: {.callout-note collapse="true" title="Hint 3"}
-(c) Condition on $X$ first (the tower property), as in week 2's exercise 1. What do you know about the inner expectation, at every $x$?
+(c) Condition on $X$ first (the tower property), as in the proof of the optimal model theorem. What do you know about the inner expectation, at every $x$?
 :::
 
 ::: {.callout-tip .answer collapse="true" title="Reveal solution"}
@@ -86,7 +86,7 @@ dividing by $c_{FP} + c_{FN} > 0$. At $p(x) = c^\star$ the two expected costs ar
 $$
 \mathbb E\big[\text{cost}(\delta(X), Y)\big] = \mathbb E_X\Big[\,\mathbb E\big[\text{cost}(\delta(X), Y) \mid X\big]\Big].
 $$
-At $X = x$ the inner expectation is the expected cost of the prediction $\delta(x)$ from (a), and by (b) it is at least the expected cost of $\delta^\star(x)$. An inequality that holds at every $x$ survives averaging over $X$. $\blacksquare$ This is week 2's step: minimize the expected loss at each $x$, then average.
+At $X = x$ the inner expectation is the expected cost of the prediction $\delta(x)$ from (a), and by (b) it is at least the expected cost of $\delta^\star(x)$. An inequality that holds at every $x$ survives averaging over $X$. $\blacksquare$ This is the step from the proof of the optimal model theorem: minimize the expected loss at each $x$, then average.
 
 (d) $c^\star = \tfrac12$: predict the more probable class, the **Bayes classifier**. The probability of a wrong label at $x$ is $1 - p(x)$ if you predict $1$ and $p(x)$ if you predict $0$, so under $\delta^\star$ it is $\min(p(x), 1 - p(x))$. Equal costs make the expected cost a multiple of the probability of error, so by (c) no rule has a smaller overall probability of error.
 
@@ -106,7 +106,7 @@ $$
 $$
 Where did you use independence?
 
-(c) Show that the population slope of the least-squares line of $Y$ on $T$ alone, $\mathrm{Cov}(T, Y)/\mathrm{Var}(T)$, is $\tau + \beta\,\delta$ with $\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T)$. Which quantity in week 2's omitted-variable bias plays the role of $\delta$?
+(c) Show that the population slope of the least-squares line of $Y$ on $T$ alone, $\mathrm{Cov}(T, Y)/\mathrm{Var}(T)$, is $\tau + \beta\,\delta$ with $\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T)$. Which quantity in the omitted-variable bias formula plays the role of $\delta$?
 
 (d) When is the gap zero?
 
@@ -176,7 +176,7 @@ Hint 4: $Z$ is upstream of $T$, so the intervention does not change it, and its 
 $$
 \mathbb E[Y \mid do(T = t)] = \mathbb E_Z\big[m_t(Z)\big] = \mathbb E_Z\Big[\,\mathbb E[Y \mid T = t, Z]\,\Big]. \qquad \blacksquare
 $$
-Where each assumption is used: the independence of the noises in the observed-world step (a common cause of $T$ and $Y$ left out of $Z$ would sit in both $\varepsilon_T$ and $\varepsilon_Y$, making them dependent); $Z$ not a consequence of $T$ in the intervened-world step (a $Z$ downstream of $T$ would change when $T$ is set, and its distribution would differ between the worlds); $P(T = t \mid Z) > 0$ with probability one, so that for the values $z$ the average runs over there are units with $T = t$ and $Z = z$ to average (if a set of $z$ with positive probability had none, the right-hand side would not be defined there). For a continuous $T$, the note under the exercise replaces this step. If $Z$ is empty, $T = h(\varepsilon_T)$ is independent of $\varepsilon_Y$ and the same lines give $\mathbb E[Y \mid do(T = t)] = \mathbb E[Y \mid T = t]$: randomization.
+Where each assumption is used: the independence of the noises in the observed-world step (a common cause of $T$ and $Y$ left out of $Z$ would be part of both $\varepsilon_T$ and $\varepsilon_Y$, making them dependent); $Z$ not a consequence of $T$ in the intervened-world step (a $Z$ downstream of $T$ would change when $T$ is set, and its distribution would differ between the worlds); $P(T = t \mid Z) > 0$ with probability one, so that for the values $z$ the average runs over there are units with $T = t$ and $Z = z$ to average (if a set of $z$ with positive probability had none, the right-hand side would not be defined there). For a continuous $T$, the note under the exercise replaces this step. If $Z$ is empty, $T = h(\varepsilon_T)$ is independent of $\varepsilon_Y$ and the same lines give $\mathbb E[Y \mid do(T = t)] = \mathbb E[Y \mid T = t]$: randomization.
 
 Common errors: letting $Z$ respond to the intervention; asserting $\mathbb E[Y \mid T = t, Z = z] = m_t(z)$ without the independence of $\varepsilon_Y$ from $(T, Z)$; reading the theorem as "regress $Y$ on $T$ and $Z$ and take the coefficient", which is one way to estimate the inside when the conditional mean is linear, not what the theorem says.
 :::
@@ -220,7 +220,7 @@ $$
 $$
 (a) Under $do(T = 1)$, $Y = g(1, Z, \varepsilon_Y)$, with $(Z, \varepsilon_Y)$ distributed as before. (b) $\pi(Z)/\pi(Z) = 1$ because $\pi(Z) > 0$. (c) $T = h(Z, \varepsilon_T)$ and $\varepsilon_T$ is independent of $(Z, \varepsilon_Y)$, so by the second fact $\mathbb E[T \mid Z = z, \varepsilon_Y = e] = P\big(h(z, \varepsilon_T) = 1\big)$; the same fact with $Z$ alone gives $\pi(z) = P\big(h(z, \varepsilon_T) = 1\big)$. (d) $g(1, Z, \varepsilon_Y)/\pi(Z)$ is fixed once $(Z, \varepsilon_Y)$ is given: taking out what is known, in reverse. (e) The tower property. (f) If $T = 0$, both $T\,g(1, Z, \varepsilon_Y)$ and $T\,Y$ are $0$; if $T = 1$, $Y = g(1, Z, \varepsilon_Y)$. The last line is the same average, written over the observed $(T, Z, Y)$, which are functions of $(Z, \varepsilon_T, \varepsilon_Y)$. $\blacksquare$
 
-Where each assumption is used: the independence of $\varepsilon_T$ from $(Z, \varepsilon_Y)$ in (c) (a common cause of $T$ and $Y$ left out of $Z$ would sit in both noises, and then $\varepsilon_Y$ would carry information about $T$ beyond $Z$); $\pi(Z) > 0$ in (b); $Z$ not a consequence of $T$ in (a) (a $Z$ downstream of $T$ would change when $T$ is set).
+Where each assumption is used: the independence of $\varepsilon_T$ from $(Z, \varepsilon_Y)$ in (c) (a common cause of $T$ and $Y$ left out of $Z$ would be part of both noises, and then $\varepsilon_Y$ would carry information about $T$ beyond $Z$); $\pi(Z) > 0$ in (b); $Z$ not a consequence of $T$ in (a) (a $Z$ downstream of $T$ would change when $T$ is set).
 
 (b) The same steps with $1 - T$ and $1 - \pi(Z)$: in (b), multiply and divide by $1 - \pi(Z)$, which needs $\pi(Z) < 1$; in (c), $\mathbb E_{\varepsilon_T}[1 - T \mid Z, \varepsilon_Y] = 1 - \pi(Z)$; in (f), $(1 - T)\,g(0, Z, \varepsilon_Y) = (1 - T)\,Y$.
 
@@ -286,7 +286,7 @@ Common errors: swapping the costs (threshold $5/6$); "the model predicts Chinstr
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
 (a) Under $do(T = t)$, $Y = t + 2Z + \varepsilon_Y$, so $\mathbb E[Y \mid do(T = t)] = t$ and raising $t$ by one raises it by $1$.
 
-(b) $\mathrm{Var}(T) = 1 + 1 = 2$. $\mathrm{Cov}(T, Y) = \mathrm{Var}(T) + 2\,\mathrm{Cov}(T, Z) + \mathrm{Cov}(T, \varepsilon_Y) = 2 + 2 + 0 = 4$. Slope $4/2 = 2 = 1 + 2 \cdot \tfrac12$: the effect $\tau = 1$ plus the gap $\beta\delta = 2 \cdot \tfrac12$, with $\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T) = \tfrac12$. The naive slope credits $T$ with what $Z$ contributes through selection, and here the gap is as large as the effect.
+(b) $\mathrm{Var}(T) = 1 + 1 = 2$. $\mathrm{Cov}(T, Y) = \mathrm{Var}(T) + 2\,\mathrm{Cov}(T, Z) + \mathrm{Cov}(T, \varepsilon_Y) = 2 + 2 + 0 = 4$. Slope $4/2 = 2 = 1 + 2 \cdot \tfrac12$: the effect $\tau = 1$ plus the gap $\beta\delta = 2 \cdot \tfrac12$, with $\delta = \mathrm{Cov}(Z, T)/\mathrm{Var}(T) = \tfrac12$. The naive slope includes what $Z$ contributes through selection, and here the gap is as large as the effect.
 
 (c) The adjustment theorem. $\mathbb E[Y \mid T = t, Z = z] = t + 2z + \mathbb E[\varepsilon_Y \mid T = t, Z = z] = t + 2z$, because $\varepsilon_Y$ is independent of $(Z, \varepsilon_T)$ and so of $(T, Z)$. Averaging over $Z$: $\mathbb E_Z[t + 2Z] = t$, which is (a). The independence is what made $\mathbb E[\varepsilon_Y \mid T = t, Z = z]$ zero. Normality is what makes this work at every $t$: given $Z$, $T$ has a positive density everywhere, so the adjustment theorem's condition holds.
 
@@ -322,7 +322,7 @@ $$
 $$
 which are $\mathbb E[Y \mid do(T = 1)]$ and $\mathbb E[Y \mid do(T = 0)]$ from (a). Difference $2$.
 
-(d) The treated units with $Z = 0$ and the untreated units with $Z = 1$: the units whose treatment was unlikely given their $Z$. Each stands in for the many units like it that went the other way. With $\pi(0) = 0.01$, about one in a hundred units with $Z = 0$ is treated, and each gets weight $100$. The condition $\pi(Z) > 0$ still holds, but in a sample of a few hundred units one or two treated units with $Z = 0$ would carry the estimate for half the population, so it would be unstable.
+(d) The treated units with $Z = 0$ and the untreated units with $Z = 1$: the units whose treatment was unlikely given their $Z$. Each stands in for the many units like it that went the other way. With $\pi(0) = 0.01$, about one in a hundred units with $Z = 0$ is treated, and each gets weight $100$. The condition $\pi(Z) > 0$ still holds, but in a sample of a few hundred units one or two treated units with $Z = 0$ would determine the estimate for half the population, so it would be unstable.
 
 Common errors: weighting by $\pi(Z)$ instead of $1/\pi(Z)$; weighting the untreated by $1/\pi(Z)$ instead of $1/(1 - \pi(Z))$; dividing by the 50 treated units instead of all 100.
 :::
@@ -386,7 +386,7 @@ stopifnot(inherits(fit_bill, "glm"), length(coef(fit_bill)) == 3,
           all(fitted(fit_bill) >= 0 & fitted(fit_bill) <= 1))
 ```
 
-You may have seen a warning that fitted probabilities are numerically 0 or 1: the two species are nearly separable on these two measurements (step 3 counts the errors). This is the lecture's "Challenges" slide in real life; next week says what it does to the fitting.
+You may have seen a warning that fitted probabilities are numerically 0 or 1: the two species are nearly separable on these two measurements (step 3 counts the errors). This is the lecture's "Challenges" slide in real life; what it does to the fitting comes later in the course.
 
 **Question 1.** Read the exponentiated coefficient on `bill_length_mm`. What happens to the odds of Chinstrap when bill length increases by one millimeter and bill depth is held fixed? Is that the change in the probability? Is it what would happen to a bird whose bill grew by a millimeter?
 
@@ -520,7 +520,7 @@ stopifnot(nrow(costs) == length(grid), all(costs$cost >= 0))
 **Question 3.** The cost-minimizing threshold is well below $\tfrac12$, and the classifier now raises many false alarms. Who decided that, and in what sense is this classifier "better" than the one at $\tfrac12$? Is the number you found the population optimum?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-The survey did, by choosing costs 5 and 1; the model contributed only $\hat p$. On these 219 birds it has a lower cost per bird under those costs, and a lower accuracy: "better" has no meaning until a loss is chosen. The formula gives the population optimum for the true $p(x)$; the curve is an empirical cost on the birds the model was fitted to, with $\hat p$ plugged in, and its minimum is flat (several thresholds near $1/6$ tie). So the agreement is between an estimate and the formula, not a proof that the formula is right for new birds. That evaluating on the training rows flatters the model is the validation week's subject.
+The survey did, by choosing costs 5 and 1; the model contributed only $\hat p$. On these 219 birds it has a lower cost per bird under those costs, and a lower accuracy: "better" has no meaning until a loss is chosen. The formula gives the population optimum for the true $p(x)$; the curve is an empirical cost on the birds the model was fitted to, with $\hat p$ plugged in, and its minimum is flat (several thresholds near $1/6$ tie). So the agreement is between an estimate and the formula, not a proof that the formula is right for new birds. That the cost on the training rows underestimates the risk on average comes up later in the course.
 :::
 
 #### Optional, can be done at home: the same with `yardstick`
@@ -612,7 +612,7 @@ worlds |>
 A: the average rises by $2$ ($Y$'s equation has $2X$). B: no change; $Y$ depends on $U$ and its own noise only. C: no change; $Y$ is upstream of $X$. D: the average falls by $3$, the coefficient on $X$ in $Y$'s equation, while the slope in step 1 is about $-3.8$: $\mathrm{Cov}(X, Y)/\mathrm{Var}(X) = (2 \cdot (-2) - 3 \cdot 5)/5 = -19/5$, the effect $-3$ plus the confounding gap $2 \cdot (-2/5)$.
 :::
 
-**Step 2.** Now intervene: set $X$ to $X + 1$ for every unit and recompute $Y$ **with the same noise**, following each world's equations. Write the four `Y_do` lines and compute the average change in $Y$ in each world.
+**Step 2.** Now intervene: set $X$ to $X + 1$ for every unit and recompute $Y$ *with the same noise*, following each world's equations. Write the four `Y_do` lines and compute the average change in $Y$ in each world.
 
 Note: recomputing each unit's $Y$ with its own noise is different from the intervention calculations in the lecture, which use only the distribution of the noise. We will learn more about it later in the course. Here it makes the average change exact, with no simulation noise.
 
@@ -688,7 +688,7 @@ mean(predict(fit_d, newdata = mutate(d, X = X + 1))) - mean(predict(fit_d, newda
 **Question 5.** Compare the coefficient on `X` with the averaged difference, and both with the effect you found in step 2. Which result says the coefficient estimates the effect, which says the averaged difference does, and what about world D made both work? What would go wrong in world B, where the confounder `e_u` is in the table but would not be observed in practice?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-The two numbers are equal, and both are near $-3$. The coefficient: the partialling-out theorem (week 2) says the coefficient on `X` in the long regression is the slope of `Y` on what is left of `X` after `Z`; in world D what is left is `e_x`, which is independent of everything else in `Y`, so the population value is $-3$ and the sample coefficient estimates it. The averaged difference: the adjustment theorem, $\mathbb E[Y \mid do(X = x)] = \mathbb E_Z[\mathbb E[Y \mid X = x, Z]]$, with the regression as the estimate of the inside. (Step 3 shifts each unit's own `X` rather than setting every unit to one value $x$; in world D the two agree because the effect is the same at every $x$.) The two numbers coincide exactly because the fitted model is linear in `X`, so every unit's difference is the coefficient. Both work because `Z` holds the only common cause of `X` and `Y`, is not a consequence of `X`, and the noises are independent. In world B the common cause is `U`, which you would not have: regress `Y` on `X` alone and you get the slope of about $2$ from step 1, while the effect is $0$. With `e_u` in the regression the coefficient on `X` is about $0$: the theorem working, on a variable you have only because you simulated the world.
+The two numbers are equal, and both are near $-3$. The coefficient: the partialling-out theorem says the coefficient on `X` in the long regression is the slope of `Y` on what is left of `X` after `Z`; in world D what is left is `e_x`, which is independent of everything else in `Y`, so the population value is $-3$ and the sample coefficient estimates it. The averaged difference: the adjustment theorem, $\mathbb E[Y \mid do(X = x)] = \mathbb E_Z[\mathbb E[Y \mid X = x, Z]]$, with the regression as the estimate of the inside. (Step 3 shifts each unit's own `X` rather than setting every unit to one value $x$; in world D the two agree because the effect is the same at every $x$.) The two numbers coincide exactly because the fitted model is linear in `X`, so every unit's difference is the coefficient. Both work because `Z` holds the only common cause of `X` and `Y`, is not a consequence of `X`, and the noises are independent. In world B the common cause is `U`, which you would not have: regress `Y` on `X` alone and you get the slope of about $2$ from step 1, while the effect is $0$. With `e_u` in the regression the coefficient on `X` is about $0$: the theorem working, on a variable you have only because you simulated the world.
 :::
 
 **Step 4.** World E: the same DAG, with a binary treatment. Each unit is treated (`X = 1`) with probability $\pi(Z)$, where $\pi(z) = 1/(1 + e^{-(-0.5 + 1.5 z)})$, and $Y = 1 + 2X + 3Z + \varepsilon_Y$. Compute three estimates of the effect of treatment: the naive difference in means between treated and untreated, the inverse propensity weighting estimate, and regression adjustment. Then look at the five units with the largest weights.
@@ -736,7 +736,7 @@ c(treated = sum(d_e$w[d_e$X == 1]), untreated = sum(d_e$w[d_e$X == 0])) / nrow(d
 **Question 6.** What is the effect of treatment in world E, which of the three estimates are near it, and which result explains each one? Which units have the largest weights, and what is unusual about them? If the unit with the largest weight had not been in the sample, and the other weights stayed as they are, by how much would the weighting estimate move?
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-The effect is $2$: $Y$'s equation has $2X$, and nothing else in it depends on $X$. The naive difference is about $5.2$: the treated have higher $Z$, and the confounding gap is $3\,(\mathbb E[Z \mid X = 1] - \mathbb E[Z \mid X = 0]) \approx 3 \cdot 1.07$. The weighting estimate is centered on $2$ by the inverse propensity weighting theorem, with $\hat\pi$ in place of $\pi$; the logistic model for $\pi$ is the right one here, because `X` was generated from a logistic function of `Z`. The regression coefficient is near $2$ by the adjustment theorem (or the partialling-out theorem), because $\mathbb E[Y \mid X, Z]$ is linear in `X` and `Z`. Weighting needs a correct regression model for the treatment; regression adjustment needs a correct regression model for the outcome; both need `Z` to hold the common causes. Of the three, the weighting estimate varies most from run to run: in about one run in ten it falls outside $1.7$ to $2.3$, so compare yours with your neighbors'.
+The effect is $2$: $Y$'s equation has $2X$, and nothing else in it depends on $X$. The naive difference is about $5.2$: the treated have higher $Z$, and the confounding gap is $3\,(\mathbb E[Z \mid X = 1] - \mathbb E[Z \mid X = 0]) \approx 3 \cdot 1.07$. The weighting estimate is near $2$. The inverse propensity weighting theorem gives exactly $2$ in expectation with the true $\pi$; with $\hat\pi$ in its place the estimate is consistent, because the logistic model for $\pi$ is the right one here: `X` was generated from a logistic function of `Z`. The regression coefficient is near $2$ by the adjustment theorem (or the partialling-out theorem), because $\mathbb E[Y \mid X, Z]$ is linear in `X` and `Z`. Weighting needs a correct regression model for the treatment; regression adjustment needs a correct regression model for the outcome; both need `Z` to hold the common causes. Of the three, the weighting estimate varies most from run to run: in about one run in ten it falls outside $1.7$ to $2.3$, so compare yours with your neighbors'.
 
 The largest weights belong to treated units with low `Z` or untreated units with high `Z`: units whose treatment was unlikely given their `Z`. Their $\hat\pi$ (or $1 - \hat\pi$) is a few percent, so each stands in for tens of units. The largest weight is usually between about 15 and 100, and it changes a lot from run to run. With the other weights held fixed (not refitting $\hat\pi$), write the estimate as an average, $\hat\tau = \frac1n \sum_i s_i$ with $s_i = (2X_i - 1)\, w_i Y_i$: a treated unit adds $w_i Y_i$, an untreated one subtracts it. Leaving unit $i$ out gives $(n\hat\tau - s_i)/(n - 1)$, so the estimate moves by $(\hat\tau - s_i)/(n - 1)$, in either arm. For the unit with the largest weight in your sample:
 
@@ -749,7 +749,7 @@ c(estimate = mean(s), largest_weight = d_e$w[i], change_if_left_out = (mean(s) -
 
 ### Optional, can be done at home: another dataset
 
-**Attrition** (`modeldata::attrition`; **fictional**, made up by IBM data scientists, used only as an exercise): whether an employee leaves (`Attrition`), with a threshold-and-costs story (a missed leaver costs a replacement, a false alarm costs a conversation). Leavers are 16 percent, so the accuracy-against-cost point is sharper: at threshold $\tfrac12$ almost nobody is predicted to leave.
+**Attrition** (`modeldata::attrition`; *fictional*, made up by IBM data scientists, used only as an exercise): whether an employee leaves (`Attrition`), with a threshold-and-costs story (a missed leaver costs a replacement, a false alarm costs a conversation). Leavers are 16 percent, so accuracy and cost disagree more: at threshold $\tfrac12$ almost nobody is predicted to leave.
 
 ```{r}
 #| eval: false

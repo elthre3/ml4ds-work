@@ -1,6 +1,6 @@
 ## Week 2: linear regression
 
-Regression as the first fitted model rather than a review: least squares and the hat matrix, and the conditional mean as the target that every regression method is aiming at (the optimal model theorem). Multiple regression and what a coefficient holds fixed: the partialling-out theorem, proved in the lecture and reused in weeks 8 and 10, and omitted-variable bias, what the same algebra says when a relevant column is left out.
+Regression as the first fitted model rather than a review: least squares and the hat matrix, and the conditional mean as the target that every regression method is aiming at (the optimal model theorem). Multiple regression and what a coefficient holds fixed: the partialling-out theorem, proved in the lecture and reused later in the course, and omitted-variable bias, what the same algebra says when a relevant column is left out.
 
 **Reading**
 

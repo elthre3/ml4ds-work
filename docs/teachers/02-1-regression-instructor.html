@@ -1213,7 +1213,7 @@ display:block!important;
 <h2>Gauss’s answer</h2>
 <aside class="notes">
 <p><code>[##------------------]</code> 11%  8 of 72 min</p>
-<p>Compress: the simplest calculations. The better reason (loss chooses the target) in 15 min.</p>
+<p>Compress: the simplest calculations. The better reason (loss determines the target) in 15 min.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1517,7 +1517,7 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 <p>Other examples also fit into this broad framework</p>
-<p>For a given <strong>loss function</strong> <span class="math inline">\(\ell(y, \hat y)\)</span> (last week: squared error), find the optimal “regression” function <span class="math inline">\(f^\star\)</span> that minimizes the <strong>risk</strong>, i.e.</p>
+<p>For a given <strong>loss function</strong> <span class="math inline">\(\ell(y, \hat y)\)</span>, find the optimal “regression” function <span class="math inline">\(f^\star\)</span> that minimizes the <strong>risk</strong>, i.e.</p>
 <p><span class="math display">\[
 R(f) = \mathbb E_{X,Y}\big[\ell(Y, f(X))\big], \qquad f^\star = \arg \min_f R(f)
 \]</span></p>
@@ -1554,13 +1554,13 @@ display:block!important;
 }</style></aside>
 <p><strong>Population risk</strong> of a predictor <span class="math inline">\(f\)</span>, an expectation over new data, the thing we want small: <span class="math display">\[R(f) = \mathbb E\,\ell(Y, f(X))\]</span></p>
 <p><strong>Training error</strong> (empirical risk), the same average over the data we fit on: <span class="math display">\[\hat R_n(f) = \tfrac{1}{n}\textstyle\sum_{i=1}^n \ell(y_i, f(x_i))\]</span></p>
-<p><strong>Test error</strong>, last week’s leaderboard, over held-out data: <span class="math display">\[\widehat{\text{Err}} = \tfrac{1}{m}\textstyle\sum_{j=1}^m \ell(y_j^{\text{test}}, \hat f(x_j^{\text{test}}))\]</span></p>
+<p><strong>Test error</strong>, the number on the leaderboard, over held-out data: <span class="math display">\[\widehat{\text{Err}} = \tfrac{1}{m}\textstyle\sum_{j=1}^m \ell(y_j^{\text{test}}, \hat f(x_j^{\text{test}}))\]</span></p>
 </section>
 <section id="optimal-model-theorem" class="slide level2" data-minutes="4">
 <h2>Optimal model theorem</h2>
 <aside class="notes">
 <p><code>[########------------]</code> 39%  28 of 72 min</p>
-<p>4 min. Statement, leave box, exercise. Do not give the method. Loss chooses the target: median for absolute loss (stated), 0-1 next week.</p>
+<p>4 min. Statement, leave box, exercise. Do not give the method. Loss determines the target: median for absolute loss (stated), 0-1 next week.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1577,9 +1577,9 @@ display:block!important;
 R(f) = R(f^\star) + \mathbb E\big[(f^\star(X) - f(X))^2\big]
 \]</span></p>
 <div class="leave">
-<p>Squared loss: the target is the conditional mean. Week 1’s <span class="math inline">\(f^\star\)</span> is <span class="math inline">\(\mathbb E[Y \mid X]\)</span>, and the excess risk of any <span class="math inline">\(f\)</span>, any method, is one number.</p>
+<p>Squared loss: the target is the conditional mean. The best function <span class="math inline">\(f^\star\)</span> is <span class="math inline">\(\mathbb E[Y \mid X]\)</span>, and the excess risk of any <span class="math inline">\(f\)</span>, any method, is one number.</p>
 </div>
-<p><strong>Proof</strong>: exercise 1 in the notebook, before the seminar. Corollaries: absolute loss, the conditional median (stated, not proved); zero–one loss, next week.</p>
+<p><strong>Proof</strong>: exercise 1 in the notebook, before the seminar. Corollaries: absolute loss, the conditional median (stated, not proved); zero–one loss, later in the course.</p>
 </section>
 <section id="our-focus" class="slide level2">
 <h2>Our focus</h2>
@@ -1947,14 +1947,14 @@ display:block!important;
 <p>Economists were “detrending” time series by hand before regressing one on another. Frisch and Waugh asked: is that the same as putting time in as a regressor?</p>
 <p>Exactly the same, they proved. Lovell (1963) generalized it to any set of columns</p>
 <div class="leave">
-<p>Why care: it relates multiple regression coefficients to an intuitive univariate regression</p>
+<p>It relates multiple regression coefficients to an intuitive univariate regression</p>
 </div>
 </section>
 <section id="partialling-out-theorem-frischwaughlovell" class="slide level2" data-minutes="3">
 <h2>Partialling-out theorem (Frisch–Waugh–Lovell)</h2>
 <aside class="notes">
 <p><code>[###############-----]</code> 76%  55 of 72 min</p>
-<p>Statement, picture, proof. Two facts do the work: normal equations (r orthogonal to columns); projection symmetric + idempotent. Full rank: denominator &gt; 0, else NA. Gram-Schmidt column by column; backfitting, boosting, causal ML reuse it.</p>
+<p>Statement, picture, proof. Proof uses two facts: normal equations (r orthogonal to columns); projection symmetric + idempotent. Full rank: denominator &gt; 0, else NA. Gram-Schmidt column by column; backfitting, boosting, causal ML reuse it.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1970,7 +1970,7 @@ display:block!important;
 \hat\beta_2 = \frac{\tilde{\mathbf x}_2^T \mathbf y}{\tilde{\mathbf x}_2^T \tilde{\mathbf x}_2}
 \]</span> (and the same number comes from regressing <span class="math inline">\(\mathbf M_1 \mathbf y\)</span> on <span class="math inline">\(\tilde{\mathbf x}_2\)</span>: residual on residual).</p>
 <div class="leave">
-<p>The coefficient on <span class="math inline">\(x_2\)</span> is the slope of <span class="math inline">\(y\)</span> on <em>what is left of <span class="math inline">\(x_2\)</span> after <span class="math inline">\(\mathbf X_1\)</span> has explained what it can</em>. Fitting to residuals: additive models, boosting and causal ML share the mechanism, not a guarantee.</p>
+<p>The coefficient on <span class="math inline">\(x_2\)</span> is the slope of <span class="math inline">\(y\)</span> on <em>what is left of <span class="math inline">\(x_2\)</span> after <span class="math inline">\(\mathbf X_1\)</span> has explained what it can</em>. Additive models, boosting and causal ML also fit to residuals, without the theorem’s guarantee.</p>
 </div>
 </section>
 <section id="visualizing-orthogonal-subspaces" class="slide level2">
@@ -1998,7 +1998,7 @@ display:block!important;
 </div>
 </div>
 </div>
-<p>Project everything onto the orthogonal complement of <span class="math inline">\(\mathrm{col}(\mathbf X_1)\)</span>, the grey plane. There, regress <span class="math inline">\(\tilde{\mathbf y}\)</span> on <span class="math inline">\(\tilde{\mathbf x}_2\)</span> through the origin: the slope is <span class="math inline">\(\hat\beta_2\)</span> and <span class="math inline">\(\mathbf r\)</span> is the full regression’s residual</p>
+<p>Project everything onto the orthogonal complement of <span class="math inline">\(\mathrm{col}(\mathbf X_1)\)</span>, the gray plane. There, regress <span class="math inline">\(\tilde{\mathbf y}\)</span> on <span class="math inline">\(\tilde{\mathbf x}_2\)</span> through the origin: the slope is <span class="math inline">\(\hat\beta_2\)</span> and <span class="math inline">\(\mathbf r\)</span> is the full regression’s residual</p>
 </section>
 <section id="partialling-out-theorem-lines-12" class="slide level2" data-minutes="3">
 <h2>Partialling-out theorem, lines 1–2</h2>
@@ -2103,7 +2103,7 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 <ul>
-<li><p>This week: exercises 1 to 3 at the top of the notebook. The proof of the optimal model theorem; omitted-variable bias: what the normal equations say when a relevant column is left out; and today’s partialling-out proof again, with the slides closed</p></li>
+<li><p>This week: exercises 1 to 3 at the top of the notebook. The proof of the optimal model theorem; omitted-variable bias (what the normal equations say when a relevant column is left out); and today’s partialling-out proof again, with the slides closed</p></li>
 <li><p>Every week: the notebook opens with a “Before the seminar” section. Do it before you arrive; the seminar’s problems start from it</p></li>
 </ul>
 </section>

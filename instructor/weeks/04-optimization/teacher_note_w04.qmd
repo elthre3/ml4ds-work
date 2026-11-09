@@ -56,5 +56,5 @@ Where they get stuck
 - In step 5, `log(p)` with $p$ numerically $0$: the solution's `log1p(exp(-z))` form avoids it; if a student's own version gives `NaN` at a large step, that is the reason.
 - In step 6, forgetting to reset `e` inside the loop (so that $e$ gains a second nonzero entry), or dividing by `h` instead of `2 * h`; the checkpoint catches both.
 - In part 2, step 1, `X_big[rows, ]` on a one-row batch drops to a vector: `drop = FALSE`.
-- Reading question 5 as "then use a smaller step": the point is which data chose the step, not the step.
+- Reading question 5 as "then use a smaller step": question 5 asks which data chose the step, not which step.
 - In the student file, a chunk with a blank starts with `#| eval: false`; they delete that line once the blank is filled. The `# ...` line can stay.

@@ -514,7 +514,7 @@ Note
 <section id="nearest-neighbors-by-hand" class="level3">
 <h3 class="anchored" data-anchor-id="nearest-neighbors-by-hand">2. Nearest neighbors, by hand</h3>
 <!-- 20 min -->
-<p>You may use <code>abs</code>, <code>order</code>, <code>mean</code> and a <code>for</code> loop, but not a library that does nearest neighbors for you. The point is to see the mechanism: a prediction is an average of the outcomes of the nearest training points (problem 4, in code).</p>
+<p>You may use <code>abs</code>, <code>order</code>, <code>mean</code> and a <code>for</code> loop, but not a library that does nearest neighbors for you. That way you see the mechanism: a prediction is an average of the outcomes of the nearest training points (problem 4, in code).</p>
 <p><strong>Step 1.</strong> Write a function that takes one new input <code>x0</code>, the training inputs <code>x</code> and outcomes <code>y</code>, and a number of neighbors <code>k</code>, and returns the average outcome of the <code>k</code> training points nearest to <code>x0</code>. The distances are computed for you; you write the two lines that pick the neighbors and average their outcomes.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>knn_predict <span class="ot">&lt;-</span> <span class="cf">function</span>(x0, x, y, k) {</span>
@@ -568,7 +568,7 @@ Note
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">length</span>(pred) <span class="sc">==</span> <span class="fu">nrow</span>(test), <span class="fu">all</span>(<span class="fu">is.finite</span>(pred)), mse_knn5 <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><strong>Step 3.</strong> Wrap step 2 in a function <code>knn_mse(k, newdata)</code> that returns the MSE of the <code>k</code>-nearest-neighbor predictor on any data frame with columns <code>lgdp</code> and <code>lifeExp</code>; the skeleton is given, you write the prediction line and the MSE line. Then compute the <strong>training</strong> MSE and the <strong>test</strong> MSE for <code>k = 1, 2, 3, 5, 10, 25, 50</code>.</p>
+<p><strong>Step 3.</strong> Wrap step 2 in a function <code>knn_mse(k, newdata)</code> that returns the MSE of the <code>k</code>-nearest-neighbor predictor on any data frame with columns <code>lgdp</code> and <code>lifeExp</code>; the skeleton is given, you write the prediction line and the MSE line. Then compute the <em>training</em> MSE and the <em>test</em> MSE for <code>k = 1, 2, 3, 5, 10, 25, 50</code>.</p>
 <p><strong>Question 2.</strong> Before you run it: what do you expect the training MSE at <code>k = 1</code> to be, and why? Write your prediction down first.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>knn_mse <span class="ot">&lt;-</span> <span class="cf">function</span>(k, newdata) {</span>
@@ -606,7 +606,7 @@ Note
 <section id="the-score-is-a-random-variable" class="level3">
 <h3 class="anchored" data-anchor-id="the-score-is-a-random-variable">3. The score is a random variable</h3>
 <!-- 7 min -->
-<p>Your test MSE is an average of 42 losses. From the split you already have, compute the 42 individual squared errors of the <code>k = 5</code> predictor, their mean (the test MSE again) and the standard error of that mean, <span class="math inline">\(\text{sd(losses)}/\sqrt{42}\)</span>. (This standard error treats the 42 losses as independent draws; that is an assumption about the countries, not a fact about them.)</p>
+<p>Your test MSE is an average of 42 losses. From the split you already have, compute the 42 individual squared errors of the <code>k = 5</code> predictor, their mean (the test MSE again) and the standard error of that mean, <span class="math inline">\(\text{sd(losses)}/\sqrt{42}\)</span>. (This standard error treats the 42 losses as independent draws; that is an assumption about the countries.)</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># losses &lt;- ____</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># c(mean = mean(losses), se = ____)</span></span>

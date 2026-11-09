@@ -486,7 +486,7 @@ Joshua Loftus
 <li>COLT, 1988</li>
 <li><em>Machine Learning</em> journal, 1986; JMLR, 2001</li>
 </ul>
-<p>Conference papers, not journal articles, are the main currency (unusual among sciences)</p>
+<p>Conference papers, not journal articles, are the main form of publication (unusual among sciences)</p>
 </div></div>
 </section>
 <section id="what-is-artificial-intelligence" class="slide level2 inverse">
@@ -622,7 +622,7 @@ X = (X_1, X_2, \ldots, X_p) \in \mathbb R^p
 <tbody>
 <tr class="odd">
 <td><strong>1986</strong></td>
-<td>DARPA funds speech recognition on the condition that every group is scored on the same held-out data by an outside referee (NIST). Progress, measured, for the first time</td>
+<td>DARPA funds speech recognition on the condition that every group is scored on the same held-out data by an outside referee (NIST)</td>
 </tr>
 <tr class="even">
 <td><strong>2006</strong></td>
@@ -655,7 +655,7 @@ X = (X_1, X_2, \ldots, X_p) \in \mathbb R^p
 <p>Netflix said the gain wasn’t worth the engineering, and the business had moved to streaming</p>
 <p>The sequel was cancelled: researchers had re-identified “anonymous” users from their ratings</p>
 <div class="leave">
-<p>Winning a competition is not always useful. This course will help you understand why</p>
+<p>Winning a competition is not always useful</p>
 </div>
 </section>
 <section id="prediction-loss-held-out-set" class="slide level2">
@@ -671,7 +671,7 @@ X = (X_1, X_2, \ldots, X_p) \in \mathbb R^p
 </section>
 <section id="one-rule-before-we-start" class="slide level2">
 <h2>One rule before we start</h2>
-<p>An input is fair game only if you would have it <strong>at the moment you need the prediction</strong></p>
+<p>An input is fair game only if you would have it <em>at the moment you need the prediction</em></p>
 <p>Predict 2007 life expectancy from GDP: fine</p>
 <p>Predict a patient’s readmission from the discharge letter written <em>after</em> readmission: not fine</p>
 <p>Predict a house’s sale price from its list price: fine. From the price it eventually sold for: that’s the answer, not an input</p>
@@ -736,7 +736,7 @@ X = (X_1, X_2, \ldots, X_p) \in \mathbb R^p
 <section id="the-score-for-every-k" class="slide level2">
 <h2>The score, for every <span class="math inline">\(k\)</span></h2>
 
-<img data-src="01-1-introduction_files/figure-revealjs/unnamed-chunk-8-1.png" width="1350" class="r-stretch"><p>At <span class="math inline">\(k = 1\)</span> the training error is <strong>exactly zero</strong>. Is that good news?</p>
+<img data-src="01-1-introduction_files/figure-revealjs/unnamed-chunk-8-1.png" width="1350" class="r-stretch"><p>At <span class="math inline">\(k = 1\)</span> the training error is <em>exactly zero</em>. Is that good news?</p>
 </section>
 <section id="the-leaderboard" class="slide level2" data-minutes="3">
 <h2>The leaderboard</h2>
@@ -757,7 +757,7 @@ X = (X_1, X_2, \ldots, X_p) \in \mathbb R^p
 <p><span class="math inline">\(y_i = f^\star(x_i) + \varepsilon_i\)</span>, inputs fixed, noise independent, mean <span class="math inline">\(0\)</span>, variance <span class="math inline">\(\sigma^2\)</span>; new <span class="math inline">\(Y_0 = f^\star(x_0) + \varepsilon_0\)</span>.</p>
 <p>We want <span class="math inline">\(\mathbb E\big[(Y_0 - \hat f_k(x_0))^2\big]\)</span>, the expected squared error of the <span class="math inline">\(k\)</span>-nearest-neighbor prediction at <span class="math inline">\(x_0\)</span>.</p>
 <div class="ask">
-<p>Two facts from ST102 do all the work in the proof. Which two? Write them down before we start.</p>
+<p>The proof uses two facts from ST102. Which two? Write them down before we start.</p>
 </div>
 </section>
 <section id="biasvariance-decomposition" class="slide level2">
@@ -861,7 +861,7 @@ Y_0 - \hat f_k(x_0) = \varepsilon_0 + \big[f^\star(x_0) - \hat f_k(x_0)\big]
 </tbody>
 </table>
 <p>In ten dimensions, a cube holding 1% of the population spans 63% of each axis. That is not local.</p>
-<p>A nearest-neighbor set is a ball around the query, not a cube, and near the boundary the calculation changes, but the lesson carries: the nearest 1% of the data is far away. So the decomposition’s bias term is where dimension bites: the neighbors are far away, and <span class="math inline">\(f^\star\)</span> has room to drift.</p>
+<p>A nearest-neighbor set is a ball around the query, not a cube, and near the boundary the calculation changes, but the conclusion holds: the nearest 1% of the data is far away. So the decomposition’s bias term is where dimension enters: the neighbors are far away, and <span class="math inline">\(f^\star\)</span> has room to drift.</p>
 </section>
 <section id="distances-concentrate" class="slide level2 inverse">
 <h2>Distances concentrate</h2>
