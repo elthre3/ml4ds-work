@@ -233,7 +233,7 @@ Joshua Loftus
 <li>ridge and the lasso, one coefficient at a time</li>
 </ul>
 </section>
-<section id="section-1" class="slide level2 inverse center">
+<section id="section-1" class="slide level2 inverse center" data-background-image="img/dial.jpg" data-background-size="cover" data-background-opacity="0.55" data-background-color="#440154">
 <h2></h2>
 <h3 id="part-1-cross-validation">Part 1: cross-validation</h3>
 </section>
@@ -278,31 +278,30 @@ Joshua Loftus
 </div>
 <p>The 5,000 training tracks, <span class="math inline">\(K = 10\)</span>. One curve per family, the knob where each is lowest (orange). Every fold’s fit standardizes on its own training rows. The selection set was not used: each track was fitted on nine times and scored once</p>
 </section>
-<section id="held-out-standard-error" class="slide level2">
-<h2>Held-out standard error</h2>
+<section id="standard-errors-held-out-and-the-cv-bars" class="slide level2">
+<h2>Standard errors: held out, and the CV bars</h2>
 <div class="columns">
 <div class="column" style="width:52%;">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="07-1-regularization_files/figure-revealjs/knn-sel-se-1.png" style="width:100.0%"></p>
+<p><img data-src="07-1-regularization_files/figure-revealjs/knn-fold-se-1.png" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>A flat bottom: <span class="math inline">\(k = 50\)</span> and <span class="math inline">\(200\)</span> differ by 1.6, with a paired SE of 3.3</p>
+<p>A flat bottom: <span class="math inline">\(k = 50\)</span> to <span class="math inline">\(200\)</span> are within one bar of each other</p>
 </div><div class="column" style="width:48%;">
-<p>Losses <span class="math inline">\(L_j = \ell(y_j, \hat f(x_j))\)</span> on <span class="math inline">\(m\)</span> held-out units, independent with <span class="math inline">\(\hat f\)</span> held fixed: <span class="math display">\[
+<p>A held-out score is a mean of <span class="math inline">\(m\)</span> losses <span class="math inline">\(L_j = \ell(y_j, \hat f(x_j))\)</span>, independent with <span class="math inline">\(\hat f\)</span> fixed: <span class="math display">\[
 \widehat{\text{Err}} = \frac1m\sum_{j=1}^m L_j, \qquad \text{SE} = \frac{\text{sd}(L)}{\sqrt m}
-\]</span> The uncertainty of this fit’s score on <span class="math inline">\(m\)</span> new units; here the <span class="math inline">\(m = 2{,}000\)</span> selection tracks</p>
+\]</span> The structures lecture’s bars: <span class="math inline">\(m = 2{,}000\)</span> selection tracks. Software’s CV bars: the same formula on the <span class="math inline">\(K\)</span> fold scores, <span class="math inline">\(m = K\)</span>; a heuristic, since the folds share fitting rows</p>
 </div></div>
-<p>In <span class="math inline">\(K\)</span>-fold CV each fit uses <span class="math inline">\(n(1 - 1/K)\)</span> rows and is scored on the other <span class="math inline">\(n/K\)</span>; pooled over the folds, <span class="math inline">\(m = n\)</span>, but by fits that share rows, so there the formula is a heuristic</p>
 </section>
 <section id="lessons-about-cross-validation" class="slide level2">
 <h2>Lessons about cross-validation</h2>
 <ul>
-<li><p>Think of it as a way to <strong>choose model complexity</strong></p></li>
+<li><p>Think of it as a way to <strong>choose model complexity</strong>, not the model itself</p></li>
 <li><p><strong>Beware</strong> common cross-validation errors! From Duda and Hart quoted in <a href="https://mlstory.org/data.html">MLstory</a></p></li>
 </ul>
 <blockquote>
@@ -349,35 +348,10 @@ Joshua Loftus
 <h2></h2>
 <h3 id="part-2-the-nearest-neighbor-rate">Part 2: the nearest-neighbor rate</h3>
 </section>
-<section id="why-care-about-rates" class="slide level2">
+<section id="why-care-about-rates" class="slide level2 inverse" data-minutes="2" data-background-image="img/datacenters.jpg" data-background-size="cover" data-background-opacity="0.5" data-background-color="#440154">
 <h2>Why care about rates?</h2>
 <p>Over a trillion dollars is going into scaling up AI models. What if this is mathematically guaranteed to fail?</p>
-<div class="fragment">
-<p>A <strong>rate</strong> says how fast the error falls as <span class="math inline">\(n\)</span> grows. With only smoothness assumed, this part shows the exponent is <span class="math inline">\(2/(p+2)\)</span>, <span class="math inline">\(p\)</span> the number of inputs. Then ten times the data cuts the error by a factor <span class="math inline">\(10^{-2/(p+2)}\)</span>:</p>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th style="text-align: left;"><span class="math inline">\(p\)</span></th>
-<th style="text-align: left;">1</th>
-<th style="text-align: left;">10</th>
-<th style="text-align: left;">100</th>
-<th style="text-align: left;"><span class="math inline">\(10^6\)</span> (a megapixel image)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">error, relative</td>
-<td style="text-align: left;"><span class="math inline">\(0.22\)</span></td>
-<td style="text-align: left;"><span class="math inline">\(0.68\)</span></td>
-<td style="text-align: left;"><span class="math inline">\(0.96\)</span></td>
-<td style="text-align: left;"><span class="math inline">\(0.999995\)</span></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="fragment">
-<p>So with smoothness alone, more data is not guaranteed to help: either scaling fails, or the problems it works on have structure that the rate does not assume. The rate first; what changes its exponent at the end of the part</p>
-</div>
+<p><a href="https://www.cnet.com/tech/services-and-software/data-centers-ai-climate-change-hyperscale/">CNET: data centers, AI and climate change</a></p>
 </section>
 <section id="the-best-k-as-n-and-p-grow" class="slide level2">
 <h2>The best <span class="math inline">\(k\)</span> as <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span> grow</h2>
@@ -412,7 +386,7 @@ Joshua Loftus
 <div class="leave">
 <p><strong><span class="math inline">\(k\)</span>-NN rate.</strong> Inputs fixed, <span class="math inline">\(f^\star\)</span> <span class="math inline">\(L\)</span>-Lipschitz, noise variance <span class="math inline">\(\sigma^2\)</span>: <span class="math inline">\(\;\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2 \,\big|\, \text{inputs}\big] \;\le\; L^2\, r_k(x_0)^2 + \sigma^2/k\)</span></p>
 </div>
-<p><strong>Proof.</strong> The decomposition’s bias is <span class="math inline">\(\frac1k\sum_l [f^\star(x_{(l)}) - f^\star(x_0)]\)</span>, each term at most <span class="math inline">\(L\,r_k\)</span> in size, so the square is at most <span class="math inline">\(L^2 r_k^2\)</span>; the variance is <span class="math inline">\(\sigma^2/k\)</span>. <span class="math inline">\(\blacksquare\)</span></p>
+<p><strong>Proof.</strong> “Inputs fixed”: given the training inputs <span class="math inline">\(x_1, \ldots, x_n\)</span>, the neighbors are fixed and only the noise is random. The bias <span class="math inline">\(\frac1k\sum_l [f^\star(x_{(l)}) - f^\star(x_0)]\)</span> has each term at most <span class="math inline">\(L\,r_k\)</span> in size, so its square is at most <span class="math inline">\(L^2 r_k^2\)</span>; the variance is <span class="math inline">\(\sigma^2/k\)</span>. <span class="math inline">\(\blacksquare\)</span></p>
 </section>
 <section id="the-nearest-neighbor-distance-lemma" class="slide level2">
 <h2>The nearest-neighbor distance lemma</h2>
@@ -420,7 +394,7 @@ Joshua Loftus
 <div class="columns">
 <div class="column" style="width:58%;">
 <div class="leave">
-<p><strong>Nearest-neighbor distance lemma</strong> (stated). For <span class="math inline">\(x_0\)</span> away from the boundary, <span class="math inline">\(\mathbb E\big[r_k(x_0)^2\big] \lesssim (k/n)^{2/p}\)</span>, the constant depending on <span class="math inline">\(p\)</span> only.</p>
+<p><strong>Nearest-neighbor distance lemma</strong> (stated). For <span class="math inline">\(x_0\)</span> away from the boundary, <span class="math inline">\(\mathbb E\big[r_k(x_0)^2\big] \le C_p\,(k/n)^{2/p}\)</span>, with <span class="math inline">\(C_p\)</span> depending on <span class="math inline">\(p\)</span> only.</p>
 </div>
 <p>In one dimension the <span class="math inline">\(k\)</span>th neighbor is about <span class="math inline">\(k/2n\)</span> away on each side. In <span class="math inline">\(p = 10\)</span> the radius is about <span class="math inline">\((k/n)^{1/10}\)</span>: with <span class="math inline">\(k/n = 1/100\)</span>, <span class="math inline">\(0.63\)</span> of the side of the cube</p>
 </div><div class="column" style="width:42%;">
@@ -441,11 +415,11 @@ Joshua Loftus
 <section id="the-rate" class="slide level2" data-minutes="3">
 <h2>The rate</h2>
 <p>Put the two together and choose <span class="math inline">\(k\)</span>: <span class="math display">\[
-\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \;\lesssim\; L^2 (k/n)^{2/p} + \sigma^2/k
-\]</span> The first term grows with <span class="math inline">\(k\)</span>, the second shrinks. They balance at <span class="math inline">\(k \asymp n^{2/(p+2)}\)</span>, and there <span class="math display">\[
-\text{error} \lesssim n^{-2/(p+2)}
+\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2\big] \;\le\; C_p L^2 (k/n)^{2/p} + \sigma^2/k
+\]</span> The first term grows with <span class="math inline">\(k\)</span>, the second shrinks. They balance at <span class="math inline">\(k = c\,n^{2/(p+2)}\)</span>, and there <span class="math display">\[
+\text{error} \le C\, n^{-2/(p+2)}, \qquad c, C \text{ constants not depending on } n
 \]</span></p>
-<p>To halve the error, <span class="math inline">\(2^{(p+2)/2}\)</span> times the data: <span class="math inline">\(2.8\times\)</span> in <span class="math inline">\(p = 1\)</span>, <span class="math inline">\(4\times\)</span> in <span class="math inline">\(p = 2\)</span>, <span class="math inline">\(11\times\)</span> in <span class="math inline">\(p = 5\)</span>, <span class="math inline">\(64\times\)</span> in <span class="math inline">\(p = 10\)</span></p>
+<p>To halve the bound, <span class="math inline">\(2^{(p+2)/2}\)</span> times the data: <span class="math inline">\(2.8\times\)</span> in <span class="math inline">\(p = 1\)</span>, <span class="math inline">\(4\times\)</span> in <span class="math inline">\(p = 2\)</span>, <span class="math inline">\(64\times\)</span> in <span class="math inline">\(p = 10\)</span></p>
 <div class="leave">
 <p><strong>Minimax rate</strong> (stated). Over all <span class="math inline">\(L\)</span>-Lipschitz <span class="math inline">\(f^\star\)</span> in <span class="math inline">\(p\)</span> dimensions no estimator beats <span class="math inline">\(n^{-2/(p+2)}\)</span> for every <span class="math inline">\(f^\star\)</span> (Stone 1980, 1982); a particular <span class="math inline">\(f^\star\)</span>, a constant say, does better.</p>
 </div>
@@ -462,7 +436,7 @@ Joshua Loftus
 <thead>
 <tr class="header">
 <th>Assumption on <span class="math inline">\(f^\star\)</span></th>
-<th>Squared error (up to constants)</th>
+<th>Squared error (up to constants; rows 1 and 2 minimax)</th>
 <th>The family</th>
 </tr>
 </thead>
@@ -479,7 +453,7 @@ Joshua Loftus
 </tr>
 <tr class="odd">
 <td>linear with <span class="math inline">\(s\)</span> nonzero coefficients among <span class="math inline">\(p\)</span> (sparsity, plus design and noise conditions)</td>
-<td>about <span class="math inline">\(s\log p/n\)</span> (Hastie et al.&nbsp;2015, Theorem 11.2)</td>
+<td>about <span class="math inline">\(s\log p/n\)</span>, an upper bound (Hastie et al.&nbsp;2015, Theorem 11.2)</td>
 <td>the lasso: a sparse plane</td>
 </tr>
 </tbody>
@@ -487,12 +461,13 @@ Joshua Loftus
 </div>
 <p>Smoothness alone: <span class="math inline">\(p\)</span> in the exponent. Additivity: the one-input exponent. Sparsity: <span class="math inline">\(p\)</span> out of the exponent, into a <span class="math inline">\(\log p\)</span>. Rows 2 and 3 are stated, not derived</p>
 <div class="retrieval">
-<p>No free lunch theorem, with numbers: the Lipschitz class is already an assumption, and nothing beats its rate for every <span class="math inline">\(f^\star\)</span> in it. A faster rate needs a stronger assumption, and holds only when that assumption is true.</p>
+<p>No free lunch theorem, with numbers. A faster rate needs a stronger assumption.</p>
 </div>
 </section>
 <section id="section-3" class="slide level2 inverse center">
 <h2></h2>
 <h3 id="part-3-ridge-and-the-lasso-side-by-side">Part 3: ridge and the lasso side by side</h3>
+<p>Assumptions <span class="math inline">\(\leftrightarrow\)</span> biases?</p>
 </section>
 <section id="history-steins-paradox" class="slide level2 inverse">
 <h2>History: Stein’s paradox</h2>
