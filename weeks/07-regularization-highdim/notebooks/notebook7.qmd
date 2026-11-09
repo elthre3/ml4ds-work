@@ -42,7 +42,7 @@ The lecture stated the bias--variance decomposition in ridge form and left its p
 Each exercise has hints, collapsed below it. Do not open a hint unless you have been stuck for at least a few minutes, and open them in order. Solutions are shown in the seminar if you ask.
 :::
 
-**Exercise 1 (bias--variance decomposition, ridge form).** $\mathbf X$ is $n \times p$ with orthonormal columns, $\mathbf X^T\mathbf X = \mathbf I$ (so $p \le n$). The outcome is $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$ with $\beta$ fixed and unknown and the $\varepsilon_i$ independent, mean $0$, variance $\sigma^2$. Expectations are over $\boldsymbol\varepsilon$, with $\mathbf X$ fixed. The least-squares estimator solves the normal equations $\mathbf X^T\mathbf X\beta = \mathbf X^T\mathbf y$, so here $\hat\beta = \mathbf X^T\mathbf y$. For $\lambda > 0$ the ridge estimator $\hat\beta_\lambda$ minimizes $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|^2$.
+**Exercise 1 (bias--variance decomposition, ridge form).** $\mathbf X$ is $n \times p$ with orthonormal columns, $\mathbf X^T\mathbf X = \mathbf I$ (so $p \le n$). The outcome is $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$ with $\beta$ fixed and unknown and the $\varepsilon_i$ independent, mean $0$, variance $\sigma^2 > 0$. Expectations are over $\boldsymbol\varepsilon$, with $\mathbf X$ fixed. The least-squares estimator solves the normal equations $\mathbf X^T\mathbf X\beta = \mathbf X^T\mathbf y$, so here $\hat\beta = \mathbf X^T\mathbf y$. For $\lambda > 0$ the ridge estimator $\hat\beta_\lambda$ minimizes $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|^2$.
 
 (a) Show that $\hat\beta$ is unbiased, $\mathbb E[\hat\beta] = \beta$, and that each coordinate has variance $\mathrm{Var}(\hat\beta_j) = \sigma^2$. Deduce $\mathbb E\|\hat\beta - \beta\|^2 = p\sigma^2$.
 
@@ -55,7 +55,7 @@ $$
 
 (d) Differentiate $\mathrm{MSE}(\lambda)$ and show that its derivative at $\lambda = 0$ is $-2p\sigma^2$, whatever $\beta$ is. Conclude that for every $\beta$ there is a $\lambda > 0$ with $\mathrm{MSE}(\lambda) < \mathrm{MSE}(0) = p\sigma^2$.
 
-(e) Find the $\lambda$ that minimizes $\mathrm{MSE}(\lambda)$, in terms of $\sigma^2$ and $\|\beta\|^2/p$, and the minimum value. Why can this $\lambda$ not be used in practice?
+(e) For $\beta \ne \mathbf 0$, find the $\lambda$ that minimizes $\mathrm{MSE}(\lambda)$, in terms of $\sigma^2$ and $\|\beta\|^2/p$, and the minimum value. What happens when $\beta = \mathbf 0$? Why can this $\lambda$ not be used in practice?
 
 ::: {.callout-note collapse="true" title="Hint 1"}
 (a) $\hat\beta = \mathbf X^T(\mathbf X\beta + \boldsymbol\varepsilon) = \beta + \mathbf X^T\boldsymbol\varepsilon$. What are the mean vector and the covariance matrix of $\mathbf X^T\boldsymbol\varepsilon$? The covariance matrix of $\mathbf A\boldsymbol\varepsilon$ is $\mathbf A\,\mathrm{Cov}(\boldsymbol\varepsilon)\,\mathbf A^T$.
@@ -69,7 +69,7 @@ $$
 (d), (e) Write $\mathrm{MSE}(\lambda) = (\lambda^2\|\beta\|^2 + p\sigma^2)/(1 + \lambda)^2$ and use the quotient rule; after cancelling a factor $(1 + \lambda)$ the numerator of the derivative is $2\lambda\|\beta\|^2 - 2p\sigma^2$.
 :::
 
-**Exercise 2 (the $k$-nearest-neighbor rate, with the slides closed).** Inputs $x_1, \ldots, x_n$ i.i.d. uniform on $[0, 1]^p$; outcomes $y_i = f^\star(x_i) + \varepsilon_i$ with the $\varepsilon_i$ independent of each other and of the inputs, mean $0$, variance $\sigma^2$; $f^\star$ is $L$-Lipschitz, $|f^\star(x) - f^\star(x')| \le L\|x - x'\|$. For a point $x_0$, $r_k(x_0)$ is the distance from $x_0$ to its $k$th nearest input, $x_{(1)}, \ldots, x_{(k)}$ are the $k$ nearest inputs, and $\hat f_k(x_0) = \tfrac1k\sum_{l=1}^k y_{(l)}$ is the mean of their outcomes. You may use the lemma stated in the lecture: for $x_0$ away from the boundary, $\mathbb E[r_k(x_0)^2] \le C_p (k/n)^{2/p}$, with $C_p$ depending on $p$ only.
+**Exercise 2 (the $k$-nearest-neighbor rate, with the slides closed).** Inputs $x_1, \ldots, x_n$ i.i.d. uniform on $[0, 1]^p$; outcomes $y_i = f^\star(x_i) + \varepsilon_i$ with the $\varepsilon_i$ independent of each other and of the inputs, mean $0$, variance $\sigma^2$; $f^\star$ is $L$-Lipschitz, $|f^\star(x) - f^\star(x')| \le L\|x - x'\|$, with $L > 0$ and $\sigma^2 > 0$. For a point $x_0$, $r_k(x_0)$ is the distance from $x_0$ to its $k$th nearest input, $x_{(1)}, \ldots, x_{(k)}$ are the $k$ nearest inputs, and $\hat f_k(x_0) = \tfrac1k\sum_{l=1}^k y_{(l)}$ is the mean of their outcomes. You may use the lemma stated in the lecture: for $x_0$ away from the boundary, $\mathbb E[r_k(x_0)^2] \le C_p (k/n)^{2/p}$, with $C_p$ depending on $p$ only.
 
 (a) Conditional on the inputs, write $\hat f_k(x_0) - f^\star(x_0)$ as the sum of a term that depends only on $f^\star$ and the inputs and a term that depends on the noise. Show that the first term is at most $L\,r_k(x_0)$ in absolute value.
 
@@ -119,13 +119,13 @@ $$
 
 (e) In $p$ dimensions a ball of radius $r$ has volume $c_p r^p$. Repeat the argument of (d) to find the order of $r_k$, and hence of $r_k^2$, in $p$ dimensions. Why does the lemma say "away from the boundary"?
 
-**Problem 3 (the smoothing penalty as weighted ridge).** A one-input curve written in a basis, $f(x) = \sum_{j=1}^J \beta_j b_j(x)$, with twice-differentiable basis functions. $\mathbf B$ is the $n \times J$ matrix with $B_{ij} = b_j(x_i)$, and $\boldsymbol\Omega$ the $J \times J$ matrix with $\Omega_{jk} = \int b_j''(x)\,b_k''(x)\,dx$. The smoothing objective is $\sum_{i=1}^n (y_i - f(x_i))^2 + \lambda\int f''(x)^2\,dx$.
+**Problem 3 (the smoothing penalty as weighted ridge).** A one-input curve written in a spline basis, $f(x) = \sum_{j=1}^J \beta_j b_j(x)$: the $b_j$ are twice differentiable and their span contains the constant and the linear functions. $\lambda \ge 0$. $\mathbf B$ is the $n \times J$ matrix with $B_{ij} = b_j(x_i)$, and $\boldsymbol\Omega$ the $J \times J$ matrix with $\Omega_{jk} = \int b_j''(x)\,b_k''(x)\,dx$. The smoothing objective is $\sum_{i=1}^n (y_i - f(x_i))^2 + \lambda\int f''(x)^2\,dx$.
 
 (a) Show that $\int f''(x)^2\,dx = \beta^T\boldsymbol\Omega\beta$, so the objective is $\|\mathbf y - \mathbf B\beta\|^2 + \lambda\beta^T\boldsymbol\Omega\beta$. Show that $\boldsymbol\Omega$ is symmetric and positive semidefinite.
 
 (b) Show that the minimizer satisfies $(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y$, and that $\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega$ is invertible when $\mathbf B$ has full column rank.
 
-(c) Suppose the basis has been chosen so that $\mathbf B^T\mathbf B = \mathbf I$ and $\boldsymbol\Omega = \mathrm{diag}(w_1, \ldots, w_J)$ with every $w_j \ge 0$ (such a basis exists; the lecture's figure showed four of its functions, ordered by wiggliness). With $\mathbf z = \mathbf B^T\mathbf y$, show that $\hat\beta_j = z_j/(1 + \lambda w_j)$.
+(c) Suppose $\mathbf B$ has full column rank and the basis has been chosen so that $\mathbf B^T\mathbf B = \mathbf I$ and $\boldsymbol\Omega = \mathrm{diag}(w_1, \ldots, w_J)$ with every $w_j \ge 0$ (such a basis exists; the lecture's figure showed four of its functions, ordered by wiggliness). With $\mathbf z = \mathbf B^T\mathbf y$, show that $\hat\beta_j = z_j/(1 + \lambda w_j)$.
 
 (d) Which basis functions have $w_j = 0$? What happens to their coefficients as $\lambda \to \infty$, and to the others? What does the fit tend to?
 
@@ -137,7 +137,7 @@ $$
 
 <!-- 14 min: steps 1 and 2, questions 1 and 2. -->
 
-The structures seminar's task: predict a track's popularity from ten audio features and its release year, squared loss ([data note](https://ml4ds.com/data/spotify.html)), genre left out. The same split as there: 5,000 training, 2,000 tuning and 3,000 test tracks, one seed. Today the tuning tracks are a check on cross-validation and the test tracks are not opened.
+The structures seminar's task: predict a track's popularity from ten audio features and its release year, squared loss ([data note](https://ml4ds.com/data/spotify.html)), genre left out. The same split as there: 5,000 training, 2,000 tuning and 3,000 test tracks, one seed. Today the tuning tracks are a check on cross-validation and the test tracks are not opened; the last step uses a split by year of the 7,000 development tracks instead of the random one.
 
 ```{r}
 feat <- c("danceability", "energy", "loudness", "speechiness", "acousticness",
@@ -205,7 +205,7 @@ tune_se <- sapply(ks, function(k) se_loss(y_tune, knn_predict(X_tune, X_train, y
 rbind(k = ks, cv = round(cv_knn), tune = round(tune_knn), tune_se = round(tune_se))
 ```
 
-**Step 3.** The lasso through the same pipeline. `lasso_fp(lam)` standardizes inside the fold, fits the path on the training rows and predicts at the one $\lambda$ `lam`. The sequence `lam_seq` comes from a fit on all 5,000 training tracks, so every fold uses the same values. Run the pipeline over `lam_seq` and find $\lambda$ at the minimum.
+**Step 3.** The lasso through the same pipeline. `lasso_fp(lam)` standardizes inside the fold, fits the path on the training rows and predicts at the one $\lambda$ `lam`. The sequence `lam_seq` comes from a fit on all 5,000 training tracks, so every fold uses the same values (a small step outside the folds, which `cv.glmnet()` takes too). Run the pipeline over `lam_seq` and find $\lambda$ at the minimum.
 
 ```{r}
 #| eval: false
@@ -219,7 +219,7 @@ lasso_fp <- function(lam) function(tr, ho) {
 # lam_cv <- ____
 ```
 
-**Question 2.** `cv.glmnet()` does the same with its own code. Run it with the same folds (`foldid = fold`) and compare `lambda.min` with your `lam_cv`. Its `lambda.1se` is larger: what rule chose it, and how many coefficients does the lasso set to zero at each of the two?
+**Question 2.** `cv.glmnet()` does the same with its own code. Run it on `X_train` (standardized once, on all 5,000 training rows, which is why the call says `standardize = FALSE`) with the same folds (`foldid = fold`) and compare `lambda.min` with your `lam_cv`. Its `lambda.1se` is larger: what rule chose it, and how many coefficients does the lasso set to zero at each of the two?
 
 ```{r}
 #| eval: !expr exists("lam_cv")
@@ -295,27 +295,37 @@ stopifnot(length(fold_track) == nrow(rows), all(tapply(fold_track, rows$track_id
 
 **Question 4.** What happened to the scores at $k = 1$, and why is the effect smaller at $k = 50$? Which of the two numbers is the one to believe, and what is the rule? About a quarter of these rows have a copy; in a dataset of patients with several visits each, or of songs in many playlists, what would you expect?
 
-**Step 6. A random split against a split in time.** Popularity is Spotify's score in January 2020, and it rewards recent plays: the mean popularity by release year, below, rises through the 2010s. A random split mixes the years, so cross-validation answers "how well does this predict a track like the ones we have?". The question a user of the model might ask is "how well will it predict this year's releases?". Fit least squares on the eleven inputs to the tracks released up to 2018 (`old`), and score it two ways: by cross-validation on `old`, and on the tracks released in 2019 and 2020 (`new`). For each, report the MSE and the mean error, $\tfrac1m\sum_j (y_j - \hat f(x_j))$.
+**Step 6. A random split against a split in time.** Popularity is Spotify's score in January 2020, and it rewards recent plays: the mean popularity by release year, below, rises through the 2010s. A random split mixes the years, so cross-validation answers "how well does this predict a track like the ones we have?". The question a user of the model might ask is "how well will it predict this year's releases?". Fit least squares on the eleven inputs to the development tracks (training and tuning, 7,000) released up to 2018 (`old`), and score it two ways: by cross-validation on `old`, and on the development tracks released in 2019 and 2020 (`new`). For each, report the MSE and the mean error, $\tfrac1m\sum_j (y_j - \hat f(x_j))$; `cv_mean_error()` does for the mean error what `cv_mse()` does for the MSE.
 
 ```{r}
 sp |> filter(release_year >= 2012) |> group_by(release_year) |>
   summarize(tracks = n(), mean_popularity = round(mean(track_popularity), 1)) |> t()
-old <- sp |> filter(release_year <= 2018)
-new <- sp |> filter(release_year >= 2019)
+sp_dev <- sp[id[1:7000], ]                              # the training and tuning tracks
+old <- sp_dev |> filter(release_year <= 2018)
+new <- sp_dev |> filter(release_year >= 2019)
 fold_old <- sample(rep(1:K, length.out = nrow(old)))
 plane_fp <- function(tr, ho) predict(lm(track_popularity ~ ., tr), ho)
+cv_mean_error <- function(fit_predict, d, fold) {        # cv_mse() with the loss replaced by the error
+  err <- rep(NA, nrow(d))
+  for (k in 1:K) {
+    tr <- d[fold != k, ]; ho <- d[fold == k, ]
+    err[fold == k] <- ho$track_popularity - fit_predict(tr, ho)
+  }
+  mean(err)
+}
 ```
 
 ```{r}
 #| eval: false
 # cv_plane <- ____                                     # the MSE by cross-validation on old
+# cv_me <- ____                                        # the mean error by cross-validation on old
 # pred_new <- ____                                     # the plane fitted on old, predicting new
-# c(cv_mse = cv_plane, new_mse = ____, new_mean_error = ____)
+# c(cv_mse = cv_plane, cv_mean_error = cv_me, new_mse = ____, new_mean_error = ____)
 # the two baselines on new: the mean of old, and the mean of new itself
 # c(old_mean = ____, new_mean = ____)
 ```
 
-**Question 5.** The plane's predictions for the new tracks are too low by about 11 points on average, and nothing in the cross-validation score hinted at it. Why can a random split not see this? Its MSE on the new tracks is lower than its CV score; is that good news? Which of the two scores answers the user's question?
+**Question 5.** The plane's predictions for the new tracks are too low on average, and nothing in the cross-validation scores hinted at it. Why can a random split not see this? Its MSE on the new tracks is lower than its CV score; is that good news? Which of the two scores answers the user's question?
 
 ### Optional, can be done at home: the wrong way to cross-validate
 

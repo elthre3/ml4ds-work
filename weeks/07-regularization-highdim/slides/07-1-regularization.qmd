@@ -357,7 +357,7 @@ A **rate** says how fast the error falls as $n$ grows. With only smoothness assu
 
 . . .
 
-So either scaling fails, or the problems it works on have structure that the rate does not assume. The rate first; what changes its exponent at the end of the part
+So with smoothness alone, more data is not guaranteed to help: either scaling fails, or the problems it works on have structure that the rate does not assume. The rate first; what changes its exponent at the end of the part
 
 ## The best $k$ as $n$ and $p$ grow
 
@@ -684,7 +684,7 @@ ridge_mse_plot
 :::
 
 ::: {.leave}
-**Bias--variance decomposition, ridge form.** $\mathbf X^T\mathbf X = I$, $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$, noise mean $0$, variance $\sigma^2$: $\;\mathrm{MSE}(\lambda) = \mathbb E\|\hat\beta_\lambda - \beta\|^2 = \sum_{j=1}^p (\lambda^2\beta_j^2 + \sigma^2)/(1 + \lambda)^2$, with slope $-2p\sigma^2 < 0$ at $\lambda = 0$: for every $\beta$, some $\lambda > 0$ beats least squares.
+**Bias--variance decomposition, ridge form.** $\mathbf X^T\mathbf X = I$, $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$, noise independent, mean $0$, variance $\sigma^2 > 0$: $\;\mathrm{MSE}(\lambda) = \mathbb E\|\hat\beta_\lambda - \beta\|^2 = \sum_{j=1}^p (\lambda^2\beta_j^2 + \sigma^2)/(1 + \lambda)^2$, with slope $-2p\sigma^2 < 0$ at $\lambda = 0$: for every $\beta$, some $\lambda > 0$ beats least squares.
 :::
 
 **Proof**: exercise 1. Which $\lambda$? The best is $\sigma^2$ over the mean of $\beta_j^2$, noise over signal: unknown
@@ -1045,9 +1045,12 @@ Three minutes. Test MSE against J for the setup of the last slide, averaged over
 #| fig-width: 12
 #| out-width: "100%"
 Js <- c(2:19, 20:30, seq(32, 60, by = 4), seq(70, 120, by = 10))
-ridge_fit_ns <- function(J, d, newx) {       # the same basis with a ridge penalty, lambda chosen by 5-fold CV
+ridge_fit_ns <- function(J, d, newx) {       # the same basis with a ridge penalty, lambda by leave-one-out CV
+  # glmnet's default lambda grid stops at 1% of its largest value when J >= n, far above the best lambda for
+  # this basis, so the grid is extended downward (lambda.min.ratio) and the 20 points are used one at a time.
   Bb <- ns(d$x, df = J, intercept = TRUE); Bn <- predict(Bb, newx)
-  cvr <- cv.glmnet(Bb, d$y, alpha = 0, intercept = FALSE, standardize = FALSE, nfolds = 5)
+  cvr <- cv.glmnet(Bb, d$y, alpha = 0, intercept = FALSE, standardize = FALSE, nfolds = nrow(d), grouped = FALSE,
+                   lambda.min.ratio = 1e-6)
   as.vector(predict(cvr, Bn, s = "lambda.min"))
 }
 dd_curve <- map_dfr(1:50, function(rep) {
@@ -1072,6 +1075,13 @@ bv_dd <- map_dfr(seq_along(Js_v), function(i) {
   tibble(J = Js_v[i], bias2 = mean((rowMeans(F) - f_dd(grid_v))^2), variance = mean(apply(F, 1, var)))
 })
 v_at <- function(J) signif(bv_dd$variance[bv_dd$J == J], 2)
+# The same replicates for ridge with lambda chosen by CV, at three of the J's
+Js_rv <- c(15, 20, 80)
+fits_rv <- map(1:50, function(rep) {
+  d <- tibble(x = dd$x, y = f_dd(dd$x) + rnorm(n_dd, sd = sd_dd))
+  sapply(Js_rv, function(J) ridge_fit_ns(J, d, grid_v))
+})
+vr_at <- function(J) { i <- match(J, Js_rv); signif(mean(apply(sapply(fits_rv, function(m) m[, i]), 1, var)), 2) }
 ggplot(dd_curve, aes(J, test_mse, colour = rule, linetype = rule)) +
   geom_vline(xintercept = n_dd, linetype = 3, colour = "grey50") +
   annotate("text", x = n_dd * 1.08, y = 3, label = "J = n", colour = "grey40", size = 4.5, hjust = 0) +
@@ -1089,12 +1099,12 @@ Test MSE against $J$ (test inputs inside the training range), averaged over 50 d
 ## Double descent and the bias--variance decomposition
 
 ::: {.notes}
-Two minutes; cut fourth. The decomposition is an identity and still holds. What fails is the folk version, "more parameters, more variance": the three variance numbers are computed with the picture's inputs fixed and fresh noise, fifty times. Spike at J = n (near-singular design), fall past it (the rule changes with J). With lambda by CV, no spike. Four dimensions: the rule that chooses the fit is what regularizes.
+Two minutes; cut fourth. The decomposition is an identity and still holds. What fails is the folk version, "more parameters, more variance": the variance numbers are computed with the picture's inputs fixed and fresh noise, fifty times. Spike at J = n (near-singular design), fall past it (the rule changes with J). Ridge by CV on the same replicates: no spike. Four dimensions: the rule that chooses the fit is what regularizes.
 :::
 
 **Does not change.** The bias--variance decomposition is an identity; it holds on every point of both curves. Training error zero still says nothing about the risk (optimism theorem)
 
-**Changes.** The folk version, "more parameters, more variance", read as a function of the parameter count alone. It is right for one way of fitting with $\lambda$ chosen by cross-validation. It is wrong for a rule that interpolates: with the inputs fixed, the variance of the smallest-norm fit over 50 replicates is `r v_at(15)` at $J = 15$, `r v_at(20)` at $J = n = 20$, where the design is nearly singular (the reason ridge was invented), and `r v_at(80)` at $J = 80$: it spikes and falls, because the rule itself changes with $J$
+**Changes.** The folk version, "more parameters, more variance", read as a function of the parameter count alone. With the inputs fixed and 50 replicates, the variance of the smallest-norm fit is `r v_at(15)` at $J = 15$, `r v_at(20)` at $J = n = 20$, where the design is nearly singular (the reason ridge was invented), and `r v_at(80)` at $J = 80$: it spikes and falls, because the rule itself changes with $J$. Ridge with $\lambda$ by cross-validation, same inputs: `r vr_at(15)`, `r vr_at(20)`, `r vr_at(80)`
 
 ::: {.retrieval}
 Four dimensions: each family assumed a shape for $f^\star$, and no single scale ran from simple to complex. The parameter count is not that scale either. The rule that chooses the fit is what regularizes.
@@ -1150,7 +1160,7 @@ Skip: the works named or quoted on the slides, in full. Not lecture content.
 
 ::: {style="font-size: 0.78em"}
 - Belkin, M., Hsu, D., Ma, S. and Mandal, S. (2019). Reconciling modern machine-learning practice and the classical bias--variance trade-off. *Proceedings of the National Academy of Sciences* 116(32), 15849--15854. [doi:10.1073/pnas.1903070116](https://doi.org/10.1073/pnas.1903070116)
-- Hastie, T., Tibshirani, R. and Friedman, J. (2009). *The Elements of Statistical Learning: Data Mining, Inference, and Prediction*, 2nd edition. Springer, New York. Section 7.10.2, p. 222 (the quotation). [hastie.su.domains/ElemStatLearn](https://hastie.su.domains/ElemStatLearn/)
+- Hastie, T., Tibshirani, R. and Friedman, J. (2009). *The Elements of Statistical Learning: Data Mining, Inference, and Prediction*, 2nd edition. Springer, New York. Section 7.2, p. 222 (the quotation). [hastie.su.domains/ElemStatLearn](https://hastie.su.domains/ElemStatLearn/)
 - Hastie, T., Tibshirani, R. and Wainwright, M. (2015). *Statistical Learning with Sparsity: The Lasso and Generalizations*. Chapman and Hall/CRC. Theorem 11.2(b), equation (11.26b), p. 300 (prediction error); Theorem 11.1 and Example 11.1, pp. 295--296 (coefficient error). [doi:10.1201/b18401](https://doi.org/10.1201/b18401); free PDF at [hastie.su.domains/StatLearnSparsity](https://hastie.su.domains/StatLearnSparsity/)
 :::
 

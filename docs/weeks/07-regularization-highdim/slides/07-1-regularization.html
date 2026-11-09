@@ -376,7 +376,7 @@ Joshua Loftus
 </table>
 </div>
 <div class="fragment">
-<p>So either scaling fails, or the problems it works on have structure that the rate does not assume. The rate first; what changes its exponent at the end of the part</p>
+<p>So with smoothness alone, more data is not guaranteed to help: either scaling fails, or the problems it works on have structure that the rate does not assume. The rate first; what changes its exponent at the end of the part</p>
 </div>
 </section>
 <section id="the-best-k-as-n-and-p-grow" class="slide level2">
@@ -576,7 +576,7 @@ Joshua Loftus
 </div>
 </div></div>
 <div class="leave">
-<p><strong>Bias–variance decomposition, ridge form.</strong> <span class="math inline">\(\mathbf X^T\mathbf X = I\)</span>, <span class="math inline">\(\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon\)</span>, noise mean <span class="math inline">\(0\)</span>, variance <span class="math inline">\(\sigma^2\)</span>: <span class="math inline">\(\;\mathrm{MSE}(\lambda) = \mathbb E\|\hat\beta_\lambda - \beta\|^2 = \sum_{j=1}^p (\lambda^2\beta_j^2 + \sigma^2)/(1 + \lambda)^2\)</span>, with slope <span class="math inline">\(-2p\sigma^2 &lt; 0\)</span> at <span class="math inline">\(\lambda = 0\)</span>: for every <span class="math inline">\(\beta\)</span>, some <span class="math inline">\(\lambda &gt; 0\)</span> beats least squares.</p>
+<p><strong>Bias–variance decomposition, ridge form.</strong> <span class="math inline">\(\mathbf X^T\mathbf X = I\)</span>, <span class="math inline">\(\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon\)</span>, noise independent, mean <span class="math inline">\(0\)</span>, variance <span class="math inline">\(\sigma^2 &gt; 0\)</span>: <span class="math inline">\(\;\mathrm{MSE}(\lambda) = \mathbb E\|\hat\beta_\lambda - \beta\|^2 = \sum_{j=1}^p (\lambda^2\beta_j^2 + \sigma^2)/(1 + \lambda)^2\)</span>, with slope <span class="math inline">\(-2p\sigma^2 &lt; 0\)</span> at <span class="math inline">\(\lambda = 0\)</span>: for every <span class="math inline">\(\beta\)</span>, some <span class="math inline">\(\lambda &gt; 0\)</span> beats least squares.</p>
 </div>
 <p><strong>Proof</strong>: exercise 1. Which <span class="math inline">\(\lambda\)</span>? The best is <span class="math inline">\(\sigma^2\)</span> over the mean of <span class="math inline">\(\beta_j^2\)</span>, noise over signal: unknown</p>
 </section>
@@ -759,7 +759,7 @@ Joshua Loftus
 <section id="double-descent-and-the-biasvariance-decomposition" class="slide level2">
 <h2>Double descent and the bias–variance decomposition</h2>
 <p><strong>Does not change.</strong> The bias–variance decomposition is an identity; it holds on every point of both curves. Training error zero still says nothing about the risk (optimism theorem)</p>
-<p><strong>Changes.</strong> The folk version, “more parameters, more variance”, read as a function of the parameter count alone. It is right for one way of fitting with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. It is wrong for a rule that interpolates: with the inputs fixed, the variance of the smallest-norm fit over 50 replicates is 0.26 at <span class="math inline">\(J = 15\)</span>, 42 at <span class="math inline">\(J = n = 20\)</span>, where the design is nearly singular (the reason ridge was invented), and 0.048 at <span class="math inline">\(J = 80\)</span>: it spikes and falls, because the rule itself changes with <span class="math inline">\(J\)</span></p>
+<p><strong>Changes.</strong> The folk version, “more parameters, more variance”, read as a function of the parameter count alone. With the inputs fixed and 50 replicates, the variance of the smallest-norm fit is 0.26 at <span class="math inline">\(J = 15\)</span>, 42 at <span class="math inline">\(J = n = 20\)</span>, where the design is nearly singular (the reason ridge was invented), and 0.048 at <span class="math inline">\(J = 80\)</span>: it spikes and falls, because the rule itself changes with <span class="math inline">\(J\)</span>. Ridge with <span class="math inline">\(\lambda\)</span> by cross-validation, same inputs: 0.078, 0.14, 0.037</p>
 <div class="retrieval">
 <p>Four dimensions: each family assumed a shape for <span class="math inline">\(f^\star\)</span>, and no single scale ran from simple to complex. The parameter count is not that scale either. The rule that chooses the fit is what regularizes.</p>
 </div>
@@ -796,7 +796,7 @@ Joshua Loftus
 <div style="font-size: 0.78em">
 <ul>
 <li>Belkin, M., Hsu, D., Ma, S. and Mandal, S. (2019). Reconciling modern machine-learning practice and the classical bias–variance trade-off. <em>Proceedings of the National Academy of Sciences</em> 116(32), 15849–15854. <a href="https://doi.org/10.1073/pnas.1903070116">doi:10.1073/pnas.1903070116</a></li>
-<li>Hastie, T., Tibshirani, R. and Friedman, J. (2009). <em>The Elements of Statistical Learning: Data Mining, Inference, and Prediction</em>, 2nd edition. Springer, New York. Section 7.10.2, p.&nbsp;222 (the quotation). <a href="https://hastie.su.domains/ElemStatLearn/">hastie.su.domains/ElemStatLearn</a></li>
+<li>Hastie, T., Tibshirani, R. and Friedman, J. (2009). <em>The Elements of Statistical Learning: Data Mining, Inference, and Prediction</em>, 2nd edition. Springer, New York. Section 7.2, p.&nbsp;222 (the quotation). <a href="https://hastie.su.domains/ElemStatLearn/">hastie.su.domains/ElemStatLearn</a></li>
 <li>Hastie, T., Tibshirani, R. and Wainwright, M. (2015). <em>Statistical Learning with Sparsity: The Lasso and Generalizations</em>. Chapman and Hall/CRC. Theorem 11.2(b), equation (11.26b), p.&nbsp;300 (prediction error); Theorem 11.1 and Example 11.1, pp.&nbsp;295–296 (coefficient error). <a href="https://doi.org/10.1201/b18401">doi:10.1201/b18401</a>; free PDF at <a href="https://hastie.su.domains/StatLearnSparsity/">hastie.su.domains/StatLearnSparsity</a></li>
 </ul>
 </div>
