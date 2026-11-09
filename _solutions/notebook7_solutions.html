@@ -2599,7 +2599,7 @@ window.Quarto = {
 <p><strong>Problem 1 (soft thresholding).</strong> One coordinate of an orthonormal design: <span class="math inline">\(z\)</span> is the least-squares coefficient, a number, and <span class="math inline">\(b\)</span> the estimate. The lasso’s one-coordinate objective is <span class="math inline">\(\tfrac12(z - b)^2 + \lambda|b|\)</span> with <span class="math inline">\(\lambda &gt; 0\)</span>.</p>
 <ol type="a">
 <li><p>Show that the minimizer is <span class="math inline">\(\hat b = \mathrm{sign}(z)\,(|z| - \lambda)_+\)</span>: <span class="math inline">\(z\)</span> moved toward zero by <span class="math inline">\(\lambda\)</span>, stopping at zero.</p></li>
-<li><p>The lecture writes the lasso objective as <span class="math inline">\(\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|_1\)</span>, without the <span class="math inline">\(\tfrac12\)</span>. In the orthonormal design, by how much does that lasso move each coefficient toward zero?</p></li>
+<li><p>The lecture writes the lasso objective as <span class="math inline">\(\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|_1\)</span>, without the <span class="math inline">\(\tfrac12\)</span>. In the orthonormal design (<span class="math inline">\(\mathbf X\)</span> is <span class="math inline">\(n \times p\)</span> with <span class="math inline">\(\mathbf X^T\mathbf X = \mathbf I\)</span>), show that this objective splits into one problem per coefficient, and find by how much that lasso moves each coefficient toward zero.</p></li>
 </ol>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
@@ -2619,8 +2619,26 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 2">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 2
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol start="2" type="a">
+<li>Let <span class="math inline">\(\mathbf z = \mathbf X^T\mathbf y\)</span>, the least-squares estimate in this design. Write <span class="math inline">\(\mathbf y - \mathbf X\beta = (\mathbf y - \mathbf X\mathbf z) + \mathbf X(\mathbf z - \beta)\)</span> and show that the two pieces are orthogonal.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2629,13 +2647,17 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
 <li><p>For <span class="math inline">\(b &gt; 0\)</span> the derivative is <span class="math inline">\(-(z - b) + \lambda\)</span>, zero at <span class="math inline">\(b = z - \lambda\)</span>, which is positive only if <span class="math inline">\(z &gt; \lambda\)</span>. For <span class="math inline">\(b &lt; 0\)</span> the derivative is <span class="math inline">\(-(z - b) - \lambda\)</span>, zero at <span class="math inline">\(b = z + \lambda\)</span>, negative only if <span class="math inline">\(z &lt; -\lambda\)</span>. If <span class="math inline">\(|z| \le \lambda\)</span> neither case gives a solution; the objective is convex (a convex quadratic plus <span class="math inline">\(\lambda|b|\)</span>), so its minimum is at the one remaining candidate, the kink <span class="math inline">\(b = 0\)</span>. Together: <span class="math inline">\(\hat b = z - \lambda\)</span> for <span class="math inline">\(z &gt; \lambda\)</span>, <span class="math inline">\(z + \lambda\)</span> for <span class="math inline">\(z &lt; -\lambda\)</span>, <span class="math inline">\(0\)</span> between, which is <span class="math inline">\(\mathrm{sign}(z)(|z| - \lambda)_+\)</span>.</p></li>
-<li><p><span class="math inline">\((z - b)^2 + \lambda|b| = 2\big[\tfrac12(z - b)^2 + \tfrac\lambda2|b|\big]\)</span>, the same problem with <span class="math inline">\(\lambda/2\)</span> in place of <span class="math inline">\(\lambda\)</span>: the lecture’s lasso moves each coefficient by <span class="math inline">\(\lambda/2\)</span>.</p></li>
+<li><p>First, the reduction to one coefficient at a time. Let <span class="math inline">\(\mathbf z = \mathbf X^T\mathbf y\)</span>. With <span class="math inline">\(\mathbf X^T\mathbf X = \mathbf I\)</span> the normal equations <span class="math inline">\(\mathbf X^T\mathbf X\beta = \mathbf X^T\mathbf y\)</span> read <span class="math inline">\(\beta = \mathbf z\)</span>, so <span class="math inline">\(\mathbf z\)</span> is the least-squares estimate and <span class="math inline">\(z_j\)</span> the least-squares coefficient of the problem’s statement. For any <span class="math inline">\(\beta\)</span>, <span class="math display">\[
+\mathbf y - \mathbf X\beta = (\mathbf y - \mathbf X\mathbf z) + \mathbf X(\mathbf z - \beta).
+\]</span> The two pieces are orthogonal: <span class="math inline">\(\mathbf X^T(\mathbf y - \mathbf X\mathbf z) = \mathbf z - \mathbf X^T\mathbf X\mathbf z = \mathbf 0\)</span>, so the residual is orthogonal to every column of <span class="math inline">\(\mathbf X\)</span>, and the second piece is a combination of those columns. By Pythagoras, and because <span class="math inline">\(\|\mathbf X\mathbf v\|^2 = \mathbf v^T\mathbf X^T\mathbf X\mathbf v = \|\mathbf v\|^2\)</span>, <span class="math display">\[
+\|\mathbf y - \mathbf X\beta\|^2 = \|\mathbf y - \mathbf X\mathbf z\|^2 + \|\mathbf X(\mathbf z - \beta)\|^2 = \|\mathbf y - \mathbf X\mathbf z\|^2 + \sum_{j=1}^p (z_j - \beta_j)^2.
+\]</span> The first term does not involve <span class="math inline">\(\beta\)</span>, and <span class="math inline">\(\lambda\|\beta\|_1 = \lambda\sum_j|\beta_j|\)</span>, so minimizing the lecture’s objective means minimizing <span class="math inline">\(\sum_{j=1}^p \big[(z_j - \beta_j)^2 + \lambda|\beta_j|\big]\)</span>. Each term involves one coefficient only, so the sum is smallest when each term is: <span class="math inline">\(p\)</span> separate problems, <span class="math inline">\((z_j - b)^2 + \lambda|b|\)</span> in <span class="math inline">\(b\)</span>. (In the lecture’s identity design, <span class="math inline">\(\mathbf X = \mathbf I\)</span> and <span class="math inline">\(n = p\)</span>, so <span class="math inline">\(\mathbf z = \mathbf y\)</span> and the first term is zero.) Second, the scale. <span class="math inline">\((z - b)^2 + \lambda|b| = 2\big[\tfrac12(z - b)^2 + \tfrac\lambda2|b|\big]\)</span>, and doubling an objective does not move its minimizer, so this is the problem of (a) with <span class="math inline">\(\lambda/2\)</span> in place of <span class="math inline">\(\lambda\)</span>: <span class="math inline">\(\hat\beta_j = \mathrm{sign}(z_j)\,(|z_j| - \lambda/2)_+\)</span>. The lecture’s lasso moves each coefficient toward zero by <span class="math inline">\(\lambda/2\)</span> and stops at zero.</p></li>
 </ol>
-<p>Common errors: forgetting to check the sign condition in (a) (<span class="math inline">\(b = z - \lambda\)</span> with <span class="math inline">\(z &lt; \lambda\)</span> is negative, which is not in the case <span class="math inline">\(b &gt; 0\)</span>); in (b), answering <span class="math inline">\(2\lambda\)</span>: the factor 2 multiplies the whole objective, so it halves <span class="math inline">\(\lambda\)</span> relative to the <span class="math inline">\(\tfrac12\)</span> form.</p>
+<p>Common errors: forgetting to check the sign condition in (a) (<span class="math inline">\(b = z - \lambda\)</span> with <span class="math inline">\(z &lt; \lambda\)</span> is negative, which is not in the case <span class="math inline">\(b &gt; 0\)</span>); in (b), answering <span class="math inline">\(2\lambda\)</span>: the factor 2 multiplies the whole objective, so it halves <span class="math inline">\(\lambda\)</span> relative to the <span class="math inline">\(\tfrac12\)</span> form; or splitting the objective into coordinates without using <span class="math inline">\(\mathbf X^T\mathbf X = \mathbf I\)</span>, which is what makes the cross terms vanish.</p>
 </div>
 </div>
 </div>
@@ -2648,7 +2670,7 @@ window.Quarto = {
 <li><p>In <span class="math inline">\(p\)</span> dimensions a ball of radius <span class="math inline">\(r\)</span> has volume <span class="math inline">\(c_p r^p\)</span>. Repeat the argument of (d) to find the order of <span class="math inline">\(r_k\)</span>, and hence of <span class="math inline">\(r_k^2\)</span>, in <span class="math inline">\(p\)</span> dimensions. Why does the lemma say “away from the boundary”?</p></li>
 </ol>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2657,7 +2679,7 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
 <li><span class="math inline">\(r_1 &gt; r\)</span> means that no input landed in the interval <span class="math inline">\((\tfrac12 - r, \tfrac12 + r)\)</span>. Each input falls in it with probability <span class="math inline">\(2r\)</span>, independently of the others.</li>
@@ -2666,7 +2688,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 2">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2675,14 +2697,14 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>(b), (c) Substitute <span class="math inline">\(u = 1 - 2r\)</span>. <span class="math inline">\(\int_0^1 u^n\,du = 1/(n + 1)\)</span> and <span class="math inline">\(\int_0^1 u^n(1 - u)\,du = 1/((n + 1)(n + 2))\)</span>.</p>
 </div>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 3">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2691,14 +2713,14 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>(d), (e) The expected number of inputs in a region is <span class="math inline">\(n\)</span> times its volume. The <span class="math inline">\(k\)</span>th nearest input is at the radius where that count reaches <span class="math inline">\(k\)</span>.</p>
 </div>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2707,7 +2729,7 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
 <li><p>Each input misses the interval <span class="math inline">\((\tfrac12 - r, \tfrac12 + r)\)</span>, of length <span class="math inline">\(2r\)</span>, with probability <span class="math inline">\(1 - 2r\)</span>; the inputs are independent, so all <span class="math inline">\(n\)</span> miss it with probability <span class="math inline">\((1 - 2r)^n\)</span>, and that is the event <span class="math inline">\(r_1 &gt; r\)</span>.</p></li>
@@ -2728,7 +2750,7 @@ window.Quarto = {
 <li><p>Which basis functions have <span class="math inline">\(w_j = 0\)</span>? What happens to their coefficients as <span class="math inline">\(\lambda \to \infty\)</span>, and to the others? What does the fit tend to?</p></li>
 </ol>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2737,7 +2759,7 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
 <li><span class="math inline">\(f&#39;&#39;(x) = \sum_j \beta_j b_j&#39;&#39;(x)\)</span>; square it (a double sum) and integrate term by term. For semidefiniteness, what is <span class="math inline">\(\beta^T\boldsymbol\Omega\beta\)</span> as an integral?</li>
@@ -2746,7 +2768,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 2">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2755,7 +2777,7 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol start="2" type="a">
 <li>Expand <span class="math inline">\(\|\mathbf y - \mathbf B\beta\|^2 + \lambda\beta^T\boldsymbol\Omega\beta\)</span> and take the gradient; the gradient of <span class="math inline">\(\beta^T\boldsymbol\Omega\beta\)</span> is <span class="math inline">\(2\boldsymbol\Omega\beta\)</span>. For invertibility, show <span class="math inline">\(v^T(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)v &gt; 0\)</span> for <span class="math inline">\(v \ne \mathbf 0\)</span>.</li>
@@ -2764,7 +2786,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 3">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2773,7 +2795,7 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol start="3" type="a">
 <li>With <span class="math inline">\(\mathbf B^T\mathbf B = \mathbf I\)</span> and a diagonal <span class="math inline">\(\boldsymbol\Omega\)</span>, the system in (b) is <span class="math inline">\(J\)</span> separate equations, one per coefficient.</li>
@@ -2782,7 +2804,7 @@ window.Quarto = {
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2791,7 +2813,7 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-19" class="callout-19-contents callout-collapse collapse">
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
 <li><p><span class="math inline">\(f&#39;&#39;(x) = \sum_j \beta_j b_j&#39;&#39;(x)\)</span>, so <span class="math inline">\(f&#39;&#39;(x)^2 = \sum_j\sum_k \beta_j\beta_k\,b_j&#39;&#39;(x)b_k&#39;&#39;(x)\)</span>, and integrating, <span class="math inline">\(\int f&#39;&#39;^2 = \sum_j\sum_k \beta_j\beta_k\Omega_{jk} = \beta^T\boldsymbol\Omega\beta\)</span>. Since <span class="math inline">\(f(x_i) = (\mathbf B\beta)_i\)</span>, the sum of squares is <span class="math inline">\(\|\mathbf y - \mathbf B\beta\|^2\)</span>. <span class="math inline">\(\Omega_{jk} = \Omega_{kj}\)</span> because the integrand is symmetric in <span class="math inline">\(j\)</span> and <span class="math inline">\(k\)</span>; and <span class="math inline">\(\beta^T\boldsymbol\Omega\beta = \int f&#39;&#39;^2 \ge 0\)</span> for every <span class="math inline">\(\beta\)</span>, which is positive semidefiniteness. (It is not positive definite: a <span class="math inline">\(\beta\)</span> whose curve <span class="math inline">\(f\)</span> is a straight line gives <span class="math inline">\(0\)</span>.)</p></li>
@@ -2841,7 +2863,7 @@ window.Quarto = {
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2850,7 +2872,7 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-20" class="callout-20-contents callout-collapse collapse">
+<div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fold <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>K, <span class="at">length.out =</span> <span class="fu">nrow</span>(sp_train)))</span>
@@ -2884,7 +2906,7 @@ window.Quarto = {
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot: cv_knn against ks, log scale on k</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2893,7 +2915,7 @@ window.Quarto = {
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-21" class="callout-21-contents callout-collapse collapse">
+<div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">500</span>)</span>
@@ -2938,7 +2960,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2947,7 +2969,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-22" class="callout-22-contents callout-collapse collapse">
+<div id="callout-23" class="callout-23-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Both curves have the same shape, a steep fall from <span class="math inline">\(k = 1\)</span> and a flat bottom from about <span class="math inline">\(k = 20\)</span> to <span class="math inline">\(200\)</span>; the CV minimum is at <span class="math inline">\(k = 100\)</span> and the tuning minimum at <span class="math inline">\(k = 100\)</span>, within the flat part, where the two curves differ by less than a tuning standard error. The CV curve costs no rows: every training track is fitted on nine times and scored once, and the tuning tracks are still unused. The tuning curve left 2,000 tracks out of every fit and scored on them alone. The CV scores average over 5,000 held-out rows, but those rows were scored by ten fits that share rows, so the curve is not simply two and a half times as precise as the tuning curve’s 2,000 independent losses; its level is a little different because each CV fit used 4,500 rows, not 5,000.</p>
 <p><code>cv_mse()</code> returns no standard error because the formula needs the losses to be independent, and the pooled CV losses are not: the ten fits share rows. A standard error from them, or from the ten fold scores, is a heuristic (the lecture’s <code>plot(cv.glmnet)</code> bars are the second kind); the tuning set’s standard error is valid for each fixed <span class="math inline">\(k\)</span>, because its rows were held out of every fit. It is conditional on that fitted predictor, and it does not cover the minimum, which was chosen on the same tuning scores.</p>
@@ -2993,7 +3015,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3002,7 +3024,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-23" class="callout-23-contents callout-collapse collapse">
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>spread <span class="ot">&lt;-</span> cv_by_K <span class="sc">|&gt;</span> <span class="fu">group_by</span>(K, k) <span class="sc">|&gt;</span></span>
@@ -3043,7 +3065,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 <span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co"># lam_cv &lt;- ____</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3052,7 +3074,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-24" class="callout-24-contents callout-collapse collapse">
+<div id="callout-25" class="callout-25-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>lam_seq <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(X_train, y_train, <span class="at">standardize =</span> <span class="cn">FALSE</span>, <span class="at">nlambda =</span> <span class="dv">20</span>)<span class="sc">$</span>lambda</span>
@@ -3090,7 +3112,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3099,7 +3121,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-25" class="callout-25-contents callout-collapse collapse">
+<div id="callout-26" class="callout-26-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p><code>lambda.min</code> and <code>lam_cv</code> agree up to the coarseness of the two sequences (<code>cv.glmnet</code> uses a finer path, and standardizes once on all 5,000 rows rather than inside each fold, which changes the numbers very little here). <code>lambda.1se</code> is the one-standard-error rule: the largest <span class="math inline">\(\lambda\)</span> whose CV error is within one (heuristic) standard error of the minimum, a flat-bottom rule that prefers the simpler model. At <code>lambda.min</code> the lasso sets 1 of the eleven coefficients to zero; at <code>lambda.1se</code>, 5.</p>
 </div>
@@ -3140,7 +3162,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># slopes |&gt; mutate(rate = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3149,7 +3171,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-26" class="callout-26-contents callout-collapse collapse">
+<div id="callout-27" class="callout-27-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>slopes <span class="ot">&lt;-</span> lc <span class="sc">|&gt;</span> <span class="fu">group_by</span>(p) <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">slope =</span> <span class="fu">coef</span>(<span class="fu">lm</span>(<span class="fu">log</span>(mse) <span class="sc">~</span> <span class="fu">log</span>(n)))[<span class="dv">2</span>])</span>
@@ -3170,7 +3192,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <p><strong>Question 4.</strong> Read the figure against the lecture. (a) From <span class="math inline">\(n = 100\)</span> to <span class="math inline">\(n = 6400\)</span> is 64 times the data. By what factor did the error fall for <span class="math inline">\(p = 1\)</span>, and for <span class="math inline">\(p = 10\)</span>? What does the rate predict for each? (b) Look at <code>lc$k_best</code>: how does the best <span class="math inline">\(k\)</span> move with <span class="math inline">\(n\)</span> for <span class="math inline">\(p = 1\)</span> and for <span class="math inline">\(p = 10\)</span>, and what does the rate’s derivation say it should do?</p>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-28-contents" aria-controls="callout-28" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3179,7 +3201,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-27" class="callout-27-contents callout-collapse collapse">
+<div id="callout-28" class="callout-28-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>lc_ratio <span class="ot">&lt;-</span> lc <span class="sc">|&gt;</span> <span class="fu">group_by</span>(p) <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">ratio =</span> <span class="fu">round</span>(mse[n <span class="sc">==</span> <span class="dv">6400</span>] <span class="sc">/</span> mse[n <span class="sc">==</span> <span class="dv">100</span>], <span class="dv">2</span>), <span class="at">predicted =</span> <span class="fu">round</span>(<span class="dv">64</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">/</span> (p[<span class="dv">1</span>] <span class="sc">+</span> <span class="dv">2</span>)), <span class="dv">2</span>),</span>
@@ -3221,7 +3243,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 <span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="co"># rbind(k = c(1, 5, 50), by_row = round(cv_row), by_track = round(cv_track))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-28-contents" aria-controls="callout-28" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-29-contents" aria-controls="callout-29" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3230,14 +3252,14 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-28" class="callout-28-contents callout-collapse collapse">
+<div id="callout-29" class="callout-29-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p><code>match(rows$track_id, tracks)</code> gives each row the position of its track in <code>tracks</code>; index <code>fold_of_track</code> by it.</p>
 </div>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-29-contents" aria-controls="callout-29" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-30-contents" aria-controls="callout-30" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3246,7 +3268,7 @@ tune_se   29   22   16   14   13   13   12   12   12</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-29" class="callout-29-contents callout-collapse collapse">
+<div id="callout-30" class="callout-30-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>rows <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;https://ml4ds.com/files/spotify_tracks.csv&quot;</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
@@ -3281,7 +3303,7 @@ by_track 1068  711  570</code></pre>
 </div>
 <p><strong>Question 5.</strong> What happened to the scores at <span class="math inline">\(k = 1\)</span>, and why is the effect smaller at <span class="math inline">\(k = 50\)</span>? Which of the two numbers is the one to believe, and what is the rule? About a quarter of these rows have a copy; in a dataset of patients with several visits each, or of songs in many playlists, what would you expect?</p>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-30-contents" aria-controls="callout-30" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-31-contents" aria-controls="callout-31" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3290,7 +3312,7 @@ by_track 1068  711  570</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-30" class="callout-30-contents callout-collapse collapse">
+<div id="callout-31" class="callout-31-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>With folds over rows, a copied track can have one copy in the held-out fold and another among the fitting rows. At <span class="math inline">\(k = 1\)</span> its nearest neighbor is then its own copy, at distance zero and with the same popularity, so its loss is zero, and the CV score at <span class="math inline">\(k = 1\)</span> drops from about 1068 (folds by track) to about 768: cross-validation is scoring the method’s memory of the fitting rows, which is exactly what it was meant not to do. At <span class="math inline">\(k = 50\)</span> the copy is one neighbor among fifty, so the effect is small (554 against 570). The number to believe is the one with folds by track: the unit of the fold is the unit that repeats, and anything that is the same unit must stay on one side. Folds by track are not the same as removing the copies, as the data note’s <code>distinct()</code> does: the copies still count in fitting and in scoring, which is why folds by track score 1068 at <span class="math inline">\(k = 1\)</span> where step 2, with one row per track, scored 1026. With one row per track the question does not arise; with several visits per patient or a song in many playlists, most rows have a twin, and the row-level CV score of a flexible method can be far too good, enough to choose the wrong method or the wrong knob.</p>
 <p>Common errors: assigning <code>fold_track</code> by <code>rep(1:K, ...)</code> over the rows in track order, which puts a track’s consecutive copies in different folds (the checkpoint catches it); concluding that the copies should be removed from the fitting rows too (they can stay; the rule is that a track is not scored against itself).</p>
@@ -3330,7 +3352,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 <span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="co"># c(old_mean = ____, new_mean = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-31-contents" aria-controls="callout-31" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-32-contents" aria-controls="callout-32" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3339,7 +3361,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-31" class="callout-31-contents callout-collapse collapse">
+<div id="callout-32" class="callout-32-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>cv_plane <span class="ot">&lt;-</span> <span class="fu">cv_mse</span>(plane_fp, old, fold_old)</span>
@@ -3361,7 +3383,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 </div>
 <p><strong>Question 6.</strong> The plane’s predictions for the new tracks are too low on average, and nothing in the cross-validation scores hinted at it. Why can a random split not see this? Its MSE on the new tracks is lower than its CV score; is that good news? Which of the two scores answers the user’s question?</p>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-32-contents" aria-controls="callout-32" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-33-contents" aria-controls="callout-33" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3370,7 +3392,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-32" class="callout-32-contents callout-collapse collapse">
+<div id="callout-33" class="callout-33-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Cross-validation’s held-out rows come from the same years as the fitting rows, so its mean error is near zero (0 here): the drift in popularity from one year to the next is inside every fold and averages away. (Least squares makes the mean error exactly zero on the fitting rows, not on a held-out fold; here it is small because the folds are random draws from the same years.) The new tracks are all from after the fitting rows, where popularity is higher than the fitted trend predicts (the plane’s year coefficient is -0.17 per year, estimated on 1957 to 2018, and it extrapolates), so the predictions are biased low by about 11. The lower MSE on the new tracks is not evidence that the model does better there: the new tracks are more alike (their popularity has variance about 348, against about 616 for the older ones), so compare on the same tracks, with a baseline that could have been used at prediction time. The old tracks’ mean scores 469 on the new tracks, so the plane beats it by about 33, close to its margin over the mean on random folds (29): what the random split hid is the calibration, the bias of about 11, not the ranking. The new tracks’ own mean scores 348, but it uses the outcomes being predicted: it is a diagnostic after the fact, not a competitor, and says how much of the plane’s 436 is the spread of the new tracks themselves. The split in time answers the user’s question; the random split answers a different one. Which to report depends on which question is being asked, and cross-validation cannot tell you that.</p>
 <p>Common errors: fitting the plane on <code>old</code> and <code>new</code> together before scoring on <code>new</code> (the fit must not see the future); reading the lower MSE on <code>new</code> as “the model does better on new tracks”; treating the new tracks’ own mean as a baseline a model could have used.</p>
@@ -3398,7 +3420,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 <span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a><span class="co"># c(wrong = cv_mse(wrong_fp, noise, fold_w), right = cv_mse(right_fp, noise, fold_w), mean = cv_mse(mean_fp, noise, fold_w))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-33-contents" aria-controls="callout-33" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-34-contents" aria-controls="callout-34" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3407,14 +3429,14 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-33" class="callout-33-contents callout-collapse collapse">
+<div id="callout-34" class="callout-34-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>A formula from a character vector of names: <code>reformulate(keep, &quot;track_popularity&quot;)</code>, or paste the names with <code>+</code>.</p>
 </div>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-34-contents" aria-controls="callout-34" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-35-contents" aria-controls="callout-35" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3423,7 +3445,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-34" class="callout-34-contents callout-collapse collapse">
+<div id="callout-35" class="callout-35-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>n_w <span class="ot">&lt;-</span> <span class="dv">100</span>; p_w <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
@@ -3461,7 +3483,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 <span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="co"># max(abs(beta - coef(g)))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-35-contents" aria-controls="callout-35" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-36-contents" aria-controls="callout-36" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3470,7 +3492,7 @@ mean_popularity   34.3   28.2   27.4   33.9   36   39.1   42.9   47.3   41.7</co
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-35" class="callout-35-contents callout-collapse collapse">
+<div id="callout-36" class="callout-36-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">gam</span>(track_popularity <span class="sc">~</span> <span class="fu">s</span>(release_year, <span class="at">k =</span> <span class="dv">20</span>, <span class="at">bs =</span> <span class="st">&quot;cr&quot;</span>), <span class="at">data =</span> sp_train)</span>

@@ -156,19 +156,30 @@ Common errors: bounding $|a|$ by $L\,r_k$ without the triangle inequality on the
 
 (a) Show that the minimizer is $\hat b = \mathrm{sign}(z)\,(|z| - \lambda)_+$: $z$ moved toward zero by $\lambda$, stopping at zero.
 
-(b) The lecture writes the lasso objective as $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|_1$, without the $\tfrac12$. In the orthonormal design, by how much does that lasso move each coefficient toward zero?
+(b) The lecture writes the lasso objective as $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|_1$, without the $\tfrac12$. In the orthonormal design ($\mathbf X$ is $n \times p$ with $\mathbf X^T\mathbf X = \mathbf I$), show that this objective splits into one problem per coefficient, and find by how much that lasso moves each coefficient toward zero.
 
 ::: {.callout-note .answer collapse="true" title="Hint 1"}
 (a) For $b > 0$ the objective is $\tfrac12(z - b)^2 + \lambda b$, differentiable: set the derivative to zero and check that the solution is positive. Likewise for $b < 0$. If neither case gives a valid solution, the minimum is at the kink.
 :::
 
+::: {.callout-note .answer collapse="true" title="Hint 2"}
+(b) Let $\mathbf z = \mathbf X^T\mathbf y$, the least-squares estimate in this design. Write $\mathbf y - \mathbf X\beta = (\mathbf y - \mathbf X\mathbf z) + \mathbf X(\mathbf z - \beta)$ and show that the two pieces are orthogonal.
+:::
+
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
 (a) For $b > 0$ the derivative is $-(z - b) + \lambda$, zero at $b = z - \lambda$, which is positive only if $z > \lambda$. For $b < 0$ the derivative is $-(z - b) - \lambda$, zero at $b = z + \lambda$, negative only if $z < -\lambda$. If $|z| \le \lambda$ neither case gives a solution; the objective is convex (a convex quadratic plus $\lambda|b|$), so its minimum is at the one remaining candidate, the kink $b = 0$. Together: $\hat b = z - \lambda$ for $z > \lambda$, $z + \lambda$ for $z < -\lambda$, $0$ between, which is $\mathrm{sign}(z)(|z| - \lambda)_+$.
 
-(b) $(z - b)^2 + \lambda|b| = 2\big[\tfrac12(z - b)^2 + \tfrac\lambda2|b|\big]$, the same problem with $\lambda/2$ in place of $\lambda$: the lecture's lasso moves each coefficient by $\lambda/2$.
+(b) First, the reduction to one coefficient at a time. Let $\mathbf z = \mathbf X^T\mathbf y$. With $\mathbf X^T\mathbf X = \mathbf I$ the normal equations $\mathbf X^T\mathbf X\beta = \mathbf X^T\mathbf y$ read $\beta = \mathbf z$, so $\mathbf z$ is the least-squares estimate and $z_j$ the least-squares coefficient of the problem's statement. For any $\beta$,
+$$
+\mathbf y - \mathbf X\beta = (\mathbf y - \mathbf X\mathbf z) + \mathbf X(\mathbf z - \beta).
+$$
+The two pieces are orthogonal: $\mathbf X^T(\mathbf y - \mathbf X\mathbf z) = \mathbf z - \mathbf X^T\mathbf X\mathbf z = \mathbf 0$, so the residual is orthogonal to every column of $\mathbf X$, and the second piece is a combination of those columns. By Pythagoras, and because $\|\mathbf X\mathbf v\|^2 = \mathbf v^T\mathbf X^T\mathbf X\mathbf v = \|\mathbf v\|^2$,
+$$
+\|\mathbf y - \mathbf X\beta\|^2 = \|\mathbf y - \mathbf X\mathbf z\|^2 + \|\mathbf X(\mathbf z - \beta)\|^2 = \|\mathbf y - \mathbf X\mathbf z\|^2 + \sum_{j=1}^p (z_j - \beta_j)^2.
+$$
+The first term does not involve $\beta$, and $\lambda\|\beta\|_1 = \lambda\sum_j|\beta_j|$, so minimizing the lecture's objective means minimizing $\sum_{j=1}^p \big[(z_j - \beta_j)^2 + \lambda|\beta_j|\big]$. Each term involves one coefficient only, so the sum is smallest when each term is: $p$ separate problems, $(z_j - b)^2 + \lambda|b|$ in $b$. (In the lecture's identity design, $\mathbf X = \mathbf I$ and $n = p$, so $\mathbf z = \mathbf y$ and the first term is zero.) Second, the scale. $(z - b)^2 + \lambda|b| = 2\big[\tfrac12(z - b)^2 + \tfrac\lambda2|b|\big]$, and doubling an objective does not move its minimizer, so this is the problem of (a) with $\lambda/2$ in place of $\lambda$: $\hat\beta_j = \mathrm{sign}(z_j)\,(|z_j| - \lambda/2)_+$. The lecture's lasso moves each coefficient toward zero by $\lambda/2$ and stops at zero.
 
-
-Common errors: forgetting to check the sign condition in (a) ($b = z - \lambda$ with $z < \lambda$ is negative, which is not in the case $b > 0$); in (b), answering $2\lambda$: the factor 2 multiplies the whole objective, so it halves $\lambda$ relative to the $\tfrac12$ form.
+Common errors: forgetting to check the sign condition in (a) ($b = z - \lambda$ with $z < \lambda$ is negative, which is not in the case $b > 0$); in (b), answering $2\lambda$: the factor 2 multiplies the whole objective, so it halves $\lambda$ relative to the $\tfrac12$ form; or splitting the objective into coordinates without using $\mathbf X^T\mathbf X = \mathbf I$, which is what makes the cross terms vanish.
 :::
 
 **Problem 2 (the distance lemma in one dimension).** $n$ inputs i.i.d. uniform on $[0, 1]$, the point $x_0 = \tfrac12$, and $r_1$ the distance from $x_0$ to the nearest input.

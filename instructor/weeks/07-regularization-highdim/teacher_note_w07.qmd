@@ -13,7 +13,7 @@ In seminar order. Planned total 60 minutes; cutting the first item marked gets b
 
 | Item | Min | | If short |
 |---|---:|---|---|
-| Problem 1(a, b): soft thresholding derived in three cases; the lecture's objective without the $\tfrac12$ moves each coefficient by $\lambda/2$ | 4 | Keep | Write the $b > 0$ case on the board and say the other two are mirror images |
+| Problem 1(a, b): soft thresholding derived in three cases; with $\mathbf X^T\mathbf X = \mathbf I$ the lecture's objective splits by Pythagoras into one problem per coefficient, and without the $\tfrac12$ it moves each coefficient by $\lambda/2$ | 4 | Keep | Write the $b > 0$ case on the board and say the other two are mirror images; for (b), the Pythagoras line and the factor 2 |
 | Problem 2(a, b, c): $\mathbb P(r_1 > r) = (1 - 2r)^n$, $\mathbb E[r_1] = 1/(2(n+1))$, $\mathbb E[r_1^2] = 1/(2(n+1)(n+2))$, the lemma at $k = 1$, $p = 1$ | 4 | Keep | The tail formula and the substitution $u = 1 - 2r$ |
 | Problem 2(d, e): $N(r)$ binomial with mean $2rn$, so $r_k \approx k/(2n)$; in $p$ dimensions $r_k^p \approx k/(c_p n)$; the boundary changes the constant | 3 | Rush; cut second | The count in a ball is $n$ times its volume; set it to $k$ |
 | Problem 3: $\int f''^2 = \beta^T\boldsymbol\Omega\beta$, the equations $(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y$, the diagonal basis gives $z_j/(1 + \lambda w_j)$, the line is never shrunk | 6 | Rush; cut first | Expand the double sum and write the equations; stop before (c) |
