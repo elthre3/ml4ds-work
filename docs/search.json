@@ -2142,11 +2142,25 @@
     "text": "Part 5: double descent"
   },
   {
-    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-zero-error-fits",
-    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-zero-error-fits",
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-biasvariance-trade-off",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#the-biasvariance-trade-off",
     "title": "Machine learning",
-    "section": "The zero-error fits",
-    "text": "The zero-error fits\n\n\n\n\n\n\n\n\n\n\\(n = 20\\) points, natural splines with \\(J\\) basis functions: least squares up to \\(J = n\\); beyond, of the many fits with zero training error, the one with the smallest \\(\\|\\beta\\|\\) (ridge’s limit as \\(\\lambda \\to 0\\)). Zero training error does not say which fit you have: the rule that picks one is the regularization"
+    "section": "The bias–variance trade-off",
+    "text": "The bias–variance trade-off\n\n\n\n\n\n\n\n\n\nExpected test error = noise + bias\\(^2\\) + variance. More flexibility: less bias, more variance; the sum is a U"
+  },
+  {
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#does-statistics-apply-to-deep-learning",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#does-statistics-apply-to-deep-learning",
+    "title": "Machine learning",
+    "section": "Does statistics apply to deep learning?",
+    "text": "Does statistics apply to deep learning?\nThe bias–variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data… or does it?\n\n\n\n\n\nBelkin, Hsu, Ma and Mandal (2019). Does zero training error necessarily mean the model is overfit? No."
+  },
+  {
+    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#zero-training-error-what-does-it-mean",
+    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#zero-training-error-what-does-it-mean",
+    "title": "Machine learning",
+    "section": "Zero training error: what does it mean?",
+    "text": "Zero training error: what does it mean?\n\n\n\n\n\n\n\n\n\n\\(n = 20\\) points, natural splines with \\(J\\) basis functions: least squares up to \\(J = n\\); beyond, of the many fits with zero training error, the one with the smallest \\(\\|\\beta\\|\\) (ridge’s limit as \\(\\lambda \\to 0\\)). Zero training error does not say which fit you have"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#double-descent-demonstrated",
@@ -2156,18 +2170,11 @@
     "text": "Double descent, demonstrated\n\n\n\n\n\n\n\n\n\nTest MSE against \\(J\\), averaged over 50 draws of 20 points: a U up to \\(J = n\\), a spike at \\(J = n\\) (interpolation threshold), a second descent beyond it (Belkin, Hsu, Ma and Mandal 2019). Ridge on same basis, \\(\\lambda\\) by cross-validation: never interpolates, no spike. Dashed: noise variance"
   },
   {
-    "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#does-statistics-apply-to-deep-learning",
-    "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#does-statistics-apply-to-deep-learning",
-    "title": "Machine learning",
-    "section": "Does statistics apply to deep learning?",
-    "text": "Does statistics apply to deep learning?\nThe bias–variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data… or does it?\n\n\n\n\n\nBelkin, Hsu, Ma and Mandal (2019). Does zero training error necessarily mean the model is overfit? No. Anna Karenina principle: all truly optimal models are alike; each overfit model is overfit in its own way"
-  },
-  {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#double-descent-takeaways",
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#double-descent-takeaways",
     "title": "Machine learning",
     "section": "Double descent: takeaways",
-    "text": "Double descent: takeaways\nIt can happen for some models (large neural networks) on some data (high signal-to-noise: images, translation). So zero training error does not necessarily mean overfit, and a test error that has started rising might fall again later: we don’t know\nIt does not contradict the bias–variance trade-off. The decomposition holds at every point of both curves. The horizontal axis needs care: past \\(J = n\\), more basis functions is not more flexibility, so the curve need not be a U\nFor most methods in this course, expect a U: \\(k\\)-NN, trees, ridge, the lasso. Regularized fits do not interpolate, and have no second descent (the ridge curve)\nISLR section 10.8, pp. 441–443"
+    "text": "Double descent: takeaways\nIt can happen for some models (large neural networks) on some data (high signal-to-noise: images, translation). So zero training error does not necessarily mean overfit, and a test error that has started rising might fall again later: we don’t know\nIt does not contradict the bias–variance trade-off. The horizontal axis may not accurately indicate model complexity\nFor most methods in this course, expect a U: \\(k\\)-NN, trees, ridge, the lasso. Regularized fits do not interpolate, and have no second descent (the ridge curve)\nISLR section 10.8, pp. 441–443"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#before-the-seminar",
@@ -2181,7 +2188,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#conclusion",
     "title": "Machine learning",
     "section": "Conclusion",
-    "text": "Conclusion\nCross-validation chooses the knob\nEvery row fitted on and scored on, in turn. The curve’s minimum is a chosen number: report a score from the vault\nThe error of a smooth \\(f^\\star\\), in \\(n\\) and \\(p\\)\nThe worst-case rate is \\(n^{-2/(p+2)}\\) with smoothness alone; a stronger assumption gives a faster rate, when it holds\nRidge divides, the lasso subtracts\nBias on purpose: for every \\(\\beta\\) some \\(\\lambda &gt; 0\\) beats least squares; the lasso’s zeros are exact. A penalty on wiggliness is ridge with weights. Past \\(p = n\\), the rule that picks the fit is the regularizer"
+    "text": "Conclusion\n\nCross-validation: the standard for tuning when model fits are less expensive and/or datasets aren’t extremely large. The minimum CV-error underestimates risk of the chosen model\nModeling assumptions (smoothness, additivity, sparsity, wiggliness) make different types of models work well. We generally don’t know if assumptions are true\nMost ML models are optimized (in the bias–variance trade-off) with nonzero bias. Achieving zero training error without overfitting is not a new discovery of the AI community and does not contradict the trade-off"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#references",

@@ -627,8 +627,31 @@ Joshua Loftus
 <h2></h2>
 <h3 id="part-5-double-descent">Part 5: double descent</h3>
 </section>
-<section id="the-zero-error-fits" class="slide level2">
-<h2>The zero-error fits</h2>
+<section id="the-biasvariance-trade-off" class="slide level2">
+<h2>The bias–variance trade-off</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="07-1-regularization_files/figure-revealjs/bv-tradeoff-1.png" class="quarto-figure quarto-figure-center" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Expected test error = noise + bias<span class="math inline">\(^2\)</span> + variance. More flexibility: less bias, more variance; the sum is a U</p>
+</section>
+<section id="does-statistics-apply-to-deep-learning" class="slide level2 inverse">
+<h2>Does statistics apply to deep learning?</h2>
+<p>The bias–variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data… or does it?</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="img/doubledescent.jpg" class="quarto-figure quarto-figure-center" style="width:70.0%"></p>
+</figure>
+</div>
+<p>Belkin, Hsu, Ma and Mandal (2019). Does zero training error <em>necessarily</em> mean the model is overfit? <strong>No.</strong></p>
+</section>
+<section id="zero-training-error-what-does-it-mean" class="slide level2">
+<h2>Zero training error: what does it mean?</h2>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -638,7 +661,7 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p><span class="math inline">\(n = 20\)</span> points, natural splines with <span class="math inline">\(J\)</span> basis functions: least squares up to <span class="math inline">\(J = n\)</span>; beyond, of the many fits with zero training error, the one with the smallest <span class="math inline">\(\|\beta\|\)</span> (ridge’s limit as <span class="math inline">\(\lambda \to 0\)</span>). Zero training error does not say which fit you have: the rule that picks one is the regularization</p>
+<p><span class="math inline">\(n = 20\)</span> points, natural splines with <span class="math inline">\(J\)</span> basis functions: least squares up to <span class="math inline">\(J = n\)</span>; beyond, of the many fits with zero training error, the one with the smallest <span class="math inline">\(\|\beta\|\)</span> (ridge’s limit as <span class="math inline">\(\lambda \to 0\)</span>). Zero training error does not say which fit you have</p>
 </section>
 <section id="double-descent-demonstrated" class="slide level2" data-minutes="3">
 <h2>Double descent, demonstrated</h2>
@@ -653,20 +676,10 @@ Joshua Loftus
 </div>
 <p>Test MSE against <span class="math inline">\(J\)</span>, averaged over 50 draws of 20 points: a U up to <span class="math inline">\(J = n\)</span>, a spike at <span class="math inline">\(J = n\)</span> (interpolation threshold), a second descent beyond it (Belkin, Hsu, Ma and Mandal 2019). Ridge on same basis, <span class="math inline">\(\lambda\)</span> by cross-validation: never interpolates, no spike. Dashed: noise variance</p>
 </section>
-<section id="does-statistics-apply-to-deep-learning" class="slide level2 inverse">
-<h2>Does statistics apply to deep learning?</h2>
-<p>The bias–variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data… or does it?</p>
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="img/doubledescent.jpg" class="quarto-figure quarto-figure-center" style="width:70.0%"></p>
-</figure>
-</div>
-<p>Belkin, Hsu, Ma and Mandal (2019). Does zero training error <em>necessarily</em> mean the model is overfit? <strong>No.</strong> Anna Karenina principle: all truly optimal models are alike; each overfit model is overfit in its own way</p>
-</section>
 <section id="double-descent-takeaways" class="slide level2">
 <h2>Double descent: takeaways</h2>
 <p><strong>It can happen</strong> for some models (large neural networks) on some data (high signal-to-noise: images, translation). So zero training error does not necessarily mean overfit, and a test error that has started rising might fall again later: we don’t know</p>
-<p><strong>It does not contradict the bias–variance trade-off.</strong> The decomposition holds at every point of both curves. The horizontal axis needs care: past <span class="math inline">\(J = n\)</span>, more basis functions is not more flexibility, so the curve need not be a U</p>
+<p><strong>It does not contradict the bias–variance trade-off.</strong> The horizontal axis may not accurately indicate model complexity</p>
 <p><strong>For most methods in this course, expect a U</strong>: <span class="math inline">\(k\)</span>-NN, trees, ridge, the lasso. Regularized fits do not interpolate, and have no second descent (the ridge curve)</p>
 <p>ISLR section 10.8, pp.&nbsp;441–443</p>
 </section>
@@ -679,12 +692,11 @@ Joshua Loftus
 </section>
 <section id="conclusion" class="slide level2 inverse">
 <h2>Conclusion</h2>
-<h4 id="cross-validation-chooses-the-knob">Cross-validation chooses the knob</h4>
-<p>Every row fitted on and scored on, in turn. The curve’s minimum is a chosen number: report a score from the vault</p>
-<h4 id="the-error-of-a-smooth-fstar-in-n-and-p">The error of a smooth <span class="math inline">\(f^\star\)</span>, in <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span></h4>
-<p>The worst-case rate is <span class="math inline">\(n^{-2/(p+2)}\)</span> with smoothness alone; a stronger assumption gives a faster rate, when it holds</p>
-<h4 id="ridge-divides-the-lasso-subtracts">Ridge divides, the lasso subtracts</h4>
-<p>Bias on purpose: for every <span class="math inline">\(\beta\)</span> some <span class="math inline">\(\lambda &gt; 0\)</span> beats least squares; the lasso’s zeros are exact. A penalty on wiggliness is ridge with weights. Past <span class="math inline">\(p = n\)</span>, the rule that picks the fit is the regularizer</p>
+<ul>
+<li><p>Cross-validation: the standard for tuning when model fits are less expensive and/or datasets aren’t extremely large. The minimum CV-error underestimates risk of the chosen model</p></li>
+<li><p>Modeling assumptions (smoothness, additivity, sparsity, wiggliness) make different types of models work well. We generally don’t know if assumptions are true</p></li>
+<li><p>Most ML models are optimized (in the bias–variance trade-off) with nonzero bias. Achieving zero training error without overfitting is not a new discovery of the AI community and does not contradict the trade-off</p></li>
+</ul>
 </section>
 <section id="references" class="slide level2 inverse" data-minutes="0">
 <h2>References</h2>
