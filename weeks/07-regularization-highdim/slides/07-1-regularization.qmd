@@ -814,10 +814,56 @@ Compress: past the interpolation threshold there are many zero-error fits and a 
 
 ### Part 5: double descent
 
-## The zero-error fits
+## The bias--variance trade-off
 
 ::: {.notes}
-After ISLR's Figure 10.21 (own simulation, J counts the intercept): 20 points, one input, natural splines with J = 8, 20, 42 and 80. Past J = n, B beta = y has infinitely many solutions and lm prints NA; the smallest-norm one is B'(BB')^{-1}y, ridge's limit as lambda goes to zero, and also where gradient descent from zero stops, the link to networks later in the course. At J = 20 the curve swings between the points; at 42 and 80 it is calmer. The rule that picks the fit is an inductive bias, and it is doing the regularizing.
+The classical picture, schematic: expected test error is noise plus bias squared plus variance; more flexibility trades bias for variance, and the sum is a U with its minimum in between. Every CV curve today had this shape.
+:::
+
+```{r}
+#| label: bv-tradeoff
+#| fig-height: 3.9
+#| fig-width: 10
+#| out-width: "80%"
+#| fig-align: center
+# A schematic, not data: bias squared falls and variance rises with flexibility; with the noise, their sum is a U.
+bv <- tibble(flex = seq(0, 1, length.out = 300)) |>
+  mutate(bias2 = 1.6 * (1 - flex)^2.2, variance = 0.06 + 1.4 * flex^2.6, total = 0.35 + bias2 + variance)
+bv_best <- bv |> slice_min(total, n = 1)
+ggplot(bv, aes(flex)) +
+  geom_hline(yintercept = 0.35, linetype = 2, colour = "grey55") +
+  geom_vline(xintercept = bv_best$flex, linetype = 3, colour = "grey45") +
+  geom_line(aes(y = bias2), colour = v_blue, linewidth = 1.3) +
+  geom_line(aes(y = variance), colour = m_orange, linewidth = 1.3) +
+  geom_line(aes(y = total), colour = v_dark, linewidth = 1.7) +
+  annotate("text", x = 0.06, y = 1.55, label = "bias^2", parse = TRUE, colour = v_blue, size = 6, hjust = 0) +
+  annotate("text", x = 0.97, y = 0.72, label = "variance", colour = m_orange, size = 6, hjust = 1) +
+  annotate("text", x = 0.97, y = 1.95, label = "expected test error", colour = v_dark, size = 6, hjust = 1) +
+  annotate("text", x = 0.97, y = 0.27, label = "noise", colour = "grey40", size = 5, hjust = 1) +
+  annotate("text", x = bv_best$flex + 0.02, y = 2.1, label = "best flexibility", colour = "grey30", size = 5, hjust = 0) +
+  coord_cartesian(ylim = c(0, 2.2)) +
+  labs(x = "flexibility (model complexity)", y = "error") +
+  theme(axis.text = element_blank(), axis.title = element_text(size = 16), panel.grid = element_blank())
+```
+
+Expected test error = noise + bias$^2$ + variance. More flexibility: less bias, more variance; the sum is a U
+
+## Does statistics apply to deep learning? {.inverse}
+
+::: {.notes}
+The figure that gave the phenomenon its name (Belkin, Hsu, Ma and Mandal 2019): on the left, the last slide's U; on the right, what can happen past the interpolation threshold. The networks that train to zero loss live on the right. The rest of the section is this picture on a small example.
+:::
+
+The bias--variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data... or does it?
+
+![](img/doubledescent.jpg){width="70%" fig-align="center"}
+
+Belkin, Hsu, Ma and Mandal (2019). Does zero training error *necessarily* mean the model is overfit? **No.**
+
+## Zero training error: what does it mean?
+
+::: {.notes}
+After ISLR's Figure 10.21 (own simulation, J counts the intercept): 20 points, one input, natural splines with J = 8, 20, 42 and 80. Past J = n, B beta = y has infinitely many solutions and lm prints NA; the smallest-norm one is B'(BB')^{-1}y, ridge's limit as lambda goes to zero, and also where gradient descent from zero stops, the link to networks later in the course. At J = 20 the curve swings between the points; at 42 and 80 it is calmer.
 :::
 
 ```{r}
@@ -843,7 +889,7 @@ ggplot(dd, aes(x, y)) + geom_line(data = interp, aes(y = fit), colour = v_blue, 
   theme(strip.text = element_text(size = 13)) + labs(x = NULL, y = NULL)
 ```
 
-$n = 20$ points, natural splines with $J$ basis functions: least squares up to $J = n$; beyond, of the many fits with zero training error, the one with the smallest $\|\beta\|$ (ridge's limit as $\lambda \to 0$). Zero training error does not say which fit you have: the rule that picks one is the regularization
+$n = 20$ points, natural splines with $J$ basis functions: least squares up to $J = n$; beyond, of the many fits with zero training error, the one with the smallest $\|\beta\|$ (ridge's limit as $\lambda \to 0$). Zero training error does not say which fit you have
 
 ## Double descent, demonstrated {minutes="3"}
 
@@ -890,18 +936,6 @@ ggplot(dd_curve, aes(J, test_mse, colour = rule, linetype = rule)) +
 
 Test MSE against $J$, averaged over 50 draws of 20 points: a U up to $J = n$, a spike at $J = n$ (interpolation threshold), a second descent beyond it (Belkin, Hsu, Ma and Mandal 2019). Ridge on same basis, $\lambda$ by cross-validation: never interpolates, no spike. Dashed: noise variance
 
-## Does statistics apply to deep learning? {.inverse}
-
-::: {.notes}
-Skip if behind. The figure that gave the phenomenon its name (Belkin, Hsu, Ma and Mandal 2019); the networks that train to zero loss live on the right of it. Anna Karenina: all truly optimal models are alike; each overfit model is overfit in its own way.
-:::
-
-The bias--variance trade-off is one of the most important pillars of statistical wisdom. If we make a model too complex, it overfits to the training data... or does it?
-
-![](img/doubledescent.jpg){width="70%" fig-align="center"}
-
-Belkin, Hsu, Ma and Mandal (2019). Does zero training error *necessarily* mean the model is overfit? **No.** Anna Karenina principle: all truly optimal models are alike; each overfit model is overfit in its own way
-
 ## Double descent: takeaways
 
 ::: {.notes}
@@ -910,7 +944,7 @@ Two minutes, ISLR 10.8's points. It happens for some models on some data, so nei
 
 **It can happen** for some models (large neural networks) on some data (high signal-to-noise: images, translation). So zero training error does not necessarily mean overfit, and a test error that has started rising might fall again later: we don't know
 
-**It does not contradict the bias--variance trade-off.** The decomposition holds at every point of both curves. The horizontal axis needs care: past $J = n$, more basis functions is not more flexibility, so the curve need not be a U
+**It does not contradict the bias--variance trade-off.** The horizontal axis may not accurately indicate model complexity
 
 **For most methods in this course, expect a U**: $k$-NN, trees, ridge, the lasso. Regularized fits do not interpolate, and have no second descent (the ridge curve)
 
@@ -929,20 +963,14 @@ Say it once: exercise 1 is the stated ridge form, exercise 2 the rate with the s
 ## Conclusion {.inverse}
 
 ::: {.notes}
-Compress: cross-validation chooses the knob and the CV score is not the number to report; the rate gives the error in n and p, and a stronger assumption gives a faster rate only when it holds; ridge divides, the lasso subtracts, and the smoothing penalty is ridge with weights; past p = n the rule that picks the fit is the regularizer.
+Compress: CV is the standard for tuning, and its minimum is optimistic; each assumption makes some model work well, and we rarely know which holds; the best models carry bias, and interpolating without overfitting is old news that the trade-off already allows.
 :::
 
-#### Cross-validation chooses the knob
+- Cross-validation: the standard for tuning when model fits are less expensive and/or datasets aren't extremely large. The minimum CV-error underestimates risk of the chosen model
 
-Every row fitted on and scored on, in turn. The curve's minimum is a chosen number: report a score from the vault
+- Modeling assumptions (smoothness, additivity, sparsity, wiggliness) make different types of models work well. We generally don't know if assumptions are true
 
-#### The error of a smooth $f^\star$, in $n$ and $p$
-
-The worst-case rate is $n^{-2/(p+2)}$ with smoothness alone; a stronger assumption gives a faster rate, when it holds
-
-#### Ridge divides, the lasso subtracts
-
-Bias on purpose: for every $\beta$ some $\lambda > 0$ beats least squares; the lasso's zeros are exact. A penalty on wiggliness is ridge with weights. Past $p = n$, the rule that picks the fit is the regularizer
+- Most ML models are optimized (in the bias--variance trade-off) with nonzero bias. Achieving zero training error without overfitting is not a new discovery of the AI community and does not contradict the trade-off
 
 ## References {.inverse minutes="0"}
 
