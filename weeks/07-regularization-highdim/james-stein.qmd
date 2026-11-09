@@ -1,0 +1,196 @@
+---
+title: "James-Stein shrinkage: a picture"
+subtitle: "Where shrinking toward zero helps, where it hurts, and what dimension does to the picture"
+execute:
+  echo: true
+  warning: false
+  message: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+---
+
+One observation $\mathbf Y \sim N(\mu, I_p)$, or equivalently the sample mean of $n$ draws with $\sigma^2/n = 1$. The natural estimate of $\mu$ is $\mathbf Y$ itself. The James-Stein estimator pulls it toward a point chosen in advance, here $\mathbf 0$:
+$$
+\hat\mu_c = \Big(1 - \frac{c}{\|\mathbf Y\|^2}\Big)_+ \mathbf Y, \qquad c = p - 2 .
+$$
+The subscript $+$ is the positive part, so a $\mathbf Y$ with $\|\mathbf Y\|^2 \le c$ is shrunk all the way to $\mathbf 0$ instead of past it. James and Stein (1961) proved that for $p \ge 3$ the version without the positive part has smaller mean squared error than $\mathbf Y$ for every $\mu$; the positive part, a later refinement, is better still.
+
+The pictures below draw many $\mathbf Y$ around one fixed truth $\mu$ (the diamond), shrink each one, and color it by whether it ended up closer to $\mu$ (blue) or farther away (orange, hollow). The grey segment is the move. Hover over a point for its numbers; drag the three-dimensional picture to rotate it.
+
+```{r}
+#| label: setup
+#| code-summary: "Show the setup code"
+library(dplyr); library(plotly)
+
+# Course palette (theme/st310.scss): viridis for the primary scale, magma for the second.
+v_dark <- "#440154"; v_blue <- "#31688e"; m_orange <- "#fc8961"; m_black <- "#000004"
+help_col <- v_blue; hurt_col <- m_orange
+hurt_line <- "rgba(252,137,97,0.8)"; hurt_wire <- "rgba(252,137,97,0.95)"
+
+set.seed(310)
+
+# Shrink every row of Y toward 0 with its own factor (1 - c / |y|^2)_+ and record the squared errors.
+shrink <- function(Y, mu, c) {
+  d2 <- rowSums(Y^2)
+  f <- pmax(1 - c / d2, 0)
+  Yhat <- Y * f
+  tibble(d2 = d2, f = f,
+         se = rowSums(sweep(Y, 2, mu)^2),
+         newse = rowSums(sweep(Yhat, 2, mu)^2)) |>
+    mutate(worse = newse > se, to_zero = f == 0)
+}
+
+# Interleave start, end, NA so one plotly line trace draws every segment.
+segments_xy <- function(a, b) {
+  n <- nrow(a); out <- matrix(NA_real_, 3 * n, ncol(a))
+  out[seq(1, 3 * n, 3), ] <- a; out[seq(2, 3 * n, 3), ] <- b
+  out
+}
+
+hover_text <- function(s) {
+  sprintf("|y|<sup>2</sup> = %.2f<br>factor = %.2f<br>error before = %.2f<br>error after = %.2f", s$d2, s$f, s$se, s$newse)
+}
+```
+
+## Two dimensions, as a heuristic
+
+In two dimensions the James-Stein constant is $c = p - 2 = 0$: no shrinkage at all, which agrees with the theorem's condition $p \ge 3$ (the sample mean cannot be beaten for every $\mu$ in one or two dimensions). So this picture borrows the three-dimensional constant, $c = 1$, to show the geometry on a page. Truth $\mu = (2.4, 1.8)$, $\|\mu\| = 3$, 150 draws.
+
+```{r}
+#| label: two-dimensions
+#| fig-height: 6.5
+mu2 <- c(2.4, 1.8); c2 <- 1; n2 <- 150
+Y2 <- matrix(rnorm(n2 * 2), ncol = 2) + rep(mu2, each = n2)
+s2 <- shrink(Y2, mu2, c2) |> mutate(x = Y2[, 1], y = Y2[, 2], nx = x * f, ny = y * f)
+
+th <- seq(0, 2 * pi, length.out = 200)
+circle <- function(center, r) tibble(x = center[1] + r * cos(th), y = center[2] + r * sin(th))
+zero_disk2 <- circle(c(0, 0), sqrt(c2))                              # inside: shrunk all the way to 0
+hurt2 <- circle(mu2 / 2, sqrt(sum(mu2^2) / 4 + c2 / 2))              # inside: shrinking hurts (see below)
+seg2 <- segments_xy(cbind(s2$x, s2$y), cbind(s2$nx, s2$ny))
+hover2 <- hover_text(s2)
+
+plot_ly() |>
+  # background layers: the two circles, then 0 and mu
+  add_trace(x = hurt2$x, y = hurt2$y, type = "scatter", mode = "lines",
+            line = list(color = hurt_line, dash = "dot", width = 1.8),
+            name = "inside: shrinking hurts", hoverinfo = "name") |>
+  add_trace(x = zero_disk2$x, y = zero_disk2$y, type = "scatter", mode = "lines",
+            line = list(color = "#8c8c8c", dash = "dash", width = 1.2),
+            name = "inside: shrunk to 0", hoverinfo = "name") |>
+  add_trace(x = 0, y = 0, type = "scatter", mode = "markers",
+            marker = list(color = m_black, size = 11, symbol = "x"), name = "0 (shrink toward)", hoverinfo = "name") |>
+  add_trace(x = mu2[1], y = mu2[2], type = "scatter", mode = "markers",
+            marker = list(color = v_dark, size = 12, symbol = "diamond"), name = "truth mu", hoverinfo = "name") |>
+  # data layers on top: the segments, then the points
+  add_trace(x = seg2[, 1], y = seg2[, 2], type = "scatter", mode = "lines",
+            line = list(color = "rgba(80,80,80,0.35)", width = 1), hoverinfo = "none", showlegend = FALSE) |>
+  add_trace(data = filter(s2, !worse), x = ~x, y = ~y, type = "scatter", mode = "markers",
+            marker = list(color = help_col, size = 7, opacity = 0.8),
+            text = hover2[!s2$worse], hoverinfo = "text", name = "shrinking helps") |>
+  add_trace(data = filter(s2, worse), x = ~x, y = ~y, type = "scatter", mode = "markers",
+            marker = list(color = hurt_col, size = 8, symbol = "circle-open", line = list(width = 2.2)),
+            text = hover2[s2$worse], hoverinfo = "text", name = "shrinking hurts") |>
+  layout(xaxis = list(title = "", zeroline = FALSE, range = c(-1.6, 5.6)),
+         yaxis = list(title = "", zeroline = FALSE, scaleanchor = "x", scaleratio = 1, range = c(-2.2, 5)),
+         legend = list(x = 0.01, y = 0.99, bgcolor = "rgba(255,255,255,0.7)"),
+         margin = list(l = 30, r = 10, t = 10, b = 30))
+```
+
+Every point moves along the line from itself to $\mathbf 0$; points far from $\mathbf 0$ barely move, points near it move a lot. The ones that get worse are the ones that were already "between" $\mu$ and $\mathbf 0$; the dotted circle, centered halfway between them, is the exact boundary for every point not shrunk all the way to $\mathbf 0$. In this run `r sum(!s2$worse)` of `r n2` draws improve and `r sum(s2$to_zero)` land on $\mathbf 0$.
+
+## Three dimensions, the theorem's smallest case
+
+Here $c = p - 2 = 1$ is the James-Stein constant itself. Truth $\mu = (2, 2, 1)$, again $\|\mu\| = 3$, 300 draws. The dotted circle has become a sphere, drawn as a wireframe.
+
+```{r}
+#| label: three-dimensions
+#| fig-height: 7
+mu3 <- c(2, 2, 1); c3 <- 1; n3 <- 300
+Y3 <- matrix(rnorm(n3 * 3), ncol = 3) + rep(mu3, each = n3)
+s3 <- shrink(Y3, mu3, c3) |> mutate(x = Y3[, 1], y = Y3[, 2], z = Y3[, 3], nx = x * f, ny = y * f, nz = z * f)
+seg3 <- segments_xy(cbind(s3$x, s3$y, s3$z), cbind(s3$nx, s3$ny, s3$nz))
+hover3 <- hover_text(s3)
+
+# the sphere inside which shrinking hurts: center mu/2, radius sqrt(|mu|^2/4 + c/2), as a wireframe
+wire <- function(center, r, n_mer = 8, n_par = 4, m = 60) {
+  t <- seq(0, 2 * pi, length.out = m); pieces <- list()
+  for (a in seq(0, pi, length.out = n_mer + 1)[-(n_mer + 1)])                   # meridians
+    pieces[[length(pieces) + 1]] <- cbind(r * cos(t) * cos(a), r * cos(t) * sin(a), r * sin(t))
+  for (ph in seq(-pi / 2, pi / 2, length.out = n_par + 2)[-c(1, n_par + 2)])   # parallels
+    pieces[[length(pieces) + 1]] <- cbind(r * cos(ph) * cos(t), r * cos(ph) * sin(t), rep(r * sin(ph), m))
+  out <- do.call(rbind, lapply(pieces, function(P) rbind(P, NA)))
+  sweep(out, 2, center, "+")
+}
+W <- wire(mu3 / 2, sqrt(sum(mu3^2) / 4 + c3 / 2))
+
+plot_ly() |>
+  add_trace(x = W[, 1], y = W[, 2], z = W[, 3], type = "scatter3d", mode = "lines",
+            line = list(color = hurt_wire, width = 3.5), hoverinfo = "none", name = "inside: shrinking hurts") |>
+  add_trace(x = seg3[, 1], y = seg3[, 2], z = seg3[, 3], type = "scatter3d", mode = "lines",
+            line = list(color = "rgba(50,50,50,0.5)", width = 2.5), hoverinfo = "none", showlegend = FALSE) |>
+  add_trace(data = filter(s3, !worse), x = ~x, y = ~y, z = ~z, type = "scatter3d", mode = "markers",
+            marker = list(color = help_col, size = 3.5, opacity = 0.85),
+            text = hover3[!s3$worse], hoverinfo = "text", name = "shrinking helps") |>
+  add_trace(data = filter(s3, worse), x = ~x, y = ~y, z = ~z, type = "scatter3d", mode = "markers",
+            marker = list(color = hurt_col, size = 4.5, symbol = "circle-open", line = list(color = hurt_col, width = 2)),
+            text = hover3[s3$worse], hoverinfo = "text", name = "shrinking hurts") |>
+  add_trace(x = 0, y = 0, z = 0, type = "scatter3d", mode = "markers",
+            marker = list(color = m_black, size = 4, symbol = "x"), name = "0 (shrink toward)", hoverinfo = "name") |>
+  add_trace(x = mu3[1], y = mu3[2], z = mu3[3], type = "scatter3d", mode = "markers",
+            marker = list(color = v_dark, size = 5, symbol = "diamond"), name = "truth mu", hoverinfo = "name") |>
+  layout(scene = list(aspectmode = "data",
+                      xaxis = list(title = "", showticklabels = FALSE), yaxis = list(title = "", showticklabels = FALSE),
+                      zaxis = list(title = "", showticklabels = FALSE),
+                      camera = list(eye = list(x = 1.6, y = -1.5, z = 0.9))),
+         legend = list(x = 0.01, y = 0.99, bgcolor = "rgba(255,255,255,0.7)"),
+         margin = list(l = 0, r = 0, t = 0, b = 0))
+```
+
+In this run `r sum(!s3$worse)` of `r n3` draws improve and `r sum(s3$to_zero)` land on $\mathbf 0$. Rotate the picture so that $\mathbf 0$ and $\mu$ line up: the sphere covers a smaller share of the cloud than the circle did, because the cloud now has a third direction to spread into.
+
+## The same three-dimensional draws, flattened
+
+The 300 draws of the picture above with their third coordinate dropped, so $\mathbf 0$ stays at the origin, $\mu = (2, 2, 1)$ goes to $(2, 2)$, and the sphere's outline is the dotted circle. Each point keeps the color it earned in three dimensions.
+
+```{r}
+#| label: three-dimensions-flattened
+#| fig-height: 6.5
+seg3f <- segments_xy(cbind(s3$x, s3$y), cbind(s3$nx, s3$ny))
+sph_c3 <- mu3 / 2; sph_r3 <- sqrt(sum(mu3^2) / 4 + c3 / 2)
+hurt3f <- circle(sph_c3[1:2], sph_r3)
+# helped in 3D, but the flattened point falls inside the circle: above or below the sphere
+s3 <- s3 |> mutate(in_circle = (x - sph_c3[1])^2 + (y - sph_c3[2])^2 < sph_r3^2,
+                   above_below = !worse & in_circle)
+
+plot_ly() |>
+  add_trace(x = hurt3f$x, y = hurt3f$y, type = "scatter", mode = "lines",
+            line = list(color = hurt_line, dash = "dot", width = 1.8),
+            name = "the sphere's outline", hoverinfo = "name") |>
+  add_trace(x = 0, y = 0, type = "scatter", mode = "markers",
+            marker = list(color = m_black, size = 11, symbol = "x"), name = "0 (shrink toward)", hoverinfo = "name") |>
+  add_trace(x = mu3[1], y = mu3[2], type = "scatter", mode = "markers",
+            marker = list(color = v_dark, size = 12, symbol = "diamond"), name = "truth mu", hoverinfo = "name") |>
+  add_trace(x = seg3f[, 1], y = seg3f[, 2], type = "scatter", mode = "lines",
+            line = list(color = "rgba(80,80,80,0.35)", width = 1), hoverinfo = "none", showlegend = FALSE) |>
+  add_trace(data = filter(s3, !worse), x = ~x, y = ~y, type = "scatter", mode = "markers",
+            marker = list(color = help_col, size = 7, opacity = 0.8),
+            text = hover3[!s3$worse], hoverinfo = "text", name = "shrinking helps") |>
+  add_trace(data = filter(s3, worse), x = ~x, y = ~y, type = "scatter", mode = "markers",
+            marker = list(color = hurt_col, size = 8, symbol = "circle-open", line = list(width = 2.2)),
+            text = hover3[s3$worse], hoverinfo = "text", name = "shrinking hurts") |>
+  layout(xaxis = list(title = "", zeroline = FALSE, range = c(-1.6, 5.6)),
+         yaxis = list(title = "", zeroline = FALSE, scaleanchor = "x", scaleratio = 1, range = c(-1.8, 5.4)),
+         legend = list(x = 0.01, y = 0.99, bgcolor = "rgba(255,255,255,0.7)"),
+         margin = list(l = 30, r = 10, t = 10, b = 30))
+```
+
+Some blue points now appear inside the circle: `r sum(s3$above_below)` of them in this run. Shrinking helped them, so they are not inside the sphere. They were above or below it, and dropping the third coordinate moved them onto the disk. Compare with the first picture, where nothing blue can be inside the circle except a point shrunk all the way to $\mathbf 0$.
+
+## Further
+
+- A proof of the theorem: E. Candès, *Stats 300C, Theory of Statistics*, Stanford, [Lecture 18 notes](https://statweb.stanford.edu/~candes/teaching/stats300c/Lectures/Lecture18.pdf).
+- Wikipedia, [James-Stein estimator](https://en.wikipedia.org/wiki/James%E2%80%93Stein_estimator): the estimator, the positive part, shrinking toward a point other than $\mathbf 0$, and the empirical Bayes reading.
+- Stein, C. (1956), "Inadmissibility of the usual estimator for the mean of a multivariate normal distribution", *Proceedings of the Third Berkeley Symposium on Mathematical Statistics and Probability*, vol. 1, 197--206. James, W. and Stein, C. (1961), "Estimation with quadratic loss", *Proceedings of the Fourth Berkeley Symposium on Mathematical Statistics and Probability*, vol. 1, 361--379, [Project Euclid](https://projecteuclid.org/euclid.bsmsp/1200512173).

@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Joshua Loftus">
+
+<title>Week 7 seminar – machine learning 4 data science</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-2933ca209de16f787bfe4fe53c4e45ee.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="https://ml4ds.com" class="navbar-brand navbar-brand-logo">
+    <img src="../../../files/sticker.png" alt="ml4ds" class="navbar-logo light-content">
+    <img src="../../../files/sticker.png" alt="ml4ds" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="https://ml4ds.com">
+    <span class="navbar-title">machine learning 4 data science</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-references" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">references</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-references">    
+        <li>
+    <a class="dropdown-item" href="https://www.statlearning.com/">
+ <span class="dropdown-text">ISLR</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://mlstory.org/">
+ <span class="dropdown-text">PPA (Patterns, Predictions, and Actions)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://causalml-book.org/">
+ <span class="dropdown-text">CausalML</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://r4ds.hadley.nz/">
+ <span class="dropdown-text">R4DS</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://hastie.su.domains/ElemStatLearn/">
+ <span class="dropdown-text">ESL</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://hastie.su.domains/CASI/">
+ <span class="dropdown-text">CASI</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://christophm.github.io/interpretable-ml-book/">
+ <span class="dropdown-text">IML</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html"> 
+<span class="menu-text">content</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../about.html"> 
+<span class="menu-text">about</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#before-the-seminar" id="toc-before-the-seminar" class="nav-link active" data-scroll-target="#before-the-seminar">Before the seminar</a></li>
+  <li><a href="#problems" id="toc-problems" class="nav-link" data-scroll-target="#problems">Problems</a></li>
+  <li><a href="#coding" id="toc-coding" class="nav-link" data-scroll-target="#coding">Coding</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Week 7 seminar</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Joshua Loftus </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is the student version of the notebook. The code you write goes where a line says <code># ...</code> or has a <code>____</code>. A code chunk with a blank starts with <code>#| eval: false</code>, so the file renders as it stands; delete that line once you have filled the blank. Working through the chunks one at a time in RStudio (Ctrl/Cmd+Enter) is unaffected. Answers are revealed in the seminar.</p>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)       <span class="co"># should've already install.packages("tidyverse")</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)          <span class="co"># might need to install.packages("glmnet")</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)            <span class="co"># penalized splines; ships with R</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_minimal</span>())</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>mse <span class="ot">&lt;-</span> <span class="cf">function</span>(y, pred) <span class="fu">mean</span>((y <span class="sc">-</span> pred)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>se_loss <span class="ot">&lt;-</span> <span class="cf">function</span>(y, pred) <span class="fu">sd</span>((y <span class="sc">-</span> pred)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(y))   <span class="co"># standard error of an MSE</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># k-NN regression with several standardized inputs, as in the lecture: squared distances by</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># matrix algebra, then the mean outcome of the k nearest training rows.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>knn_predict <span class="ot">&lt;-</span> <span class="cf">function</span>(Xnew, Xtrain, ytrain, k) {</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  d2 <span class="ot">&lt;-</span> <span class="fu">outer</span>(<span class="fu">rowSums</span>(Xnew<span class="sc">^</span><span class="dv">2</span>), <span class="fu">rowSums</span>(Xtrain<span class="sc">^</span><span class="dv">2</span>), <span class="st">"+"</span>) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> Xnew <span class="sc">%*%</span> <span class="fu">t</span>(Xtrain)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">apply</span>(d2, <span class="dv">1</span>, <span class="cf">function</span>(d) <span class="fu">mean</span>(ytrain[<span class="fu">order</span>(d)[<span class="dv">1</span><span class="sc">:</span>k]]))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="before-the-seminar" class="level2">
+<h2 class="anchored" data-anchor-id="before-the-seminar">Before the seminar</h2>
+<!-- At home, before the seminar. -->
+<p>The lecture stated the bias–variance decomposition in ridge form and left its proof to you (exercise 1). It proved the <span class="math inline">\(k\)</span>-nearest-neighbor rate from a stated lemma; exercise 2 is that proof again, with the slides closed. Do both on paper before the seminar; the seminar’s problems are variations on them. You may use, without proof: linearity of expectation; that the variance of a sum of independent variables is the sum of their variances; that for a symmetric matrix <span class="math inline">\(\mathbf A\)</span> the gradient of <span class="math inline">\(\beta^T\mathbf A\beta\)</span> is <span class="math inline">\(2\mathbf A\beta\)</span> and its Hessian is <span class="math inline">\(2\mathbf A\)</span>; and the tower property, <span class="math inline">\(\mathbb E[W] = \mathbb E\big[\mathbb E[W \mid V]\big]\)</span>. Throughout, assume that every expectation that appears exists.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Hints">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Hints
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Each exercise has hints, collapsed below it. Do not open a hint unless you have been stuck for at least a few minutes, and open them in order. Solutions are shown in the seminar if you ask.</p>
+</div>
+</div>
+<p><strong>Exercise 1 (bias–variance decomposition, ridge form).</strong> <span class="math inline">\(\mathbf X\)</span> is <span class="math inline">\(n \times p\)</span> with orthonormal columns, <span class="math inline">\(\mathbf X^T\mathbf X = \mathbf I\)</span> (so <span class="math inline">\(p \le n\)</span>). The outcome is <span class="math inline">\(\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon\)</span> with <span class="math inline">\(\beta\)</span> fixed and unknown and the <span class="math inline">\(\varepsilon_i\)</span> independent, mean <span class="math inline">\(0\)</span>, variance <span class="math inline">\(\sigma^2 &gt; 0\)</span>. Expectations are over <span class="math inline">\(\boldsymbol\varepsilon\)</span>, with <span class="math inline">\(\mathbf X\)</span> fixed. The least-squares estimator solves the normal equations <span class="math inline">\(\mathbf X^T\mathbf X\beta = \mathbf X^T\mathbf y\)</span>, so here <span class="math inline">\(\hat\beta = \mathbf X^T\mathbf y\)</span>. For <span class="math inline">\(\lambda &gt; 0\)</span> the ridge estimator <span class="math inline">\(\hat\beta_\lambda\)</span> minimizes <span class="math inline">\(\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|^2\)</span>.</p>
+<ol type="a">
+<li><p>Show that <span class="math inline">\(\hat\beta\)</span> is unbiased, <span class="math inline">\(\mathbb E[\hat\beta] = \beta\)</span>, and that each coordinate has variance <span class="math inline">\(\mathrm{Var}(\hat\beta_j) = \sigma^2\)</span>. Deduce <span class="math inline">\(\mathbb E\|\hat\beta - \beta\|^2 = p\sigma^2\)</span>.</p></li>
+<li><p>Derive the stationarity condition of the ridge objective, <span class="math inline">\((\mathbf X^T\mathbf X + \lambda\mathbf I)\beta = \mathbf X^T\mathbf y\)</span>, and show that in this design <span class="math inline">\(\hat\beta_\lambda = \hat\beta/(1 + \lambda)\)</span>.</p></li>
+<li><p>Compute the bias <span class="math inline">\(\mathbb E[\hat\beta_{\lambda,j}] - \beta_j\)</span> and the variance <span class="math inline">\(\mathrm{Var}(\hat\beta_{\lambda,j})\)</span> of each coordinate, and show <span class="math display">\[
+\mathrm{MSE}(\lambda) = \mathbb E\|\hat\beta_\lambda - \beta\|^2 = \sum_{j=1}^p \frac{\lambda^2\beta_j^2 + \sigma^2}{(1 + \lambda)^2}.
+\]</span></p></li>
+<li><p>Differentiate <span class="math inline">\(\mathrm{MSE}(\lambda)\)</span> and show that its derivative at <span class="math inline">\(\lambda = 0\)</span> is <span class="math inline">\(-2p\sigma^2\)</span>, whatever <span class="math inline">\(\beta\)</span> is. Conclude that for every <span class="math inline">\(\beta\)</span> there is a <span class="math inline">\(\lambda &gt; 0\)</span> with <span class="math inline">\(\mathrm{MSE}(\lambda) &lt; \mathrm{MSE}(0) = p\sigma^2\)</span>.</p></li>
+<li><p>For <span class="math inline">\(\beta \ne \mathbf 0\)</span>, find the <span class="math inline">\(\lambda\)</span> that minimizes <span class="math inline">\(\mathrm{MSE}(\lambda)\)</span>, in terms of <span class="math inline">\(\sigma^2\)</span> and <span class="math inline">\(\|\beta\|^2/p\)</span>, and the minimum value. What happens when <span class="math inline">\(\beta = \mathbf 0\)</span>? Why can this <span class="math inline">\(\lambda\)</span> not be used in practice?</p></li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint 1">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 1
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="a">
+<li><span class="math inline">\(\hat\beta = \mathbf X^T(\mathbf X\beta + \boldsymbol\varepsilon) = \beta + \mathbf X^T\boldsymbol\varepsilon\)</span>. What are the mean vector and the covariance matrix of <span class="math inline">\(\mathbf X^T\boldsymbol\varepsilon\)</span>? The covariance matrix of <span class="math inline">\(\mathbf A\boldsymbol\varepsilon\)</span> is <span class="math inline">\(\mathbf A\,\mathrm{Cov}(\boldsymbol\varepsilon)\,\mathbf A^T\)</span>.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint 2">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 2
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>(b), (c) With <span class="math inline">\(\mathbf X^T\mathbf X = \mathbf I\)</span> the stationarity condition reads <span class="math inline">\((1 + \lambda)\beta = \mathbf X^T\mathbf y\)</span>. For a constant <span class="math inline">\(c\)</span>, the estimator <span class="math inline">\(c\hat\beta_j\)</span> has bias <span class="math inline">\((c - 1)\beta_j\)</span> and variance <span class="math inline">\(c^2\sigma^2\)</span>.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint 3">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 3
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>(d), (e) Write <span class="math inline">\(\mathrm{MSE}(\lambda) = (\lambda^2\|\beta\|^2 + p\sigma^2)/(1 + \lambda)^2\)</span> and use the quotient rule; after cancelling a factor <span class="math inline">\((1 + \lambda)\)</span> the numerator of the derivative is <span class="math inline">\(2\lambda\|\beta\|^2 - 2p\sigma^2\)</span>.</p>
+</div>
+</div>
+</div>
+<p><strong>Exercise 2 (the <span class="math inline">\(k\)</span>-nearest-neighbor rate, with the slides closed).</strong> Inputs <span class="math inline">\(x_1, \ldots, x_n\)</span> i.i.d. uniform on <span class="math inline">\([0, 1]^p\)</span>; outcomes <span class="math inline">\(y_i = f^\star(x_i) + \varepsilon_i\)</span> with the <span class="math inline">\(\varepsilon_i\)</span> independent of each other and of the inputs, mean <span class="math inline">\(0\)</span>, variance <span class="math inline">\(\sigma^2\)</span>; <span class="math inline">\(f^\star\)</span> is <span class="math inline">\(L\)</span>-Lipschitz, <span class="math inline">\(|f^\star(x) - f^\star(x')| \le L\|x - x'\|\)</span>, with <span class="math inline">\(L &gt; 0\)</span> and <span class="math inline">\(\sigma^2 &gt; 0\)</span>. For a point <span class="math inline">\(x_0\)</span>, <span class="math inline">\(r_k(x_0)\)</span> is the distance from <span class="math inline">\(x_0\)</span> to its <span class="math inline">\(k\)</span>th nearest input, <span class="math inline">\(x_{(1)}, \ldots, x_{(k)}\)</span> are the <span class="math inline">\(k\)</span> nearest inputs, and <span class="math inline">\(\hat f_k(x_0) = \tfrac1k\sum_{l=1}^k y_{(l)}\)</span> is the mean of their outcomes. You may use the lemma stated in the lecture: for <span class="math inline">\(x_0\)</span> away from the boundary, <span class="math inline">\(\mathbb E[r_k(x_0)^2] \le C_p (k/n)^{2/p}\)</span>, with <span class="math inline">\(C_p\)</span> depending on <span class="math inline">\(p\)</span> only.</p>
+<ol type="a">
+<li><p>Conditional on the inputs, write <span class="math inline">\(\hat f_k(x_0) - f^\star(x_0)\)</span> as the sum of a term that depends only on <span class="math inline">\(f^\star\)</span> and the inputs and a term that depends on the noise. Show that the first term is at most <span class="math inline">\(L\,r_k(x_0)\)</span> in absolute value.</p></li>
+<li><p>Show that, conditional on the inputs, the noise term has mean <span class="math inline">\(0\)</span> and variance <span class="math inline">\(\sigma^2/k\)</span>.</p></li>
+<li><p>Deduce <span class="math inline">\(\mathbb E\big[(\hat f_k(x_0) - f^\star(x_0))^2 \mid \text{inputs}\big] \le L^2 r_k(x_0)^2 + \sigma^2/k\)</span>, then take the expectation over the inputs and apply the lemma.</p></li>
+<li><p>Treat <span class="math inline">\(k\)</span> as a continuous variable and minimize the bound <span class="math inline">\(C_p L^2 (k/n)^{2/p} + \sigma^2/k\)</span> over <span class="math inline">\(k\)</span>. Show that the minimizer is <span class="math inline">\(k = c\,n^{2/(p+2)}\)</span> for a constant <span class="math inline">\(c\)</span> that depends on <span class="math inline">\(p\)</span>, <span class="math inline">\(L\)</span>, <span class="math inline">\(\sigma^2\)</span> and <span class="math inline">\(C_p\)</span> but not on <span class="math inline">\(n\)</span>, and that the minimized bound is proportional to <span class="math inline">\(n^{-2/(p+2)}\)</span>.</p></li>
+<li><p>By what factor must <span class="math inline">\(n\)</span> grow to halve the bound when <span class="math inline">\(p = 10\)</span>? When <span class="math inline">\(p = 1\)</span>?</p></li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint 1">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 1
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="a">
+<li><span class="math inline">\(\hat f_k(x_0) - f^\star(x_0) = \tfrac1k\sum_l \big(f^\star(x_{(l)}) - f^\star(x_0)\big) + \tfrac1k\sum_l \varepsilon_{(l)}\)</span>. Every one of the <span class="math inline">\(k\)</span> nearest inputs is within <span class="math inline">\(r_k(x_0)\)</span> of <span class="math inline">\(x_0\)</span>.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint 2">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 2
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>(b), (c) Given the inputs, which <span class="math inline">\(k\)</span> noise terms are averaged is fixed, and they are independent with variance <span class="math inline">\(\sigma^2\)</span>. For (c), expand <span class="math inline">\((a + b)^2\)</span> with <span class="math inline">\(a\)</span> the first term and <span class="math inline">\(b\)</span> the noise term; what is the conditional mean of the cross term?</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint 3">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 3
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol start="4" type="a">
+<li>Write the bound as <span class="math inline">\(A k^{2/p} + B/k\)</span> with <span class="math inline">\(A = C_p L^2 n^{-2/p}\)</span> and <span class="math inline">\(B = \sigma^2\)</span>. The derivative is zero when <span class="math inline">\((2A/p)\,k^{2/p - 1} = B/k^2\)</span>, that is, <span class="math inline">\(k^{(p+2)/p} = pB/(2A)\)</span>.</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section id="problems" class="level2">
+<h2 class="anchored" data-anchor-id="problems">Problems</h2>
+<!-- About 20 min: problems 1 to 3 (7, 7, 6), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
+<p><strong>Problem 1 (thresholding rules).</strong> One coordinate of an orthonormal design: <span class="math inline">\(z\)</span> is the least-squares coefficient, a number, and <span class="math inline">\(b\)</span> the estimate. The lasso’s one-coordinate objective is <span class="math inline">\(\tfrac12(z - b)^2 + \lambda|b|\)</span> with <span class="math inline">\(\lambda &gt; 0\)</span>.</p>
+<ol type="a">
+<li><p>Show that the minimizer is <span class="math inline">\(\hat b = \mathrm{sign}(z)\,(|z| - \lambda)_+\)</span>: <span class="math inline">\(z\)</span> moved toward zero by <span class="math inline">\(\lambda\)</span>, stopping at zero.</p></li>
+<li><p>The lecture writes the lasso objective as <span class="math inline">\(\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|_1\)</span>, without the <span class="math inline">\(\tfrac12\)</span>. In the orthonormal design, by how much does that lasso move each coefficient toward zero?</p></li>
+<li><p>The elastic net adds a ridge term. One coordinate: <span class="math inline">\(\tfrac12(z - b)^2 + \lambda_1|b| + \tfrac{\lambda_2}{2}b^2\)</span>. Show that <span class="math inline">\(\hat b = \mathrm{sign}(z)\,(|z| - \lambda_1)_+ / (1 + \lambda_2)\)</span>: soft thresholding, then ridge’s division.</p></li>
+<li><p>Best subset selection penalizes the count of nonzero coefficients. One coordinate: <span class="math inline">\(\tfrac12(z - b)^2 + \lambda\,\mathbf 1\{b \ne 0\}\)</span>. Show that <span class="math inline">\(\hat b = z\)</span> if <span class="math inline">\(|z| &gt; \sqrt{2\lambda}\)</span> and <span class="math inline">\(\hat b = 0\)</span> otherwise (hard thresholding). Sketch the three rules, <span class="math inline">\(\hat b\)</span> against <span class="math inline">\(z\)</span>. Which rule is discontinuous in <span class="math inline">\(z\)</span>?</p></li>
+</ol>
+<p><strong>Problem 2 (the distance lemma in one dimension).</strong> <span class="math inline">\(n\)</span> inputs i.i.d. uniform on <span class="math inline">\([0, 1]\)</span>, the point <span class="math inline">\(x_0 = \tfrac12\)</span>, and <span class="math inline">\(r_1\)</span> the distance from <span class="math inline">\(x_0\)</span> to the nearest input.</p>
+<ol type="a">
+<li><p>For <span class="math inline">\(0 \le r \le \tfrac12\)</span>, show that <span class="math inline">\(\mathbb P(r_1 &gt; r) = (1 - 2r)^n\)</span>.</p></li>
+<li><p>Compute <span class="math inline">\(\mathbb E[r_1]\)</span>. You may use <span class="math inline">\(\mathbb E[W] = \int_0^\infty \mathbb P(W &gt; w)\,dw\)</span> for <span class="math inline">\(W \ge 0\)</span>.</p></li>
+<li><p>Compute <span class="math inline">\(\mathbb E[r_1^2]\)</span> (use <span class="math inline">\(\mathbb E[W^2] = \int_0^\infty 2w\,\mathbb P(W &gt; w)\,dw\)</span>) and compare it with the lemma’s <span class="math inline">\((k/n)^{2/p}\)</span> at <span class="math inline">\(k = 1\)</span>, <span class="math inline">\(p = 1\)</span>.</p></li>
+<li><p>Let <span class="math inline">\(N(r)\)</span> be the number of inputs within distance <span class="math inline">\(r\)</span> of <span class="math inline">\(x_0\)</span>. What is its distribution? The distance <span class="math inline">\(r_k\)</span> to the <span class="math inline">\(k\)</span>th nearest input satisfies <span class="math inline">\(r_k &gt; r\)</span> exactly when <span class="math inline">\(N(r) &lt; k\)</span>. Without computing, explain why <span class="math inline">\(r_k\)</span> is about <span class="math inline">\(k/(2n)\)</span> when <span class="math inline">\(k\)</span> is much smaller than <span class="math inline">\(n\)</span>.</p></li>
+<li><p>In <span class="math inline">\(p\)</span> dimensions a ball of radius <span class="math inline">\(r\)</span> has volume <span class="math inline">\(c_p r^p\)</span>. Repeat the argument of (d) to find the order of <span class="math inline">\(r_k\)</span>, and hence of <span class="math inline">\(r_k^2\)</span>, in <span class="math inline">\(p\)</span> dimensions. Why does the lemma say “away from the boundary”?</p></li>
+</ol>
+<p><strong>Problem 3 (the smoothing penalty as weighted ridge).</strong> A one-input curve written in a spline basis, <span class="math inline">\(f(x) = \sum_{j=1}^J \beta_j b_j(x)\)</span>: the <span class="math inline">\(b_j\)</span> are twice differentiable and their span contains the constant and the linear functions. <span class="math inline">\(\lambda \ge 0\)</span>. <span class="math inline">\(\mathbf B\)</span> is the <span class="math inline">\(n \times J\)</span> matrix with <span class="math inline">\(B_{ij} = b_j(x_i)\)</span>, and <span class="math inline">\(\boldsymbol\Omega\)</span> the <span class="math inline">\(J \times J\)</span> matrix with <span class="math inline">\(\Omega_{jk} = \int b_j''(x)\,b_k''(x)\,dx\)</span>. The smoothing objective is <span class="math inline">\(\sum_{i=1}^n (y_i - f(x_i))^2 + \lambda\int f''(x)^2\,dx\)</span>.</p>
+<ol type="a">
+<li><p>Show that <span class="math inline">\(\int f''(x)^2\,dx = \beta^T\boldsymbol\Omega\beta\)</span>, so the objective is <span class="math inline">\(\|\mathbf y - \mathbf B\beta\|^2 + \lambda\beta^T\boldsymbol\Omega\beta\)</span>. Show that <span class="math inline">\(\boldsymbol\Omega\)</span> is symmetric and positive semidefinite.</p></li>
+<li><p>Show that the minimizer satisfies <span class="math inline">\((\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y\)</span>, and that <span class="math inline">\(\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega\)</span> is invertible when <span class="math inline">\(\mathbf B\)</span> has full column rank.</p></li>
+<li><p>Suppose <span class="math inline">\(\mathbf B\)</span> has full column rank and the basis has been chosen so that <span class="math inline">\(\mathbf B^T\mathbf B = \mathbf I\)</span> and <span class="math inline">\(\boldsymbol\Omega = \mathrm{diag}(w_1, \ldots, w_J)\)</span> with every <span class="math inline">\(w_j \ge 0\)</span> (such a basis exists; the lecture’s figure showed four of its functions, ordered by wiggliness). With <span class="math inline">\(\mathbf z = \mathbf B^T\mathbf y\)</span>, show that <span class="math inline">\(\hat\beta_j = z_j/(1 + \lambda w_j)\)</span>.</p></li>
+<li><p>Which basis functions have <span class="math inline">\(w_j = 0\)</span>? What happens to their coefficients as <span class="math inline">\(\lambda \to \infty\)</span>, and to the others? What does the fit tend to?</p></li>
+</ol>
+</section>
+<section id="coding" class="level2">
+<h2 class="anchored" data-anchor-id="coding">Coding</h2>
+<!-- About 40 min: part 1 14, part 2 10, part 3 16. Skeleton lines in comments are scaffolds: the statistical operation is what you write. Everything headed "Optional, can be done at home" is outside the seminar. -->
+<section id="the-cross-validation-pipeline" class="level3">
+<h3 class="anchored" data-anchor-id="the-cross-validation-pipeline">1. The cross-validation pipeline</h3>
+<!-- 14 min: steps 1 and 2, questions 1 and 2. -->
+<p>The structures seminar’s task: predict a track’s popularity from ten audio features and its release year, squared loss (<a href="https://ml4ds.com/data/spotify.html">data note</a>), genre left out. The same split as there: 5,000 training, 2,000 tuning and 3,000 test tracks, one seed. Today the tuning tracks are a check on cross-validation and the test tracks are not opened; the last step uses a split by year of the 7,000 development tracks instead of the random one.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>feat <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"danceability"</span>, <span class="st">"energy"</span>, <span class="st">"loudness"</span>, <span class="st">"speechiness"</span>, <span class="st">"acousticness"</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>          <span class="st">"instrumentalness"</span>, <span class="st">"liveness"</span>, <span class="st">"valence"</span>, <span class="st">"tempo"</span>, <span class="st">"duration_min"</span>, <span class="st">"release_year"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>sp_file <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"https://ml4ds.com/files/spotify_tracks.csv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(track_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span>          <span class="co"># one row per track</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">duration_min =</span> duration_ms <span class="sc">/</span> <span class="dv">60000</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>sp <span class="ot">&lt;-</span> sp_file <span class="sc">|&gt;</span> <span class="fu">select</span>(track_popularity, <span class="fu">all_of</span>(feat))   <span class="co"># the outcome and the eleven inputs</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">310</span>)   <span class="co"># change this number: a different split, and different numbers below</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(sp))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>sp_train <span class="ot">&lt;-</span> sp[id[<span class="dv">1</span><span class="sc">:</span><span class="dv">5000</span>], ]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>sp_tune <span class="ot">&lt;-</span> sp[id[<span class="dv">5001</span><span class="sc">:</span><span class="dv">7000</span>], ]</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>sp_test <span class="ot">&lt;-</span> sp[id[<span class="dv">7001</span><span class="sc">:</span><span class="dv">10000</span>], ]</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> sp_train<span class="sc">$</span>track_popularity</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>y_tune <span class="ot">&lt;-</span> sp_tune<span class="sc">$</span>track_popularity</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">10</span>          <span class="co"># folds, for the whole seminar</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Step 1.</strong> One function for every pipeline. <code>cv_mse(fit_predict, d, fold)</code> takes a function <code>fit_predict(tr, ho)</code> that fits on the rows <code>tr</code> and returns predictions for the rows <code>ho</code>, the data <code>d</code>, and a vector <code>fold</code> giving each row’s fold. For each fold it fits on the other folds, predicts the held-out fold, and stores each held-out row’s squared loss; it returns the mean of all the losses, so every row is scored once. Assign the folds at random, the same folds for every method today.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fold <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>K, <span class="at">length.out =</span> <span class="fu">nrow</span>(sp_train)))   <span class="co"># each row's fold, 500 rows in each</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>cv_mse <span class="ot">&lt;-</span> <span class="cf">function</span>(fit_predict, d, fold) {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  loss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="fu">nrow</span>(d))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>K) {</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># tr &lt;- ____                        # the rows whose fold is not k</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ho &lt;- ____                        # the rows whose fold is k</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># loss[fold == k] &lt;- (ho$track_popularity - ____)^2</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(loss)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Checkpoint (run it; if it stops, fix step 1 before going on): the mean of the training rows, as a pipeline, should score close to the variance of <code>y_train</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mean_fp <span class="ot">&lt;-</span> <span class="cf">function</span>(tr, ho) <span class="fu">rep</span>(<span class="fu">mean</span>(tr<span class="sc">$</span>track_popularity), <span class="fu">nrow</span>(ho))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(<span class="fu">cv_mse</span>(mean_fp, sp_train, fold) <span class="sc">-</span> <span class="fu">var</span>(y_train)) <span class="sc">&lt;</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Step 2.</strong> The CV curve for <span class="math inline">\(k\)</span> nearest neighbors. <code>knn_fp(k)</code> returns a <code>fit_predict</code> function for one value of <span class="math inline">\(k\)</span>: it standardizes the inputs with the fold’s training rows (the means and standard deviations of <code>tr</code>, applied to both <code>tr</code> and <code>ho</code>), then calls <code>knn_predict()</code>. Run it over <code>ks</code>, find the <span class="math inline">\(k\)</span> at the minimum, and draw the curve.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">500</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>knn_fp <span class="ot">&lt;-</span> <span class="cf">function</span>(k) <span class="cf">function</span>(tr, ho) {</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(tr[, feat]); s <span class="ot">&lt;-</span> <span class="fu">apply</span>(tr[, feat], <span class="dv">2</span>, sd)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># knn_predict(____, ____, tr$track_popularity, k)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># cv_knn &lt;- sapply(ks, function(k) ____)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># k_cv &lt;- ____</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot: cv_knn against ks, log scale on k</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Question 1.</strong> The structures seminar chose <span class="math inline">\(k\)</span> on the 2,000 tuning tracks instead. The chunk below scores the same <code>ks</code> that way, from fits on all 5,000 training tracks. Compare the two curves: where is each minimum, and how far apart are the two curves at the bottom? Which curve do you trust more, and what did each cost in rows? The tuning scores come with a standard error (the lecture’s formula); why does <code>cv_mse()</code> not return one?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(sp_train[, feat]); s <span class="ot">&lt;-</span> <span class="fu">apply</span>(sp_train[, feat], <span class="dv">2</span>, sd)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> <span class="fu">scale</span>(sp_train[, feat], mu, s); X_tune <span class="ot">&lt;-</span> <span class="fu">scale</span>(sp_tune[, feat], mu, s)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tune_knn <span class="ot">&lt;-</span> <span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">mse</span>(y_tune, <span class="fu">knn_predict</span>(X_tune, X_train, y_train, k)))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>tune_se <span class="ot">&lt;-</span> <span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">se_loss</span>(y_tune, <span class="fu">knn_predict</span>(X_tune, X_train, y_train, k)))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">k =</span> ks, <span class="at">cv =</span> <span class="fu">round</span>(cv_knn), <span class="at">tune =</span> <span class="fu">round</span>(tune_knn), <span class="at">tune_se =</span> <span class="fu">round</span>(tune_se))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Step 3.</strong> The lasso through the same pipeline. <code>lasso_fp(lam)</code> standardizes inside the fold, fits the path on the training rows and predicts at the one <span class="math inline">\(\lambda\)</span> <code>lam</code>. The sequence <code>lam_seq</code> comes from a fit on all 5,000 training tracks, so every fold uses the same values (a small step outside the folds, which <code>cv.glmnet()</code> takes too). Run the pipeline over <code>lam_seq</code> and find <span class="math inline">\(\lambda\)</span> at the minimum.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>lam_seq <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(X_train, y_train, <span class="at">standardize =</span> <span class="cn">FALSE</span>, <span class="at">nlambda =</span> <span class="dv">20</span>)<span class="sc">$</span>lambda</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>lasso_fp <span class="ot">&lt;-</span> <span class="cf">function</span>(lam) <span class="cf">function</span>(tr, ho) {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(tr[, feat]); s <span class="ot">&lt;-</span> <span class="fu">apply</span>(tr[, feat], <span class="dv">2</span>, sd)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(<span class="fu">scale</span>(tr[, feat], mu, s), tr<span class="sc">$</span>track_popularity, <span class="at">lambda =</span> lam_seq, <span class="at">standardize =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.vector</span>(<span class="fu">predict</span>(fit, <span class="fu">scale</span>(ho[, feat], mu, s), <span class="at">s =</span> lam))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># cv_lasso &lt;- ____</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># lam_cv &lt;- ____</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Question 2.</strong> <code>cv.glmnet()</code> does the same with its own code. Run it on <code>X_train</code> (standardized once, on all 5,000 training rows, which is why the call says <code>standardize = FALSE</code>) with the same folds (<code>foldid = fold</code>) and compare <code>lambda.min</code> with your <code>lam_cv</code>. Its <code>lambda.1se</code> is larger: what rule chose it, and how many coefficients does the lasso set to zero at each of the two?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cvg <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(X_train, y_train, <span class="at">foldid =</span> fold, <span class="at">standardize =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">lambda.min =</span> <span class="fu">signif</span>(cvg<span class="sc">$</span>lambda.min, <span class="dv">2</span>), <span class="at">lambda.1se =</span> <span class="fu">signif</span>(cvg<span class="sc">$</span>lambda<span class="fl">.1</span>se, <span class="dv">2</span>), <span class="at">lam_cv =</span> <span class="fu">signif</span>(lam_cv, <span class="dv">2</span>))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">zero_at_min =</span> <span class="fu">sum</span>(<span class="fu">coef</span>(cvg, <span class="at">s =</span> <span class="st">"lambda.min"</span>)[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">==</span> <span class="dv">0</span>), <span class="at">zero_at_1se =</span> <span class="fu">sum</span>(<span class="fu">coef</span>(cvg, <span class="at">s =</span> <span class="st">"lambda.1se"</span>)[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">==</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="learning-curves-and-the-rate" class="level3">
+<h3 class="anchored" data-anchor-id="learning-curves-and-the-rate">2. Learning curves and the rate</h3>
+<!-- 10 min: the simulation (started earlier), step 4, question 3. -->
+<p>The lecture’s rate says how the error of <span class="math inline">\(k\)</span> nearest neighbors falls with <span class="math inline">\(n\)</span>: the bound on the squared estimation error at a point is proportional to <span class="math inline">\(n^{-2/(p+2)}\)</span>, with <span class="math inline">\(p\)</span> the number of inputs, at the best <span class="math inline">\(k\)</span>. The simulation below checks it. Inputs uniform on <span class="math inline">\([0, 1]^p\)</span> for <span class="math inline">\(p = 1, 2, 5, 10\)</span>; the truth <span class="math inline">\(f^\star(x) = \sum_{j=1}^p \sin(2\pi x_j)/\sqrt p\)</span>, which depends on every input and is Lipschitz; noise with variance <span class="math inline">\(1\)</span>. For each <span class="math inline">\(n\)</span> it fits <span class="math inline">\(k\)</span>-NN at every <span class="math inline">\(k\)</span> in <code>ks</code>, measures the squared estimation error <span class="math inline">\(\tfrac1{400}\sum (\hat f_k(x_0) - f^\star(x_0))^2\)</span> on 400 new points (against the truth, not the noisy outcome), averages over three draws of the training data, and keeps the best <span class="math inline">\(k\)</span>. The chunk takes about 40 seconds.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>f_star <span class="ot">&lt;-</span> <span class="cf">function</span>(X) <span class="fu">rowSums</span>(<span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> X)) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">ncol</span>(X))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ps <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>ns <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">400</span>, <span class="dv">800</span>, <span class="dv">1600</span>, <span class="dv">3200</span>, <span class="dv">6400</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>ks_lc <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">500</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>lc <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(ps, <span class="cf">function</span>(p) <span class="fu">map_dfr</span>(ns, <span class="cf">function</span>(n) {</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  err <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(<span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(rep) {</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(n <span class="sc">*</span> p), n, p); y <span class="ot">&lt;-</span> <span class="fu">f_star</span>(X) <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    X0 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="dv">400</span> <span class="sc">*</span> p), <span class="dv">400</span>, p); f0 <span class="ot">&lt;-</span> <span class="fu">f_star</span>(X0)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sapply</span>(ks_lc, <span class="cf">function</span>(k) <span class="cf">if</span> (k <span class="sc">&lt;=</span> n <span class="sc">/</span> <span class="dv">2</span>) <span class="fu">mean</span>((<span class="fu">knn_predict</span>(X0, X, y, k) <span class="sc">-</span> f0)<span class="sc">^</span><span class="dv">2</span>) <span class="cf">else</span> <span class="cn">NA</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  }))</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">p =</span> p, <span class="at">n =</span> n, <span class="at">k_best =</span> ks_lc[<span class="fu">which.min</span>(err)], <span class="at">mse =</span> <span class="fu">min</span>(err, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(lc, <span class="fu">aes</span>(n, mse, <span class="at">colour =</span> <span class="fu">factor</span>(p))) <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span> <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">colour =</span> <span class="st">"p"</span>, <span class="at">y =</span> <span class="st">"squared estimation error at the best k (log scale)"</span>, <span class="at">x =</span> <span class="st">"n (log scale)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notebook7_files/figure-html/learning-curves-1.png" class="img-fluid figure-img" width="1050"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Step 4.</strong> On log scales a rate is a slope: if the error is <span class="math inline">\(c\,n^{-a}\)</span> then <span class="math inline">\(\log(\text{error}) = \log c - a\log n\)</span>. For each <span class="math inline">\(p\)</span>, fit a line of <code>log(mse)</code> on <code>log(n)</code> and read off the slope. Put the slopes next to the rate’s exponent, <span class="math inline">\(-2/(p + 2)\)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># slopes &lt;- lc |&gt; group_by(p) |&gt; summarize(slope = ____)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># slopes |&gt; mutate(rate = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Question 3.</strong> Read the figure against the lecture. (a) From <span class="math inline">\(n = 100\)</span> to <span class="math inline">\(n = 6400\)</span> is 64 times the data. By what factor did the error fall for <span class="math inline">\(p = 1\)</span>, and for <span class="math inline">\(p = 10\)</span>? What does the rate predict for each? (b) Look at <code>lc$k_best</code>: how does the best <span class="math inline">\(k\)</span> move with <span class="math inline">\(n\)</span> for <span class="math inline">\(p = 1\)</span> and for <span class="math inline">\(p = 10\)</span>, and what does the rate’s derivation say it should do? (c) The Spotify task has <span class="math inline">\(p = 11\)</span> and <span class="math inline">\(n = 5{,}000\)</span>. If the rate applied to it as a worst case, how much data would halve the error of <span class="math inline">\(k\)</span>-NN?</p>
+</section>
+<section id="two-ways-cross-validation-goes-wrong" class="level3">
+<h3 class="anchored" data-anchor-id="two-ways-cross-validation-goes-wrong">3. Two ways cross-validation goes wrong</h3>
+<!-- 16 min: step 5 and question 4 (8), step 6 and question 5 (8). Mandatory: this is the complication the lecture deferred. -->
+<p>Cross-validation has worked. It assumes that the rows are exchangeable: that a held-out row is a fresh draw from the same population as the rows it was fitted on. Two ways that fails on these tracks.</p>
+<p><strong>Step 5. The same track on both sides of a fold.</strong> The file has 11,554 rows for 10,000 tracks: 1,101 tracks are in more than one playlist, and every copy has the same audio features, year and popularity. The loader removed the copies with <code>distinct()</code>. Load the rows again without it, keep the 5,000 training tracks with all their copies, and build two fold assignments: <code>fold_row</code>, at random over rows, and <code>fold_track</code>, at random over tracks, so that every copy of a track is in the same fold. Then run the <span class="math inline">\(k\)</span>-NN pipeline at <span class="math inline">\(k = 1\)</span>, <span class="math inline">\(5\)</span> and <span class="math inline">\(50\)</span> with each.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>rows <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"https://ml4ds.com/files/spotify_tracks.csv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">duration_min =</span> duration_ms <span class="sc">/</span> <span class="dv">60000</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(track_id <span class="sc">%in%</span> sp_file<span class="sc">$</span>track_id[id[<span class="dv">1</span><span class="sc">:</span><span class="dv">5000</span>]]) <span class="sc">|&gt;</span>   <span class="co"># the training tracks, copies kept</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(track_id, track_popularity, <span class="fu">all_of</span>(feat))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>fold_row <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>K, <span class="at">length.out =</span> <span class="fu">nrow</span>(rows)))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>tracks <span class="ot">&lt;-</span> <span class="fu">unique</span>(rows<span class="sc">$</span>track_id)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>fold_of_track <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>K, <span class="at">length.out =</span> <span class="fu">length</span>(tracks)))   <span class="co"># one fold per track</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># fold_track &lt;- ____                                              # each row gets its track's fold</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># cv_row &lt;- sapply(c(1, 5, 50), function(k) ____)</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># cv_track &lt;- sapply(c(1, 5, 50), function(k) ____)</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># rbind(k = c(1, 5, 50), by_row = round(cv_row), by_track = round(cv_track))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Checkpoint:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">length</span>(fold_track) <span class="sc">==</span> <span class="fu">nrow</span>(rows), <span class="fu">all</span>(<span class="fu">tapply</span>(fold_track, rows<span class="sc">$</span>track_id, <span class="cf">function</span>(f) <span class="fu">length</span>(<span class="fu">unique</span>(f))) <span class="sc">==</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Question 4.</strong> What happened to the scores at <span class="math inline">\(k = 1\)</span>, and why is the effect smaller at <span class="math inline">\(k = 50\)</span>? Which of the two numbers is the one to believe, and what is the rule? About a quarter of these rows have a copy; in a dataset of patients with several visits each, or of songs in many playlists, what would you expect?</p>
+<p><strong>Step 6. A random split against a split in time.</strong> Popularity is Spotify’s score in January 2020, and it rewards recent plays: the mean popularity by release year, below, rises through the 2010s. A random split mixes the years, so cross-validation answers “how well does this predict a track like the ones we have?”. The question a user of the model might ask is “how well will it predict this year’s releases?”. Fit least squares on the eleven inputs to the development tracks (training and tuning, 7,000) released up to 2018 (<code>old</code>), and score it two ways: by cross-validation on <code>old</code>, and on the development tracks released in 2019 and 2020 (<code>new</code>). For each, report the MSE and the mean error, <span class="math inline">\(\tfrac1m\sum_j (y_j - \hat f(x_j))\)</span>; <code>cv_mean_error()</code> does for the mean error what <code>cv_mse()</code> does for the MSE.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sp <span class="sc">|&gt;</span> <span class="fu">filter</span>(release_year <span class="sc">&gt;=</span> <span class="dv">2012</span>) <span class="sc">|&gt;</span> <span class="fu">group_by</span>(release_year) <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">tracks =</span> <span class="fu">n</span>(), <span class="at">mean_popularity =</span> <span class="fu">round</span>(<span class="fu">mean</span>(track_popularity), <span class="dv">1</span>)) <span class="sc">|&gt;</span> <span class="fu">t</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  [,1] [,2]   [,3] [,4]   [,5]   [,6]   [,7]   [,8]   [,9]
+release_year    2012.0 2013 2014.0 2015 2016.0 2017.0 2018.0 2019.0 2020.0
+tracks           215.0  321  475.0  538  638.0  774.0 1030.0 2636.0  224.0
+mean_popularity   34.7   30   28.3   34   35.2   38.6   42.4   47.5   41.8</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sp_dev <span class="ot">&lt;-</span> sp[id[<span class="dv">1</span><span class="sc">:</span><span class="dv">7000</span>], ]                              <span class="co"># the training and tuning tracks</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>old <span class="ot">&lt;-</span> sp_dev <span class="sc">|&gt;</span> <span class="fu">filter</span>(release_year <span class="sc">&lt;=</span> <span class="dv">2018</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>new <span class="ot">&lt;-</span> sp_dev <span class="sc">|&gt;</span> <span class="fu">filter</span>(release_year <span class="sc">&gt;=</span> <span class="dv">2019</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>fold_old <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>K, <span class="at">length.out =</span> <span class="fu">nrow</span>(old)))</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>plane_fp <span class="ot">&lt;-</span> <span class="cf">function</span>(tr, ho) <span class="fu">predict</span>(<span class="fu">lm</span>(track_popularity <span class="sc">~</span> ., tr), ho)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>cv_mean_error <span class="ot">&lt;-</span> <span class="cf">function</span>(fit_predict, d, fold) {        <span class="co"># cv_mse() with the loss replaced by the error</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  err <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="fu">nrow</span>(d))</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>K) {</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    tr <span class="ot">&lt;-</span> d[fold <span class="sc">!=</span> k, ]; ho <span class="ot">&lt;-</span> d[fold <span class="sc">==</span> k, ]</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    err[fold <span class="sc">==</span> k] <span class="ot">&lt;-</span> ho<span class="sc">$</span>track_popularity <span class="sc">-</span> <span class="fu">fit_predict</span>(tr, ho)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(err)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cv_plane &lt;- ____                                     # the MSE by cross-validation on old</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># cv_me &lt;- ____                                        # the mean error by cross-validation on old</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># pred_new &lt;- ____                                     # the plane fitted on old, predicting new</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># c(cv_mse = cv_plane, cv_mean_error = cv_me, new_mse = ____, new_mean_error = ____)</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># the two baselines on new: the mean of old, and the mean of new itself</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># c(old_mean = ____, new_mean = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Question 5.</strong> The plane’s predictions for the new tracks are too low on average, and nothing in the cross-validation scores hinted at it. Why can a random split not see this? Its MSE on the new tracks is lower than its CV score; is that good news? Which of the two scores answers the user’s question?</p>
+</section>
+<section id="optional-can-be-done-at-home-the-wrong-way-to-cross-validate" class="level3">
+<h3 class="anchored" data-anchor-id="optional-can-be-done-at-home-the-wrong-way-to-cross-validate">Optional, can be done at home: the wrong way to cross-validate</h3>
+<p>Cross-validate the entire pipeline, the lecture said. Here is the classic way to get that wrong (ESL, section 7.10.2). Pure noise: <span class="math inline">\(n = 100\)</span> rows, <span class="math inline">\(p = 1{,}000\)</span> inputs and an outcome, all independent standard normal, so the best possible risk is <span class="math inline">\(1\)</span> and no method can do better than the mean. The wrong way: screen the 20 inputs most correlated with the outcome on all 100 rows, then cross-validate least squares on those 20. The right way: screen inside each fold, on the fitting rows only. Write both as <code>fit_predict</code> functions for <code>cv_mse()</code> and compare the two CV scores with the mean’s.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>n_w <span class="ot">&lt;-</span> <span class="dv">100</span>; p_w <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>noise <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(<span class="fu">matrix</span>(<span class="fu">rnorm</span>(n_w <span class="sc">*</span> p_w), n_w, p_w), <span class="at">.name_repair =</span> <span class="sc">~</span> <span class="fu">paste0</span>(<span class="st">"x"</span>, <span class="fu">seq_along</span>(.x))) <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">track_popularity =</span> <span class="fu">rnorm</span>(n_w))              <span class="co"># named so that cv_mse() finds the outcome</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>fold_w <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>K, <span class="at">length.out =</span> n_w))</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>top20 <span class="ot">&lt;-</span> <span class="cf">function</span>(d) {                               <span class="co"># the 20 inputs most correlated with the outcome in d</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">cor</span>(<span class="fu">select</span>(d, <span class="sc">-</span>track_popularity), d<span class="sc">$</span>track_popularity)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames</span>(r)[<span class="fu">order</span>(<span class="sc">-</span><span class="fu">abs</span>(r))[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]]</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co"># wrong: screened once, on all rows, before cross-validation</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co"># keep &lt;- top20(noise)</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co"># wrong_fp &lt;- function(tr, ho) predict(lm(____), ho)</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co"># right: screened inside the fold</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co"># right_fp &lt;- function(tr, ho) { keep &lt;- top20(tr); predict(lm(____), ho) }</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co"># c(wrong = cv_mse(wrong_fp, noise, fold_w), right = cv_mse(right_fp, noise, fold_w), mean = cv_mse(mean_fp, noise, fold_w))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Hint 1">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 1
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>A formula from a character vector of names: <code>reformulate(keep, "track_popularity")</code>, or paste the names with <code>+</code>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="optional-can-be-done-at-home-the-weighted-ridge-form-on-a-real-fit" class="level3">
+<h3 class="anchored" data-anchor-id="optional-can-be-done-at-home-the-weighted-ridge-form-on-a-real-fit">Optional, can be done at home: the weighted-ridge form on a real fit</h3>
+<p>Problem 3 says the penalized spline’s coefficients solve <span class="math inline">\((\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y\)</span>. Check it on <code>mgcv</code>’s fit of popularity on the release year, as in the lecture: <code>model.matrix()</code> gives <span class="math inline">\(\mathbf B\)</span> (the intercept and nineteen smooth columns), <code>g$smooth[[1]]$S[[1]]</code> gives the penalty matrix of the smooth columns, and <code>g$sp</code> the <span class="math inline">\(\lambda\)</span> that GCV chose. Build <span class="math inline">\(\boldsymbol\Omega\)</span> with a row and column of zeros for the intercept, solve, and compare with <code>coef(g)</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">gam</span>(track_popularity <span class="sc">~</span> <span class="fu">s</span>(release_year, <span class="at">k =</span> <span class="dv">20</span>, <span class="at">bs =</span> <span class="st">"cr"</span>), <span class="at">data =</span> sp_train)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(g)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> g<span class="sc">$</span>smooth[[<span class="dv">1</span>]]<span class="sc">$</span>S[[<span class="dv">1</span>]]</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>Omega <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="fu">ncol</span>(B), <span class="fu">ncol</span>(B)); Omega[<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>] <span class="ot">&lt;-</span> S</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co"># beta &lt;- solve(____, ____)</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># max(abs(beta - coef(g)))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Hastie, T., Tibshirani, R. and Friedman, J. (2009). <em>The Elements of Statistical Learning: Data Mining, Inference, and Prediction</em>, 2nd edition. Springer, New York. Section 7.10.2, “The Wrong and Right Way to Do Cross-validation”, pp.&nbsp;245–247. <a href="https://hastie.su.domains/ElemStatLearn/">hastie.su.domains/ElemStatLearn</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/ml4ds\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>ST310 Machine Learning, LSE. Original course content CC BY 4.0 except where otherwise credited; datasets and images carry their own licences.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
