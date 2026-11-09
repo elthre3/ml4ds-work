@@ -58,7 +58,7 @@ Where they get stuck
 - Step 3: `predict(fit, ..., s = lam)` returns a one-column matrix; `as.vector()` is in the given code. `cv.glmnet`'s `lambda.min` differs from `lam_cv` because its path is finer and it standardizes once on all rows.
 - Step 4: `coef(lm(log(mse) ~ log(n)))[2]` inside `summarize()`; a student who regresses `mse` on `n` without logs gets a slope with no meaning. The simulation's slopes are steeper than the exponent; say that the bound is a worst case and this truth is one function.
 - Step 5: assigning `fold_track` with `rep(1:K, ...)` over the rows in track order, which puts a track's copies in different folds; the checkpoint catches it. The `match()` line is in the hint.
-- Step 6: fitting on `old` and `new` together, or scoring `old`'s mean on `old`. Students read 436 < 588 as improvement; the baseline on the same tracks (348) and the mean error ($+11$) are the answer.
+- Step 6: fitting on `old` and `new` together, or scoring `old`'s mean on `old`. Students read 436 < 587 as improvement; the baseline on the same tracks (348) and the mean error ($+11$) are the answer.
 - In the student file, a chunk with a blank starts with `#| eval: false`; they delete that line once the blank is filled. The `# ...` lines can stay.
 
 Sources: the data note at [ml4ds.com/data/spotify.html](https://ml4ds.com/data/spotify.html); the optional item follows Hastie, Tibshirani and Friedman (2009), *The Elements of Statistical Learning*, 2nd edition, section 7.10.2, pp. 245--247.
