@@ -50,7 +50,7 @@ segments_xy <- function(a, b) {
 }
 
 hover_text <- function(s) {
-  sprintf("|y|<sup>2</sup> = %.2f<br>factor = %.2f<br>error before = %.2f<br>error after = %.2f", s$d2, s$f, s$se, s$newse)
+  sprintf("|y|<sup>2</sup> = %.2f<br>factor = %.2f<br>squared error before = %.2f<br>squared error after = %.2f", s$d2, s$f, s$se, s$newse)
 }
 ```
 
@@ -76,7 +76,7 @@ plot_ly() |>
   # background layers: the two circles, then 0 and mu
   add_trace(x = hurt2$x, y = hurt2$y, type = "scatter", mode = "lines",
             line = list(color = hurt_line, dash = "dot", width = 1.8),
-            name = "inside: shrinking hurts", hoverinfo = "name") |>
+            name = "inside: shrinking hurts, if not sent to 0", hoverinfo = "name") |>
   add_trace(x = zero_disk2$x, y = zero_disk2$y, type = "scatter", mode = "lines",
             line = list(color = "#8c8c8c", dash = "dash", width = 1.2),
             name = "inside: shrunk to 0", hoverinfo = "name") |>
@@ -99,7 +99,7 @@ plot_ly() |>
          margin = list(l = 30, r = 10, t = 10, b = 30))
 ```
 
-Every point moves along the line from itself to $\mathbf 0$; points far from $\mathbf 0$ barely move, points near it move a lot. The ones that get worse are the ones that were already "between" $\mu$ and $\mathbf 0$; the dotted circle, centered halfway between them, is the exact boundary for every point not shrunk all the way to $\mathbf 0$. In this run `r sum(!s2$worse)` of `r n2` draws improve and `r sum(s2$to_zero)` land on $\mathbf 0$.
+Every point moves along the line from itself to $\mathbf 0$. The closer it starts to $\mathbf 0$, the larger the fraction it is shrunk by, reaching 100% inside the dashed circle; the longest moves start at that circle. The ones that get worse are the ones that were already "between" $\mu$ and $\mathbf 0$; the dotted circle, centered halfway between them, is the exact boundary for every point not shrunk all the way to $\mathbf 0$. In this run `r sum(!s2$worse)` of `r n2` draws improve and `r sum(s2$to_zero)` land on $\mathbf 0$.
 
 ## Three dimensions, the theorem's smallest case
 
@@ -128,7 +128,7 @@ W <- wire(mu3 / 2, sqrt(sum(mu3^2) / 4 + c3 / 2))
 
 plot_ly() |>
   add_trace(x = W[, 1], y = W[, 2], z = W[, 3], type = "scatter3d", mode = "lines",
-            line = list(color = hurt_wire, width = 3.5), hoverinfo = "none", name = "inside: shrinking hurts") |>
+            line = list(color = hurt_wire, width = 3.5), hoverinfo = "none", name = "inside: shrinking hurts, if not sent to 0") |>
   add_trace(x = seg3[, 1], y = seg3[, 2], z = seg3[, 3], type = "scatter3d", mode = "lines",
             line = list(color = "rgba(50,50,50,0.5)", width = 2.5), hoverinfo = "none", showlegend = FALSE) |>
   add_trace(data = filter(s3, !worse), x = ~x, y = ~y, z = ~z, type = "scatter3d", mode = "markers",
@@ -151,6 +151,8 @@ plot_ly() |>
 
 In this run `r sum(!s3$worse)` of `r n3` draws improve and `r sum(s3$to_zero)` land on $\mathbf 0$. Rotate the picture so that $\mathbf 0$ and $\mu$ line up: the sphere covers a smaller share of the cloud than the circle did, because the cloud now has a third direction to spread into.
 
+Counting improved draws is not the theorem's criterion: mean squared error averages the squared errors, so the size of each gain and loss counts. Here `r sum(!s2$worse)` of `r n2` two-dimensional draws improve, yet the average squared error `r if (mean(s2$newse) > mean(s2$se)) "rises" else "falls"` from `r sprintf("%.2f", mean(s2$se))` to `r sprintf("%.2f", mean(s2$newse))`; in three dimensions it `r if (mean(s3$newse) > mean(s3$se)) "rises" else "falls"` from `r sprintf("%.2f", mean(s3$se))` to `r sprintf("%.2f", mean(s3$newse))`.
+
 ## The same three-dimensional draws, flattened
 
 The 300 draws of the picture above with their third coordinate dropped, so $\mathbf 0$ stays at the origin, $\mu = (2, 2, 1)$ goes to $(2, 2)$, and the sphere's outline is the dotted circle. Each point keeps the color it earned in three dimensions.
@@ -163,7 +165,9 @@ sph_c3 <- mu3 / 2; sph_r3 <- sqrt(sum(mu3^2) / 4 + c3 / 2)
 hurt3f <- circle(sph_c3[1:2], sph_r3)
 # helped in 3D, but the flattened point falls inside the circle: above or below the sphere
 s3 <- s3 |> mutate(in_circle = (x - sph_c3[1])^2 + (y - sph_c3[2])^2 < sph_r3^2,
-                   above_below = !worse & in_circle)
+                   above_below = !worse & in_circle,
+                   in_sphere = (x - sph_c3[1])^2 + (y - sph_c3[2])^2 + (z - sph_c3[3])^2 < sph_r3^2)
+n_ab <- sum(s3$above_below); n_ab_out <- sum(s3$above_below & !s3$in_sphere)
 
 plot_ly() |>
   add_trace(x = hurt3f$x, y = hurt3f$y, type = "scatter", mode = "lines",
@@ -187,7 +191,7 @@ plot_ly() |>
          margin = list(l = 30, r = 10, t = 10, b = 30))
 ```
 
-Some blue points now appear inside the circle: `r sum(s3$above_below)` of them in this run. Shrinking helped them, so they are not inside the sphere. They were above or below it, and dropping the third coordinate moved them onto the disk. Compare with the first picture, where nothing blue can be inside the circle except a point shrunk all the way to $\mathbf 0$.
+Some blue points now appear inside the circle: `r n_ab` of them in this run, and `r if (n_ab_out == n_ab) paste("all", n_ab, "are") else paste(n_ab_out, "of them are")` outside the sphere. They were above or below it, and dropping the third coordinate moved them onto the disk. Compare with the first picture, where nothing blue can be inside the circle except a point shrunk all the way to $\mathbf 0$.
 
 ## Further
 
