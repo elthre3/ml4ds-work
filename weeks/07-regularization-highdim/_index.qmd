@@ -1,6 +1,6 @@
 ## Week 7: tuning and regularization
 
-Every method so far had a knob. This week: choosing it by $K$-fold cross-validation, with the curve it draws against $\lambda$, $k$ and tree depth, and the standard error of a held-out score. Then how the error depends on $n$ and the number of inputs: from the bias--variance decomposition, the error of $k$-nearest neighbors with $p$ inputs, the rate $n^{-2/(p+2)}$, and the faster rates an additive or a sparse truth allows. Ridge and the lasso side by side in the simplest design: shrinkage against soft thresholding, and selection against prediction; the smoothing penalty on a spline as ridge with weights. What changes when $p > n$: the minimum-norm interpolant, which zero-error fit you get, and the double-descent curve.
+Every method so far had a knob. This week: choosing it by $K$-fold cross-validation, with the curve it draws against $\lambda$, $k$ and tree depth, and the standard error of a held-out score. Then how the error depends on $n$ and the number of inputs: from the bias--variance decomposition, the error of $k$-nearest neighbors with $p$ inputs, the rate $n^{-2/(p+2)}$, and the faster rates an additive or a sparse truth allows. Ridge and the lasso side by side in the simplest design: shrinkage against soft thresholding, and selection against prediction; the smoothing penalty on a spline as ridge with weights. Double descent: which zero-error fit you get past the interpolation threshold, why the test error can fall again, and why that does not contradict the bias--variance trade-off.
 
 **Reading**
 

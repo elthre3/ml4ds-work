@@ -86,7 +86,7 @@ f_gen <- reformulate(c(feat, "genre"), "track_popularity")
 ::: {.notes}
 The deck on the spine's scale (2 a content slide, 3 a slide with a proof or a pause for the room, 1 a dark slide); the bar at the top of each note is the share done and its denominator the total. Dark = rush or skip; each dark slide's note says skip or gives the compressed phrase. Data: the Spotify tracks and the structures lecture's split (one seed, 310, at the split) for everything with several inputs; week 1's countries and simulated data for the one-input pictures. One proof in the lecture, the k-NN rate (part 2); the ridge form is stated and proved in exercise 1.
 
-Cut order: (1) the zoom on the high-dimensional example, (2) "A fixed lambda is not a chosen lambda" to one sentence on the selection slide, (3) "What double descent does and does not change" to the caption of the demonstration. The CV curve, the rate, the identity design and the ridge form do not move.
+Cut order: (1) the zoom on the high-dimensional example, (2) "A fixed lambda is not a chosen lambda" to one sentence on the selection slide. The CV curve, the rate, the identity design and the ridge form do not move.
 
 In the notebook: exercise 1 proves the ridge form, exercise 2 redoes the rate with the slides closed; problems vary soft thresholding, the distance lemma in one dimension and the weighted-ridge form of the smoothing penalty. The seminar writes a CV pipeline, reads a learning-curve figure against the rate, and then breaks CV twice: duplicated tracks across folds and a split in time.
 :::
@@ -101,7 +101,7 @@ Part 3: ridge and the lasso side by side
 
 Part 4: a penalty on wiggliness
 
-Part 5: more inputs than observations
+Part 5: double descent
 
 ## Where we left off {minutes="1"}
 
@@ -537,9 +537,9 @@ $$
 Skip if behind. The legacy shrinkage figure, redone with one factor per point and in three dimensions, is the linked page; the one line to say is the last one.
 :::
 
-Statisticians emphasized unbiasedness. After Stein's example, bias is not always bad. Most ML methods use bias this way
+[James--Stein shrinkage demo](https://ml4ds.com/weeks/07-regularization-highdim/james-stein.html)
 
-[James--Stein shrinkage, a picture](../james-stein.html): where shrinking toward zero helps and where it hurts, in two and three dimensions
+Statisticians emphasized unbiasedness. After Stein's example, bias is not always bad. Most ML methods use bias this way
 
 ## Ridge and the lasso, again
 
@@ -571,10 +571,10 @@ Ridge's estimates are dense: every coefficient nonzero, in general; the lasso's 
 ## The identity design
 
 ::: {.notes}
-Two minutes, stated. X = I: one observation per coefficient, y_j = beta_j + noise, least squares is y itself and the objective is a sum of one-coefficient problems. Ridge divides each y_j by 1 + lambda. The lasso moves each y_j toward zero by lambda over 2 and stops at zero: the kink of the absolute value absorbs any pull of size at most lambda over 2. Both derivations are the notebook's (exercise 1, problem 1); the half comes from the course's objective, lambda in front of the l1 norm with no factor on the squared error.
+Two minutes, stated. X = I: one observation per coefficient, y_j = beta_j + noise, least squares is y itself and the objective is a sum of one-coefficient problems. Ridge divides each y_j by 1 + lambda. The lasso moves each y_j toward zero by lambda over 2 and stops at zero: the kink of the absolute value absorbs any pull of size at most lambda over 2. Both derivations are the notebook's; the half comes from the course's objective, lambda in front of the l1 norm with no factor on the squared error.
 :::
 
-$\mathbf X = I$ ($n = p$), so $\mathbf y = \beta + \boldsymbol\varepsilon$: one observation per coefficient, least squares $\hat\beta = \mathbf y$, and $\|\mathbf y - \beta\|_2^2 + \lambda\,\text{pen}(\beta) = \sum_j \big[(y_j - \beta_j)^2 + \lambda\,\text{pen}(\beta_j)\big]$: one problem per coefficient
+$\mathbf X = I$ ($n = p$), so $\mathbf y = \beta + \boldsymbol\varepsilon$: one observation per coefficient, least squares $\hat\beta = \mathbf y$. A penalty that adds up over coefficients, as ridge's and the lasso's do, splits the objective: $\|\mathbf y - \beta\|_2^2 + \mathcal P_\lambda(\beta) = \sum_j \big[(y_j - \beta_j)^2 + \mathcal P_\lambda(\beta_j)\big]$, one problem per coefficient
 
 . . .
 
@@ -587,58 +587,25 @@ $\mathbf X = I$ ($n = p$), so $\mathbf y = \beta + \boldsymbol\varepsilon$: one 
 . . .
 
 ::: {.leave}
-**Soft thresholding.** $\arg\min_b\ (y - b)^2 + \lambda|b| = \mathrm{sign}(y)\,(|y| - \lambda/2)_+$. Derivations of both minimizers: the notebook (exercise 1 and problem 1).
+**Soft thresholding.** $\arg\min_b\ (y - b)^2 + \lambda|b| = \mathrm{sign}(y)\,(|y| - \lambda/2)_+$. Deriving both minimizers: an exercise in the notebook.
 :::
 
 ## Bias--variance decomposition, ridge form {minutes="3"}
 
 ::: {.notes}
-Stated; exercise 1 proves it. Same identity design. Dividing by 1 + lambda divides the variance by (1 + lambda) squared and adds a bias of lambda over 1 + lambda times the truth; add the squares. Slope at zero minus 2 p sigma squared: for every beta some lambda beats least squares, Stein's lesson in regression. Which lambda is unknown (noise over signal). Figure: p = 10, sigma squared 1; blue the small beta, orange the large.
+Stated; exercise 1 proves it. Same identity design. Dividing by 1 + lambda divides the variance by (1 + lambda) squared and adds a bias of lambda over 1 + lambda times the truth; add the squares. Slope at zero minus 2 p sigma squared: for every beta some lambda beats least squares, Stein's lesson in regression. Which lambda is unknown (noise over signal).
 :::
 
-```{r}
-#| label: ridge-mse-figure
-#| include: false
-p_r <- 10; sig2 <- 1
-mse_ridge <- function(lambda, b2) sum((lambda^2 * b2 + sig2) / (1 + lambda)^2)
-rm <- expand_grid(truth = c("every beta_j = 0.5", "every beta_j = 2"),
-                  lambda = 10^seq(-2, 1.5, length.out = 200)) |>
-  mutate(b2 = if_else(str_detect(truth, "0.5"), 0.5^2, 2^2),
-         mse = map2_dbl(lambda, b2, ~ mse_ridge(.x, rep(.y, p_r))))
-rm_best <- rm |> group_by(truth) |> slice_min(mse, n = 1)
-ridge_mse_plot <- ggplot(rm, aes(lambda, mse, colour = truth)) +
-  geom_hline(yintercept = p_r * sig2, linetype = 2, colour = "grey50") +
-  annotate("text", x = 0.012, y = p_r * sig2 + 0.8, label = "least squares", hjust = 0, size = 4.5, colour = "grey40") +
-  geom_line(linewidth = 1.2) + geom_point(data = rm_best, size = 3.5) +
-  scale_x_log10() + scale_colour_manual(values = c(v_blue, m_orange), name = NULL) +
-  coord_cartesian(ylim = c(0, 16)) +
-  labs(x = expression(paste(lambda, " (log scale); ", p == 10, ", ", sigma^2 == 1)), y = expression(MSE(lambda))) +
-  theme(legend.position = "top", legend.text = element_text(size = 12))
-```
-
-::: {.columns}
-::: {.column width="52%"}
 Same design, noise variance $\sigma^2$. Least squares, $\hat\beta = \mathbf y$: unbiased, variance $\sigma^2$ per coefficient. Divide by $1 + \lambda$:
 $$
 \text{bias}_j = -\frac{\lambda}{1 + \lambda}\,\beta_j, \qquad \mathrm{Var}(\hat\beta_{\lambda,j}) = \frac{\sigma^2}{(1 + \lambda)^2}
 $$
-:::
-::: {.column width="48%"}
-```{r}
-#| label: ridge-mse-plot
-#| fig-width: 5.8
-#| fig-height: 3.0
-#| out-width: "100%"
-ridge_mse_plot
-```
-:::
-:::
 
 ::: {.leave}
 **Bias--variance decomposition, ridge form.** $\mathbf X = I$, $\mathbf y = \beta + \boldsymbol\varepsilon$, noise independent, mean $0$, variance $\sigma^2 > 0$: $\;\mathrm{MSE}(\lambda) = \mathbb E\|\hat\beta_\lambda - \beta\|^2 = \sum_{j=1}^p (\lambda^2\beta_j^2 + \sigma^2)/(1 + \lambda)^2$, with slope $-2p\sigma^2 < 0$ at $\lambda = 0$: for every $\beta$, some $\lambda > 0$ beats least squares.
 :::
 
-**Proof**: exercise 1. Which $\lambda$? The best is $\sigma^2$ over the mean of $\beta_j^2$, noise over signal: unknown
+**Proof**: an exercise in the notebook. Which $\lambda$? The best is $\sigma^2$ over the mean of $\beta_j^2$, noise over signal: unknown
 
 ## High-dimensional example
 
@@ -705,33 +672,25 @@ People like sparser, simpler models: they can be easier to interpret
 ## Lasso downside: instability
 
 ::: {.notes}
-New slide. The ten models cross-validation fit, one per fold on the other nine, at lambda.min: which inputs each keeps changes from fold to fold, while their scores on the same selection tracks are within a few points of each other. The same instability as a tree's cutoffs. At lambda.1se the ten sets agree, which is part of the one-SE rule's appeal.
+New slide. The ten models cross-validation fit, one per fold on the other nine, at lambda.min: which inputs each keeps changes from fold to fold. The same instability as a tree's cutoffs. At lambda.1se the ten sets agree, which is part of the one-SE rule's appeal.
 :::
 
 ```{r}
 #| label: lasso-stability
-#| fig-height: 3.4
-#| fig-width: 12.5
+#| fig-height: 3.7
+#| fig-width: 12
 # The fold models of cv_fit, refit: glmnet on the rows outside fold k, at lambda.min (at lambda.1se the ten kept sets agree).
 stab <- map_dfr(1:K, function(k) {
   fit_k <- glmnet(sp_Xtr[fold != k, ], y_tr[fold != k], standardize = FALSE, lambda = cv_fit$lambda)
-  bk <- coef(fit_k, s = cv_fit$lambda.min)[-1]
-  pred <- predict(fit_k, sp_Xse, s = cv_fit$lambda.min)        # all ten scored on the same 2,000 selection tracks
-  tibble(fold = k, variable = colnames(sp_Xtr), selected = bk != 0, sel_mse = mse(y_se, pred), sel_se = se_loss(y_se, pred))
+  tibble(fold = k, variable = colnames(sp_Xtr), selected = coef(fit_k, s = cv_fit$lambda.min)[-1] != 0)
 })
-stab_sum <- stab |> distinct(fold, sel_mse, sel_se)
-p_stab <- ggplot(stab, aes(factor(fold), fct_rev(variable), fill = selected)) + geom_tile(colour = "white") +
+ggplot(stab, aes(factor(fold), fct_rev(variable), fill = selected)) + geom_tile(colour = "white") +
   scale_fill_manual(values = c(`FALSE` = "grey90", `TRUE` = v_teal), guide = "none") +
   labs(x = "fold held out", y = NULL, title = "which inputs each fold's lasso keeps (lambda.min)") +
-  theme(axis.text.y = element_text(size = 10), plot.title = element_text(size = 14))
-p_stab_mse <- ggplot(stab_sum, aes(factor(fold), sel_mse)) +
-  geom_errorbar(aes(ymin = sel_mse - sel_se, ymax = sel_mse + sel_se), width = 0.3, colour = "grey55") +
-  geom_point(size = 3, colour = v_blue) +
-  labs(x = "fold held out", y = "selection MSE", title = "the ten models on the selection tracks", caption = "bars: one SE") + theme(plot.title = element_text(size = 14))
-p_stab + p_stab_mse + plot_layout(widths = c(3, 1.4))
+  theme(axis.text.y = element_text(size = 12), plot.title = element_text(size = 14))
 ```
 
-The ten models cross-validation fit, each on nine folds, at `lambda.min`: the kept inputs change from fold to fold, their scores on the same 2,000 selection tracks barely do. The same instability as a tree's cutoffs. At the one-SE $\lambda$ the ten sets agree
+The ten models cross-validation fit, each on nine folds, at `lambda.min`: the kept inputs change from fold to fold. The same instability as a tree's cutoffs. At the one-SE $\lambda$ the ten sets agree
 
 ## A fixed $\lambda$ and a data-chosen $\hat\lambda$
 
@@ -845,64 +804,20 @@ p_shrink <- ggplot(tibble(j = seq_along(shrink), factor = shrink), aes(j, factor
 p_funs + p_shrink
 ```
 
-In the right basis the penalty acts coefficient by coefficient: coefficient $j$ is shrunk by $1/(1 + \lambda w_j)$, $w_j$ the wiggliness of basis function $j$. The straight line ($w = 0$) is never shrunk; the wiggles nearly vanish. Ridge's formula, with a weight
+In the right basis, coefficient $j$ is shrunk by $1/(1 + \lambda w_j)$, $w_j$ the wiggliness of basis function $j$. The straight line ($w = 0$) is never shrunk; the wiggles nearly vanish. Ridge's formula, with a weight
 
 ## {.inverse .center}
 
 ::: {.notes}
-Compress: with more inputs than observations least squares has infinitely many perfect fits; a penalty picks one, and the U-curve does not describe what happens past p = n.
+Compress: past the interpolation threshold there are many zero-error fits and a rule picks one; the test error can fall again; the bias-variance decomposition still holds, and for this course's methods expect a U.
 :::
 
-### Part 5: more inputs than observations
-
-## Least squares when $p > n$ {minutes="3"}
-
-::: {.notes}
-Three minutes. More unknowns than equations: every beta with X beta = y has training error zero, a whole flat set of them, and lm prints NA. Ridge is defined for every positive lambda and its limit as lambda goes to zero is one particular zero-error fit, the one with the smallest norm; it is also where gradient descent from zero stops (week 4, stated). The push-through identity that proves the limit is in the note for the curious: (X'X + lambda I)^{-1} X' = X' (X X' + lambda I)^{-1}.
-:::
-
-::: {.columns}
-::: {.column width="56%"}
-$\mathbf X$ is $n \times p$, $p > n$, full row rank. Every $\beta$ with $\mathbf X\beta = \mathbf y$ is a least-squares fit: infinitely many, all with **training error zero**. `lm` prints `NA`
-
-Ridge is defined for every $\lambda > 0$, and
-$$
-\hat\beta_\lambda \;\longrightarrow\; \hat\beta_{\min} = \mathbf X^T(\mathbf X\mathbf X^T)^{-1}\mathbf y \quad \text{as } \lambda \to 0^+
-$$
-the **minimum-norm interpolant**: of all the zero-error fits, the one with the smallest $\|\beta\|$
-
-Gradient descent on least squares from $\beta = \mathbf 0$, small step, converges to the same point (stated)
-:::
-::: {.column width="44%"}
-```{r}
-#| label: minnorm-picture
-#| fig-width: 5.2
-#| fig-height: 4.0
-#| out-width: "100%"
-# One equation, two unknowns: x1 b1 + x2 b2 = y is a line of zero-error fits; the minimum-norm one is the
-# point of the line nearest the origin; ridge's path from large lambda approaches it.
-x_eq <- c(2, 1); y_eq <- 2
-line_df <- tibble(b1 = seq(-0.5, 1.6, length.out = 100)) |> mutate(b2 = (y_eq - x_eq[1] * b1) / x_eq[2])
-b_min <- x_eq * y_eq / sum(x_eq^2)
-rp <- map_dfr(10^seq(1.5, -3, length.out = 80), function(l) {
-  b <- solve(crossprod(t(x_eq)) + l * diag(2), x_eq * y_eq); tibble(lambda = l, b1 = b[1], b2 = b[2]) })
-ggplot() + geom_line(data = line_df, aes(b1, b2), colour = "grey40", linewidth = 1.1) +
-  geom_path(data = rp, aes(b1, b2), colour = v_blue, linewidth = 1.3, arrow = arrow(length = unit(0.14, "inches"))) +
-  annotate("point", x = b_min[1], y = b_min[2], colour = m_orange, size = 4) +
-  annotate("point", x = 0, y = 0, shape = 4, size = 4, stroke = 1.5) +
-  annotate("text", x = 2.0, y = 1.45, label = "every point on this line\nfits the data exactly", size = 4.2, colour = "grey30", hjust = 1) +
-  annotate("text", x = b_min[1] + 0.1, y = b_min[2] + 0.12, label = "smallest norm", colour = m_orange, size = 4.5, hjust = 0) +
-  annotate("text", x = -0.3, y = -0.35, label = expression(paste("ridge path, ", lambda, " falling")), colour = v_blue, size = 4.2, hjust = 0) +
-  coord_equal(xlim = c(-0.5, 2.1), ylim = c(-0.5, 1.8)) + labs(x = expression(beta[1]), y = expression(beta[2]),
-  title = "one observation, two coefficients") + theme(plot.title = element_text(size = 14))
-```
-:::
-:::
+### Part 5: double descent
 
 ## The zero-error fits
 
 ::: {.notes}
-After ISLR's Figure 10.21 (own simulation, J counts the intercept): 20 points, one input, natural splines with J = 8, 20, 42 and 80 basis functions, the fit with the smallest coefficient norm once J exceeds n. At J = 20 the curve passes through every point and swings wildly between them; at 42 and 80 it still passes through every point and is calmer. Zero training error does not say which of the zero-error fits you have; the choice of rule (minimum norm here) is an inductive bias, and it is doing the regularizing.
+After ISLR's Figure 10.21 (own simulation, J counts the intercept): 20 points, one input, natural splines with J = 8, 20, 42 and 80. Past J = n, B beta = y has infinitely many solutions and lm prints NA; the smallest-norm one is B'(BB')^{-1}y, ridge's limit as lambda goes to zero, and also where gradient descent from zero stops, the link to networks later in the course. At J = 20 the curve swings between the points; at 42 and 80 it is calmer. The rule that picks the fit is an inductive bias, and it is doing the regularizing.
 :::
 
 ```{r}
@@ -928,12 +843,12 @@ ggplot(dd, aes(x, y)) + geom_line(data = interp, aes(y = fit), colour = v_blue, 
   theme(strip.text = element_text(size = 13)) + labs(x = NULL, y = NULL)
 ```
 
-$n = 20$ points, natural splines with $J$ basis functions: least squares up to $J = n$, the smallest-norm zero-error fit beyond. At $J = 20$ the curve swings between the points; at $J = 80$ it still passes through every one, and is calmer. Zero training error does not say which zero-error fit you have; the rule that picks one, smallest norm here, is the regularization
+$n = 20$ points, natural splines with $J$ basis functions: least squares up to $J = n$; beyond, of the many fits with zero training error, the one with the smallest $\|\beta\|$ (ridge's limit as $\lambda \to 0$). Zero training error does not say which fit you have: the rule that picks one is the regularization
 
 ## Double descent, demonstrated {minutes="3"}
 
 ::: {.notes}
-Three minutes. Test MSE against J for the setup of the last slide (test inputs inside the training range), averaged over fifty draws of the twenty training points: the U-curve up to J = n, a spike at the interpolation threshold, then a second descent. The dashed curve: the same basis with a ridge penalty, lambda chosen by cross-validation, which never interpolates and shows no spike. Demonstrated, not proved; the name is from Belkin and co-authors, 2019.
+Three minutes. The last slide's setup, test inputs inside the training range, fifty draws of the twenty points: a U up to J = n, a spike at the interpolation threshold, a second descent. Dashed: ridge on the same basis, lambda by cross-validation; it never interpolates and has no spike. Demonstrated, not proved.
 :::
 
 ```{r}
@@ -961,24 +876,6 @@ dd_curve <- map_dfr(1:50, function(rep) {
   })
 }) |> pivot_longer(c(`smallest norm`, `ridge, lambda by CV`), names_to = "rule", values_to = "test_mse") |>
   group_by(J, rule) |> summarize(test_mse = mean(test_mse, na.rm = TRUE), .groups = "drop") |> filter(is.finite(test_mse))
-# Bias and variance of the smallest-norm rule with the inputs fixed (the picture's twenty x's, fresh noise), on a grid
-grid_v <- seq(min(dd$x), max(dd$x), length.out = 200); Js_v <- c(10, 15, 19, 20, 21, 25, 42, 80)
-fits_v <- map(1:50, function(rep) {
-  d <- tibble(x = dd$x, y = f_dd(dd$x) + rnorm(n_dd, sd = sd_dd))
-  sapply(Js_v, function(J) ns_fit(J, d, grid_v))
-})
-bv_dd <- map_dfr(seq_along(Js_v), function(i) {
-  F <- sapply(fits_v, function(m) m[, i])     # 200 grid points by 50 replicates
-  tibble(J = Js_v[i], bias2 = mean((rowMeans(F) - f_dd(grid_v))^2), variance = mean(apply(F, 1, var)))
-})
-v_at <- function(J) signif(bv_dd$variance[bv_dd$J == J], 2)
-# Ridge with lambda chosen by CV on the same inputs (fresh noise), at three of the J's
-Js_rv <- c(15, 20, 80)
-fits_rv <- map(1:50, function(rep) {
-  d <- tibble(x = dd$x, y = f_dd(dd$x) + rnorm(n_dd, sd = sd_dd))
-  sapply(Js_rv, function(J) ridge_fit_ns(J, d, grid_v))
-})
-vr_at <- function(J) { i <- match(J, Js_rv); signif(mean(apply(sapply(fits_rv, function(m) m[, i]), 1, var)), 2) }
 ggplot(dd_curve, aes(J, test_mse, colour = rule, linetype = rule)) +
   geom_vline(xintercept = n_dd, linetype = 3, colour = "grey50") +
   annotate("text", x = n_dd * 1.08, y = 3, label = "J = n", colour = "grey40", size = 4.5, hjust = 0) +
@@ -991,21 +888,7 @@ ggplot(dd_curve, aes(J, test_mse, colour = rule, linetype = rule)) +
   theme(legend.position = "top", legend.text = element_text(size = 12))
 ```
 
-Test MSE against $J$, averaged over 50 draws of the 20 points: the U-curve up to $J = n$, a spike at the interpolation threshold, a second descent beyond it (Belkin, Hsu, Ma and Mandal 2019). Ridge on the same basis, $\lambda$ by cross-validation, never interpolates and has no spike. Dashed: the noise variance
-
-## Double descent and the bias--variance decomposition
-
-::: {.notes}
-Two minutes; cut third. The decomposition is an identity and still holds. What fails is the folk version, "more parameters, more variance": the variance numbers are computed with the picture's inputs fixed and fresh noise, fifty times. Spike at J = n (near-singular design), fall past it (the rule changes with J). Ridge by CV on the same inputs with fresh noise: no spike. Four dimensions: the rule that chooses the fit is what regularizes.
-:::
-
-**Does not change.** The bias--variance decomposition is an identity and holds at every point of both curves. Zero training error still says nothing about the risk
-
-**Changes.** The folk version, "more parameters, more variance". Inputs fixed, 50 replicates: the variance of the smallest-norm fit is `r v_at(15)` at $J = 15$, `r v_at(20)` at $J = n = 20$ (a nearly singular design) and `r v_at(80)` at $J = 80$. It spikes and falls because the rule changes with $J$. Ridge by cross-validation on the same inputs: `r vr_at(15)`, `r vr_at(20)`, `r vr_at(80)`
-
-::: {.retrieval}
-Four dimensions, again: the parameter count is not the scale from simple to complex. The rule that chooses the fit is what regularizes.
-:::
+Test MSE against $J$, averaged over 50 draws of 20 points: a U up to $J = n$, a spike at $J = n$ (interpolation threshold), a second descent beyond it (Belkin, Hsu, Ma and Mandal 2019). Ridge on same basis, $\lambda$ by cross-validation: never interpolates, no spike. Dashed: noise variance
 
 ## Does statistics apply to deep learning? {.inverse}
 
@@ -1018,6 +901,20 @@ The bias--variance trade-off is one of the most important pillars of statistical
 ![](img/doubledescent.jpg){width="70%" fig-align="center"}
 
 Belkin, Hsu, Ma and Mandal (2019). Does zero training error *necessarily* mean the model is overfit? **No.** Anna Karenina principle: all truly optimal models are alike; each overfit model is overfit in its own way
+
+## Double descent: takeaways
+
+::: {.notes}
+Two minutes, ISLR 10.8's points. It happens for some models on some data, so neither "zero training error means overfit" nor "test error is rising, stop" is safe. The decomposition is an identity and always holds; the horizontal axis is what misleads, since past J = n more basis functions is not more flexibility (the J = 42 fit has lower variance than J = 20). For k-NN, trees and penalized regression, expect the U.
+:::
+
+**It can happen** for some models (large neural networks) on some data (high signal-to-noise: images, translation). So zero training error does not necessarily mean overfit, and a test error that has started rising might fall again later: we don't know
+
+**It does not contradict the bias--variance trade-off.** The decomposition holds at every point of both curves. The horizontal axis needs care: past $J = n$, more basis functions is not more flexibility, so the curve need not be a U
+
+**For most methods in this course, expect a U**: $k$-NN, trees, ridge, the lasso. Regularized fits do not interpolate, and have no second descent (the ridge curve)
+
+ISLR section 10.8, pp. 441--443
 
 ## Before the seminar
 
