@@ -2334,7 +2334,7 @@ window.Quarto = {
 
 <section id="keep-or-rush" class="level2">
 <h2 class="anchored" data-anchor-id="keep-or-rush">Keep or rush</h2>
-<p>In seminar order. Planned total 60 minutes; cutting the first item marked gets back to 54, which leaves time for transitions and questions. The simulation at the top of coding part 2 takes about a minute and uses no data from part 1: run its chunk at the very start, during problem 1, so the figure is ready when you reach it. Run that way, it and every random step after question 2 (the folds of steps 5 and 6, the optional items) draw different numbers from a run in order, so those numbers will differ a little from the ones below, which are for a run in order; the lessons do not depend on them.</p>
+<p>In seminar order. Planned total 82 minutes, 22 more than the seminar’s 60, so items must be cut, in the order marked: cutting the first three gets back to 66, and all five to 60, with no slack for transitions and questions; a room that runs slow should go to the minimum seminar below the table. The simulation at the top of coding part 2 takes about a minute and uses no data from part 1: run its chunk at the very start, during problem 1, so the figure is ready when you reach it. Run that way, it and every random step after question 3 (steps 5, 6 and 7) draw different numbers from a run in order, so those numbers will differ a little from the ones below, which are for a run in order; the lessons do not depend on them.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 32%">
@@ -2366,7 +2366,7 @@ window.Quarto = {
 <tr class="odd">
 <td>Problem 2(d, e): <span class="math inline">\(N(r)\)</span> binomial with mean <span class="math inline">\(2rn\)</span>, so <span class="math inline">\(r_k \approx k/(2n)\)</span>; in <span class="math inline">\(p\)</span> dimensions <span class="math inline">\(r_k^p \approx k/(c_p n)\)</span>; the boundary changes the constant</td>
 <td style="text-align: right;">3</td>
-<td>Rush; cut second</td>
+<td>Rush; cut third</td>
 <td>The count in a ball is <span class="math inline">\(n\)</span> times its volume; set it to <span class="math inline">\(k\)</span></td>
 </tr>
 <tr class="even">
@@ -2374,6 +2374,18 @@ window.Quarto = {
 <td style="text-align: right;">6</td>
 <td>Rush; cut first</td>
 <td>Expand the double sum and write the equations; stop before (c)</td>
+</tr>
+<tr class="odd">
+<td>Problem 4(a, b): the mean of <span class="math inline">\(m\)</span> rows has expected loss <span class="math inline">\(\sigma^2(1 + 1/m)\)</span>, so <span class="math inline">\(K\)</span>-fold CV overestimates by <span class="math inline">\(\sigma^2/((K-1)n)\)</span>; leave-one-out in one fit, <span class="math inline">\(\frac{n}{n-1}s^2\)</span></td>
+<td style="text-align: right;">5</td>
+<td>Keep</td>
+<td><span class="math inline">\(\mathrm{Var}(Y) + \mathrm{Var}(\bar Y_m)\)</span>; then <span class="math inline">\(\bar y_{(-i)} = (n\bar y - y_i)/(n - 1)\)</span></td>
+</tr>
+<tr class="even">
+<td>Problem 4(c): the idealized <span class="math inline">\(k\)</span>-NN risk; CV with <span class="math inline">\(K\)</span> folds chooses <span class="math inline">\(\rho\,k^\star(n)\)</span>; the risk ratio is <span class="math inline">\(1 + (1 - \rho)^2/p\)</span>, at worst 1.19 (<span class="math inline">\(p = 1\)</span>, <span class="math inline">\(K = 2\)</span>): <span class="math inline">\(K\)</span> barely changes the tuned fit’s risk</td>
+<td style="text-align: right;">7</td>
+<td>Rush; cut second</td>
+<td>State <span class="math inline">\(k^\star \propto m^{2/(p+2)}\)</span>, write down the ratio, and say why there is no first-order term (the derivative is zero at the minimum)</td>
 </tr>
 <tr class="odd">
 <td>Coding 1, step 1: <code>cv_mse()</code>, the fold loop, the checkpoint against the variance</td>
@@ -2388,16 +2400,16 @@ window.Quarto = {
 <td>Standardize with <code>tr</code>’s means and sds, applied to both <code>tr</code> and <code>ho</code></td>
 </tr>
 <tr class="odd">
-<td>Coding 1, question 2: <span class="math inline">\(K = 2, 5, 10, 50\)</span>, two draws of folds each; 2 folds are pessimistic (fits on half the tracks), the draws differ most at small <span class="math inline">\(K\)</span>, the chosen <span class="math inline">\(k\)</span> barely moves</td>
-<td style="text-align: right;">6</td>
-<td>Keep</td>
-<td>Start the chunk, then talk through (a) and (c) while it runs (a minute or two)</td>
+<td>Coding 1, step 3 and question 2: the lasso through the same pipeline, minimum at <span class="math inline">\(\lambda = 0.1\)</span> (531); <code>cv.glmnet</code> agrees, <code>lambda.1se</code> sets 5 of 11 to zero</td>
+<td style="text-align: right;">4</td>
+<td>Rush; cut fourth</td>
+<td>Give the <code>sapply</code> line; run the <code>cv.glmnet</code> chunk and read the two <span class="math inline">\(\lambda\)</span>’s</td>
 </tr>
 <tr class="even">
-<td>Coding 1, step 3 and question 3: the lasso through the same pipeline, minimum at <span class="math inline">\(\lambda = 0.1\)</span> (531); <code>cv.glmnet</code> agrees, <code>lambda.1se</code> sets 5 of 11 to zero</td>
-<td style="text-align: right;">4</td>
-<td>Rush; cut third</td>
-<td>Give the <code>sapply</code> line; run the <code>cv.glmnet</code> chunk and read the two <span class="math inline">\(\lambda\)</span>’s</td>
+<td>Coding 1, question 3: <span class="math inline">\(K = 2, 5, 10, 50\)</span>, two draws of folds each, the same folds for <span class="math inline">\(k\)</span>-NN and the lasso; 2 folds are pessimistic for both, more for <span class="math inline">\(k\)</span>-NN (528 against 520 at <span class="math inline">\(k = 100\)</span>) than for the lasso (534 against 531 at <span class="math inline">\(\lambda = 0.05\)</span>), whose learning curve is flatter; the chosen <span class="math inline">\(k\)</span> and <span class="math inline">\(\lambda\)</span> do not show the push</td>
+<td style="text-align: right;">8</td>
+<td>Keep; its lasso half (2 min) cut fifth</td>
+<td>Start the chunk, then talk through (a) and (c) while it runs (a minute or two)</td>
 </tr>
 <tr class="odd">
 <td>Coding 2, step 4 and question 4: slopes of the learning curves against <span class="math inline">\(-2/(p+2)\)</span>; 64 times the data halves the error in <span class="math inline">\(p = 10\)</span>; the best <span class="math inline">\(k\)</span> grows with <span class="math inline">\(n\)</span></td>
@@ -2417,16 +2429,22 @@ window.Quarto = {
 <td>Keep</td>
 <td>A random split cannot see drift; on the same tracks the plane still beats the old mean, and the mean error shows the calibration</td>
 </tr>
+<tr class="even">
+<td>Coding 3, step 7 and question 7: on pure noise, screening on all rows scores 0.50 against the mean’s 0.91; screening inside the fold scores 1.30</td>
+<td style="text-align: right;">8</td>
+<td>Keep</td>
+<td><code>keep &lt;- top20(tr)</code> inside <code>right_fp</code>; every step that looks at the outcome goes inside the fold</td>
+</tr>
 </tbody>
 </table>
-<p>Minimum seminar, about 35 minutes: problem 1(a, b), coding steps 1, 2, 5 and 6 with their questions. With more time, add step 4 back first, then problem 2(a, b, c).</p>
+<p>Minimum seminar, about 40 minutes: problem 1(a, b), coding steps 1, 2, 5, 6 and 7 with their questions. With more time, add step 4 back first, then problem 4(a, b), then problem 2(a, b, c).</p>
 </section>
 <section id="if-you-read-on" class="level2">
 <h2 class="anchored" data-anchor-id="if-you-read-on">If you read on</h2>
 <p>How it runs</p>
 <ul>
 <li>Students did exercises 1 and 2 at home (the ridge form, and the rate with the slides closed). Open the <a href="https://ml4ds.com/teachers/notebook7_complete.html">complete notebook</a> on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are answers. Show an exercise’s solution only if asked. Each problem’s solution stands on its own, so a skipped problem costs nothing later.</li>
-<li>Everything headed “Optional, can be done at home” is outside the seminar: the wrong way to cross-validate (screening on all rows, from ESL section 7.10.2) and the weighted-ridge equations checked on <code>mgcv</code>’s fit.</li>
+<li>Everything headed “Optional, can be done at home” is outside the seminar: the weighted-ridge equations checked on <code>mgcv</code>’s fit.</li>
 <li>One seed, <code>set.seed(310)</code> at the split, and no other: a student who runs the chunks in order gets the numbers below; one who changes the seed gets a different split and slightly different numbers everywhere, step 6 included: its split is by year, but its tracks are the seeded split’s development tracks. The data note’s <code>distinct()</code> is in the loader, so the lecture’s and the seminar’s numbers agree; step 5 reloads the file to put the copies back.</li>
 </ul>
 <p>What students should see</p>
@@ -2434,26 +2452,30 @@ window.Quarto = {
 <li>Problem 1: <span class="math inline">\(\hat b = \mathrm{sign}(z)(|z| - \lambda)_+\)</span>; the lecture’s objective gives <span class="math inline">\(\lambda/2\)</span>.</li>
 <li>Problem 2: <span class="math inline">\((1 - 2r)^n\)</span>; <span class="math inline">\(1/(2(n+1))\)</span>; <span class="math inline">\(1/(2(n+1)(n+2))\)</span>, the lemma’s <span class="math inline">\((1/n)^2\)</span> with constant <span class="math inline">\(\tfrac12\)</span>; <span class="math inline">\(r_k \approx k/(2n)\)</span> in size (its mean is exactly <span class="math inline">\(k/(2(n+1))\)</span>: an order statistic; it does not concentrate for fixed <span class="math inline">\(k\)</span>); <span class="math inline">\(r_k \approx (k/(c_p n))^{1/p}\)</span>.</li>
 <li>Problem 3: <span class="math inline">\(\beta^T\boldsymbol\Omega\beta\)</span> by expanding the double sum; <span class="math inline">\((\mathbf B^T\mathbf B + \lambda\boldsymbol\Omega)\beta = \mathbf B^T\mathbf y\)</span>, positive definite when <span class="math inline">\(\mathbf B\)</span> has full column rank; <span class="math inline">\(\hat\beta_j = z_j/(1 + \lambda w_j)\)</span>; the two functions with <span class="math inline">\(w_j = 0\)</span> are the constant and the line, never shrunk, and the fit tends to the least-squares line.</li>
+<li>Problem 4: <span class="math inline">\(\sigma^2(1 + 1/m)\)</span>; the CV score’s expectation <span class="math inline">\(\sigma^2\big(1 + \tfrac{K}{(K-1)n}\big)\)</span> and its bias <span class="math inline">\(\tfrac{\sigma^2}{(K-1)n}\)</span>, which is <span class="math inline">\(\sigma^2/n\)</span>, <span class="math inline">\(\sigma^2/(9n)\)</span> and <span class="math inline">\(\sigma^2/((n-1)n)\)</span> for <span class="math inline">\(K = 2, 10, n\)</span>; <span class="math inline">\(y_i - \bar y_{(-i)} = \tfrac{n}{n-1}(y_i - \bar y)\)</span> and <span class="math inline">\(\mathrm{CV}_{(n)} = \tfrac{n}{n-1}s^2\)</span>, with expectation <span class="math inline">\(\sigma^2(1 + 1/(n-1))\)</span>, (a) at <span class="math inline">\(K = n\)</span>; <span class="math inline">\(k^\star(m) = (p\sigma^2/(2a))^{p/(p+2)}m^{2/(p+2)}\)</span>, the ratio <span class="math inline">\((p\rho^{2/p} + 2/\rho)/(p+2)\)</span> and its expansion <span class="math inline">\(1 + (1 - \rho)^2/p\)</span>; the ratios 1.19 (<span class="math inline">\(p = 1\)</span>, <span class="math inline">\(K = 2\)</span>), 1.005 (<span class="math inline">\(p = 1\)</span>, <span class="math inline">\(K = 10\)</span>), 1.001 (<span class="math inline">\(p = 11\)</span>, <span class="math inline">\(K = 2\)</span>), 1.00002 (<span class="math inline">\(p = 11\)</span>, <span class="math inline">\(K = 10\)</span>).</li>
 <li>Coding 1: 10 folds of 500. The mean’s CV score is within 1 of <code>var(y_train)</code>. <span class="math inline">\(k\)</span>-NN CV MSE 1026, 773, 614, 557, 537, 524, 522, 524, 533 at <span class="math inline">\(k = 1, 2, 5, 10, 20, 50, 100, 200, 500\)</span>; minimum at <span class="math inline">\(k = 100\)</span>. The tuning curve: 1002, 732, 581, 556, 531, 525, 523, 523, 530, standard errors 12 to 29, minimum at <span class="math inline">\(k = 100\)</span>. Lasso: CV MSE 565 at <span class="math inline">\(\lambda = 3\)</span> falling to 531 at <span class="math inline">\(\lambda = 0.1\)</span> and 532 at the small end; <code>cv.glmnet</code> with the same folds gives <code>lambda.min</code> 0.13 and <code>lambda.1se</code> 0.99, with 1 and 5 zero coefficients.</li>
-<li>Coding 1, question 2: minimum CV MSE about 527 with 2 folds against 520 to 522 with 5, 10 and 50; the largest gap between two draws of folds 3.9 with 2 folds, 1.6 with 5, 3.0 with 10, 0.9 with 50; the chosen <span class="math inline">\(k\)</span> is 100 everywhere except one draw with 2 folds (50).</li>
+<li>Coding 1, question 3: <span class="math inline">\(k\)</span>-NN at <span class="math inline">\(k = 100\)</span>, 528 with 2 folds against 520 with 50; minimum CV MSE 527 to 528 with 2 folds against 520 to 522 with 5, 10 and 50; the largest gap between two draws of folds 3.9, 1.6, 3.0 and 0.9 for <span class="math inline">\(K = 2, 5, 10, 50\)</span>; the chosen <span class="math inline">\(k\)</span> is 100 everywhere except one draw with 2 folds (50). The lasso at <span class="math inline">\(\lambda = 0.051\)</span>, 534 with 2 folds against 531 with 50; minima 533 to 534 against 530 to 531; gaps 1.8, 1.8, 0.7 and 0.3; the chosen <span class="math inline">\(\lambda\)</span> between 0.035 and 0.13, both extremes from the two draws with 2 folds.</li>
 <li>Coding 2: slopes <span class="math inline">\(-0.71\)</span>, <span class="math inline">\(-0.57\)</span>, <span class="math inline">\(-0.31\)</span>, <span class="math inline">\(-0.18\)</span> against the exponents <span class="math inline">\(-0.67\)</span>, <span class="math inline">\(-0.5\)</span>, <span class="math inline">\(-0.29\)</span>, <span class="math inline">\(-0.17\)</span> (a little steeper each; the bound is a worst case). From <span class="math inline">\(n = 100\)</span> to <span class="math inline">\(6400\)</span> the error falls to <span class="math inline">\(0.06\)</span>, <span class="math inline">\(0.09\)</span>, <span class="math inline">\(0.3\)</span> and <span class="math inline">\(0.45\)</span> of its value, against <span class="math inline">\(0.06\)</span>, <span class="math inline">\(0.12\)</span>, <span class="math inline">\(0.3\)</span> and <span class="math inline">\(0.5\)</span> predicted. The best <span class="math inline">\(k\)</span> goes from 20 to 500 for <span class="math inline">\(p = 1\)</span> and from 20 to 50 for <span class="math inline">\(p = 10\)</span>. Question 4’s answer adds <span class="math inline">\(p = 11\)</span>: <span class="math inline">\(2^{6.5} \approx 90\)</span> times the data to halve the bound.</li>
 <li>Coding 3, step 5: 5,774 rows for the 5,000 training tracks. Folds by row against folds by track: 768 against 1068 at <span class="math inline">\(k = 1\)</span>, 600 against 711 at <span class="math inline">\(k = 5\)</span>, 554 against 570 at <span class="math inline">\(k = 50\)</span>. Step 6, on the 7,000 development tracks: 5,022 up to 2018 and 1,978 from 2019 on; the plane’s CV MSE on the old tracks 587 and its CV mean error 0.0; on the new tracks MSE 436 and mean error <span class="math inline">\(+11.0\)</span> (the year coefficient is <span class="math inline">\(-0.17\)</span>); the old mean scores 469 on the new tracks and the new mean 348 (their variance), against 616 for the old tracks’ variance.</li>
-<li>Optional: on pure noise the fitting rows’ mean scores 0.91, the wrong way 0.50, the right way 1.30; the weighted-ridge equations reproduce <code>coef(g)</code> to <span class="math inline">\(10^{-10}\)</span>.</li>
-<li>Run times in the build container (R 4.3): the whole notebook executes in about three and a half minutes; the learning-curve simulation takes 50 seconds, question 2’s chunk about a minute, the <span class="math inline">\(k\)</span>-NN curve 20, step 5 about 20, step 3 about 10. A laptop may take two or three times as long.</li>
+<li>Coding 3, step 7: on pure noise the fitting rows’ mean scores 0.91, the wrong way 0.50, the right way 1.30.</li>
+<li>Optional: the weighted-ridge equations reproduce <code>coef(g)</code> to <span class="math inline">\(10^{-10}\)</span>.</li>
+<li>Run times in the build container (R 4.3): the whole notebook executes in about three and a half minutes; the learning-curve simulation takes 50 seconds, question 3’s chunk about a minute, the <span class="math inline">\(k\)</span>-NN curve 20, step 5 about 20, step 3 about 10. A laptop may take two or three times as long.</li>
 </ul>
 <p>Where they get stuck</p>
 <ul>
+<li>Problem 4: in (a), predicting <span class="math inline">\(y_i\)</span> with the mean of all <span class="math inline">\(n\)</span> rows, which includes it; in (c), comparing the two minima <span class="math inline">\(g_m(k^\star(m))\)</span> and <span class="math inline">\(g_n(k^\star(n))\)</span> instead of evaluating <span class="math inline">\(g_n\)</span> at the chosen <span class="math inline">\(k\)</span>. If (c) is cut, say its conclusion: the choice of <span class="math inline">\(K\)</span> barely changes the risk of the tuned fit, because the risk is flat at its minimum, while it changes the reported error at first order.</li>
 <li>Step 1: filling <code>fit_predict(tr, ho)</code> with <code>d</code> instead of <code>tr</code>, so every fold fits on all rows; the checkpoint passes (the mean is the mean) but the <span class="math inline">\(k\)</span>-NN curve then bottoms at <span class="math inline">\(k = 1\)</span> with a score near 0. The curve is the check.</li>
-<li>Step 2: standardizing <code>ho</code> with its own means and sds, or both with the full training set’s. The numbers move by a point or two; the procedure is the point, and it is what step 5 and the optional item are about.</li>
+<li>Step 2: standardizing <code>ho</code> with its own means and sds, or both with the full training set’s. The numbers move by a point or two; the procedure is the point, and it is what steps 5 and 7 are about.</li>
 <li>Question 1: students may expect the two curves to differ more. They differ at the level (CV fits on 4,500 rows, scores 5,000 held out once) and not in the shape; the lesson is that CV cost no rows.</li>
-<li>Question 2: students read the gap between 2 folds and 50 as noise; both draws show it at every <span class="math inline">\(k\)</span>, so it is mostly the pessimism of fitting on half the tracks, though two draws cannot rule noise out entirely. The chunk is slow on a laptop; start it before discussing.</li>
+<li>Question 3: students read the gap between 2 folds and 50 as noise; both draws show it, so it is mostly the pessimism of fitting on half the tracks, though two draws cannot rule noise out entirely. The lasso’s gap is smaller because its learning curve is flatter; a student who expects the lasso’s <span class="math inline">\(\lambda\)</span> to move like <span class="math inline">\(k\)</span> has the direction backwards (fewer rows, larger <span class="math inline">\(\lambda\)</span>, a simpler fit). The chunk is slow on a laptop; start it before discussing.</li>
 <li>Step 3: <code>predict(fit, ..., s = lam)</code> returns a one-column matrix; <code>as.vector()</code> is in the given code. <code>cv.glmnet</code>’s <code>lambda.min</code> differs from <code>lam_cv</code> because its path is finer and it standardizes once on all rows.</li>
 <li>Step 4: <code>coef(lm(log(mse) ~ log(n)))[2]</code> inside <code>summarize()</code>; a student who regresses <code>mse</code> on <code>n</code> without logs gets a slope with no meaning. The simulation’s slopes are steeper than the exponent; say that the bound is a worst case and this truth is one function.</li>
 <li>Step 5: assigning <code>fold_track</code> with <code>rep(1:K, ...)</code> over the rows in track order, which puts a track’s copies in different folds; the checkpoint catches it. The <code>match()</code> line is in the hint.</li>
 <li>Step 6: fitting on <code>old</code> and <code>new</code> together, or scoring <code>old</code>‘s mean on <code>old</code>. Students read 436 &lt; 587 as improvement; the answer is the old tracks’ mean on the same tracks (469: the plane still wins) and the mean error (<span class="math inline">\(+11\)</span>: the calibration). The new tracks’ own mean (348) uses the outcomes being predicted, so it is a diagnostic, not a baseline.</li>
+<li>Step 7: <code>wrong_fp</code> uses the <code>keep</code> screened once on all rows, <code>right_fp</code> its own <code>keep</code> from <code>tr</code>; a student who screens inside both gets two similar scores. The right way’s score above the mean’s is not a mistake: twenty noise inputs fitted on 90 rows add variance.</li>
 <li>In the student file, a chunk with a blank starts with <code>#| eval: false</code>; they delete that line once the blank is filled. The <code># ...</code> lines can stay.</li>
 </ul>
-<p>Sources: the data note at <a href="https://ml4ds.com/data/spotify.html">ml4ds.com/data/spotify.html</a>; the optional item follows Hastie, Tibshirani and Friedman (2009), <em>The Elements of Statistical Learning</em>, 2nd edition, section 7.10.2, pp. 245–247.</p>
+<p>Sources: the data note at <a href="https://ml4ds.com/data/spotify.html">ml4ds.com/data/spotify.html</a>; step 7 follows Hastie, Tibshirani and Friedman (2009), <em>The Elements of Statistical Learning</em>, 2nd edition, section 7.10.2, pp. 245–247.</p>
 </section>
 
 </main>

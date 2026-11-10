@@ -22,18 +22,18 @@ optional items) stay in the student file, behind a warning not to open them earl
 Do not edit the student file by hand.
 
 How this seminar runs: students do exercises 1 and 2 at home (neither is gone
-through in the room unless asked). In the room: problems 1 to 3 (about 17 minutes:
-4, 7, 6; hints then answers), then the coding (about 43: part 1 20, part 2 7,
-part 3 16). Everything headed "Optional, can be done at home" is outside the
-seminar. The simulation at the top of part 2 takes about 50 seconds and does not
-use the Spotify data: run its chunk at the start of the seminar, during problem 1,
-so the figure is ready. Run that way, it and every random step after question 2
-(the folds of steps 5 and 6, the optional items) draw different numbers from a run
-in order, so those numbers differ a little from the teacher note's; the lessons do
-not depend on them. If the room runs slow, protect problem 1, coding steps 1
-and 2, and part 3; problem 3 is the first thing to cut, then problem 2(d, e), then
-step 3 and question 3. One seed, set at the split: every student who runs the chunks in order
-sees the numbers in the teacher note. -->
+through in the room unless asked). In the room: problems 1 to 4 (about 29 minutes:
+4, 7, 6, 12; hints then answers), then the coding (about 53: part 1 22, part 2 7,
+part 3 24), 82 in all against a 60-minute seminar, so items must be cut: protect
+problem 1, coding steps 1 and 2, and part 3; cut problem 3 first, then problem 4(c),
+then problem 2(d, e), then step 3 and question 2, then the lasso half of question 3.
+Everything headed "Optional, can be done at home" is outside the seminar. The
+simulation at the top of part 2 takes about 50 seconds and does not use the Spotify
+data: run its chunk at the start of the seminar, during problem 1, so the figure is
+ready. Run that way, it and every random step after question 3 (steps 5, 6 and 7)
+draw different numbers from a run in order, so those numbers differ a little from
+the teacher note's; the lessons do not depend on them. One seed, set at the split:
+every student who runs the chunks in order sees the numbers in the teacher note. -->
 
 ```{r}
 #| label: setup
@@ -150,7 +150,7 @@ Common errors: bounding $|a|$ by $L\,r_k$ without the triangle inequality on the
 
 ## Problems
 
-<!-- About 17 min: problems 1 to 3 (4, 7, 6), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
+<!-- About 29 min: problems 1 to 4 (4, 7, 6, 12), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
 
 **Problem 1 (soft thresholding).** One coordinate of an orthonormal design: $z$ is the least-squares coefficient, a number, and $b$ the estimate. The lasso's one-coordinate objective is $\tfrac12(z - b)^2 + \lambda|b|$ with $\lambda > 0$.
 
@@ -254,13 +254,51 @@ Common errors: using $\mathbb P(r_1 \le r)$ in the tail formula; forgetting that
 Common errors: writing $\int f''^2 = \sum_j \beta_j^2\int b_j''^2$, dropping the cross terms (making them vanish is what the diagonal basis in (c) arranges); claiming $\boldsymbol\Omega$ is positive definite; in (d), saying the fit tends to zero (the line is not penalized).
 :::
 
+**Problem 4 (how many folds?).** $y_1, \ldots, y_n$ are i.i.d. with mean $\mu$ and variance $\sigma^2$, and $K$ divides $n$. The method predicts a new $Y$ (independent of the $y_i$, with the same distribution) by the mean of the rows it is fitted on, with squared-error loss. $K$-fold cross-validation scores each $y_i$ against the mean of the $n - n/K$ rows outside its fold, and averages the $n$ losses.
+
+(a) Show that the mean $\bar Y_m$ of $m$ such rows has expected loss $\mathbb E[(Y - \bar Y_m)^2] = \sigma^2(1 + 1/m)$ on a new $Y$. Deduce that the $K$-fold CV score has expectation $\sigma^2\big(1 + \tfrac{K}{(K-1)n}\big)$, and that it overestimates the expected loss of the mean fitted on all $n$ rows by $\tfrac{\sigma^2}{(K-1)n}$. Compare $K = 2$, $K = 10$ and $K = n$.
+
+(b) Leave-one-out is $K = n$. With $\bar y$ the mean of all $n$ rows and $\bar y_{(-i)}$ the mean without row $i$, show that $y_i - \bar y_{(-i)} = \tfrac{n}{n-1}(y_i - \bar y)$, so that the leave-one-out score needs only one fit: $\mathrm{CV}_{(n)} = \tfrac{n}{n-1}\,s^2$ with $s^2 = \tfrac{1}{n-1}\sum_i (y_i - \bar y)^2$. Check its expectation against (a).
+
+(c) For tuning, the question is what $K$ does to the choice. Take $k$-NN with $p$ inputs, and suppose, as an idealization, that fitted on $m$ rows its excess risk (its expected loss minus the noise variance $\sigma^2$) is exactly $g_m(k) = a\,(k/m)^{2/p} + \sigma^2/k$, with $a > 0$ and $k$ treated as a continuous variable. First, show that $g_m$ has a unique minimizer $k^\star(m)$, proportional to $m^{2/(p+2)}$. Second, suppose $K$-fold cross-validation measured $g_m$ without error at $m = n(K-1)/K$, so that it chooses $k^\star(m)$, which is then used with all $n$ rows. Show that this choice is $\rho\,k^\star(n)$ with $\rho = \big(\tfrac{K-1}{K}\big)^{2/(p+2)}$, and that
+$$
+\frac{g_n(\rho\,k^\star(n))}{g_n(k^\star(n))} = \frac{p\,\rho^{2/p} + 2/\rho}{p + 2}.
+$$
+Third, show that this ratio is $1 + (1 - \rho)^2/p$ up to terms of order $(1 - \rho)^3$, and say why there is no term of first order. Evaluate the ratio for $p = 1$ and $p = 11$ with $K = 2$ and $K = 10$: what does it say about the choice of $K$ for tuning, as against for reporting the error?
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+(a) $Y$ and $\bar Y_m$ are independent with the same mean, so $\mathbb E[(Y - \bar Y_m)^2] = \mathrm{Var}(Y) + \mathrm{Var}(\bar Y_m)$. In the CV score, row $i$ is not among the rows its prediction was fitted on.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 2"}
+(b) $\bar y_{(-i)} = (n\bar y - y_i)/(n - 1)$, and $\mathbb E[s^2] = \sigma^2$.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 3"}
+(c) At $k^\star(n)$ the derivative is zero, which fixes the ratio of the two terms: $a\,(k^\star/n)^{2/p} = \tfrac p2\,\sigma^2/k^\star$. Write $g_n(k^\star)$ and $g_n(\rho k^\star)$ as multiples of $\sigma^2/k^\star$. For the expansion, put $\rho = 1 - \varepsilon$.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) $Y - \bar Y_m$ has mean $\mu - \mu = 0$, and $Y$ is independent of $\bar Y_m$, so $\mathbb E[(Y - \bar Y_m)^2] = \mathrm{Var}(Y - \bar Y_m) = \sigma^2 + \sigma^2/m$. In the $K$-fold score, $y_i$ is predicted by the mean of the $m = n - n/K = n(K-1)/K$ rows outside its fold, which do not include $y_i$, so each of the $n$ losses has expectation $\sigma^2(1 + 1/m) = \sigma^2\big(1 + \tfrac{K}{(K-1)n}\big)$, and so does their average. The mean fitted on all $n$ rows has expected loss $\sigma^2(1 + 1/n)$, and the difference is $\sigma^2\big(\tfrac{K}{(K-1)n} - \tfrac1n\big) = \tfrac{\sigma^2}{(K-1)n}$: $\sigma^2/n$ for $K = 2$, $\sigma^2/(9n)$ for $K = 10$, $\sigma^2/((n-1)n)$ for $K = n$. The score is pessimistic because each fit uses fewer rows than the final one, and the bias shrinks as $K$ grows. For the mean it is tiny next to $\sigma^2$, because the mean's loss barely depends on $m$; a method whose loss falls faster with $m$ has a larger bias at small $K$.
+
+(b) $\bar y_{(-i)} = (n\bar y - y_i)/(n - 1)$, so $y_i - \bar y_{(-i)} = \frac{(n - 1)y_i - n\bar y + y_i}{n - 1} = \frac{n}{n - 1}(y_i - \bar y)$. Then
+$$
+\mathrm{CV}_{(n)} = \frac1n\sum_{i=1}^n \frac{n^2}{(n-1)^2}(y_i - \bar y)^2 = \frac{n}{n-1}\cdot\frac{1}{n-1}\sum_{i=1}^n (y_i - \bar y)^2 = \frac{n}{n-1}\,s^2:
+$$
+one fit, $\bar y$ and $s^2$, gives all $n$ leave-one-out losses. It is the mean's case of the least-squares shortcut, which divides each residual by $1 - h_i$, here with leverage $h_i = 1/n$ (ISLR, equation 5.2). Since $\mathbb E[s^2] = \sigma^2$, $\mathbb E[\mathrm{CV}_{(n)}] = \frac{n}{n-1}\sigma^2 = \sigma^2\big(1 + \frac{1}{n-1}\big)$, which is (a)'s expectation at $K = n$, since $\frac{K}{(K-1)n} = \frac{1}{n-1}$ there.
+
+(c) The minimizer: $g_m'(k) = \frac2p\,a\,m^{-2/p}k^{2/p - 1} - \sigma^2/k^2$ is zero when $k^{(p+2)/p} = \frac{p\sigma^2}{2a}m^{2/p}$, that is at $k^\star(m) = \big(\frac{p\sigma^2}{2a}\big)^{p/(p+2)} m^{2/(p+2)}$. It is the only stationary point, and $g_m \to \infty$ both as $k \to 0$ and as $k \to \infty$, so it is the minimum. The choice: $k^\star(m)/k^\star(n) = (m/n)^{2/(p+2)} = \rho$. Write $k^\star = k^\star(n)$. Stationarity at $k^\star$ says $a\,(k^\star/n)^{2/p} = \frac p2\cdot\frac{\sigma^2}{k^\star}$, so $g_n(k^\star) = \big(\frac p2 + 1\big)\frac{\sigma^2}{k^\star}$ and $g_n(\rho k^\star) = \rho^{2/p}\,a\,(k^\star/n)^{2/p} + \frac{\sigma^2}{\rho k^\star} = \big(\frac p2\rho^{2/p} + \frac1\rho\big)\frac{\sigma^2}{k^\star}$, and the ratio is $\frac{p\rho^{2/p} + 2/\rho}{p+2}$. The expansion: with $\rho = 1 - \varepsilon$, $\rho^{2/p} = 1 - \frac2p\varepsilon + \frac1p\big(\frac2p - 1\big)\varepsilon^2 + O(\varepsilon^3)$ and $1/\rho = 1 + \varepsilon + \varepsilon^2 + O(\varepsilon^3)$, so the numerator is $p + 2 + \frac{p+2}{p}\varepsilon^2 + O(\varepsilon^3)$ and the ratio is $1 + \varepsilon^2/p + O(\varepsilon^3)$. The first-order terms cancel because $k^\star$ minimizes $g_n$: the derivative is zero there, so a small error in $k$ costs only its square. The exact ratios are 1.19 ($p = 1$, $K = 2$), 1.005 ($p = 1$, $K = 10$), 1.001 ($p = 11$, $K = 2$) and 1.00002 ($p = 11$, $K = 10$). For tuning, $K$ makes little difference unless the problem is low-dimensional and $K$ is 2: the choice is pushed by a factor $\rho$, but a flat minimum forgives it. For reporting the error, what counts is the bias of the score itself, which is of first order: in (a) it is $\sigma^2/((K-1)n)$, and it is larger for a method whose error falls faster with the number of rows.
+
+Common errors: in (a), predicting $y_i$ with the mean of all $n$ rows, which includes $y_i$; in (b), forgetting that $\bar y_{(-i)}$ leaves $y_i$ out; in (c), comparing the two minima $g_m(k^\star(m))$ and $g_n(k^\star(n))$ instead of evaluating $g_n$ at the chosen $k$.
+:::
+
 ## Coding
 
-<!-- About 43 min: part 1 20, part 2 7, part 3 16. Skeleton lines in comments are scaffolds: the statistical operation is what you write. Everything headed "Optional, can be done at home" is outside the seminar. -->
+<!-- About 53 min: part 1 22, part 2 7, part 3 24. Skeleton lines in comments are scaffolds: the statistical operation is what you write. Everything headed "Optional, can be done at home" is outside the seminar. -->
 
 ### 1. The cross-validation pipeline
 
-<!-- 20 min: steps 1 to 3, questions 1 to 3. -->
+<!-- 22 min: steps 1 to 3, questions 1 to 3. -->
 
 The structures seminar's task: predict a track's popularity from ten audio features and its release year, squared loss ([data note](https://ml4ds.com/data/spotify.html)), genre left out. The same split as there: 5,000 training, 2,000 tuning and 3,000 test tracks, one seed. Today the tuning tracks are a check on cross-validation and the test tracks are not opened; the last step uses a split by year of the 7,000 development tracks instead of the random one.
 
@@ -366,48 +404,6 @@ Both curves have the same shape, a steep fall from $k = 1$ and a flat bottom fro
 `cv_mse()` returns no standard error because the formula needs the losses to be independent, and the pooled CV losses are not: the ten fits share rows. A standard error from them, or from the ten fold scores, is a heuristic (the lecture's `plot(cv.glmnet)` bars are the second kind); the tuning set's standard error is valid for each fixed $k$, because its rows were held out of every fit. It is conditional on that fitted predictor, and it does not cover the minimum, which was chosen on the same tuning scores.
 :::
 
-**Question 2 (how many folds?).** Ten folds is a convention. The chunk below reruns the $k$-NN curve with $K = 2, 5, 10$ and $50$ folds, twice for each $K$ with fresh random folds; it takes a minute or more, so read the questions while it runs. (a) With $K$ folds, each fit uses what share of the 5,000 training tracks? Which $K$ should estimate the error of a fit on all 5,000 most pessimistically, and does the table agree? (b) For which $K$ do the scores move most between the two draws of folds? (c) The best $k$ for $k$-NN grows with the number of fitting rows (where the rate's two terms balance, $k$ is proportional to $n^{2/(p+2)}$). Which way should a small $K$ push the chosen $k$, toward a more or a less complex fit, and by about how much here, with $p = 11$? Do the chosen $k$'s show it? (d) Leave-one-out cross-validation is $K = n$. What would it cost, and what would it gain?
-
-```{r}
-#| eval: !expr exists("knn_fp")
-Ks <- c(2, 5, 10, 50)
-ks_K <- c(20, 50, 100, 200)
-cv_by_K <- map_dfr(Ks, function(K_try) map_dfr(1:2, function(draw) {
-  # fresh folds for each K and each draw
-  fold_K <- sample(rep(1:K_try, length.out = nrow(sp_train)))
-  tibble(K = K_try, draw = draw, k = ks_K,
-         mse = sapply(ks_K, function(k) cv_mse(knn_fp(k), sp_train, fold_K)))
-}))
-by_K <- cv_by_K |> group_by(K, draw) |>
-  summarize(k_chosen = k[which.min(mse)], min_cv_mse = round(min(mse), 1),
-            .groups = "drop")
-by_K
-ggplot(cv_by_K, aes(k, mse, colour = factor(K), group = interaction(K, draw))) +
-  geom_line() + geom_point() + scale_x_log10() +
-  labs(colour = "K", y = "CV MSE", title = "two draws of folds for each K")
-```
-
-::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-```{r}
-spread <- cv_by_K |> group_by(K, k) |>
-  summarize(gap = abs(diff(mse)), .groups = "drop") |>
-  group_by(K) |> summarize(largest_gap = round(max(gap), 1))
-spread
-at_100 <- cv_by_K |> filter(k == 100) |> group_by(K) |> summarize(mse = mean(mse))
-two_above <- cv_by_K |> group_by(k) |> summarize(above = min(mse[K == 2]) > max(mse[K != 2]))
-```
-
-(a) Each fit uses the share $(K - 1)/K$: half the tracks for $K = 2$, 80% for 5, 90% for 10, 98% for 50. A fit on fewer tracks predicts worse, so the score estimates the error of a fit on fewer than 5,000 tracks and is pessimistic, most for $K = 2$. At $k = 100$ the two draws with 2 folds average `r round(at_100$mse[at_100$K == 2])` against `r round(at_100$mse[at_100$K == 50])` with 50 folds, and the 2-fold curves lie above every other curve at `r sum(two_above$above)` of the `r nrow(two_above)` values of $k$; the curves for $K = 5, 10, 50$ almost coincide. That is consistent with the usual pessimism of fitting on half the tracks. The gaps also contain fold-assignment variation, of the size in (b); two draws per $K$ cannot separate the two exactly. (Comparing at one $k$ avoids comparing minima, each chosen on its own noisy curve.)
-
-(b) The largest gap between the two draws of folds, over the $k$'s, is `r paste0(spread$largest_gap, " for K = ", spread$K, collapse = ", ")`. Here it is largest for the fewest folds and smallest for the most; two draws are too few to put the middle two in order. The fold assignment makes less difference as the folds get more numerous, and leave-one-out has none to draw. That is only the variation from the fold assignment, with the training tracks fixed. The variance that counts for estimating the risk is over new training samples, which this chunk cannot see. ISLR (section 5.1.4) argues that it grows with $K$: leave-one-out averages $n$ fits on almost the same rows, which are highly correlated, while 5 or 10 folds average fewer, less correlated fits. With the bias of (a), that is the trade-off behind the usual choice of 5 or 10. The argument is a heuristic: whether and how the variance changes with $K$ depends on the method and the data.
-
-(c) Fewer fitting rows push the best $k$ down, toward a more complex fit. Here the push should be small: if the rate's balance applied, going from 4,900 to 2,500 fitting rows would move $k$ by a factor $(2500/4900)^{2/13} \approx 0.90$, a tenth, much finer than the grid's steps and inside the curve's flat bottom. The chosen $k$'s are `r paste0(by_K$k_chosen, " (K = ", by_K$K, ")", collapse = ", ")`: a step between two draws of the same $K$ is the flat bottom's noise, not the push. With one input the factor would be $(2500/4900)^{2/3} \approx 0.64$, and a small $K$ would choose visibly smaller $k$'s.
-
-(d) Cost: $n$ fits instead of 10. For $k$-NN the arithmetic is about the same as 10 folds, since every track is still scored once against about 5,000 others, but for a method whose fits are slow (the lasso's path, a network) it is 500 times the work. For least squares it is free: one fit gives every leave-one-out residual (ISLR, equation 5.2). What it gains: the smallest bias of (a), fits on 4,999 tracks, and no random fold assignment.
-
-Common errors: reading the gap between $K = 2$ and $K = 50$ as noise alone (both draws show it, so it is mostly the pessimism of fitting on half the tracks); expecting the chosen $k$ to move a lot with $K$.
-:::
-
 **Step 3.** The lasso through the same pipeline. `lasso_fp(lam)` standardizes inside the fold, fits the path on the training rows and predicts at the one $\lambda$ `lam`. The sequence `lam_seq` comes from a fit on all 5,000 training tracks, so every fold uses the same values (a small step outside the folds, which `cv.glmnet()` takes too). Run the pipeline over `lam_seq` and find $\lambda$ at the minimum.
 
 ```{r}
@@ -438,7 +434,7 @@ setNames(round(cv_lasso), signif(lam_seq, 2))     # the CV MSE at each lambda, l
 The minimum is at $\lambda = `r signif(lam_cv, 2)`$ (glmnet's scale), near the small end of the path, as in the structures seminar: with 5,000 tracks and eleven inputs the data can afford every coefficient, and the lasso's score is least squares'.
 :::
 
-**Question 3.** `cv.glmnet()` does the same with its own code. Run it on `X_train` (standardized once, on all 5,000 training rows, which is why the call says `standardize = FALSE`) with the same folds (`foldid = fold`) and compare `lambda.min` with your `lam_cv`. Its `lambda.1se` is larger: what rule chose it, and how many coefficients does the lasso set to zero at each of the two?
+**Question 2.** `cv.glmnet()` does the same with its own code. Run it on `X_train` (standardized once, on all 5,000 training rows, which is why the call says `standardize = FALSE`) with the same folds (`foldid = fold`) and compare `lambda.min` with your `lam_cv`. Its `lambda.1se` is larger: what rule chose it, and how many coefficients does the lasso set to zero at each of the two?
 
 ```{r}
 #| eval: !expr exists("lam_cv")
@@ -449,6 +445,71 @@ c(zero_at_min = sum(coef(cvg, s = "lambda.min")[-1] == 0), zero_at_1se = sum(coe
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
 `lambda.min` and `lam_cv` agree up to the coarseness of the two sequences (`cv.glmnet` uses a finer path, and standardizes once on all 5,000 rows rather than inside each fold, which changes the numbers very little here). `lambda.1se` is the one-standard-error rule: the largest $\lambda$ whose CV error is within one (heuristic) standard error of the minimum, a flat-bottom rule that prefers the simpler model. At `lambda.min` the lasso sets `r sum(coef(cvg, s = "lambda.min")[-1] == 0)` of the eleven coefficients to zero; at `lambda.1se`, `r sum(coef(cvg, s = "lambda.1se")[-1] == 0)`.
+:::
+
+**Question 3 (how many folds?).** Ten folds is a convention. The chunk below reruns the CV curves of $k$-NN and of the lasso with $K = 2, 5, 10$ and $50$ folds, twice for each $K$ with fresh random folds, the same folds for both methods. `lasso_curve()` does for the lasso's whole path what `cv_mse()` does for one method, on `X_train`, standardized once as in question 2 (`cv.glmnet()` refuses fewer than three folds). The $k$-NN curves take a minute or more, so read the questions while it runs. (a) With $K$ folds, each fit uses what share of the 5,000 training tracks? Which $K$ should estimate the error of a fit on all 5,000 most pessimistically? Do the curves agree, and for which method is the effect larger? (b) For which $K$ do the scores move most between the two draws of folds? (c) The best $k$ for $k$-NN grows with the number of fitting rows (where the rate's two terms balance, $k$ is proportional to $n^{2/(p+2)}$); the best $\lambda$ for the lasso, on glmnet's scale, shrinks, since the chance correlations the penalty has to overrule shrink as rows are added. Which way should a small $K$ push each choice, toward a more or a less complex fit, and by about how much for $k$-NN here, with $p = 11$? Do the chosen values show it? (d) Leave-one-out cross-validation is $K = n$. What would it cost, and what would it gain?
+
+```{r}
+#| eval: !expr exists("knn_fp") && exists("X_train")
+Ks <- c(2, 5, 10, 50)
+ks_K <- c(20, 50, 100, 200)
+lam_path <- glmnet(X_train, y_train, standardize = FALSE)$lambda   # cv.glmnet()'s path in question 2
+lam_K <- lam_path[lam_path <= 1]
+lasso_curve <- function(fold, lam) {          # the lasso's CV MSE at every lambda, for any folds
+  loss <- matrix(NA, nrow(X_train), length(lam))
+  for (k in 1:max(fold)) {
+    fit <- glmnet(X_train[fold != k, ], y_train[fold != k], lambda = lam, standardize = FALSE)
+    loss[fold == k, ] <- (y_train[fold == k] - predict(fit, X_train[fold == k, ]))^2
+  }
+  colMeans(loss)
+}
+cv_by_K <- map_dfr(Ks, function(K_try) map_dfr(1:2, function(draw) {
+  # fresh folds for each K and each draw, the same for both methods
+  fold_K <- sample(rep(1:K_try, length.out = nrow(sp_train)))
+  bind_rows(
+    tibble(method = "k-NN", knob = ks_K,
+           mse = sapply(ks_K, function(k) cv_mse(knn_fp(k), sp_train, fold_K))),
+    tibble(method = "lasso", knob = lam_K, mse = lasso_curve(fold_K, lam_K))) |>
+    mutate(K = K_try, draw = draw)
+}))
+by_K <- cv_by_K |> group_by(method, K, draw) |>
+  summarize(chosen = signif(knob[which.min(mse)], 2), min_cv_mse = round(min(mse), 1),
+            .groups = "drop")
+by_K |> pivot_wider(names_from = method, values_from = c(chosen, min_cv_mse))
+ggplot(cv_by_K, aes(knob, mse, colour = factor(K), group = interaction(K, draw))) +
+  geom_line() + scale_x_log10() + facet_wrap(~ method, scales = "free") +
+  labs(x = "k for k-NN, lambda for the lasso", y = "CV MSE", colour = "K",
+       title = "two draws of folds for each K")
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+```{r}
+knn_K <- cv_by_K |> filter(method == "k-NN")
+lasso_K <- cv_by_K |> filter(method == "lasso")
+spread <- cv_by_K |> group_by(method, K, knob) |>
+  summarize(gap = abs(diff(mse)), .groups = "drop") |>
+  group_by(method, K) |> summarize(largest_gap = round(max(gap), 1), .groups = "drop")
+spread |> pivot_wider(names_from = method, values_from = largest_gap)
+at_100 <- knn_K |> filter(knob == 100) |> group_by(K) |> summarize(mse = mean(mse))
+two_above <- knn_K |> group_by(knob) |> summarize(above = min(mse[K == 2]) > max(mse[K != 2]))
+lam_mid <- lam_K[which.min(abs(lam_K - 0.05))]
+at_lam <- lasso_K |> filter(knob == lam_mid) |> group_by(K) |> summarize(mse = mean(mse))
+gap_text <- function(m) with(filter(spread, method == m),
+                              paste0(format(largest_gap, nsmall = 1), " for K = ", K, collapse = ", "))
+chosen_text <- function(m) by_K |> filter(method == m) |> group_by(K) |>
+  summarize(t = paste0(paste(chosen, collapse = " and "), " (K = ", K[1], ")")) |>
+  pull(t) |> paste(collapse = ", ")
+```
+
+(a) Each fit uses the share $(K - 1)/K$: half the tracks for $K = 2$, 80% for 5, 90% for 10, 98% for 50. A fit on fewer tracks predicts worse, so the score estimates the error of a fit on fewer than 5,000 tracks and is pessimistic, most for $K = 2$. For $k$-NN at $k = 100$ the two draws with 2 folds average `r round(at_100$mse[at_100$K == 2])` against `r round(at_100$mse[at_100$K == 50])` with 50 folds, and the 2-fold curves lie above every other curve at `r sum(two_above$above)` of the `r nrow(two_above)` values of $k$; the curves for $K = 5, 10, 50$ almost coincide. For the lasso at $\lambda = `r signif(lam_mid, 2)`$ they average `r round(at_lam$mse[at_lam$K == 2])` against `r round(at_lam$mse[at_lam$K == 50])`: the same direction, a smaller gap. Both are consistent with the usual pessimism of fitting on half the tracks; the gaps also contain fold-assignment variation, of the size in (b), and two draws per $K$ cannot separate the two exactly. (Comparing at one value of the knob avoids comparing minima, each chosen on its own noisy curve.) The effect is larger for $k$-NN because its error keeps falling as rows are added, while least squares on eleven inputs gains little from 4,900 rows over 2,500 (if the linear model were right, the estimation part of its error would be about $\sigma^2 p/m$: with $\sigma^2 \approx 520$ and $p = 11$, about 2 at $m = 2{,}500$ and 1 at $m = 4{,}900$): a small $K$'s pessimism is the drop in the learning curve between $n(K-1)/K$ rows and $n$, larger where the curve is steeper.
+
+(b) For $k$-NN the largest gap between the two draws of folds, over the values of $k$, is `r gap_text("k-NN")`; for the lasso, over the values of $\lambda$, it is `r gap_text("lasso")`. Two draws per $K$ are too few to rank the $K$'s finely; what is general is that the fold assignment makes less difference as the folds get more numerous, and leave-one-out has none to draw. That is only the variation from the fold assignment, with the training tracks fixed. The variance that counts for estimating the risk is over new training samples, which this chunk cannot see. ISLR (section 5.1.4) argues that it grows with $K$: leave-one-out averages $n$ fits on almost the same rows, which are highly correlated, while 5 or 10 folds average fewer, less correlated fits. With the bias of (a), that is the trade-off behind the usual choice of 5 or 10. The argument is a heuristic: whether and how the variance changes with $K$ depends on the method and the data.
+
+(c) Fewer fitting rows push $k$-NN's best $k$ down, toward a more complex fit, and the lasso's best $\lambda$ up, toward a simpler one: the direction of the push depends on how the method's best complexity changes with $n$. For $k$-NN the push should be small here: if the rate's balance applied, going from 4,900 to 2,500 fitting rows would move $k$ by a factor $(2500/4900)^{2/13} \approx 0.90$, much finer than the grid's steps. The chosen $k$'s are `r chosen_text("k-NN")`; the chosen $\lambda$'s are `r chosen_text("lasso")`: both curves have flat bottoms, and a difference between two draws of the same $K$ is their noise, not the push. With one input the factor for $k$ would be $(2500/4900)^{2/3} \approx 0.64$, and a small $K$ would choose visibly smaller $k$'s.
+
+(d) Cost: $n$ fits instead of 10. For $k$-NN the arithmetic is about the same as 10 folds, since every track is still scored once against about 5,000 others, but for a method whose fits are slow (the lasso's path, a network) it is 500 times the work. For least squares it is free: one fit gives every leave-one-out residual (ISLR, equation 5.2). What it gains: the smallest bias of (a), fits on 4,999 tracks, and no random fold assignment.
+
+Common errors: reading the gap between $K = 2$ and $K = 50$ as noise alone (both draws show it, so it is mostly the pessimism of fitting on half the tracks); expecting the chosen $k$ or $\lambda$ to move a lot with $K$.
 :::
 
 ### 2. Learning curves and the rate
@@ -505,11 +566,11 @@ lc_ratio
 (a) For $p = 1$ the error fell to `r lc_ratio$ratio[1]` of its value (the rate: $64^{-2/3} = 0.06$); for $p = 10$ to `r lc_ratio$ratio[4]` ($64^{-1/6} = 0.5$). Sixty-four times the data about halves the error in ten dimensions; the Spotify inputs are eleven, and there halving the bound takes $2^{(11 + 2)/2} \approx 90$ times the data, about 450,000 tracks, if popularity were a Lipschitz function of them and the bound were tight. (b) The best $k$ grows with $n$, fast for $p = 1$ and slowly for $p = 10$: the derivation balances the two terms at $k \propto n^{2/(p+2)}$, which is $n^{2/3}$ in one dimension and $n^{1/6}$ in ten. The lesson: with only smoothness assumed, more data helps slowly in many dimensions, and a method that assumes more (additive, sparse) can do better when the assumption holds.
 :::
 
-### 3. Two ways cross-validation goes wrong
+### 3. Three ways cross-validation goes wrong
 
-<!-- 16 min: step 5 and question 5 (8), step 6 and question 6 (8). Mandatory: this is the complication the lecture deferred. -->
+<!-- 24 min: step 5 and question 5 (8), step 6 and question 6 (8), step 7 and question 7 (8). Mandatory: this is the complication the lecture deferred. -->
 
-Cross-validation has worked. It assumes that a held-out row is like a new draw: independent of the rows it was fitted on, and from the same population. Two ways that fails on these tracks: copies of a track break the independence, and drift over time breaks the same population.
+Cross-validation has worked. It assumes that a held-out row is like a new draw: independent of the rows it was fitted on, and from the same population. Three ways that fails: copies of a track break the independence, drift over time breaks the same population, and a step that looks at the outcome outside the folds lets the held-out rows into the fit.
 
 **Step 5. The same track on both sides of a fold.** The file has 11,554 rows for 10,000 tracks: 1,101 tracks are in more than one playlist, and every copy has the same audio features, year and popularity. The loader removed the copies with `distinct()`. Load the rows again without it, keep the 5,000 training tracks with all their copies, and build two fold assignments: `fold_row`, at random over rows, and `fold_track`, at random over tracks, so that every copy of a track is in the same fold. Then run the $k$-NN pipeline at $k = 1$, $5$ and $50$ with each.
 
@@ -612,9 +673,7 @@ Cross-validation's held-out rows come from the same years as the fitting rows, s
 Common errors: fitting the plane on `old` and `new` together before scoring on `new` (the fit must not see the future); reading the lower MSE on `new` as "the model does better on new tracks"; treating the new tracks' own mean as a baseline a model could have used.
 :::
 
-### Optional, can be done at home: the wrong way to cross-validate
-
-Cross-validate the entire pipeline, the lecture said. Here is the classic way to get that wrong (ESL, section 7.10.2). Pure noise: $n = 100$ rows, $p = 1{,}000$ inputs and an outcome, all independent standard normal, so the best possible risk is $1$ and no method can do better than the mean. The wrong way: screen the 20 inputs most correlated with the outcome on all 100 rows, then cross-validate least squares on those 20. The right way: screen inside each fold, on the fitting rows only. Write both as `fit_predict` functions for `cv_mse()` and compare the two CV scores with the mean's.
+**Step 7. The wrong way to cross-validate.** Every step of a pipeline that looks at the outcome belongs inside the fold. Here is the classic way to get that wrong (ESL, section 7.10.2). Pure noise: $n = 100$ rows, $p = 1{,}000$ inputs and an outcome, all independent standard normal, so the best possible risk is $1$ and no method can do better than the mean. The wrong way: screen the 20 inputs most correlated with the outcome on all 100 rows, then cross-validate least squares on those 20. The right way: screen inside each fold, on the fitting rows only. Write both as `fit_predict` functions for `cv_mse()` and compare the two CV scores with the mean's.
 
 ```{r}
 #| eval: false
@@ -634,7 +693,7 @@ top20 <- function(d) {                               # the 20 inputs most correl
 # c(wrong = cv_mse(wrong_fp, noise, fold_w), right = cv_mse(right_fp, noise, fold_w), mean = cv_mse(mean_fp, noise, fold_w))
 ```
 
-::: {.callout-note collapse="true" title="Hint 1"}
+::: {.callout-note .answer collapse="true" title="Hint 1"}
 A formula from a character vector of names: `reformulate(keep, "track_popularity")`, or paste the names with `+`.
 :::
 
@@ -654,8 +713,14 @@ right_fp <- function(tr, ho) { keep <- top20(tr); predict(lm(reformulate(keep, "
 cv_w <- round(c(wrong = cv_mse(wrong_fp, noise, fold_w), right = cv_mse(right_fp, noise, fold_w), mean = cv_mse(mean_fp, noise, fold_w)), 2)
 cv_w
 ```
+:::
 
-On pure noise the best predictor is the outcome's mean, zero, with risk $1$; the fitting rows' mean is the baseline a method can actually use, and it scores `r cv_w["mean"]` here. The wrong way scores `r cv_w["wrong"]`, far below it: the twenty inputs were chosen for their correlation with the outcome on the very rows that are later held out, so the held-out rows are not fresh. The right way scores `r cv_w["right"]`, at or above the baseline, as a least-squares fit of 20 noise inputs on 90 rows will usually be. Screening is a step of the pipeline; the lecture's rule is that every step that looks at the outcome happens inside the fold.
+**Question 7.** On pure noise nothing can beat the mean. Why does the wrong way score far below it? Which steps of a pipeline have to happen inside the fold?
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+On pure noise the best predictor is the outcome's mean, zero, with risk $1$; the fitting rows' mean is the baseline a method can actually use, and it scores `r cv_w["mean"]` here. The wrong way scores `r cv_w["wrong"]`, far below it: the twenty inputs were chosen for their correlation with the outcome on the very rows that are later held out, so the held-out rows are not fresh, and their chance correlations with the chosen inputs make the fit look good on them. The right way scores `r cv_w["right"]`, at or above the baseline, as a least-squares fit of 20 noise inputs on 90 rows will usually be. Every step that looks at the outcome (screening inputs, choosing a transformation by its fit) belongs inside the fold; so does tuning, when the score is to estimate the error of the tuned pipeline, which is why the minimum of a CV curve is a slightly optimistic estimate of the chosen fit's error. Steps that look only at the inputs, such as standardizing, leak much less; this notebook standardizes inside the fold anyway, except in questions 2 and 3, which call `glmnet()` on `X_train`, standardized once on all 5,000 training tracks.
+
+Common errors: screening inside `wrong_fp` by accident, which makes it the right way; reading the right way's score above 1 as a mistake (twenty noise inputs fitted on 90 rows add variance).
 :::
 
 ### Optional, can be done at home: the weighted-ridge form on a real fit
