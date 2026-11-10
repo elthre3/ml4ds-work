@@ -42,7 +42,7 @@ The lecture stated the bias--variance decomposition in ridge form and left its p
 Each exercise has hints, collapsed below it. Do not open a hint unless you have been stuck for at least a few minutes, and open them in order. Solutions are shown in the seminar if you ask.
 :::
 
-**Exercise 1 (bias--variance decomposition, ridge form).** $\mathbf X$ is $n \times p$ with orthonormal columns, $\mathbf X^T\mathbf X = \mathbf I$ (so $p \le n$). The outcome is $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$ with $\beta$ fixed and unknown and the $\varepsilon_i$ independent, mean $0$, variance $\sigma^2 > 0$. Expectations are over $\boldsymbol\varepsilon$, with $\mathbf X$ fixed. The least-squares estimator solves the normal equations $\mathbf X^T\mathbf X\beta = \mathbf X^T\mathbf y$, so here $\hat\beta = \mathbf X^T\mathbf y$. For $\lambda > 0$ the ridge estimator $\hat\beta_\lambda$ minimizes $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|^2$.
+**Exercise 1 (bias--variance decomposition, ridge form).** $\mathbf X$ is $n \times p$ with orthonormal columns, $\mathbf X^T\mathbf X = \mathbf I$ (so $p \le n$; the lecture's identity design is the case $\mathbf X = \mathbf I$, $n = p$). The outcome is $\mathbf y = \mathbf X\beta + \boldsymbol\varepsilon$ with $\beta$ fixed and unknown and the $\varepsilon_i$ independent, mean $0$, variance $\sigma^2 > 0$. Expectations are over $\boldsymbol\varepsilon$, with $\mathbf X$ fixed. The least-squares estimator solves the normal equations $\mathbf X^T\mathbf X\beta = \mathbf X^T\mathbf y$, so here $\hat\beta = \mathbf X^T\mathbf y$. For $\lambda > 0$ the ridge estimator $\hat\beta_\lambda$ minimizes $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|^2$.
 
 (a) Show that $\hat\beta$ is unbiased, $\mathbb E[\hat\beta] = \beta$, and that each coordinate has variance $\mathrm{Var}(\hat\beta_j) = \sigma^2$. Deduce $\mathbb E\|\hat\beta - \beta\|^2 = p\sigma^2$.
 
@@ -95,17 +95,13 @@ $$
 
 ## Problems
 
-<!-- About 20 min: problems 1 to 3 (7, 7, 6), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
+<!-- About 29 min: problems 1 to 4 (4, 7, 6, 12), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
 
-**Problem 1 (thresholding rules).** One coordinate of an orthonormal design: $z$ is the least-squares coefficient, a number, and $b$ the estimate. The lasso's one-coordinate objective is $\tfrac12(z - b)^2 + \lambda|b|$ with $\lambda > 0$.
+**Problem 1 (soft thresholding).** One coordinate of an orthonormal design: $z$ is the least-squares coefficient, a number, and $b$ the estimate. The lasso's one-coordinate objective is $\tfrac12(z - b)^2 + \lambda|b|$ with $\lambda > 0$.
 
 (a) Show that the minimizer is $\hat b = \mathrm{sign}(z)\,(|z| - \lambda)_+$: $z$ moved toward zero by $\lambda$, stopping at zero.
 
-(b) The lecture writes the lasso objective as $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|_1$, without the $\tfrac12$. In the orthonormal design, by how much does that lasso move each coefficient toward zero?
-
-(c) The elastic net adds a ridge term. One coordinate: $\tfrac12(z - b)^2 + \lambda_1|b| + \tfrac{\lambda_2}{2}b^2$. Show that $\hat b = \mathrm{sign}(z)\,(|z| - \lambda_1)_+ / (1 + \lambda_2)$: soft thresholding, then ridge's division.
-
-(d) Best subset selection penalizes the count of nonzero coefficients. One coordinate: $\tfrac12(z - b)^2 + \lambda\,\mathbf 1\{b \ne 0\}$. Show that $\hat b = z$ if $|z| > \sqrt{2\lambda}$ and $\hat b = 0$ otherwise (hard thresholding). Sketch the three rules, $\hat b$ against $z$. Which rule is discontinuous in $z$?
+(b) The lecture writes the lasso objective as $\|\mathbf y - \mathbf X\beta\|^2 + \lambda\|\beta\|_1$, without the $\tfrac12$. In the orthonormal design ($\mathbf X$ is $n \times p$ with $\mathbf X^T\mathbf X = \mathbf I$), show that this objective splits into one problem per coefficient, and find by how much that lasso moves each coefficient toward zero.
 
 **Problem 2 (the distance lemma in one dimension).** $n$ inputs i.i.d. uniform on $[0, 1]$, the point $x_0 = \tfrac12$, and $r_1$ the distance from $x_0$ to the nearest input.
 
@@ -129,13 +125,25 @@ $$
 
 (d) Which basis functions have $w_j = 0$? What happens to their coefficients as $\lambda \to \infty$, and to the others? What does the fit tend to?
 
+**Problem 4 (how many folds?).** $y_1, \ldots, y_n$ are i.i.d. with mean $\mu$ and variance $\sigma^2$, and $K$ divides $n$. The method predicts a new $Y$ (independent of the $y_i$, with the same distribution) by the mean of the rows it is fitted on, with squared-error loss. $K$-fold cross-validation scores each $y_i$ against the mean of the $n - n/K$ rows outside its fold, and averages the $n$ losses.
+
+(a) Show that the mean $\bar Y_m$ of $m$ such rows has expected loss $\mathbb E[(Y - \bar Y_m)^2] = \sigma^2(1 + 1/m)$ on a new $Y$. Deduce that the $K$-fold CV score has expectation $\sigma^2\big(1 + \tfrac{K}{(K-1)n}\big)$, and that it overestimates the expected loss of the mean fitted on all $n$ rows by $\tfrac{\sigma^2}{(K-1)n}$. Compare $K = 2$, $K = 10$ and $K = n$.
+
+(b) Leave-one-out is $K = n$. With $\bar y$ the mean of all $n$ rows and $\bar y_{(-i)}$ the mean without row $i$, show that $y_i - \bar y_{(-i)} = \tfrac{n}{n-1}(y_i - \bar y)$, so that the leave-one-out score needs only one fit: $\mathrm{CV}_{(n)} = \tfrac{n}{n-1}\,s^2$ with $s^2 = \tfrac{1}{n-1}\sum_i (y_i - \bar y)^2$. Check its expectation against (a).
+
+(c) For tuning, the question is what $K$ does to the choice. Take $k$-NN with $p$ inputs, and suppose, as an idealization, that fitted on $m$ rows its excess risk (its expected loss minus the noise variance $\sigma^2$) is exactly $g_m(k) = a\,(k/m)^{2/p} + \sigma^2/k$, with $a > 0$ and $k$ treated as a continuous variable. First, show that $g_m$ has a unique minimizer $k^\star(m)$, proportional to $m^{2/(p+2)}$. Second, suppose $K$-fold cross-validation measured $g_m$ without error at $m = n(K-1)/K$, so that it chooses $k^\star(m)$, which is then used with all $n$ rows. Show that this choice is $\rho\,k^\star(n)$ with $\rho = \big(\tfrac{K-1}{K}\big)^{2/(p+2)}$, and that
+$$
+\frac{g_n(\rho\,k^\star(n))}{g_n(k^\star(n))} = \frac{p\,\rho^{2/p} + 2/\rho}{p + 2}.
+$$
+Third, show that this ratio is $1 + (1 - \rho)^2/p$ up to terms of order $(1 - \rho)^3$, and say why there is no term of first order. Evaluate the ratio for $p = 1$ and $p = 11$ with $K = 2$ and $K = 10$: what does it say about the choice of $K$ for tuning, as against for reporting the error?
+
 ## Coding
 
-<!-- About 40 min: part 1 14, part 2 10, part 3 16. Skeleton lines in comments are scaffolds: the statistical operation is what you write. Everything headed "Optional, can be done at home" is outside the seminar. -->
+<!-- About 53 min: part 1 22, part 2 7, part 3 24. Skeleton lines in comments are scaffolds: the statistical operation is what you write. Everything headed "Optional, can be done at home" is outside the seminar. -->
 
 ### 1. The cross-validation pipeline
 
-<!-- 14 min: steps 1 and 2, questions 1 and 2. -->
+<!-- 22 min: steps 1 to 3, questions 1 to 3. -->
 
 The structures seminar's task: predict a track's popularity from ten audio features and its release year, squared loss ([data note](https://ml4ds.com/data/spotify.html)), genre left out. The same split as there: 5,000 training, 2,000 tuning and 3,000 test tracks, one seed. Today the tuning tracks are a check on cross-validation and the test tracks are not opened; the last step uses a split by year of the 7,000 development tracks instead of the random one.
 
@@ -163,7 +171,7 @@ K <- 10          # folds, for the whole seminar
 fold <- sample(rep(1:K, length.out = nrow(sp_train)))   # each row's fold, 500 rows in each
 cv_mse <- function(fit_predict, d, fold) {
   loss <- rep(NA, nrow(d))
-  for (k in 1:K) {
+  for (k in 1:max(fold)) {
     # tr <- ____                        # the rows whose fold is not k
     # ho <- ____                        # the rows whose fold is k
     # loss[fold == k] <- (ho$track_popularity - ____)^2
@@ -228,9 +236,44 @@ c(lambda.min = signif(cvg$lambda.min, 2), lambda.1se = signif(cvg$lambda.1se, 2)
 c(zero_at_min = sum(coef(cvg, s = "lambda.min")[-1] == 0), zero_at_1se = sum(coef(cvg, s = "lambda.1se")[-1] == 0))
 ```
 
+**Question 3 (how many folds?).** Ten folds is a convention. The chunk below reruns the CV curves of $k$-NN and of the lasso with $K = 2, 5, 10$ and $50$ folds, twice for each $K$ with fresh random folds, the same folds for both methods. `lasso_curve()` does for the lasso's whole path what `cv_mse()` does for one method, on `X_train`, standardized once as in question 2 (`cv.glmnet()` refuses fewer than three folds). The $k$-NN curves take a minute or more, so read the questions while it runs. (a) With $K$ folds, each fit uses what share of the 5,000 training tracks? Which $K$ should estimate the error of a fit on all 5,000 most pessimistically? Do the curves agree, and for which method is the effect larger? (b) For which $K$ do the scores move most between the two draws of folds? (c) The best $k$ for $k$-NN grows with the number of fitting rows (where the rate's two terms balance, $k$ is proportional to $n^{2/(p+2)}$); the best $\lambda$ for the lasso, on glmnet's scale, shrinks, since the chance correlations the penalty has to overrule shrink as rows are added. Which way should a small $K$ push each choice, toward a more or a less complex fit, and by about how much for $k$-NN here, with $p = 11$? Do the chosen values show it? (d) Leave-one-out cross-validation is $K = n$. What would it cost, and what would it gain?
+
+```{r}
+#| eval: !expr exists("knn_fp") && exists("X_train")
+Ks <- c(2, 5, 10, 50)
+ks_K <- c(20, 50, 100, 200)
+lam_path <- glmnet(X_train, y_train, standardize = FALSE)$lambda   # cv.glmnet()'s path in question 2
+lam_K <- lam_path[lam_path <= 1]
+lasso_curve <- function(fold, lam) {          # the lasso's CV MSE at every lambda, for any folds
+  loss <- matrix(NA, nrow(X_train), length(lam))
+  for (k in 1:max(fold)) {
+    fit <- glmnet(X_train[fold != k, ], y_train[fold != k], lambda = lam, standardize = FALSE)
+    loss[fold == k, ] <- (y_train[fold == k] - predict(fit, X_train[fold == k, ]))^2
+  }
+  colMeans(loss)
+}
+cv_by_K <- map_dfr(Ks, function(K_try) map_dfr(1:2, function(draw) {
+  # fresh folds for each K and each draw, the same for both methods
+  fold_K <- sample(rep(1:K_try, length.out = nrow(sp_train)))
+  bind_rows(
+    tibble(method = "k-NN", knob = ks_K,
+           mse = sapply(ks_K, function(k) cv_mse(knn_fp(k), sp_train, fold_K))),
+    tibble(method = "lasso", knob = lam_K, mse = lasso_curve(fold_K, lam_K))) |>
+    mutate(K = K_try, draw = draw)
+}))
+by_K <- cv_by_K |> group_by(method, K, draw) |>
+  summarize(chosen = signif(knob[which.min(mse)], 2), min_cv_mse = round(min(mse), 1),
+            .groups = "drop")
+by_K |> pivot_wider(names_from = method, values_from = c(chosen, min_cv_mse))
+ggplot(cv_by_K, aes(knob, mse, colour = factor(K), group = interaction(K, draw))) +
+  geom_line() + scale_x_log10() + facet_wrap(~ method, scales = "free") +
+  labs(x = "k for k-NN, lambda for the lasso", y = "CV MSE", colour = "K",
+       title = "two draws of folds for each K")
+```
+
 ### 2. Learning curves and the rate
 
-<!-- 10 min: the simulation (started earlier), step 4, question 3. -->
+<!-- 7 min: the simulation (started earlier), step 4, question 4. -->
 
 The lecture's rate says how the error of $k$ nearest neighbors falls with $n$: the bound on the squared estimation error at a point is proportional to $n^{-2/(p+2)}$, with $p$ the number of inputs, at the best $k$. The simulation below checks it. Inputs uniform on $[0, 1]^p$ for $p = 1, 2, 5, 10$; the truth $f^\star(x) = \sum_{j=1}^p \sin(2\pi x_j)/\sqrt p$, which depends on every input and is Lipschitz; noise with variance $1$. For each $n$ it fits $k$-NN at every $k$ in `ks`, measures the squared estimation error $\tfrac1{400}\sum (\hat f_k(x_0) - f^\star(x_0))^2$ on 400 new points (against the truth, not the noisy outcome), averages over three draws of the training data, and keeps the best $k$. The chunk takes about 40 seconds.
 
@@ -261,13 +304,13 @@ ggplot(lc, aes(n, mse, colour = factor(p))) + geom_line() + geom_point() +
 # slopes |> mutate(rate = ____)
 ```
 
-**Question 3.** Read the figure against the lecture. (a) From $n = 100$ to $n = 6400$ is 64 times the data. By what factor did the error fall for $p = 1$, and for $p = 10$? What does the rate predict for each? (b) Look at `lc$k_best`: how does the best $k$ move with $n$ for $p = 1$ and for $p = 10$, and what does the rate's derivation say it should do? (c) The Spotify task has $p = 11$ and $n = 5{,}000$. If the rate applied to it as a worst case, how much data would halve the error of $k$-NN?
+**Question 4.** Read the figure against the lecture. (a) From $n = 100$ to $n = 6400$ is 64 times the data. By what factor did the error fall for $p = 1$, and for $p = 10$? What does the rate predict for each? (b) Look at `lc$k_best`: how does the best $k$ move with $n$ for $p = 1$ and for $p = 10$, and what does the rate's derivation say it should do?
 
-### 3. Two ways cross-validation goes wrong
+### 3. Three ways cross-validation goes wrong
 
-<!-- 16 min: step 5 and question 4 (8), step 6 and question 5 (8). Mandatory: this is the complication the lecture deferred. -->
+<!-- 24 min: step 5 and question 5 (8), step 6 and question 6 (8), step 7 and question 7 (8). Mandatory: this is the complication the lecture deferred. -->
 
-Cross-validation has worked. It assumes that the rows are exchangeable: that a held-out row is a fresh draw from the same population as the rows it was fitted on. Two ways that fails on these tracks.
+Cross-validation has worked. It assumes that a held-out row is like a new draw: independent of the rows it was fitted on, and from the same population. Three ways that fails: copies of a track break the independence, drift over time breaks the same population, and a step that looks at the outcome outside the folds lets the held-out rows into the fit.
 
 **Step 5. The same track on both sides of a fold.** The file has 11,554 rows for 10,000 tracks: 1,101 tracks are in more than one playlist, and every copy has the same audio features, year and popularity. The loader removed the copies with `distinct()`. Load the rows again without it, keep the 5,000 training tracks with all their copies, and build two fold assignments: `fold_row`, at random over rows, and `fold_track`, at random over tracks, so that every copy of a track is in the same fold. Then run the $k$-NN pipeline at $k = 1$, $5$ and $50$ with each.
 
@@ -293,21 +336,21 @@ Checkpoint:
 stopifnot(length(fold_track) == nrow(rows), all(tapply(fold_track, rows$track_id, function(f) length(unique(f))) == 1))
 ```
 
-**Question 4.** What happened to the scores at $k = 1$, and why is the effect smaller at $k = 50$? Which of the two numbers is the one to believe, and what is the rule? About a quarter of these rows have a copy; in a dataset of patients with several visits each, or of songs in many playlists, what would you expect?
+**Question 5.** What happened to the scores at $k = 1$, and why is the effect smaller at $k = 50$? Which of the two numbers is the one to believe, and what is the rule? About a quarter of these rows have a copy; in a dataset of patients with several visits each, or of songs in many playlists, what would you expect?
 
 **Step 6. A random split against a split in time.** Popularity is Spotify's score in January 2020, and it rewards recent plays: the mean popularity by release year, below, rises through the 2010s. A random split mixes the years, so cross-validation answers "how well does this predict a track like the ones we have?". The question a user of the model might ask is "how well will it predict this year's releases?". Fit least squares on the eleven inputs to the development tracks (training and tuning, 7,000) released up to 2018 (`old`), and score it two ways: by cross-validation on `old`, and on the development tracks released in 2019 and 2020 (`new`). For each, report the MSE and the mean error, $\tfrac1m\sum_j (y_j - \hat f(x_j))$; `cv_mean_error()` does for the mean error what `cv_mse()` does for the MSE.
 
 ```{r}
-sp |> filter(release_year >= 2012) |> group_by(release_year) |>
-  summarize(tracks = n(), mean_popularity = round(mean(track_popularity), 1)) |> t()
 sp_dev <- sp[id[1:7000], ]                              # the training and tuning tracks
+sp_dev |> filter(release_year >= 2012) |> group_by(release_year) |>
+  summarize(tracks = n(), mean_popularity = round(mean(track_popularity), 1)) |> t()
 old <- sp_dev |> filter(release_year <= 2018)
 new <- sp_dev |> filter(release_year >= 2019)
 fold_old <- sample(rep(1:K, length.out = nrow(old)))
 plane_fp <- function(tr, ho) predict(lm(track_popularity ~ ., tr), ho)
 cv_mean_error <- function(fit_predict, d, fold) {        # cv_mse() with the loss replaced by the error
   err <- rep(NA, nrow(d))
-  for (k in 1:K) {
+  for (k in 1:max(fold)) {
     tr <- d[fold != k, ]; ho <- d[fold == k, ]
     err[fold == k] <- ho$track_popularity - fit_predict(tr, ho)
   }
@@ -325,11 +368,9 @@ cv_mean_error <- function(fit_predict, d, fold) {        # cv_mse() with the los
 # c(old_mean = ____, new_mean = ____)
 ```
 
-**Question 5.** The plane's predictions for the new tracks are too low on average, and nothing in the cross-validation scores hinted at it. Why can a random split not see this? Its MSE on the new tracks is lower than its CV score; is that good news? Which of the two scores answers the user's question?
+**Question 6.** The plane's predictions for the new tracks are too low on average, and nothing in the cross-validation scores hinted at it. Why can a random split not see this? Its MSE on the new tracks is lower than its CV score; is that good news? Which of the two scores answers the user's question?
 
-### Optional, can be done at home: the wrong way to cross-validate
-
-Cross-validate the entire pipeline, the lecture said. Here is the classic way to get that wrong (ESL, section 7.10.2). Pure noise: $n = 100$ rows, $p = 1{,}000$ inputs and an outcome, all independent standard normal, so the best possible risk is $1$ and no method can do better than the mean. The wrong way: screen the 20 inputs most correlated with the outcome on all 100 rows, then cross-validate least squares on those 20. The right way: screen inside each fold, on the fitting rows only. Write both as `fit_predict` functions for `cv_mse()` and compare the two CV scores with the mean's.
+**Step 7. The wrong way to cross-validate.** Every step of a pipeline that looks at the outcome belongs inside the fold. Here is the classic way to get that wrong (ESL, section 7.10.2). Pure noise: $n = 100$ rows, $p = 1{,}000$ inputs and an outcome, all independent standard normal, so the best possible risk is $1$ and no method can do better than the mean. The wrong way: screen the 20 inputs most correlated with the outcome on all 100 rows, then cross-validate least squares on those 20. The right way: screen inside each fold, on the fitting rows only. Write both as `fit_predict` functions for `cv_mse()` and compare the two CV scores with the mean's.
 
 ```{r}
 #| eval: false
@@ -349,9 +390,7 @@ top20 <- function(d) {                               # the 20 inputs most correl
 # c(wrong = cv_mse(wrong_fp, noise, fold_w), right = cv_mse(right_fp, noise, fold_w), mean = cv_mse(mean_fp, noise, fold_w))
 ```
 
-::: {.callout-note collapse="true" title="Hint 1"}
-A formula from a character vector of names: `reformulate(keep, "track_popularity")`, or paste the names with `+`.
-:::
+**Question 7.** On pure noise nothing can beat the mean. Why does the wrong way score far below it? Which steps of a pipeline have to happen inside the fold?
 
 ### Optional, can be done at home: the weighted-ridge form on a real fit
 
@@ -370,3 +409,4 @@ Omega <- matrix(0, ncol(B), ncol(B)); Omega[-1, -1] <- S
 ## References
 
 - Hastie, T., Tibshirani, R. and Friedman, J. (2009). *The Elements of Statistical Learning: Data Mining, Inference, and Prediction*, 2nd edition. Springer, New York. Section 7.10.2, "The Wrong and Right Way to Do Cross-validation", pp. 245--247. [hastie.su.domains/ElemStatLearn](https://hastie.su.domains/ElemStatLearn/)
+- James, G., Witten, D., Hastie, T. and Tibshirani, R. (2021). *An Introduction to Statistical Learning with Applications in R*, 2nd edition. Springer, New York. Section 5.1.4, "Bias-Variance Trade-Off for k-Fold Cross-Validation", pp. 205--206, and equation (5.2), p. 202. [statlearning.com](https://www.statlearning.com)

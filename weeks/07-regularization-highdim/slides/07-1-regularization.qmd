@@ -88,7 +88,7 @@ The deck on the spine's scale (2 a content slide, 3 a slide with a proof or a pa
 
 Cut order: (1) the zoom on the high-dimensional example, (2) "A fixed lambda is not a chosen lambda" to one sentence on the selection slide. The CV curve, the rate, the identity design and the ridge form do not move.
 
-In the notebook: exercise 1 proves the ridge form, exercise 2 redoes the rate with the slides closed; problems vary soft thresholding, the distance lemma in one dimension and the weighted-ridge form of the smoothing penalty. The seminar writes a CV pipeline, reads a learning-curve figure against the rate, and then breaks CV twice: duplicated tracks across folds and a split in time.
+In the notebook: exercise 1 proves the ridge form, exercise 2 redoes the rate with the slides closed; problems vary soft thresholding, the distance lemma in one dimension and the weighted-ridge form of the smoothing penalty, and add the number of folds. The seminar writes a CV pipeline, reads a learning-curve figure against the rate, and then breaks CV three times: duplicated tracks across folds, a split in time, and inputs screened on all rows.
 :::
 
 ### Week 7: tuning and regularization
