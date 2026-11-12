@@ -393,7 +393,7 @@ $$
 \mathrm{PDP}_j(t) = \frac1n \sum_{i=1}^n \hat f(x_{i,-j},\, t)
 $$
 
-Set input $j$ to $t$, leave every other input at the unit's value, predict, average over the units. For an additive fit, $\mathrm{PDP}_j$ is the component $\hat f_j$ plus a constant
+Set input $j$ to $t$, leave the unit's other inputs, predict, average. A modified unit may be one no real unit resembles. For an additive fit, $\mathrm{PDP}_j$ is $\hat f_j$ plus a constant
 
 ## Regression trees + bagging
 

@@ -2307,7 +2307,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#partial-dependence",
     "title": "Machine learning",
     "section": "Partial dependence",
-    "text": "Partial dependence\nFor models with multiple predictors, partial dependence plots can hide model structure. Options for the other variables:\n\nHold other variables fixed (e.g. at medians)\nAverage over them, pdp method\nPlot a curve for each observation, ice method\n\nFor input \\(j\\), a value \\(t\\), and unit \\(i\\)’s other inputs \\(x_{i,-j}\\): \\[\n\\mathrm{ICE}_i(t) = \\hat f(x_{i,-j},\\, t), \\qquad\n\\mathrm{PDP}_j(t) = \\frac1n \\sum_{i=1}^n \\hat f(x_{i,-j},\\, t)\n\\]\nSet input \\(j\\) to \\(t\\), leave every other input at the unit’s value, predict, average over the units. For an additive fit, \\(\\mathrm{PDP}_j\\) is the component \\(\\hat f_j\\) plus a constant"
+    "text": "Partial dependence\nFor models with multiple predictors, partial dependence plots can hide model structure. Options for the other variables:\n\nHold other variables fixed (e.g. at medians)\nAverage over them, pdp method\nPlot a curve for each observation, ice method\n\nFor input \\(j\\), a value \\(t\\), and unit \\(i\\)’s other inputs \\(x_{i,-j}\\): \\[\n\\mathrm{ICE}_i(t) = \\hat f(x_{i,-j},\\, t), \\qquad\n\\mathrm{PDP}_j(t) = \\frac1n \\sum_{i=1}^n \\hat f(x_{i,-j},\\, t)\n\\]\nSet input \\(j\\) to \\(t\\), leave the unit’s other inputs, predict, average. A modified unit may be one no real unit resembles. For an additive fit, \\(\\mathrm{PDP}_j\\) is \\(\\hat f_j\\) plus a constant"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#regression-trees-bagging",
