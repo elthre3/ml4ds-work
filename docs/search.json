@@ -2181,7 +2181,7 @@
     "href": "weeks/07-regularization-highdim/slides/07-1-regularization.html#before-the-seminar",
     "title": "Machine learning",
     "section": "Before the seminar",
-    "text": "Before the seminar\n\nThis week: exercises 1 and 2 at the top of the notebook. The ridge form of the bias–variance decomposition, proved in the orthogonal design with numbered hints; and the \\(k\\)-NN rate again, with the slides closed\nIn the seminar: a cross-validation pipeline on the Spotify tracks, written as one function and run for \\(k\\)-NN and the lasso; a learning-curve figure to read against the rate; and then, after it has worked, two ways cross-validation goes wrong"
+    "text": "Before the seminar\n\nThis week: exercises 1 and 2 at the top of the notebook. The ridge form of the bias–variance decomposition, proved in the orthogonal design with numbered hints; and the \\(k\\)-NN rate again, with the slides closed\nIn the seminar: a cross-validation pipeline on the Spotify tracks, written as one function and run for \\(k\\)-NN and the lasso; a learning-curve figure to read against the rate; and then, after it has worked, three ways cross-validation goes wrong"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#conclusion",

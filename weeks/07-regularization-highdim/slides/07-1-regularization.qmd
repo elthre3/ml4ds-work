@@ -953,12 +953,12 @@ ISLR section 10.8, pp. 441--443
 ## Before the seminar
 
 ::: {.notes}
-Say it once: exercise 1 is the stated ridge form, exercise 2 the rate with the slides closed; the seminar's problems vary soft thresholding, the distance lemma in one dimension and the weighted-ridge form of the penalty. Then a CV pipeline on the tracks, a learning-curve figure read against the rate, and two ways CV goes wrong once it has worked.
+Say it once: exercise 1 is the stated ridge form, exercise 2 the rate with the slides closed; the seminar's problems vary soft thresholding, the distance lemma in one dimension and the weighted-ridge form of the penalty, and add the number of folds. Then a CV pipeline on the tracks, a learning-curve figure read against the rate, and three ways CV goes wrong once it has worked.
 :::
 
 - This week: exercises 1 and 2 at the top of the notebook. The ridge form of the bias--variance decomposition, proved in the orthogonal design with numbered hints; and the $k$-NN rate again, with the slides closed
 
-- In the seminar: a cross-validation pipeline on the Spotify tracks, written as one function and run for $k$-NN and the lasso; a learning-curve figure to read against the rate; and then, after it has worked, two ways cross-validation goes wrong
+- In the seminar: a cross-validation pipeline on the Spotify tracks, written as one function and run for $k$-NN and the lasso; a learning-curve figure to read against the rate; and then, after it has worked, three ways cross-validation goes wrong
 
 ## Conclusion {.inverse}
 
