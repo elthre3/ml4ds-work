@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.10.18">
+
+  <meta name="author" content="Joshua Loftus">
+  <title>machine learning 4 data science – Machine learning</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-4ff0974c21d4a5644e87c327675c5c70.css">
+  <link href="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Machine learning</h1>
+  <p class="subtitle">Week 8: additive models, trees and ensembles</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Joshua Loftus
+</div>
+        <p class="quarto-title-affiliation">
+            LSE
+          </p>
+    </div>
+</div>
+
+</section>
+<section id="section" class="slide level2 inverse">
+<h2></h2>
+<h3 id="week-8-additive-models-trees-and-ensembles">Week 8: additive models, trees and ensembles</h3>
+<p>Part 1: fitting an additive model</p>
+<p>Part 2: plots for other models</p>
+<p>Part 3: building a tree</p>
+<p>Part 4: three model improvement strategies</p>
+<p>Part 5: boosting</p>
+</section>
+<section id="where-we-left-off" class="slide level2" data-minutes="1">
+<h2>Where we left off</h2>
+<p>Every family has a knob, chosen by cross-validation, and a score on held-out data</p>
+<p>This week: how some of those fits are built, and how to read them</p>
+<ul>
+<li>an additive model, one curve at a time</li>
+<li>a plot of one input for any fitted model, and what it can hide</li>
+<li>a tree, one question at a time</li>
+<li>many trees: averaged (bagging, random forests) or added (boosting)</li>
+</ul>
+</section>
+<section id="section-1" class="slide level2 inverse center">
+<h2></h2>
+<h3 id="part-1-fitting-an-additive-model">Part 1: fitting an additive model</h3>
+</section>
+<section id="univariate-plots" class="slide level2" data-minutes="1">
+<h2>Univariate plots</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/additive-sim-plot-1.png" class="quarto-figure quarto-figure-center" width="1800"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(y = f_1(x_1) + f_2(x_2) + f_3(x_3) + \varepsilon\)</span>, three independent inputs, <span class="math inline">\(n = 400\)</span>. Blue: a separate <code>loess</code> smooth of <span class="math inline">\(y\)</span> on each input. Green: the true <span class="math inline">\(f_j\)</span></p>
+</section>
+<section id="bias-why" class="slide level2">
+<h2>Bias? Why? 😲</h2>
+<p>The true model is additive</p>
+<p>We plot each variable separately but the <code>loess</code> curves are biased…</p>
+<p>To fit <span class="math inline">\(\hat f_1\)</span> we would <em>ideally</em> do <code>loess</code> on</p>
+<p><span class="math display">\[
+y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
+\]</span></p>
+<p>But we don’t know <span class="math inline">\(f_2\)</span> and <span class="math inline">\(f_3\)</span>, we are trying to estimate them too!</p>
+</section>
+<section id="backfitting-algorithm" class="slide level2">
+<h2>Backfitting algorithm</h2>
+<ol type="1">
+<li><p>Start with some initial estimates <span class="math inline">\(\hat f_j\)</span>, e.g.&nbsp;from <code>y ~ x_j</code></p></li>
+<li><p>Iterate over <span class="math inline">\(j\)</span>, updating <span class="math inline">\(\hat f_j\)</span> by fitting <code>r_j ~ x_j</code> where the partial residual <span class="math inline">\(\mathbf r_j\)</span> <span class="math display">\[\mathbf r_j = \mathbf y - \hat \beta_0 - \sum_{k \neq j} \hat f_k(\mathbf x_k)\]</span> is computed using the current fits for all the other predictors</p></li>
+<li><p>Repeat until “convergence” (some stopping rule)</p></li>
+</ol>
+</section>
+<section id="backfitting-is-partialling-out" class="slide level2" data-minutes="3">
+<h2>Backfitting is partialling out</h2>
+<p>Two centered inputs and lines for components, <span class="math inline">\(\hat f_j(x) = \beta_j x\)</span>. Step 2 for <span class="math inline">\(j = 1\)</span> regresses the partial residual on <span class="math inline">\(\mathbf x_1\)</span>: <span class="math display">\[
+\beta_1 \leftarrow \frac{\mathbf x_1^T(\mathbf y - \beta_2 \mathbf x_2)}{\mathbf x_1^T \mathbf x_1}, \qquad
+\beta_2 \leftarrow \frac{\mathbf x_2^T(\mathbf y - \beta_1 \mathbf x_1)}{\mathbf x_2^T \mathbf x_2}
+\]</span></p>
+<div class="fragment">
+<p>The loop can stop only where both hold: <span class="math inline">\(\mathbf x_j^T(\mathbf y - \beta_1 \mathbf x_1 - \beta_2 \mathbf x_2) = 0\)</span> for <span class="math inline">\(j = 1, 2\)</span>. These are the normal equations: the fixed point is least squares</p>
+<div class="retrieval">
+<p>Partialling-out theorem: the coefficient on <span class="math inline">\(\mathbf x_2\)</span> is <span class="math inline">\(\tilde{\mathbf x}_2^T \mathbf y / \tilde{\mathbf x}_2^T \tilde{\mathbf x}_2\)</span>, the slope on what is left of <span class="math inline">\(\mathbf x_2\)</span> after <span class="math inline">\(\mathbf x_1\)</span> has explained what it can.</p>
+</div>
+<p>With a smoother in place of each line, the same loop fits an additive model: each curve fitted to what the others leave</p>
+</div>
+</section>
+<section id="additive-combination-of-non-linear-predictors" class="slide level2">
+<h2>Additive combination of non-linear predictors</h2>
+<p>IMDb films (<a href="https://ml4ds.com/data/movies.html">data note</a>): 10,000 at random, split 5,000 training, 2,000 tuning, 3,000 test</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>fit_gam <span class="ot">&lt;-</span></span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">gam</span>(rating <span class="sc">~</span> <span class="fu">s</span>(length) <span class="sc">+</span> <span class="fu">s</span>(year), <span class="at">data =</span> mv_train)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>s</code> is a penalized spline, but can use different methods too</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 5
+  term        edf ref.df statistic p.value
+  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+1 s(length)  7.04   8.00      51.8       0
+2 s(year)    8.00   8.70      29.0       0</code></pre>
+</div>
+</div>
+<p>No coefficients, so how do we interpret?</p>
+</section>
+<section id="replace-each-linear-coefficient-with-2d-plot" class="slide level2">
+<h2>Replace each linear coefficient with 2d plot</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb4-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/gam-components-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="retrieval">
+<p>The cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input curves has the one-input rate, <span class="math inline">\(n^{-2/3}\)</span>, however many inputs.</p>
+</div>
+</section>
+<section id="section-2" class="slide level2 inverse center">
+<h2></h2>
+<h3 id="part-2-plots-for-other-models">Part 2: plots for other models</h3>
+</section>
+<section id="can-additivitygams-be-importantly-wrong" class="slide level2">
+<h2>Can additivity/GAMs be <em>importantly wrong</em>?</h2>
+<p>Interpretation: think carefully about <strong>calculus</strong> and <strong>causality</strong>. To simplify let’s consider the identity link function (rather than e.g.&nbsp;logistic regression, those cases are more complicated)</p>
+<h4 id="calculus">Calculus</h4>
+<p>Does the CEF really decompose into additive terms? Is this approximation good:</p>
+<p><span class="math display">\[
+\frac{\partial}{\partial x_j} \mathbb E[Y | \mathbf X] \approx g(x_j)
+\]</span> Or does the relationship between the average of <span class="math inline">\(Y\)</span> and <span class="math inline">\(x_j\)</span> vary depending on the value of another predictor <span class="math inline">\(x_k\)</span>?</p>
+</section>
+<section id="interactions-in-the-movies-data" class="slide level2">
+<h2>Interactions in the movies data</h2>
+<p>Does the relationship between length and rating change depending on the year? Let’s check a few decades</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/movies-interaction-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="misspecification-failure-of-additivity" class="slide level2">
+<h2>Misspecification: failure of additivity</h2>
+<p>Difficult to tell because of small <span class="math inline">\(n\)</span> outside the range of length between 1 and 2 hours</p>
+<p>But I think it’s possible the <em>relationship</em> is changing over time, i.e.&nbsp;there is an interaction</p>
+<p><span class="math display">\[
+\frac{\partial}{\partial \text{length}} \mathbb E[\text{rating} | \text{length}, \text{year}] \approx g(\text{length}, \text{year})
+\]</span></p>
+<p>Since the right hand side does not depend on length <em>only</em>, the additive model might be a poor fit</p>
+<p>Less accurate predictions</p>
+<p>(Possibly importantly) wrong interpretations</p>
+</section>
+<section id="now-true-model-is-not-additive" class="slide level2">
+<h2>Now true model is <strong>not</strong> additive</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">cos</span>(pi <span class="sc">*</span> x <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb5-3"><a aria-hidden="true" tabindex="-1"></a>df_int <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(<span class="dv">2000</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">runif</span>(<span class="dv">2000</span>, <span class="sc">-</span><span class="dv">4</span>, <span class="dv">4</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">f1</span>(x1) <span class="sc">*</span> <span class="fu">f2</span>(x2) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">2000</span>))</span>
+<span id="cb5-5"><a aria-hidden="true" tabindex="-1"></a>fit_gam_wrong <span class="ot">&lt;-</span> <span class="fu">gam</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> <span class="fu">s</span>(x2), <span class="at">data =</span> df_int)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="columns">
+<div class="column" style="width:58%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/int-gam-1.png" width="1110"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:42%;">
+<p>The fitted component for <span class="math inline">\(x_1\)</span> is nearly flat: a parabola opening upward when <span class="math inline">\(\cos(\pi x_2/2) &gt; 0\)</span> and downward when <span class="math inline">\(\cos(\pi x_2/2) &lt; 0\)</span> cancels in the sum</p>
+<p>Additivity assumption is now (importantly) wrong</p>
+</div></div>
+</section>
+<section id="partial-dependence" class="slide level2" data-minutes="3">
+<h2>Partial dependence</h2>
+<p>For models with multiple predictors, partial dependence plots can hide model structure. Options for the other variables:</p>
+<ul>
+<li>Hold other variables fixed (e.g.&nbsp;at medians)</li>
+<li>Average over them, <code>pdp</code> method</li>
+<li>Plot a curve for each observation, <code>ice</code> method</li>
+</ul>
+<p>For input <span class="math inline">\(j\)</span>, a value <span class="math inline">\(t\)</span>, and unit <span class="math inline">\(i\)</span>’s other inputs <span class="math inline">\(x_{i,-j}\)</span>: <span class="math display">\[
+\mathrm{ICE}_i(t) = \hat f(x_{i,-j},\, t), \qquad
+\mathrm{PDP}_j(t) = \frac1n \sum_{i=1}^n \hat f(x_{i,-j},\, t)
+\]</span></p>
+<p>Set input <span class="math inline">\(j\)</span> to <span class="math inline">\(t\)</span>, leave every other input at the unit’s value, predict, average over the units. For an additive fit, <span class="math inline">\(\mathrm{PDP}_j\)</span> is the component <span class="math inline">\(\hat f_j\)</span> plus a constant</p>
+</section>
+<section id="regression-trees-bagging" class="slide level2">
+<h2>Regression trees + bagging</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df_int, <span class="at">ntree =</span> <span class="dv">300</span>, <span class="at">mtry =</span> <span class="dv">2</span>, <span class="at">nodesize =</span> <span class="dv">50</span>)</span>
+<span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a>ice_x1 <span class="ot">&lt;-</span> <span class="fu">partial</span>(fit_rf, <span class="at">pred.var =</span> <span class="st">"x1"</span>, <span class="at">ice =</span> <span class="cn">TRUE</span>, <span class="at">train =</span> df_sub)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/rf-ice-plot-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Thin: one curve per unit, <span class="math inline">\(x_2\)</span> left at its value (ICE). Black: their average, the PDP, nearly flat. The forest fitted the interaction; the average hides it</p>
+</section>
+<section id="section-3" class="slide level2 inverse center">
+<h2></h2>
+<h3 id="part-3-building-a-tree">Part 3: building a tree</h3>
+</section>
+<section id="where-would-you-cut" class="slide level2" data-minutes="3">
+<h2>Where would you cut?</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/cut-ask-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="ask">
+<p>One question about GDP per capita, then one constant on each side. Write down your cutoff.</p>
+</div>
+</section>
+<section id="split-search" class="slide level2">
+<h2>Split search</h2>
+<div class="columns">
+<div class="column" style="width:56%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/split-search-1.png" width="990"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:44%;">
+<p>Every cutoff between two countries, scored: the residual sum of squares when each side predicts its own mean</p>
+<p>Each side of a split is a <strong>leaf</strong> (until it is split again)</p>
+<p>Then every input; keep the best; then <strong>recurse</strong> into each leaf. Greedy: each split is the best <em>now</em></p>
+<p>For a label: the same search, scoring each leaf by its <strong>Gini index</strong> <span class="math inline">\(\sum_k \hat p_k (1 - \hat p_k)\)</span></p>
+</div></div>
+</section>
+<section id="complexity-and-overfitting" class="slide level2">
+<h2>Complexity and overfitting</h2>
+<p>Could keep recursively splitting on predictor space until we have bins containing only 1 unique set of predictor values each</p>
+<p>This would be like 1-nearest neighbors</p>
+<p><strong>Lab exercise</strong>: create a plot of training error versus tree size</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>fit_tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(rating <span class="sc">~</span> year <span class="sc">+</span> length, <span class="at">data =</span> mv_train,</span>
+<span id="cb7-2"><a aria-hidden="true" tabindex="-1"></a>      <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>, <span class="at">minsplit =</span> <span class="dv">2</span>, <span class="at">minbucket =</span> <span class="dv">1</span>))</span>
+<span id="cb7-3"><a aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(fit_tree<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>) <span class="co"># number of "leaf" endpoints</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2857</code></pre>
+</div>
+</div>
+<div class="retrieval">
+<p><span class="math inline">\(k\)</span> nearest neighbors average the <span class="math inline">\(k\)</span> training points closest to <span class="math inline">\(x_0\)</span>; a tree averages the training points in <span class="math inline">\(x_0\)</span>’s leaf, a neighborhood chosen by the data. More leaves, smaller neighborhoods.</p>
+</div>
+</section>
+<section id="growing-and-pruning" class="slide level2">
+<h2>Growing and pruning</h2>
+<h4 id="problem-greedy-splitting">Problem: greedy splitting</h4>
+<p>Each split uses the best possible predictor, similar to forward stepwise. Early stopping may prevent the model from finding useful but weaker predictors later on</p>
+<p><strong>Solution</strong>: don’t use early stopping. Grow a large tree</p>
+<h4 id="problem-overfitting">Problem: overfitting</h4>
+<p>Larger trees are more complex, more difficult to interpret, and could be overfit to training data</p>
+<p><strong>Solution</strong>: (cost complexity / weakest link) pruning</p>
+</section>
+<section id="how-to-prune-a-tree" class="slide level2">
+<h2>How to prune a tree</h2>
+<p>After growing a large tree, find the “best” sub-tree</p>
+<h4 id="problem-too-many-sub-trees">Problem: too many sub-trees</h4>
+<p>The number of sub-trees grows combinatorially in the number of splits (depends on depth as well, interesting counting problem)</p>
+<p><strong>Solution</strong>: consider only a one-dimensional path of sub-tree models, the ones that minimize</p>
+<p><span class="math display">\[RSS(\text{Sub-tree}) + \alpha |\text{SubTree}|\]</span></p>
+<p>for <span class="math inline">\(\alpha \geq 0\)</span>. Now we can choose <span class="math inline">\(\alpha\)</span>, and therefore a specific sub-tree, using validation</p>
+</section>
+<section id="three-model-improvement-strategies" class="slide level2 inverse">
+<h2>Three model improvement strategies</h2>
+<p>Sacrifice simplicity/interpretability for prediction accuracy</p>
+<p>Can be used with other models too, not just trees</p>
+<h4 id="bagging-bootstrap-aggregating"><strong>Bagging</strong>: bootstrap aggregating</h4>
+<ul>
+<li>Resample training data, average resulting models</li>
+</ul>
+<h4 id="random-forest-randomly-drop-predictors"><strong>Random forest</strong>: randomly drop predictors</h4>
+<ul>
+<li>Randomly drop predictors at each split</li>
+</ul>
+<h4 id="boosting-iterative-descent-using-residuals"><strong>Boosting</strong>: iterative descent using residuals</h4>
+<ul>
+<li>Fit each new model to residual of previous fits</li>
+</ul>
+</section>
+<section id="bagging-bootstrap-aggregating-1" class="slide level2">
+<h2>Bagging: bootstrap aggregating</h2>
+<p><strong>Problem</strong>: a single tree model can have high variance (like many non-smooth or non-regularized models)</p>
+<ol type="1">
+<li><p><strong>Bootstrap</strong>: for each <span class="math inline">\(b = 1, \ldots, B\)</span> resamples (with replacement) of the training data, fit <span class="math inline">\(\hat f^{*b}\)</span> on bootstrap sample <span class="math inline">\(b\)</span></p></li>
+<li><p><strong>Aggregate</strong>: combine the <span class="math inline">\(B\)</span> models, using majority vote for classification or mean for regression</p></li>
+</ol>
+<p><span class="math display">\[\hat f_\text{bag} = \frac{1}{B} \sum_{b=1}^B \hat f^{*b}\]</span></p>
+<p>(“Smoothing” useful for low-bias, high-variance models)</p>
+</section>
+<section id="averaging-b-trees" class="slide level2" data-minutes="3">
+<h2>Averaging <span class="math inline">\(B\)</span> trees</h2>
+<p>Average <span class="math inline">\(B\)</span> trees’ predictions at one input <span class="math inline">\(x\)</span></p>
+<div class="ask">
+<p>First: <span class="math inline">\(B\)</span> copies of the <em>same</em> tree. What is the variance of their average?</p>
+<p>Then: <span class="math inline">\(B\)</span> trees whose predictions each have variance <span class="math inline">\(\tau^2\)</span>, every pair with correlation <span class="math inline">\(\rho\)</span>. Write down the variance of their average.</p>
+</div>
+</section>
+<section id="correlated-average-variance" class="slide level2" data-minutes="3">
+<h2>Correlated-average variance</h2>
+<p>The variance of a sum is every variance plus every covariance, <span class="math inline">\(B\)</span> terms <span class="math inline">\(\tau^2\)</span> and <span class="math inline">\(B(B - 1)\)</span> terms <span class="math inline">\(\rho\tau^2\)</span>: <span class="math inline">\(\;\mathrm{Var}\big(\sum_{b} V_b\big) = B\tau^2 + B(B - 1)\rho\tau^2\)</span></p>
+<div class="fragment">
+<div class="leave">
+<p><strong>Correlated-average variance.</strong> <span class="math inline">\(V_1, \ldots, V_B\)</span>, each with variance <span class="math inline">\(\tau^2\)</span>, every pair with correlation <span class="math inline">\(\rho\)</span>: <span class="math display">\[
+\mathrm{Var}\Big(\frac1B \sum_{b=1}^B V_b\Big) = \rho\,\tau^2 + (1 - \rho)\,\frac{\tau^2}{B}
+\]</span></p>
+</div>
+<p><strong>Proof</strong>: divide by <span class="math inline">\(B^2\)</span>. Bagging shrinks the second term; <span class="math inline">\(\rho\tau^2\)</span> stays, since bootstrap trees grown from one sample are alike</p>
+</div>
+</section>
+<section id="random-forest-dropping-predictors" class="slide level2">
+<h2>Random forest: dropping predictors</h2>
+<p><strong>Problem</strong>: aggregation does not increase information if the aggregates are highly correlated, e.g.&nbsp;averaging 1000 trees but each one uses the same small set of predictor variables</p>
+<p><span class="math display">\[\text{Var}\left( \sum_{b=1}^B \hat f^{*b} \right) =
+\sum_{b=1}^B \text{Var}\left( \hat f^{*b} \right) + \sum_{b=1}^B \sum_{b'\neq b} \text{Cov}\left( \hat f^{*b}, \hat f^{*b'} \right)\]</span></p>
+<div class="fragment">
+<ol type="1">
+<li><p><strong>Drop</strong> predictors randomly, at every split</p>
+<p>e.g.&nbsp;each split chooses among a random <span class="math inline">\(\sqrt{p}\)</span> of the <span class="math inline">\(p\)</span> predictors</p></li>
+<li><p><strong>Aggregate</strong> models which are now (typically) less correlated, achieving greater variance reduction</p></li>
+</ol>
+</div>
+</section>
+<section id="out-of-bag-predictions" class="slide level2">
+<h2>Out-of-bag predictions</h2>
+<ul>
+<li><p>Each bootstrap sample contains some subset of the training data</p></li>
+<li><p>Roughly <span class="math inline">\(1/e \approx 0.37\)</span> portion of the training samples will be left out of each bootstrap sample</p></li>
+<li><p>Can use these to estimate test error (e.g.&nbsp;instead of <span class="math inline">\(K\)</span>-fold cross-validation)</p></li>
+</ul>
+<p>Software implementations may do this automatically</p>
+<div style="font-size: 0.9em">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>A forest on the films, 300 trees</th>
+<th>MSE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>training films, every tree</td>
+<td>1.60</td>
+</tr>
+<tr class="even">
+<td>training films, out-of-bag trees only</td>
+<td>2.03</td>
+</tr>
+<tr class="odd">
+<td>tuning films</td>
+<td>2.04</td>
+</tr>
+<tr class="even">
+<td>tuning films, predicting the training mean</td>
+<td>2.50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="featurevariable-importance" class="slide level2">
+<h2>Feature/variable importance</h2>
+<ul>
+<li><p>Which predictors are <em>used most</em> by the model?</p></li>
+<li><p>Does not necessarily tell us about <strong>causation</strong> (none of these methods do, but an important reminder)</p></li>
+</ul>
+<h4 id="tree-specific-importance">Tree-specific importance</h4>
+<p>When <span class="math inline">\(x_j\)</span> is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)</p>
+<h4 id="permutation-importance">Permutation importance</h4>
+<p>Permute values of predictor <span class="math inline">\(x_j\)</span>. How much does the accuracy of the model decrease?</p>
+<p><span class="math display">\[\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, \text{column } j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
+</section>
+<section id="permuting-forces-extrapolation" class="slide level2">
+<h2>Permuting forces extrapolation</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/permute-length-1.png" class="quarto-figure quarto-figure-center" width="1725"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Shuffling length keeps each film’s other inputs: 147 of the 166 shorts now run over an hour, and 146 features under 40 minutes. The tuning films have none</p>
+<p>The forest is scored where it never saw a film. Permutation importance mixes two things: how much the model’s accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)</p>
+</section>
+<section id="leave-one-covariate-out" class="slide level2">
+<h2>Leave one covariate out</h2>
+<div class="columns">
+<div class="column" style="width:52%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/loco-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:48%;">
+<p>Refit without input <span class="math inline">\(j\)</span>; score on the same held-out films: <span class="math display">\[\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
+<p>No permuted rows, so no extrapolation; any method, at the cost of <span class="math inline">\(p\)</span> refits</p>
+<p>Length and Short together: 0.22, more than alone (0.15 and 0.03). LOCO charges neither input for what the two share</p>
+</div></div>
+</section>
+<section id="section-4" class="slide level2 inverse center">
+<h2></h2>
+<h3 id="part-5-boosting">Part 5: boosting</h3>
+</section>
+<section id="boosting-iterated-fitting-on-residuals" class="slide level2">
+<h2>Boosting: iterated fitting on residuals</h2>
+<p><strong>Idea</strong>: train models sequentially, decreasing residuals by a small amount each time. Each model contributes something different</p>
+<p>Can use <strong>weak learners</strong> – e.g.&nbsp;trees with one split (“stumps”) – to grow an ensemble model gradually fitting closer to the training data</p>
+<div class="fragment">
+<h4 id="relationship-with-gradient-descent">Relationship with gradient descent</h4>
+<p><strong>Gradient descent</strong>: small step in direction of negative gradient</p>
+<p><strong>Boosting</strong>: small step in direction of <em>weak learner closest to negative gradient</em> (maximum inner product in function space)</p>
+<p>Optional additional reading: <a href="https://hastie.su.domains/ElemStatLearn/">ESL</a> Chapter 10</p>
+</div>
+</section>
+<section id="boosting-as-gradient-descent" class="slide level2" data-minutes="3">
+<h2>Boosting as gradient descent</h2>
+<p>Gradient descent moves parameters. Take the <span class="math inline">\(n\)</span> fitted values <span class="math inline">\(F(x_1), \ldots, F(x_n)\)</span> as the parameters, with squared loss <span class="math inline">\(L(F) = \frac12 \sum_{i=1}^n \big(y_i - F(x_i)\big)^2\)</span>: <span class="math display">\[
+-\frac{\partial L}{\partial F(x_i)} = y_i - F(x_i): \quad \text{the negative gradient is the residual vector}
+\]</span></p>
+<div class="fragment">
+<p>A step along it moves only those <span class="math inline">\(n\)</span> values. Fit a small tree to the residuals instead (defined at every <span class="math inline">\(x\)</span>), and step along the tree, with <strong>learning rate</strong> <span class="math inline">\(\gamma\)</span>: <span class="math display">\[
+\hat F_0 = \bar y, \qquad \hat F_b = \hat F_{b-1} + \gamma\, \hat f^b, \qquad \hat f^b \text{ a small tree fitted to } y_i - \hat F_{b-1}(x_i)
+\]</span></p>
+<div class="retrieval">
+<p>Gradient descent: a step of size <span class="math inline">\(\gamma\)</span> against the gradient, and stopped early, the number of steps is a knob. Partialling out: each tree is fitted to what the sum so far leaves.</p>
+</div>
+</div>
+</section>
+<section id="boosting-in-practice" class="slide level2">
+<h2>Boosting in practice</h2>
+<h4 id="more-tuning-parameters">More tuning parameters</h4>
+<p>Number of trees/steps <span class="math inline">\(B\)</span>, complexity of each tree/model <span class="math inline">\(d\)</span>, regularization/learning rate <span class="math inline">\(\gamma\)</span>. <strong>Warning</strong>: can now overfit with large <span class="math inline">\(B\)</span> (unlike bagging/r.f.)</p>
+<h4 id="choosingoptimizing-tuning-parameters">Choosing/optimizing tuning parameters</h4>
+<p>Software may do something automatically. <em>No guarantee it’s reasonable!</em> e.g.&nbsp;optimize over a grid of tuning parameters</p>
+<p>Two grid-tuning stages:</p>
+<ol type="1">
+<li>Rough grid covering a large range (possibly orders of magnitude)</li>
+<li>Finer grid over a smaller range</li>
+</ol>
+</section>
+<section id="rounds-and-learning-rate" class="slide level2">
+<h2>Rounds and learning rate</h2>
+<div class="columns">
+<div class="column" style="width:56%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/rounds-1.png" width="990"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:44%;">
+<p><strong>Rounds <span class="math inline">\(B\)</span>.</strong> Training error keeps falling; tuning error turns. Stopping there is early stopping, as for gradient descent</p>
+<p><strong>Learning rate <span class="math inline">\(\gamma\)</span>.</strong> Smaller steps, more of them; often a lower minimum, not always</p>
+<p><strong>Depth.</strong> How many inputs one tree can combine (next)</p>
+</div></div>
+</section>
+<section id="depth-is-interaction-order" class="slide level2">
+<h2>Depth is interaction order</h2>
+<div class="columns">
+<div class="column" style="width:46%;">
+<p>A stump asks one question, so a sum of stumps is a sum of one-input functions: an <strong>additive</strong> model</p>
+<p>Depth 2 asks a second question inside the first. Depth <span class="math inline">\(d\)</span>: interactions of up to <span class="math inline">\(d\)</span> inputs</p>
+<p>A boosted model is additive in trees, not in the predictors</p>
+</div><div class="column" style="width:54%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/depth-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+<p><span class="math inline">\(f^\star(x) = 4\cdot\mathbf 1\{x_1 &gt; 0,\ x_2 &gt; 0\}\)</span>, ten inputs: thresholds with an interaction</p>
+</section>
+<section id="were-in-dangerous-territory" class="slide level2 inverse">
+<h2>We’re in dangerous territory</h2>
+<ul>
+<li>Less interpretable methods/models</li>
+<li>Many tuning parameters</li>
+<li>Increasingly sophisticated software with many defaults and/or automatically optimized tuning parameters</li>
+</ul>
+<div class="fragment">
+<p>But consider, <a href="https://philosophicaldisquisitions.blogspot.com/2015/04/is-automation-making-us-stupid.html">Alfred North Whitehead</a> said (pre-WW2):</p>
+<blockquote>
+<p>It is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. <strong>Civilization advances by extending the number of important operations which we can perform without thinking about them</strong>.</p>
+</blockquote>
+</div>
+</section>
+<section id="before-the-seminar" class="slide level2">
+<h2>Before the seminar</h2>
+<ul>
+<li><p>This week: exercises 1 and 2 at the top of the notebook. The correlated-average variance again, with the slides closed; and one boosting step by hand</p></li>
+<li><p>In the seminar: a split found by hand, bagging’s variance measured against the formula, and partial dependence and LOCO on the films</p></li>
+</ul>
+</section>
+<section id="conclusion" class="slide level2 inverse">
+<h2>Conclusion</h2>
+<h4 id="additive-models">Additive models</h4>
+<p>One curve per input, each fitted to what the others leave: partialling out, one input at a time</p>
+<h4 id="partial-dependence-and-importance">Partial dependence and importance</h4>
+<p>A plot of one input exists for any model, and its average can hide an interaction. Permuting an input asks the model about data that do not exist; LOCO refits instead</p>
+<h4 id="trees-and-ensembles">Trees and ensembles</h4>
+<p>Greedy questions, pruned by validation. Bagging and forests average trees and lower variance down to <span class="math inline">\(\rho\tau^2\)</span>; boosting adds small trees, gradient descent on the fitted values</p>
+</section>
+<section id="references" class="slide level2 inverse" data-minutes="0">
+<h2>References</h2>
+<div style="font-size: 0.78em">
+<ul>
+<li>Hooker, G., Mentch, L. and Zhou, S. (2021). Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance. <em>Statistics and Computing</em> 31(6), article 82. <a href="https://doi.org/10.1007/s11222-021-10057-z">doi:10.1007/s11222-021-10057-z</a></li>
+<li>Lei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. <em>Journal of the American Statistical Association</em> 113(523), 1094–1111. Section 6 (LOCO). <a href="https://doi.org/10.1080/01621459.2017.1307116">doi:10.1080/01621459.2017.1307116</a></li>
+</ul>
+</div>
+
+
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+<p>ST310 Machine Learning</p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../../../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../../../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 720,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 6.0e-2,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp("https:\/\/ml4ds\.com");
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
