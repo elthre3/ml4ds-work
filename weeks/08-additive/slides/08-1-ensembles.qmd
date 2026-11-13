@@ -58,7 +58,7 @@ genres <- c("Action", "Animation", "Comedy", "Drama", "Documentary", "Romance", 
 inputs <- c("year", "length", genres)
 mv <- movies |>
   filter(length <= 200, length > 10, year > 1918, votes >= 5) |>
-  select(title, rating, year, length, all_of(genres))
+  select(title, rating, year, length, votes, all_of(genres))   # votes only to pick a well-known film; not an input
 set.seed(310)   # the deck's only seed: the split (the seminar's), then every random step below, in order
 mv_id <- sample(nrow(mv), 10000)
 mv_train <- mv[mv_id[1:5000], ]
@@ -73,7 +73,9 @@ gm <- gapminder |> filter(year == 2007)
 ::: {.notes}
 The deck on the spine's scale (2 a content slide, 3 a proof or a pause for the room, 1 a dark slide); the bar at the top of each note is the share done, its denominator the total. Dark = rush or skip. Data: the films (data note: data/movies.md), a random 10,000 split 5,000 / 2,000 / 3,000 with one seed, 310, shared with the seminar; the test films stay shut. Week 1's countries for the split by hand; simulations where the truth must be known. One proof in the lecture: the correlated-average variance. Boosting as gradient descent is derived.
 
-Cut order: (1) "Misspecification: failure of additivity" to one sentence on the slide before, (2) "Rounds and learning rate" to one sentence, (3) "Complexity and overfitting" to one sentence on "Split search". The split by hand, the proof, partial dependence and the forest's ICE curves, permutation and LOCO, and boosting as gradient descent do not move.
+Questions before big ideas (QUESTION in the note): plotting one input; four samples, four trees; averaging B trees; which term a forest shrinks; what the next tree should predict. Also asked: where to cut.
+
+Cut order: (1) "Rounds and learning rate" to its first sentence on "Boosting in practice", (2) the decade figure on "Interactions in the movies data" to its first sentence, (3) "Tree depth and interactions" to its first sentence. The questions, the split by hand, the proof, partial dependence and the forest's ICE curves, permutation and LOCO, and boosting as gradient descent do not move.
 
 In the notebook (to be agreed): exercise 1 redoes the correlated-average variance with the slides closed; exercise 2 is one boosting step by hand.
 :::
@@ -91,22 +93,6 @@ Part 4: three model improvement strategies
 Part 5: boosting
 
 Part 6: feature importance
-
-## Where we left off {minutes="1"}
-
-::: {.notes}
-One minute. New data this week: IMDb films instead of the tracks, the same protocol. The test films are not opened today.
-:::
-
-Every family has a knob, chosen by cross-validation, and a score on held-out data
-
-This week: how some of those fits are built, and how to read them
-
-- an additive model, one curve at a time
-- a plot of one input for any fitted model, and what it can hide
-- a tree, one question at a time
-- many trees: averaged (bagging, random forests) or added (boosting)
-- what a forest uses: feature importance
 
 ## {.inverse .center}
 
@@ -160,7 +146,7 @@ $y = f_1(x_1) + f_2(x_2) + f_3(x_3) + \varepsilon$, three independent inputs, $n
 ## Bias? Why? 😲
 
 ::: {.notes}
-Legacy slide, whole. The inputs are independent here, so each separate smooth is its f_j shifted by the other components' averages (E f_1(X_1) = -4/3, E f_2(X_2) about 0, E f_3(X_3) about 0.70): the shape is right and the level is off. With correlated inputs the shape goes wrong too (the seminar).
+Legacy slide, whole. Each blue curve estimates E[Y | X_j = x], which is f_j(x) plus the other components' means (E f_1(X_1) = -4/3, E f_2(X_2) about 0, E f_3(X_3) about 0.70): with independent inputs only the level is off. With correlated inputs the shape goes wrong too (the seminar).
 :::
 
 The true model is additive
@@ -178,18 +164,18 @@ But we don't know $f_2$ and $f_3$, we are trying to estimate them too!
 ## Backfitting algorithm
 
 ::: {.notes}
-Legacy slide, whole. beta_0-hat is the mean of y. Center each update (subtract its average over the data), so that the constants do not drift between components: only the sum of the f_j is determined.
+Legacy slide, with the intercept and the centering step written in. Centering keeps the constants from drifting between components: only the sum of the f_j is determined.
 :::
 
-1. Start with some initial estimates $\hat f_j$, e.g. from `y ~ x_j`
+1. Set $\hat \beta_0 = \bar y$ and start with some initial estimates $\hat f_j$, e.g. $\hat f_j = 0$ or from `y ~ x_j`
 
 2. Iterate over $j$, updating $\hat f_j$ by fitting `r_j ~ x_j` where the partial residual $\mathbf r_j$
 $$\mathbf r_j = \mathbf y - \hat \beta_0 - \sum_{k \neq j} \hat f_k(\mathbf x_k)$$
-is computed using the current fits for all the other predictors
+is computed using the current fits for all the other predictors; then center $\hat f_j$ (subtract its mean over the data)
 
 3. Repeat until "convergence" (some stopping rule)
 
-## Backfitting is partialling out {minutes="3"}
+## Backfitting and partialling out {minutes="3"}
 
 ::: {.notes}
 Line by line: the update is a one-column least-squares slope of the partial residual; a fixed point satisfies both normal equations; that is least squares, whose coefficients the partialling-out theorem describes. Backfitting iterates instead of residualizing x_2 once; with standardized inputs of correlation rho, each sweep multiplies the distance to least squares by rho squared.
@@ -214,7 +200,7 @@ With a smoother in place of each line, the same loop fits an additive model: eac
 ## The movies data
 
 ::: {.notes}
-The data note has the rest. rating averages the users who chose to watch a film and then to rate it. Short is a genre flag, and in these films it almost always means under 40 minutes: it returns in the last part. The figure is the legacy "One univariate non-linear relationship", on the training films.
+New data, the same protocol as for the tracks; the test films stay shut today. Short is a genre flag, almost always under 40 minutes here; "non-short" below means not tagged Short. The figure is the legacy "One univariate non-linear relationship", on the training films.
 :::
 
 ::: {.columns}
@@ -278,12 +264,12 @@ fit_gam <-
 tidy(fit_gam)
 ```
 
-No coefficients, so how do we interpret?
+No single slope per input: how do we interpret the fitted curves?
 
 ## Replace each linear coefficient with 2d plot
 
 ::: {.notes}
-Legacy slide. Each panel is a fitted component, centered, with its band; the rug shows where the films are. Length: ratings rise past about 100 minutes, and the shortest films rate well too (the shorts). Year: the older films rate higher, with a steady fall to the 2000s.
+Legacy slide. Each panel is a fitted component, centered (the y label says so); the band is uncertainty in the curve, not the spread of ratings; the rug shows where the films are. Length: ratings rise past about 100 minutes, and the shortest films rate well too (the shorts). Year: the older films rate higher, with a steady fall to the 2000s.
 :::
 
 ```{r}
@@ -297,15 +283,15 @@ plot(fit_gam)
 ```{r}
 #| label: gam-components
 #| fig-width: 11
-#| fig-height: 3.3
+#| fig-height: 3.0
 #| fig-align: center
-# The code shown above, with margins and text sizes set for a slide (knitr resets par() in every chunk).
-par(mfrow = c(1, 2), mar = c(4.5, 4.5, 0.8, 0.8), cex = 1.3)
-plot(fit_gam, col = v_blue, shade = TRUE, shade.col = "#31688e33")
+# The code shown above, with margins, text sizes and axis labels set for a slide (knitr resets par() in every chunk).
+par(mfrow = c(1, 2), mar = c(4.4, 4.5, 0.6, 0.8), cex = 1.3)
+plot(fit_gam, col = v_blue, shade = TRUE, shade.col = "#31688e33", ylab = "centered contribution")
 ```
 
 ::: {.retrieval}
-The cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input curves has the one-input rate, $n^{-2/3}$, however many inputs.
+The cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input curves (additivity, plus design conditions) has the one-input rate, $n^{-2/3}$.
 :::
 
 ## {.inverse .center}
@@ -322,7 +308,7 @@ Compress: for an additive fit the component is the curve. For any other model we
 Legacy slide, the calculus half. The causality half is later in the course, where a model's curve is compared with an effect.
 :::
 
-Interpretation: think carefully about **calculus** and **causality**. To simplify let's consider the identity link function (rather than e.g. logistic regression, those cases are more complicated)
+Interpretation: think carefully about **calculus** and **causality** (causality: later in the course). To simplify let's consider the identity link function (rather than e.g. logistic regression, those cases are more complicated)
 
 #### Calculus
 
@@ -344,17 +330,17 @@ cor_dec <- mv_dec |> filter(Short == 0) |> group_by(decade) |>
 ```
 
 ::: {.notes}
-Legacy slide, with decades in place of single years: 5,000 training films leave too few in one year. Among the features (not the shorts) the correlation of length with rating falls from `r cor_dec$r[cor_dec$decade == 1930]` in the 1930s to `r cor_dec$r[cor_dec$decade == 2000]` in the 2000s: a raw correlation, not a fitted interaction.
+Legacy "Interactions" and "Misspecification", merged. Decades, not years (too few films in one year), and non-shorts only (the shorts put a dip near an hour in every decade). The correlation of length with rating goes from `r cor_dec$r[cor_dec$decade == 1950]` in the 1950s to `r cor_dec$r[cor_dec$decade == 2000]` in the 2000s: a raw correlation, not a fitted interaction.
 :::
 
-Does the relationship between length and rating change depending on the year? Let's check a few decades
+If the slope in length changes with year, the derivative of $\mathbb E[\text{rating} \mid \text{length}, \text{year}]$ in length depends on year too, and an additive model is misspecified. Non-shorts, by decade:
 
 ```{r}
 #| label: movies-interaction
 #| fig-width: 11
-#| fig-height: 4.4
+#| fig-height: 4.1
 #| fig-align: center
-mv_dec |> filter(decade >= 1950) |>
+mv_dec |> filter(decade >= 1950, Short == 0) |>
   mutate(decade = paste0(decade, "s")) |>
   ggplot(aes(length, rating)) + geom_point(alpha = .15, size = 1) +
   geom_smooth(colour = v_blue, se = FALSE, linewidth = 1.3) + facet_wrap(~ decade, nrow = 1) +
@@ -362,30 +348,10 @@ mv_dec |> filter(decade >= 1950) |>
   theme(strip.text = element_text(size = 16))
 ```
 
-## Misspecification: failure of additivity
-
-::: {.notes}
-Legacy slide, whole. First on the cut order: one sentence on the slide before.
-:::
-
-Difficult to tell because of small $n$ outside the range of length between 1 and 2 hours
-
-But I think it's possible the *relationship* is changing over time, i.e. there is an interaction
-
-$$
-\frac{\partial}{\partial \text{length}} \mathbb E[\text{rating} | \text{length}, \text{year}] \approx g(\text{length}, \text{year})
-$$
-
-Since the right hand side does not depend on length *only*, the additive model might be a poor fit
-
-Less accurate predictions
-
-(Possibly importantly) wrong interpretations
-
 ## Now true model is **not** additive
 
 ::: {.notes}
-Legacy slides from the interpretation deck, merged. The CEF is x_1 squared times cos(pi x_2 / 2): a parabola in x_1 that opens up where the cosine is positive and down where it is negative. The additive fit averages the two and finds almost nothing in x_1. The legacy text wrote cos(x_2); the argument is pi x_2 / 2.
+Legacy slides from the interpretation deck, merged. The CEF (conditional expectation function, E[Y | X]) is x_1 squared times cos(pi x_2 / 2): a parabola in x_1 opening up where the cosine is positive and down where it is negative, which average to almost nothing. The legacy text wrote cos(x_2).
 :::
 
 ```{r}
@@ -409,23 +375,39 @@ plot(fit_gam_wrong, col = v_blue, shade = TRUE, shade.col = "#31688e33", ylim = 
 ```
 :::
 ::: {.column width="42%"}
-The fitted component for $x_1$ is nearly flat: a parabola opening upward when $\cos(\pi x_2/2) > 0$ and downward when $\cos(\pi x_2/2) < 0$ cancels in the sum
+The fitted component for $x_1$ is nearly flat: a parabola opening upward when $\cos(\pi x_2/2) > 0$ and downward when $\cos(\pi x_2/2) < 0$ cancel when averaged over $x_2$
 
 Additivity assumption is now (importantly) wrong
 :::
 :::
 
-## Partial dependence {minutes="3"}
+## Plotting one input {minutes="3"}
 
 ::: {.notes}
-Legacy "What to do about other variables?", with the definitions the spine gives. The PDP is a computation on f-hat: set, leave, predict, average. For an additive f-hat it is the component plus a constant (the other components' averages). Fixing the others at their medians gives a different curve in general.
+QUESTION: plot f-hat against x_1: what do we do with x_2?
+
+Two minutes, written, then three answers before the next slide. Expected: fix x_2 at a typical value, its median or mean (one curve); one curve for each unit, at its own x_2; the average of those curves. What each hides here: at the median of x_2 (about 0, where the cosine is 1) the curve opens upward, while for about half the units it opens downward; the average of all the curves is nearly flat.
+:::
+
+A forest fitted to these data can hold the interaction, but it has no components: $\hat f(x_1, x_2)$ is one function of both inputs
+
+::: {.ask}
+We want a plot of how $\hat f$ depends on $x_1$. What do we do with $x_2$ while we draw it?
+
+Write down one way, and what that plot could hide.
+:::
+
+## Partial dependence
+
+::: {.notes}
+The answers to the last slide: legacy "What to do about other variables?", with the definitions the spine gives. The PDP is a computation on f-hat: set, leave, predict, average. For an additive f-hat it is the component plus a constant (the other components' averages). Fixing the others at their medians gives a different curve in general.
 :::
 
 For models with multiple predictors, partial dependence plots can hide model structure. Options for the other variables:
 
-- Hold other variables fixed (e.g. at medians)
+- Hold other variables fixed (e.g. at medians), `plotmo` default
 - Average over them, `pdp` method
-- Plot a curve for each observation, `ice` method
+- Plot a curve for each observation: individual conditional expectation (ICE), `ice` method
 
 For input $j$, a value $t$, and unit $i$'s other inputs $x_{i,-j}$:
 $$
@@ -433,12 +415,12 @@ $$
 \mathrm{PDP}_j(t) = \frac1n \sum_{i=1}^n \hat f(x_{i,-j},\, t)
 $$
 
-Set input $j$ to $t$, leave the unit's other inputs, predict, average. A modified unit may be one no real unit resembles. For an additive fit, $\mathrm{PDP}_j$ is $\hat f_j$ plus a constant
+Set $x_j$ to $t$, leave the unit's other inputs, predict, average. A modified unit may resemble no real unit
 
 ## Regression trees + bagging
 
 ::: {.notes}
-Legacy slide; iml's FeatureEffects replaced by pdp::partial. A forest on the same simulated data, every input offered at every split (bagging), leaves of at least 50 units. 100 of the 2,000 units, one curve each, colored by the sign of cos(pi x_2 / 2) at their x_2. The forest has the interaction; the average of the curves does not show it.
+Legacy slide; pdp::partial for iml. A forest on the same data, every input offered at every split (bagging); nodes under 50 units are not split. 100 units, colored by the sign of cos(pi x_2 / 2). The GAM's x_1 curve on "Now true model is not additive" was flat too, but the GAM has no interaction to hide; only the ICE curves tell the two apart.
 :::
 
 ```{r}
@@ -480,6 +462,8 @@ Compress: a tree asks one question about one input at a time, each the best ques
 ## Where would you cut? {minutes="3"}
 
 ::: {.notes}
+QUESTION: one cutoff in GDP per capita: write it down
+
 Thirty seconds, a number written down. Week 1's countries, 2007. The next slide scores every cutoff.
 :::
 
@@ -517,7 +501,7 @@ root_rss <- sum((gm$lifeExp - mean(gm$lifeExp))^2)
 ```
 
 ::: {.notes}
-Every cutoff between two countries with different GDP, scored by the RSS of predicting each side's mean: the best is about `r format(round(best_cut$cut), big.mark = ",")` dollars, which takes the RSS from `r format(round(root_rss), big.mark = ",")` (the dotted line, no split) to `r format(round(best_cut$rss), big.mark = ",")`. Compare with the room's cutoffs. Running sums score every cutoff in one pass after a sort: the seminar.
+Every cutoff between two countries with different GDP, scored by the RSS of predicting each side's mean: the best is about `r format(round(best_cut$cut), big.mark = ",")` dollars, which takes the RSS from `r format(round(root_rss), big.mark = ",")` (the dotted line, no split) to `r format(round(best_cut$rss), big.mark = ",")`. Compare with the room's cutoffs.
 :::
 
 ::: {.columns}
@@ -537,80 +521,74 @@ ggplot(rc, aes(cut, rss)) +
 ```
 :::
 ::: {.column width="44%"}
-Every cutoff between two countries, scored: the residual sum of squares when each side predicts its own mean
+Every cutoff between two countries, scored by the RSS when each side predicts its own mean
 
 Each side of a split is a **leaf** (until it is split again)
 
 Then every input; keep the best; then **recurse** into each leaf. Greedy: each split is the best *now*
 
-For a label: the same search, scoring each leaf by its **Gini index** $\sum_k \hat p_k (1 - \hat p_k)$
+For a label: the same search, scoring each split by its leaves' **Gini indices** $\sum_k \hat p_k (1 - \hat p_k)$, weighted by leaf size
 :::
-:::
-
-## Complexity and overfitting
-
-::: {.notes}
-Legacy slide; the tree package is now rpart, the penguins the films (two inputs). One film per leaf, roughly: rpart stops splitting a leaf whose films share their inputs. Third on the cut order. The lab exercise is the seminar's.
-:::
-
-Could keep recursively splitting on predictor space until we have bins containing only 1 unique set of predictor values each
-
-This would be like 1-nearest neighbors
-
-**Lab exercise**: create a plot of training error versus tree size
-
-```{r}
-#| label: big-tree
-#| echo: true
-fit_tree <- rpart(rating ~ year + length, data = mv_train,
-      control = rpart.control(cp = 0, minsplit = 2, minbucket = 1))
-sum(fit_tree$frame$var == "<leaf>") # number of "leaf" endpoints
-```
-
-::: {.retrieval}
-$k$ nearest neighbors average the $k$ training points closest to $x_0$; a tree averages the training points in $x_0$'s leaf, a neighborhood chosen by the data. More leaves, smaller neighborhoods.
 :::
 
 ## Growing and pruning
 
+```{r}
+#| label: big-tree
+#| include: false
+fit_tree <- rpart(rating ~ year + length, data = mv_train,
+                  control = rpart.control(cp = 0, minsplit = 2, minbucket = 1))
+n_leaves <- sum(fit_tree$frame$var == "<leaf>")
+n_pairs <- nrow(distinct(mv_train, year, length))
+```
+
 ::: {.notes}
-Legacy slide, whole. Greedy splitting is why stopping early is a bad rule: a weak split now can enable a strong one below it.
+Legacy "Complexity and overfitting", "Growing and pruning" and "How to prune a tree", merged. Grown out, rpart gives `r format(n_leaves, big.mark = ",")` leaves for `r format(n_pairs, big.mark = ",")` distinct (year, length) pairs: it cannot split films that share their inputs. In rpart the path is the cptable, cp a rescaled alpha.
 :::
 
-#### Problem: greedy splitting
+Split until no leaf can split, and a tree is like 1-nearest neighbors: `r format(n_leaves, big.mark = ",")` leaves on year and length alone
 
-Each split uses the best possible predictor, similar to forward stepwise. Early stopping may prevent the model from finding useful but weaker predictors later on
+**Greedy splitting**: each split is the best now, and stopping early can miss a weak split that enables a strong one below it. So grow a large tree
 
-**Solution**: don't use early stopping. Grow a large tree
+**Overfitting**: then prune. Of the many sub-trees, take only the path of minimizers of
+$$RSS(\text{Sub-tree}) + \alpha\, |\text{Sub-tree}|, \qquad \alpha \geq 0$$
+and choose $\alpha$, and so a sub-tree, by validation
 
-#### Problem: overfitting
-
-Larger trees are more complex, more difficult to interpret, and could be overfit to training data
-
-**Solution**: (cost complexity / weakest link) pruning
-
-## How to prune a tree
-
-::: {.notes}
-Legacy slide, whole. |SubTree| is the number of leaves. In rpart the path is the cptable, cp a rescaled alpha; choosing alpha by cross-validation is the tuning lecture's method. The penalty is a penalized empirical risk, with the number of leaves as the complexity.
+::: {.retrieval}
+$k$ nearest neighbors average the $k$ training points closest to $x_0$; a tree averages those in $x_0$'s leaf, a neighborhood chosen by the data
 :::
 
-After growing a large tree, find the "best" sub-tree
-
-#### Problem: too many sub-trees
-
-The number of sub-trees grows combinatorially in the number of splits (depends on depth as well, interesting counting problem)
-
-**Solution**: consider only a one-dimensional path of sub-tree models, the ones that minimize
-
-$$RSS(\text{Sub-tree}) + \alpha |\text{SubTree}|$$
-
-for $\alpha \geq 0$. Now we can choose $\alpha$, and therefore a specific sub-tree, using validation
-
-## Three model improvement strategies {.inverse}
+## Four samples, four trees {minutes="3"}
 
 ::: {.notes}
-Compress: three ways to use many trees: average resampled trees, average trees that see random subsets of predictors, or add small trees fitted to residuals. Legacy slide; "when resampling" became "at each split" (a forest redraws the predictors at every split).
+QUESTION: same method, same films, four different trees: what should we do?
+
+Each tree is grown to depth 2 on a random half of the 5,000 training films. The root question changes between halves, and so do the questions under it. The structures lecture showed the same on the countries, with resamples; some will remember averaging. A minute for the room; the next slide's three strategies are the answers.
+:::
+
+```{r}
+#| label: unstable-trees
+#| fig-width: 12
+#| fig-height: 3.0
+#| fig-align: center
+half_trees <- map(1:4, function(b) rpart(f_all, data = slice_sample(mv_train, n = 2500),
+                                         control = rpart.control(maxdepth = 2, cp = 0, minbucket = 30)))
+shawshank <- mv_train |> slice_max(votes, n = 1) |> mutate(title = sub("^(.*), The$", "The \\1", title))
+pred_shaw <- sapply(half_trees, function(t) predict(t, shawshank))
+par(mfrow = c(2, 2), mar = c(0.9, 1.5, 0.1, 1.5), xpd = NA)
+for (t in half_trees) { plot(t, uniform = TRUE, margin = 0.1); text(t, cex = 1.45, digits = 3) }
+```
+
+Depth 2, each on a random half of the training films. *`r shawshank$title`* (rated `r shawshank$rating`): predicted `r paste(sprintf("%.2f", pred_shaw), collapse = ", ")`
+
+::: {.ask}
+Same method, same films, four different models. What should we do about this?
+:::
+
+## Part 4: three model improvement strategies {.inverse}
+
+::: {.notes}
+Compress: three ways to use many trees: average resampled trees, average trees that see random subsets of predictors, or add small trees one at a time. Legacy slide; "at each split" for "when resampling", and the boosting block no longer says what the next model is fitted to: Part 5 asks.
 :::
 
 Sacrifice simplicity/interpretability for prediction accuracy
@@ -625,9 +603,9 @@ Can be used with other models too, not just trees
 
 - Randomly drop predictors at each split
 
-#### **Boosting**: iterative descent using residuals
+#### **Boosting**: add models one at a time
 
-- Fit each new model to residual of previous fits
+- Each new model is added to the sum of the previous ones
 
 ## Bagging: bootstrap aggregating
 
@@ -648,21 +626,25 @@ $$\hat f_\text{bag} = \frac{1}{B} \sum_{b=1}^B \hat f^{*b}$$
 ## Averaging $B$ trees {minutes="3"}
 
 ::: {.notes}
-Two minutes, written. The first is the identical-copies case: no reduction. Most will write tau^2 / B for the second, the rho = 0 case. Collect both before the next slide.
+QUESTION: variance of an average of B trees: copies, independent, correlation rho?
+
+Two minutes, written. Expected: tau^2 (no reduction), then tau^2 / B; the third is the next slide. Collect all three first.
 :::
 
 Average $B$ trees' predictions at one input $x$
 
 ::: {.ask}
-First: $B$ copies of the *same* tree. What is the variance of their average?
+What is the variance of their average if the $B$ trees are
 
-Then: $B$ trees whose predictions each have variance $\tau^2$, every pair with correlation $\rho$. Write down the variance of their average.
+- copies of the *same* tree, with variance $\tau^2$?
+- independent, each with variance $\tau^2$?
+- each with variance $\tau^2$, every pair with correlation $\rho$?
 :::
 
 ## Correlated-average variance {minutes="3"}
 
 ::: {.notes}
-The lecture's proof. Heuristic first: the variance of a sum is every variance plus every covariance; count them. Then the statement, then divide by B squared. Check against the ask: rho = 1 gives tau^2, no reduction (the first answer); rho = 0 gives tau^2 / B (the second). rho is a correlation over the training sample and the bootstrap draws together; given the sample the bootstrap trees are independent, so rho tau^2 is the part of one tree's variance that comes from the sample, and more trees cannot remove it.
+The lecture's proof: count the terms, state, divide by B squared and regroup. Check: rho = 1 gives tau^2, rho = 0 gives tau^2 / B. Given the sample the bootstrap trees are independent, so rho tau^2 is the part of one tree's variance that comes from the sample; more trees cannot remove it.
 :::
 
 The variance of a sum is every variance plus every covariance, $B$ terms $\tau^2$ and $B(B - 1)$ terms $\rho\tau^2$: $\;\mathrm{Var}\big(\sum_{b} V_b\big) = B\tau^2 + B(B - 1)\rho\tau^2$
@@ -676,20 +658,23 @@ $$
 $$
 :::
 
-**Proof**: divide by $B^2$. Bagging shrinks the second term; $\rho\tau^2$ stays, since bootstrap trees grown from one sample are alike
+**Proof**: divide by $B^2$ and regroup, $\frac{\tau^2}{B} + \frac{B - 1}{B}\rho\tau^2 = \rho\tau^2 + (1 - \rho)\frac{\tau^2}{B}$. Bagging shrinks the second term; $\rho\tau^2$ stays, since bootstrap trees grown from one sample are alike
 
 ## Random forest: dropping predictors
 
 ::: {.notes}
-Two edits to the legacy slide: the predictors are redrawn at every split (Breiman's forest, as in ISLR and randomForest), not once per tree; and "(typically)", since a random subset changes each tree as well as the correlation. randomForest's default for regression offers p/3 predictors, here 3 of the 9.
+QUESTION: B is already 300: which term is left, and how could we shrink it?
+
+A minute. Expected: rho tau^2; make the trees less alike. Legacy edits: predictors redrawn at every split, not once per tree; "(typically)". randomForest's default for regression offers p/3 predictors, here 3 of the 9.
 :::
 
-**Problem**: aggregation does not increase information if the aggregates are highly correlated, e.g. averaging 1000 trees but each one uses the same small set of predictor variables
-
-$$\text{Var}\left( \sum_{b=1}^B \hat f^{*b} \right) =
- \sum_{b=1}^B \text{Var}\left( \hat f^{*b} \right) + \sum_{b=1}^B \sum_{b'\neq b} \text{Cov}\left( \hat f^{*b}, \hat f^{*b'} \right)$$
+::: {.ask}
+$B$ is already 300. Which term of the correlated-average variance is left, and how could we make it smaller?
+:::
 
 . . .
+
+**Problem**: aggregation does not increase information if the aggregates are highly correlated, e.g. averaging 1000 trees but each one uses the same small set of predictor variables
 
 1. **Drop** predictors randomly, at every split
 
@@ -700,7 +685,7 @@ $$\text{Var}\left( \sum_{b=1}^B \hat f^{*b} \right) =
 ## Out-of-bag predictions
 
 ::: {.notes}
-Legacy slide, with the films. Training MSE uses every tree, including the two thirds that had each film in their sample, so it is far too good, as for the forest on the tracks. Out-of-bag: each film predicted only by the trees that never saw it, close to the tuning films' score. Once used to choose mtry or the number of trees, it is a validation score, not a test.
+Legacy slide, with the films. Training MSE uses every tree, including those that had the film in their sample, so it is too low; out of bag, each film is predicted only by the trees that never saw it, close to the tuning score. Once used to choose mtry or the number of trees, it is a validation score, not a test.
 :::
 
 - Each bootstrap sample contains some subset of the training data
@@ -714,7 +699,7 @@ Software implementations may do this automatically
 ```{r}
 #| label: oob
 #| output: asis
-rf_mv <- randomForest(f_all, data = mv_train, ntree = 300)
+rf_mv <- randomForest(f_all, data = mv_train, ntree = 300, mtry = 3)   # mtry = 3 is the default for 9 inputs; fixed for LOCO
 oob_tab <- tibble(
   score = c("training films, every tree", "training films, out-of-bag trees only", "tuning films", "tuning films, predicting the training mean"),
   mse = c(mse(mv_train$rating, predict(rf_mv, mv_train)), mse(mv_train$rating, predict(rf_mv)),
@@ -732,10 +717,24 @@ Compress: fit a small tree to what the sum so far leaves, add a fraction of it, 
 
 ### Part 5: boosting
 
+## Adding trees
+
+::: {.notes}
+QUESTION: add one small tree to the current fit: what should it predict?
+
+A minute. Expected: the residuals, y minus the current fit; some will say the worst-fit films. The same move as backfitting, which fitted each curve to what the others left.
+:::
+
+A forest grows its trees separately and averages them. Now grow them one after another and add them up: after $b$ trees the fit is $\hat F_b$, the sum so far
+
+::: {.ask}
+We may add one small tree to $\hat F_b$. What should it predict?
+:::
+
 ## Boosting: iterated fitting on residuals
 
 ::: {.notes}
-Legacy slide; the ESL link is the course's current address, and the parenthetical after "Chapter 10" is dropped (the site carries no assessment information). "Closest" is the textbook description; the tree is found greedily, so it approximates the closest small tree.
+The answer to the last slide. Legacy slide; the ESL link is the current address, and two parentheticals are dropped (assessment information; "maximum inner product", unbounded without a norm constraint). The tree is found greedily, so it approximates the closest small tree.
 :::
 
 **Idea**: train models sequentially, decreasing residuals by a small amount each time. Each model contributes something different
@@ -748,14 +747,14 @@ Can use **weak learners** -- e.g. trees with one split ("stumps") -- to grow an 
 
 **Gradient descent**: small step in direction of negative gradient
 
-**Boosting**: small step in direction of *weak learner closest to negative gradient* (maximum inner product in function space)
+**Boosting**: small step in direction of *weak learner closest to negative gradient*
 
 Optional additional reading: [ESL](https://hastie.su.domains/ElemStatLearn/) Chapter 10
 
 ## Boosting as gradient descent {minutes="3"}
 
 ::: {.notes}
-Derived. What we have: a loss of the n fitted values. What we want: a step that lowers it. The gradient with respect to the fitted values is F - y, so the negative gradient is the residual. A tree turns the n numbers into a function of x, which is why the step can be applied to new films. For squared loss and leaf means, a step with 0 < gamma <= 2 never raises the training loss (seminar). gamma is the learning rate; ISLR writes lambda, which this course keeps for the penalty.
+Derived. What we have: a loss of the n fitted values. What we want: a step that lowers it. The gradient with respect to the fitted values is F - y, so the negative gradient is the residual. A tree turns the n numbers into a function of x, which is why the step can be applied to new films. gamma is the learning rate; ISLR writes lambda, which this course keeps for the penalty.
 :::
 
 Gradient descent moves parameters. Take the $n$ fitted values $F(x_1), \ldots, F(x_n)$ as the parameters, with squared loss $L(F) = \frac12 \sum_{i=1}^n \big(y_i - F(x_i)\big)^2$:
@@ -771,27 +770,24 @@ $$
 $$
 
 ::: {.retrieval}
-Gradient descent: a step of size $\gamma$ against the gradient, and stopped early, the number of steps is a knob. Partialling out: each tree is fitted to what the sum so far leaves.
+Gradient descent, stopped early: the number of steps is a knob. Backfitting replaced a curve; boosting adds a tree, fitted to what the sum leaves.
 :::
 
-## Boosting in practice
+## Boosting in practice {minutes="1"}
 
 ::: {.notes}
-One edit to the legacy slide: the learning rate is gamma, as on the last slide. "Unlike bagging/r.f.": more trees in a forest settle to an average; more rounds of boosting keep fitting the training data.
+Legacy slide, the grid-tuning half cut; the learning rate is gamma, as on the last slide. More trees in a forest settle to an average; more rounds of boosting keep fitting the training data.
 :::
 
 #### More tuning parameters
 
 Number of trees/steps $B$, complexity of each tree/model $d$, regularization/learning rate $\gamma$. **Warning**: can now overfit with large $B$ (unlike bagging/r.f.)
 
-#### Choosing/optimizing tuning parameters
+Software may choose them automatically. *No guarantee it's reasonable!*
 
-Software may do something automatically. *No guarantee it's reasonable!* e.g. optimize over a grid of tuning parameters
+#### Bagging and boosting
 
-Two grid-tuning stages:
-
-1. Rough grid covering a large range (possibly orders of magnitude)
-2. Finer grid over a smaller range
+Bagging and forests average large trees, which have low bias, to lower variance; boosting adds small trees, which have high bias, to lower bias
 
 ## Rounds and learning rate
 
@@ -812,7 +808,7 @@ best_tune <- bc |> group_by(rate) |> summarise(m = min(tuning)) |> with(setNames
 ```
 
 ::: {.notes}
-xgboost on the films, trees of depth 2, at two learning rates; training and tuning MSE after each number of rounds. With gamma = 0.3 the tuning MSE is lowest at round `r best_round[["0.3"]]` (`r best_tune[["0.3"]]`) and then drifts up; with gamma = 0.03 it is `r if (best_round[["0.03"]] == max(rounds)) "still falling at the last round, 1,000" else paste("lowest at round", best_round[["0.03"]])` (`r best_tune[["0.03"]]`). The mean alone scores `r round(mse(mv_tune$rating, mean(mv_train$rating)), 3)`. Patterns, not guarantees: at a fixed budget of rounds a small rate can underfit. Second on the cut order.
+xgboost on the films, trees of depth 2, at two learning rates; training and tuning MSE after each number of rounds. With gamma = 0.3 the tuning MSE is lowest at round `r best_round[["0.3"]]` (`r best_tune[["0.3"]]`) and then drifts up; with gamma = 0.03 it is `r if (best_round[["0.03"]] == max(rounds)) "still falling at the last round, 1,000" else paste("lowest at round", best_round[["0.03"]])` (`r best_tune[["0.03"]]`). The mean alone scores `r round(mse(mv_tune$rating, mean(mv_train$rating)), 3)`. Patterns, not guarantees: at a fixed budget of rounds a small rate can underfit. First on the cut order.
 :::
 
 ::: {.columns}
@@ -838,10 +834,10 @@ bc |> pivot_longer(c(training, tuning)) |>
 :::
 :::
 
-## Depth is interaction order
+## Tree depth and interactions
 
 ::: {.notes}
-The structures lecture's truth C: a step of height 4 where x_1 > 0 and x_2 > 0, ten inputs uniform on (-1, 1), noise variance 1; 2,000 rows to fit, 2,000 to score; xgboost, 300 rounds at gamma = 0.1, not tuned. The best sum of one-input functions leaves 1 of the signal's variance 3, so stumps cannot go below 2. Answer if asked: a sum of stumps is a sum of one-input step functions; x_1 x_2 is not a sum of one-input functions at all.
+The structures lecture's truth C: a step of height 4 where x_1 > 0 and x_2 > 0, ten inputs uniform on (-1, 1), noise variance 1; 2,000 rows to fit, 2,000 to score; xgboost, 300 rounds at gamma = 0.1, not tuned. The best sum of one-input functions leaves 1 of the signal's variance 3, so stumps cannot go below 2. Third on the cut order.
 :::
 
 ::: {.columns}
@@ -866,7 +862,7 @@ dep <- tibble(depth = 1:4) |> mutate(test = map_dbl(depth, function(d) {
 }))
 ggplot(dep, aes(depth, test)) + geom_line(colour = v_blue, linewidth = 1.2) + geom_point(colour = v_blue, size = 3.5) +
   geom_hline(yintercept = c(1, 2), linetype = "dotted", colour = "grey40") +
-  annotate("text", x = 4, y = c(1.08, 2.08), hjust = 1, size = 5, colour = "grey30",
+  annotate("text", x = 4, y = c(0.91, 2.08), hjust = 1, size = 5, colour = "grey30",
            label = c("noise variance", "best additive fit")) +
   coord_cartesian(ylim = c(0.8, 2.4)) +
   labs(x = "tree depth", y = "test MSE, 2,000 new rows") + scale_x_continuous(breaks = 1:4)
@@ -884,64 +880,86 @@ Compress: what did the forest use? Permutation importance shuffles one input; LO
 
 ### Part 6: feature importance
 
-## Feature/variable importance
+## Feature/variable "importance"
 
 ::: {.notes}
-Legacy slide, now a light one (it was dark): importance is core this week. The forest is the one from the out-of-bag slide. Split improvement is randomForest's IncNodePurity. Permutation importance is the increase in held-out loss when one column is shuffled, with the fitted model unchanged; computed on the tuning films below.
+Legacy slide, now light (it was dark), with the forest from the out-of-bag slide. Split improvement is randomForest's IncNodePurity; permutation is on the tuning films, the forest unchanged, ten shuffles each. Each measure is shown as a share of its total over the nine inputs, so the two can share an axis.
 :::
 
 - Which predictors are *used most* by the model?
+- Does not necessarily tell us about **causation** (none of these methods do)
 
-- Does not necessarily tell us about **causation** (none of these methods do, but an important reminder)
-
+::: {.columns}
+::: {.column width="55%"}
 #### Tree-specific importance
 
-When $x_j$ is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)
+Sum the RSS decrease of every split on $x_j$ within a tree, then average over trees
 
 #### Permutation importance
 
 Permute values of predictor $x_j$. How much does the accuracy of the model decrease?
+$$\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, x_j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)$$
+:::
+::: {.column width="45%"}
+```{r}
+#| label: importance
+#| fig-width: 5.0
+#| fig-height: 3.15
+base_tune <- mse(mv_tune$rating, predict(rf_mv, mv_tune))
+pi_j <- sapply(inputs, function(v) mean(replicate(10, {
+  d <- mv_tune; d[[v]] <- sample(d[[v]]); mse(mv_tune$rating, predict(rf_mv, d)) })) - base_tune)
+split_j <- importance(rf_mv)[inputs, "IncNodePurity"]
+tibble(input = factor(inputs, levels = inputs[order(split_j)]),
+       `split improvement` = split_j / sum(split_j), permutation = pi_j / sum(pi_j)) |>
+  pivot_longer(-input, names_to = "measure") |>
+  ggplot(aes(value, input, colour = measure, shape = measure)) + geom_point(size = 3.5) +
+  scale_colour_manual(values = c(`split improvement` = v_dark, permutation = m_pink), name = NULL) +
+  scale_shape_manual(values = c(`split improvement` = 15, permutation = 17), name = NULL) +
+  labs(x = "share of the measure's total", y = NULL) +
+  theme(legend.position = "top", legend.margin = ggplot2::margin(0, 0, -8, 0), axis.text.y = element_text(size = 13))
+```
 
-$$\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, \text{column } j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)$$
+Each has pros/cons, no satisfactory answer for dependence
+:::
+:::
 
-## Permuting forces extrapolation
+## Permutation and extrapolation
 
 ```{r}
 #| label: permute-counts
 #| include: false
 perm <- mv_tune |> mutate(length = sample(length))
+odd <- function(d) c(long_short = sum(d$Short == 1 & d$length > 60), short_other = sum(d$Short == 0 & d$length < 40))
 n_short <- sum(mv_tune$Short == 1)
-n_feat_short <- sum(mv_tune$Short == 0 & mv_tune$length < 40)
-n_long_short <- sum(perm$Short == 1 & perm$length > 60)
-n_short_feat <- sum(perm$Short == 0 & perm$length < 40)
+odd_perm <- odd(perm); odd_tune <- odd(mv_tune); odd_train <- odd(mv_train)
 ```
 
 ::: {.notes}
-The tuning films, length permuted once. Before the shuffle: no short over an hour, and features under 40 minutes: `r n_feat_short`. After it: `r n_long_short` of the `r n_short` shorts run over an hour and `r n_short_feat` features under 40 minutes. The forest's predictions there are extrapolation, and permutation importance averages over them. Hooker, Mentch and Zhou (2021) show this over-emphasizes correlated inputs, in importance and in partial dependence alike; a PDP sets length on every film, shorts included.
+The tuning films, length shuffled once. Hooker, Mentch and Zhou (2021): with dependent inputs, shuffling puts weight where there are few data, in importance and in partial dependence alike; a PDP sets length on every film, shorts included.
 :::
 
 ```{r}
 #| label: permute-length
 #| fig-width: 11.5
-#| fig-height: 3.0
+#| fig-height: 2.7
 #| fig-align: center
 bind_rows(mv_tune |> mutate(data = "tuning films"),
           perm |> mutate(data = "length permuted")) |>
-  mutate(data = fct_inorder(data), kind = if_else(Short == 1, "short", "feature")) |>
+  mutate(data = fct_inorder(data), kind = if_else(Short == 1, "short", "non-short")) |>
   ggplot(aes(length, kind, colour = kind)) +
   geom_jitter(height = 0.25, width = 0, alpha = 0.35, size = 1.2, show.legend = FALSE) +
-  facet_wrap(~ data) + scale_colour_manual(values = c(feature = v_blue, short = m_pink)) +
+  facet_wrap(~ data) + scale_colour_manual(values = c(`non-short` = v_blue, short = m_pink)) +
   labs(x = "length (minutes)", y = NULL) + theme(strip.text = element_text(size = 16))
 ```
 
-Shuffling length keeps each film's other inputs: `r n_long_short` of the `r n_short` shorts now run over an hour, and `r n_short_feat` features under 40 minutes. The tuning films have none
+Shuffling length keeps each film's other inputs: `r odd_perm[["long_short"]]` of the `r n_short` shorts now run over an hour, and `r odd_perm[["short_other"]]` non-shorts under 40 minutes. Before: `r odd_tune[["long_short"]]` and `r odd_tune[["short_other"]]`; in the 5,000 training films, `r odd_train[["long_short"]]` and `r odd_train[["short_other"]]`
 
-The forest is scored where it never saw a film. Permutation importance mixes two things: how much the model's accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)
+The forest's predictions there rest on almost no data, and permutation importance averages over them (Hooker, Mentch and Zhou 2021)
 
 ## Leave one covariate out
 
 ::: {.notes}
-Ten more forests: one per input left out, and one without both length and Short; each scored on the same tuning films. Permutation importance is the larger for every input that matters here: part of the gap is the extrapolation on the last slide, part is that a refit without an input can lean on the others. LOCO answers a different question: what the model loses without the input, given the others. Named by Lei et al. (2018); the reading's LOFO.
+Ten more forests, mtry = 3 as in the full one: one per input left out, one without length and Short; all scored on the tuning films. Permutation is larger for every input that matters, with or without extrapolation: for an additive f with independent inputs, permuting x_j adds 2 Var f_j(X_j) to the error, refitting without it Var f_j(X_j). Two questions: how much the fitted model relies on x_j; what the method loses without it. The reading's LOFO.
 :::
 
 ::: {.columns}
@@ -950,11 +968,8 @@ Ten more forests: one per input left out, and one without both length and Short;
 #| label: loco
 #| fig-width: 6.4
 #| fig-height: 4.6
-base_tune <- mse(mv_tune$rating, predict(rf_mv, mv_tune))
-pi_j <- sapply(inputs, function(v) mean(replicate(10, {
-  d <- mv_tune; d[[v]] <- sample(d[[v]]); mse(mv_tune$rating, predict(rf_mv, d)) })) - base_tune)
 refit_without <- function(drop) {
-  fit <- randomForest(reformulate(setdiff(inputs, drop), "rating"), data = mv_train, ntree = 300)
+  fit <- randomForest(reformulate(setdiff(inputs, drop), "rating"), data = mv_train, ntree = 300, mtry = 3)
   mse(mv_tune$rating, predict(fit, mv_tune)) - base_tune
 }
 loco_j <- sapply(inputs, refit_without)
@@ -970,19 +985,19 @@ tibble(input = inputs, permutation = pi_j, LOCO = loco_j) |>
 ```
 :::
 ::: {.column width="48%"}
-Refit without input $j$; score on the same held-out films:
+Refit without input $j$, with the same settings; score on the same held-out films (Lei et al. 2018):
 $$\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)$$
 
-No permuted rows, so no extrapolation; any method, at the cost of $p$ refits
+No extrapolation from permuting; any method, at the cost of $p$ refits
 
-Length and Short together: `r sprintf("%.2f", loco_pair)`, more than alone (`r sprintf("%.2f", loco_j[["length"]])` and `r sprintf("%.2f", loco_j[["Short"]])`). LOCO charges neither input for what the two share
+Length and Short together: `r sprintf("%.2f", loco_pair)`, more than length alone and Short alone added up (`r sprintf("%.2f", loco_j[["length"]])` + `r sprintf("%.2f", loco_j[["Short"]])`). Each stands in for part of the other
 :::
 :::
 
 ## We're in dangerous territory {.inverse}
 
 ::: {.notes}
-Skip if behind. Legacy slide, whole.
+Skip if behind. Legacy slide; the link now goes to the book (References), not a blog.
 :::
 
 - Less interpretable methods/models
@@ -991,7 +1006,7 @@ Skip if behind. Legacy slide, whole.
 
 . . .
 
-But consider, [Alfred North Whitehead](https://philosophicaldisquisitions.blogspot.com/2015/04/is-automation-making-us-stupid.html) said (pre-WW2):
+But consider, [Alfred North Whitehead](https://www.gutenberg.org/ebooks/41568) wrote (1911):
 
 > It is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. **Civilization advances by extending the number of important operations which we can perform without thinking about them**.
 
@@ -1008,7 +1023,7 @@ Say it once. The exercises are what the seminar's problems vary (the seminar pla
 ## Conclusion {.inverse}
 
 ::: {.notes}
-Compress: an additive model fits one curve per input, each to what the others leave; a plot of one input exists for any model and can hide an interaction; trees ask greedy questions, forests average them, boosting adds them; permutation importance asks about films that do not exist, LOCO refits.
+Compress: an additive model fits one curve per input, each to what the others leave; a plot of one input exists for any model and can hide an interaction; trees ask greedy questions, forests average them, boosting adds them; permutation importance can ask about films the data scarcely contain, LOCO refits.
 :::
 
 #### Additive models
@@ -1025,7 +1040,7 @@ Greedy questions, pruned by validation. Bagging and forests average trees and lo
 
 #### Feature importance
 
-Permuting an input asks the model about data that do not exist; LOCO refits instead
+Permuting an input can ask the model about films the data scarcely contain; LOCO refits instead
 
 ## References {.inverse minutes="0"}
 
@@ -1036,4 +1051,5 @@ Skip: the works named on the slides, in full. Not lecture content.
 ::: {style="font-size: 0.78em"}
 - Hooker, G., Mentch, L. and Zhou, S. (2021). Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance. *Statistics and Computing* 31(6), article 82. [doi:10.1007/s11222-021-10057-z](https://doi.org/10.1007/s11222-021-10057-z)
 - Lei, J., G'Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. *Journal of the American Statistical Association* 113(523), 1094--1111. Section 6 (LOCO). [doi:10.1080/01621459.2017.1307116](https://doi.org/10.1080/01621459.2017.1307116)
+- Whitehead, A. N. (1911). *An Introduction to Mathematics*. London: Williams and Norgate. [Project Gutenberg](https://www.gutenberg.org/ebooks/41568)
 :::

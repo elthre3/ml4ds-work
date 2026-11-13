@@ -224,18 +224,6 @@ Joshua Loftus
 <p>Part 5: boosting</p>
 <p>Part 6: feature importance</p>
 </section>
-<section id="where-we-left-off" class="slide level2" data-minutes="1">
-<h2>Where we left off</h2>
-<p>Every family has a knob, chosen by cross-validation, and a score on held-out data</p>
-<p>This week: how some of those fits are built, and how to read them</p>
-<ul>
-<li>an additive model, one curve at a time</li>
-<li>a plot of one input for any fitted model, and what it can hide</li>
-<li>a tree, one question at a time</li>
-<li>many trees: averaged (bagging, random forests) or added (boosting)</li>
-<li>what a forest uses: feature importance</li>
-</ul>
-</section>
 <section id="section-1" class="slide level2 inverse center">
 <h2></h2>
 <h3 id="part-1-fitting-an-additive-model">Part 1: fitting an additive model</h3>
@@ -266,13 +254,13 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <section id="backfitting-algorithm" class="slide level2">
 <h2>Backfitting algorithm</h2>
 <ol type="1">
-<li><p>Start with some initial estimates <span class="math inline">\(\hat f_j\)</span>, e.g.&nbsp;from <code>y ~ x_j</code></p></li>
-<li><p>Iterate over <span class="math inline">\(j\)</span>, updating <span class="math inline">\(\hat f_j\)</span> by fitting <code>r_j ~ x_j</code> where the partial residual <span class="math inline">\(\mathbf r_j\)</span> <span class="math display">\[\mathbf r_j = \mathbf y - \hat \beta_0 - \sum_{k \neq j} \hat f_k(\mathbf x_k)\]</span> is computed using the current fits for all the other predictors</p></li>
+<li><p>Set <span class="math inline">\(\hat \beta_0 = \bar y\)</span> and start with some initial estimates <span class="math inline">\(\hat f_j\)</span>, e.g.&nbsp;<span class="math inline">\(\hat f_j = 0\)</span> or from <code>y ~ x_j</code></p></li>
+<li><p>Iterate over <span class="math inline">\(j\)</span>, updating <span class="math inline">\(\hat f_j\)</span> by fitting <code>r_j ~ x_j</code> where the partial residual <span class="math inline">\(\mathbf r_j\)</span> <span class="math display">\[\mathbf r_j = \mathbf y - \hat \beta_0 - \sum_{k \neq j} \hat f_k(\mathbf x_k)\]</span> is computed using the current fits for all the other predictors; then center <span class="math inline">\(\hat f_j\)</span> (subtract its mean over the data)</p></li>
 <li><p>Repeat until “convergence” (some stopping rule)</p></li>
 </ol>
 </section>
-<section id="backfitting-is-partialling-out" class="slide level2" data-minutes="3">
-<h2>Backfitting is partialling out</h2>
+<section id="backfitting-and-partialling-out" class="slide level2" data-minutes="3">
+<h2>Backfitting and partialling out</h2>
 <p>Two centered inputs and lines for components, <span class="math inline">\(\hat f_j(x) = \beta_j x\)</span>. Step 2 for <span class="math inline">\(j = 1\)</span> regresses the partial residual on <span class="math inline">\(\mathbf x_1\)</span>: <span class="math display">\[
 \beta_1 \leftarrow \frac{\mathbf x_1^T(\mathbf y - \beta_2 \mathbf x_2)}{\mathbf x_1^T \mathbf x_1}, \qquad
 \beta_2 \leftarrow \frac{\mathbf x_2^T(\mathbf y - \beta_1 \mathbf x_1)}{\mathbf x_2^T \mathbf x_2}
@@ -332,7 +320,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 2 s(year)    8.00   8.70      29.0       0</code></pre>
 </div>
 </div>
-<p>No coefficients, so how do we interpret?</p>
+<p>No single slope per input: how do we interpret the fitted curves?</p>
 </section>
 <section id="replace-each-linear-coefficient-with-2d-plot" class="slide level2">
 <h2>Replace each linear coefficient with 2d plot</h2>
@@ -350,7 +338,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </div>
 </div>
 <div class="retrieval">
-<p>The cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input curves has the one-input rate, <span class="math inline">\(n^{-2/3}\)</span>, however many inputs.</p>
+<p>The cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input curves (additivity, plus design conditions) has the one-input rate, <span class="math inline">\(n^{-2/3}\)</span>.</p>
 </div>
 </section>
 <section id="section-2" class="slide level2 inverse center">
@@ -359,7 +347,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </section>
 <section id="can-additivitygams-be-importantly-wrong" class="slide level2">
 <h2>Can additivity/GAMs be <em>importantly wrong</em>?</h2>
-<p>Interpretation: think carefully about <strong>calculus</strong> and <strong>causality</strong>. To simplify let’s consider the identity link function (rather than e.g.&nbsp;logistic regression, those cases are more complicated)</p>
+<p>Interpretation: think carefully about <strong>calculus</strong> and <strong>causality</strong> (causality: later in the course). To simplify let’s consider the identity link function (rather than e.g.&nbsp;logistic regression, those cases are more complicated)</p>
 <h4 id="calculus">Calculus</h4>
 <p>Does the CEF really decompose into additive terms? Is this approximation good:</p>
 <p><span class="math display">\[
@@ -368,7 +356,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </section>
 <section id="interactions-in-the-movies-data" class="slide level2">
 <h2>Interactions in the movies data</h2>
-<p>Does the relationship between length and rating change depending on the year? Let’s check a few decades</p>
+<p>If the slope in length changes with year, the derivative of <span class="math inline">\(\mathbb E[\text{rating} \mid \text{length}, \text{year}]\)</span> in length depends on year too, and an additive model is misspecified. Non-shorts, by decade:</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -378,17 +366,6 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </div>
 </div>
 </div>
-</section>
-<section id="misspecification-failure-of-additivity" class="slide level2">
-<h2>Misspecification: failure of additivity</h2>
-<p>Difficult to tell because of small <span class="math inline">\(n\)</span> outside the range of length between 1 and 2 hours</p>
-<p>But I think it’s possible the <em>relationship</em> is changing over time, i.e.&nbsp;there is an interaction</p>
-<p><span class="math display">\[
-\frac{\partial}{\partial \text{length}} \mathbb E[\text{rating} | \text{length}, \text{year}] \approx g(\text{length}, \text{year})
-\]</span></p>
-<p>Since the right hand side does not depend on length <em>only</em>, the additive model might be a poor fit</p>
-<p>Less accurate predictions</p>
-<p>(Possibly importantly) wrong interpretations</p>
 </section>
 <section id="now-true-model-is-not-additive" class="slide level2">
 <h2>Now true model is <strong>not</strong> additive</h2>
@@ -411,23 +388,31 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </div>
 </div>
 </div><div class="column" style="width:42%;">
-<p>The fitted component for <span class="math inline">\(x_1\)</span> is nearly flat: a parabola opening upward when <span class="math inline">\(\cos(\pi x_2/2) &gt; 0\)</span> and downward when <span class="math inline">\(\cos(\pi x_2/2) &lt; 0\)</span> cancels in the sum</p>
+<p>The fitted component for <span class="math inline">\(x_1\)</span> is nearly flat: a parabola opening upward when <span class="math inline">\(\cos(\pi x_2/2) &gt; 0\)</span> and downward when <span class="math inline">\(\cos(\pi x_2/2) &lt; 0\)</span> cancel when averaged over <span class="math inline">\(x_2\)</span></p>
 <p>Additivity assumption is now (importantly) wrong</p>
 </div></div>
 </section>
-<section id="partial-dependence" class="slide level2" data-minutes="3">
+<section id="plotting-one-input" class="slide level2" data-minutes="3">
+<h2>Plotting one input</h2>
+<p>A forest fitted to these data can hold the interaction, but it has no components: <span class="math inline">\(\hat f(x_1, x_2)\)</span> is one function of both inputs</p>
+<div class="ask">
+<p>We want a plot of how <span class="math inline">\(\hat f\)</span> depends on <span class="math inline">\(x_1\)</span>. What do we do with <span class="math inline">\(x_2\)</span> while we draw it?</p>
+<p>Write down one way, and what that plot could hide.</p>
+</div>
+</section>
+<section id="partial-dependence" class="slide level2">
 <h2>Partial dependence</h2>
 <p>For models with multiple predictors, partial dependence plots can hide model structure. Options for the other variables:</p>
 <ul>
-<li>Hold other variables fixed (e.g.&nbsp;at medians)</li>
+<li>Hold other variables fixed (e.g.&nbsp;at medians), <code>plotmo</code> default</li>
 <li>Average over them, <code>pdp</code> method</li>
-<li>Plot a curve for each observation, <code>ice</code> method</li>
+<li>Plot a curve for each observation: individual conditional expectation (ICE), <code>ice</code> method</li>
 </ul>
 <p>For input <span class="math inline">\(j\)</span>, a value <span class="math inline">\(t\)</span>, and unit <span class="math inline">\(i\)</span>’s other inputs <span class="math inline">\(x_{i,-j}\)</span>: <span class="math display">\[
 \mathrm{ICE}_i(t) = \hat f(x_{i,-j},\, t), \qquad
 \mathrm{PDP}_j(t) = \frac1n \sum_{i=1}^n \hat f(x_{i,-j},\, t)
 \]</span></p>
-<p>Set input <span class="math inline">\(j\)</span> to <span class="math inline">\(t\)</span>, leave the unit’s other inputs, predict, average. A modified unit may be one no real unit resembles. For an additive fit, <span class="math inline">\(\mathrm{PDP}_j\)</span> is <span class="math inline">\(\hat f_j\)</span> plus a constant</p>
+<p>Set <span class="math inline">\(x_j\)</span> to <span class="math inline">\(t\)</span>, leave the unit’s other inputs, predict, average. A modified unit may resemble no real unit</p>
 </section>
 <section id="regression-trees-bagging" class="slide level2">
 <h2>Regression trees + bagging</h2>
@@ -479,49 +464,39 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </div>
 </div>
 </div><div class="column" style="width:44%;">
-<p>Every cutoff between two countries, scored: the residual sum of squares when each side predicts its own mean</p>
+<p>Every cutoff between two countries, scored by the RSS when each side predicts its own mean</p>
 <p>Each side of a split is a <strong>leaf</strong> (until it is split again)</p>
 <p>Then every input; keep the best; then <strong>recurse</strong> into each leaf. Greedy: each split is the best <em>now</em></p>
-<p>For a label: the same search, scoring each leaf by its <strong>Gini index</strong> <span class="math inline">\(\sum_k \hat p_k (1 - \hat p_k)\)</span></p>
+<p>For a label: the same search, scoring each split by its leaves’ <strong>Gini indices</strong> <span class="math inline">\(\sum_k \hat p_k (1 - \hat p_k)\)</span>, weighted by leaf size</p>
 </div></div>
-</section>
-<section id="complexity-and-overfitting" class="slide level2">
-<h2>Complexity and overfitting</h2>
-<p>Could keep recursively splitting on predictor space until we have bins containing only 1 unique set of predictor values each</p>
-<p>This would be like 1-nearest neighbors</p>
-<p><strong>Lab exercise</strong>: create a plot of training error versus tree size</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a>fit_tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(rating <span class="sc">~</span> year <span class="sc">+</span> length, <span class="at">data =</span> mv_train,</span>
-<span id="cb8-2"><a aria-hidden="true" tabindex="-1"></a>      <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>, <span class="at">minsplit =</span> <span class="dv">2</span>, <span class="at">minbucket =</span> <span class="dv">1</span>))</span>
-<span id="cb8-3"><a aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(fit_tree<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>) <span class="co"># number of "leaf" endpoints</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2857</code></pre>
-</div>
-</div>
-<div class="retrieval">
-<p><span class="math inline">\(k\)</span> nearest neighbors average the <span class="math inline">\(k\)</span> training points closest to <span class="math inline">\(x_0\)</span>; a tree averages the training points in <span class="math inline">\(x_0\)</span>’s leaf, a neighborhood chosen by the data. More leaves, smaller neighborhoods.</p>
-</div>
 </section>
 <section id="growing-and-pruning" class="slide level2">
 <h2>Growing and pruning</h2>
-<h4 id="problem-greedy-splitting">Problem: greedy splitting</h4>
-<p>Each split uses the best possible predictor, similar to forward stepwise. Early stopping may prevent the model from finding useful but weaker predictors later on</p>
-<p><strong>Solution</strong>: don’t use early stopping. Grow a large tree</p>
-<h4 id="problem-overfitting">Problem: overfitting</h4>
-<p>Larger trees are more complex, more difficult to interpret, and could be overfit to training data</p>
-<p><strong>Solution</strong>: (cost complexity / weakest link) pruning</p>
+<p>Split until no leaf can split, and a tree is like 1-nearest neighbors: 2,857 leaves on year and length alone</p>
+<p><strong>Greedy splitting</strong>: each split is the best now, and stopping early can miss a weak split that enables a strong one below it. So grow a large tree</p>
+<p><strong>Overfitting</strong>: then prune. Of the many sub-trees, take only the path of minimizers of <span class="math display">\[RSS(\text{Sub-tree}) + \alpha\, |\text{Sub-tree}|, \qquad \alpha \geq 0\]</span> and choose <span class="math inline">\(\alpha\)</span>, and so a sub-tree, by validation</p>
+<div class="retrieval">
+<p><span class="math inline">\(k\)</span> nearest neighbors average the <span class="math inline">\(k\)</span> training points closest to <span class="math inline">\(x_0\)</span>; a tree averages those in <span class="math inline">\(x_0\)</span>’s leaf, a neighborhood chosen by the data</p>
+</div>
 </section>
-<section id="how-to-prune-a-tree" class="slide level2">
-<h2>How to prune a tree</h2>
-<p>After growing a large tree, find the “best” sub-tree</p>
-<h4 id="problem-too-many-sub-trees">Problem: too many sub-trees</h4>
-<p>The number of sub-trees grows combinatorially in the number of splits (depends on depth as well, interesting counting problem)</p>
-<p><strong>Solution</strong>: consider only a one-dimensional path of sub-tree models, the ones that minimize</p>
-<p><span class="math display">\[RSS(\text{Sub-tree}) + \alpha |\text{SubTree}|\]</span></p>
-<p>for <span class="math inline">\(\alpha \geq 0\)</span>. Now we can choose <span class="math inline">\(\alpha\)</span>, and therefore a specific sub-tree, using validation</p>
+<section id="four-samples-four-trees" class="slide level2" data-minutes="3">
+<h2>Four samples, four trees</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/unstable-trees-1.png" class="quarto-figure quarto-figure-center" width="1800"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Depth 2, each on a random half of the training films. <em>The Shawshank Redemption</em> (rated 9.1): predicted 7.01, 6.79, 6.93, 6.62</p>
+<div class="ask">
+<p>Same method, same films, four different models. What should we do about this?</p>
+</div>
 </section>
-<section id="three-model-improvement-strategies" class="slide level2 inverse">
-<h2>Three model improvement strategies</h2>
+<section id="part-4-three-model-improvement-strategies" class="slide level2 inverse">
+<h2>Part 4: three model improvement strategies</h2>
 <p>Sacrifice simplicity/interpretability for prediction accuracy</p>
 <p>Can be used with other models too, not just trees</p>
 <h4 id="bagging-bootstrap-aggregating"><strong>Bagging</strong>: bootstrap aggregating</h4>
@@ -532,9 +507,9 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <ul>
 <li>Randomly drop predictors at each split</li>
 </ul>
-<h4 id="boosting-iterative-descent-using-residuals"><strong>Boosting</strong>: iterative descent using residuals</h4>
+<h4 id="boosting-add-models-one-at-a-time"><strong>Boosting</strong>: add models one at a time</h4>
 <ul>
-<li>Fit each new model to residual of previous fits</li>
+<li>Each new model is added to the sum of the previous ones</li>
 </ul>
 </section>
 <section id="bagging-bootstrap-aggregating-1" class="slide level2">
@@ -551,8 +526,12 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <h2>Averaging <span class="math inline">\(B\)</span> trees</h2>
 <p>Average <span class="math inline">\(B\)</span> trees’ predictions at one input <span class="math inline">\(x\)</span></p>
 <div class="ask">
-<p>First: <span class="math inline">\(B\)</span> copies of the <em>same</em> tree. What is the variance of their average?</p>
-<p>Then: <span class="math inline">\(B\)</span> trees whose predictions each have variance <span class="math inline">\(\tau^2\)</span>, every pair with correlation <span class="math inline">\(\rho\)</span>. Write down the variance of their average.</p>
+<p>What is the variance of their average if the <span class="math inline">\(B\)</span> trees are</p>
+<ul>
+<li>copies of the <em>same</em> tree, with variance <span class="math inline">\(\tau^2\)</span>?</li>
+<li>independent, each with variance <span class="math inline">\(\tau^2\)</span>?</li>
+<li>each with variance <span class="math inline">\(\tau^2\)</span>, every pair with correlation <span class="math inline">\(\rho\)</span>?</li>
+</ul>
 </div>
 </section>
 <section id="correlated-average-variance" class="slide level2" data-minutes="3">
@@ -564,15 +543,16 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 \mathrm{Var}\Big(\frac1B \sum_{b=1}^B V_b\Big) = \rho\,\tau^2 + (1 - \rho)\,\frac{\tau^2}{B}
 \]</span></p>
 </div>
-<p><strong>Proof</strong>: divide by <span class="math inline">\(B^2\)</span>. Bagging shrinks the second term; <span class="math inline">\(\rho\tau^2\)</span> stays, since bootstrap trees grown from one sample are alike</p>
+<p><strong>Proof</strong>: divide by <span class="math inline">\(B^2\)</span> and regroup, <span class="math inline">\(\frac{\tau^2}{B} + \frac{B - 1}{B}\rho\tau^2 = \rho\tau^2 + (1 - \rho)\frac{\tau^2}{B}\)</span>. Bagging shrinks the second term; <span class="math inline">\(\rho\tau^2\)</span> stays, since bootstrap trees grown from one sample are alike</p>
 </div>
 </section>
 <section id="random-forest-dropping-predictors" class="slide level2">
 <h2>Random forest: dropping predictors</h2>
-<p><strong>Problem</strong>: aggregation does not increase information if the aggregates are highly correlated, e.g.&nbsp;averaging 1000 trees but each one uses the same small set of predictor variables</p>
-<p><span class="math display">\[\text{Var}\left( \sum_{b=1}^B \hat f^{*b} \right) =
-\sum_{b=1}^B \text{Var}\left( \hat f^{*b} \right) + \sum_{b=1}^B \sum_{b'\neq b} \text{Cov}\left( \hat f^{*b}, \hat f^{*b'} \right)\]</span></p>
+<div class="ask">
+<p><span class="math inline">\(B\)</span> is already 300. Which term of the correlated-average variance is left, and how could we make it smaller?</p>
+</div>
 <div class="fragment">
+<p><strong>Problem</strong>: aggregation does not increase information if the aggregates are highly correlated, e.g.&nbsp;averaging 1000 trees but each one uses the same small set of predictor variables</p>
 <ol type="1">
 <li><p><strong>Drop</strong> predictors randomly, at every split</p>
 <p>e.g.&nbsp;each split chooses among a random <span class="math inline">\(\sqrt{p}\)</span> of the <span class="math inline">\(p\)</span> predictors</p></li>
@@ -599,7 +579,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <tbody>
 <tr class="odd">
 <td>training films, every tree</td>
-<td>1.60</td>
+<td>1.59</td>
 </tr>
 <tr class="even">
 <td>training films, out-of-bag trees only</td>
@@ -621,6 +601,13 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <h2></h2>
 <h3 id="part-5-boosting">Part 5: boosting</h3>
 </section>
+<section id="adding-trees" class="slide level2">
+<h2>Adding trees</h2>
+<p>A forest grows its trees separately and averages them. Now grow them one after another and add them up: after <span class="math inline">\(b\)</span> trees the fit is <span class="math inline">\(\hat F_b\)</span>, the sum so far</p>
+<div class="ask">
+<p>We may add one small tree to <span class="math inline">\(\hat F_b\)</span>. What should it predict?</p>
+</div>
+</section>
 <section id="boosting-iterated-fitting-on-residuals" class="slide level2">
 <h2>Boosting: iterated fitting on residuals</h2>
 <p><strong>Idea</strong>: train models sequentially, decreasing residuals by a small amount each time. Each model contributes something different</p>
@@ -628,7 +615,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <div class="fragment">
 <h4 id="relationship-with-gradient-descent">Relationship with gradient descent</h4>
 <p><strong>Gradient descent</strong>: small step in direction of negative gradient</p>
-<p><strong>Boosting</strong>: small step in direction of <em>weak learner closest to negative gradient</em> (maximum inner product in function space)</p>
+<p><strong>Boosting</strong>: small step in direction of <em>weak learner closest to negative gradient</em></p>
 <p>Optional additional reading: <a href="https://hastie.su.domains/ElemStatLearn/">ESL</a> Chapter 10</p>
 </div>
 </section>
@@ -642,21 +629,17 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 \hat F_0 = \bar y, \qquad \hat F_b = \hat F_{b-1} + \gamma\, \hat f^b, \qquad \hat f^b \text{ a small tree fitted to } y_i - \hat F_{b-1}(x_i)
 \]</span></p>
 <div class="retrieval">
-<p>Gradient descent: a step of size <span class="math inline">\(\gamma\)</span> against the gradient, and stopped early, the number of steps is a knob. Partialling out: each tree is fitted to what the sum so far leaves.</p>
+<p>Gradient descent, stopped early: the number of steps is a knob. Backfitting replaced a curve; boosting adds a tree, fitted to what the sum leaves.</p>
 </div>
 </div>
 </section>
-<section id="boosting-in-practice" class="slide level2">
+<section id="boosting-in-practice" class="slide level2" data-minutes="1">
 <h2>Boosting in practice</h2>
 <h4 id="more-tuning-parameters">More tuning parameters</h4>
 <p>Number of trees/steps <span class="math inline">\(B\)</span>, complexity of each tree/model <span class="math inline">\(d\)</span>, regularization/learning rate <span class="math inline">\(\gamma\)</span>. <strong>Warning</strong>: can now overfit with large <span class="math inline">\(B\)</span> (unlike bagging/r.f.)</p>
-<h4 id="choosingoptimizing-tuning-parameters">Choosing/optimizing tuning parameters</h4>
-<p>Software may do something automatically. <em>No guarantee it’s reasonable!</em> e.g.&nbsp;optimize over a grid of tuning parameters</p>
-<p>Two grid-tuning stages:</p>
-<ol type="1">
-<li>Rough grid covering a large range (possibly orders of magnitude)</li>
-<li>Finer grid over a smaller range</li>
-</ol>
+<p>Software may choose them automatically. <em>No guarantee it’s reasonable!</em></p>
+<h4 id="bagging-and-boosting">Bagging and boosting</h4>
+<p>Bagging and forests average large trees, which have low bias, to lower variance; boosting adds small trees, which have high bias, to lower bias</p>
 </section>
 <section id="rounds-and-learning-rate" class="slide level2">
 <h2>Rounds and learning rate</h2>
@@ -677,8 +660,8 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <p><strong>Depth.</strong> How many inputs one tree can combine (next)</p>
 </div></div>
 </section>
-<section id="depth-is-interaction-order" class="slide level2">
-<h2>Depth is interaction order</h2>
+<section id="tree-depth-and-interactions" class="slide level2">
+<h2>Tree depth and interactions</h2>
 <div class="columns">
 <div class="column" style="width:46%;">
 <p>A stump asks one question, so a sum of stumps is a sum of one-input functions: an <strong>additive</strong> model</p>
@@ -702,19 +685,32 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <h3 id="part-6-feature-importance">Part 6: feature importance</h3>
 </section>
 <section id="featurevariable-importance" class="slide level2">
-<h2>Feature/variable importance</h2>
+<h2>Feature/variable “importance”</h2>
 <ul>
-<li><p>Which predictors are <em>used most</em> by the model?</p></li>
-<li><p>Does not necessarily tell us about <strong>causation</strong> (none of these methods do, but an important reminder)</p></li>
+<li>Which predictors are <em>used most</em> by the model?</li>
+<li>Does not necessarily tell us about <strong>causation</strong> (none of these methods do)</li>
 </ul>
+<div class="columns">
+<div class="column" style="width:55%;">
 <h4 id="tree-specific-importance">Tree-specific importance</h4>
-<p>When <span class="math inline">\(x_j\)</span> is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)</p>
+<p>Sum the RSS decrease of every split on <span class="math inline">\(x_j\)</span> within a tree, then average over trees</p>
 <h4 id="permutation-importance">Permutation importance</h4>
-<p>Permute values of predictor <span class="math inline">\(x_j\)</span>. How much does the accuracy of the model decrease?</p>
-<p><span class="math display">\[\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, \text{column } j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
+<p>Permute values of predictor <span class="math inline">\(x_j\)</span>. How much does the accuracy of the model decrease? <span class="math display">\[\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, x_j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
+</div><div class="column" style="width:45%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/importance-1.png" width="750"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each has pros/cons, no satisfactory answer for dependence</p>
+</div></div>
 </section>
-<section id="permuting-forces-extrapolation" class="slide level2">
-<h2>Permuting forces extrapolation</h2>
+<section id="permutation-and-extrapolation" class="slide level2">
+<h2>Permutation and extrapolation</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -724,8 +720,8 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </div>
 </div>
 </div>
-<p>Shuffling length keeps each film’s other inputs: 146 of the 166 shorts now run over an hour, and 145 features under 40 minutes. The tuning films have none</p>
-<p>The forest is scored where it never saw a film. Permutation importance mixes two things: how much the model’s accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)</p>
+<p>Shuffling length keeps each film’s other inputs: 147 of the 166 shorts now run over an hour, and 147 non-shorts under 40 minutes. Before: 0 and 1; in the 5,000 training films, 4 and 2</p>
+<p>The forest’s predictions there rest on almost no data, and permutation importance averages over them (Hooker, Mentch and Zhou 2021)</p>
 </section>
 <section id="leave-one-covariate-out" class="slide level2">
 <h2>Leave one covariate out</h2>
@@ -741,9 +737,9 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </div>
 </div>
 </div><div class="column" style="width:48%;">
-<p>Refit without input <span class="math inline">\(j\)</span>; score on the same held-out films: <span class="math display">\[\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
-<p>No permuted rows, so no extrapolation; any method, at the cost of <span class="math inline">\(p\)</span> refits</p>
-<p>Length and Short together: 0.21, more than alone (0.15 and 0.02). LOCO charges neither input for what the two share</p>
+<p>Refit without input <span class="math inline">\(j\)</span>, with the same settings; score on the same held-out films (Lei et al.&nbsp;2018): <span class="math display">\[\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
+<p>No extrapolation from permuting; any method, at the cost of <span class="math inline">\(p\)</span> refits</p>
+<p>Length and Short together: 0.20, more than length alone and Short alone added up (0.13 + 0.01). Each stands in for part of the other</p>
 </div></div>
 </section>
 <section id="were-in-dangerous-territory" class="slide level2 inverse">
@@ -754,7 +750,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <li>Increasingly sophisticated software with many defaults and/or automatically optimized tuning parameters</li>
 </ul>
 <div class="fragment">
-<p>But consider, <a href="https://philosophicaldisquisitions.blogspot.com/2015/04/is-automation-making-us-stupid.html">Alfred North Whitehead</a> said (pre-WW2):</p>
+<p>But consider, <a href="https://www.gutenberg.org/ebooks/41568">Alfred North Whitehead</a> wrote (1911):</p>
 <blockquote>
 <p>It is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. <strong>Civilization advances by extending the number of important operations which we can perform without thinking about them</strong>.</p>
 </blockquote>
@@ -776,7 +772,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <h4 id="trees-and-ensembles">Trees and ensembles</h4>
 <p>Greedy questions, pruned by validation. Bagging and forests average trees and lower variance down to <span class="math inline">\(\rho\tau^2\)</span>; boosting adds small trees, gradient descent on the fitted values</p>
 <h4 id="feature-importance">Feature importance</h4>
-<p>Permuting an input asks the model about data that do not exist; LOCO refits instead</p>
+<p>Permuting an input can ask the model about films the data scarcely contain; LOCO refits instead</p>
 </section>
 <section id="references" class="slide level2 inverse" data-minutes="0">
 <h2>References</h2>
@@ -784,6 +780,7 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <ul>
 <li>Hooker, G., Mentch, L. and Zhou, S. (2021). Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance. <em>Statistics and Computing</em> 31(6), article 82. <a href="https://doi.org/10.1007/s11222-021-10057-z">doi:10.1007/s11222-021-10057-z</a></li>
 <li>Lei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. <em>Journal of the American Statistical Association</em> 113(523), 1094–1111. Section 6 (LOCO). <a href="https://doi.org/10.1080/01621459.2017.1307116">doi:10.1080/01621459.2017.1307116</a></li>
+<li>Whitehead, A. N. (1911). <em>An Introduction to Mathematics</em>. London: Williams and Norgate. <a href="https://www.gutenberg.org/ebooks/41568">Project Gutenberg</a></li>
 </ul>
 </div>
 
