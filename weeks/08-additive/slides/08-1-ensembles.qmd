@@ -90,6 +90,8 @@ Part 4: three model improvement strategies
 
 Part 5: boosting
 
+Part 6: feature importance
+
 ## Where we left off {minutes="1"}
 
 ::: {.notes}
@@ -104,6 +106,7 @@ This week: how some of those fits are built, and how to read them
 - a plot of one input for any fitted model, and what it can hide
 - a tree, one question at a time
 - many trees: averaged (bagging, random forests) or added (boosting)
+- what a forest uses: feature importance
 
 ## {.inverse .center}
 
@@ -208,6 +211,45 @@ Partialling-out theorem: the coefficient on $\mathbf x_2$ is $\tilde{\mathbf x}_
 
 With a smoother in place of each line, the same loop fits an additive model: each curve fitted to what the others leave
 
+## The movies data
+
+::: {.notes}
+The data note has the rest. rating averages the users who chose to watch a film and then to rate it. Short is a genre flag, and in these films it almost always means under 40 minutes: it returns in the last part. The figure is the legacy "One univariate non-linear relationship", on the training films.
+:::
+
+::: {.columns}
+::: {.column width="52%"}
+```{r}
+#| label: movies-loader
+#| echo: true
+#| eval: false
+library(ggplot2movies)
+mv <- movies |>
+  filter(length <= 200, length > 10,
+         year > 1918, votes >= 5)
+```
+
+IMDb films up to 2005, `r format(nrow(mv), big.mark = ",")` after this selection ([data note](https://ml4ds.com/data/movies.html))
+
+- **Target**: `rating`, average user rating, 1 to 10
+- **Inputs**: `year`, `length` (minutes), seven genre flags
+- Not used: `votes`, `r1` to `r10` (from the same ratings)
+:::
+::: {.column width="48%"}
+```{r}
+#| label: movies-length
+#| fig-width: 5.8
+#| fig-height: 4.2
+mv_train %>%
+  ggplot(aes(length, rating)) +
+  geom_point(alpha = .1) + geom_smooth(colour = v_blue, se = FALSE, linewidth = 1.3) +
+  labs(title = "the 5,000 training films") + theme(plot.title = element_text(size = 15))
+```
+
+A random 10,000: 5,000 training, 2,000 tuning, 3,000 test
+:::
+:::
+
 ## Additive combination of non-linear predictors
 
 ```{r}
@@ -217,10 +259,8 @@ fit_gam <- gam(rating ~ s(length) + s(year), data = mv_train)   # refitted, unch
 ```
 
 ::: {.notes}
-Legacy slide; gam::lo() (loess) is now mgcv's s(), the penalized spline from the tuning lecture, with its lambda chosen by GCV. mgcv does not backfit: it fits all the curves in one penalized least-squares problem, and with those penalties fixed backfitting would converge to the same fit. Effective degrees of freedom about `r round(summary(fit_gam)$edf[1], 1)` for length and `r round(summary(fit_gam)$edf[2], 1)` for year. The films: average user rating 1 to 10, variance `r round(var(mv_train$rating), 2)` on the training films.
+Legacy slide; gam::lo() (loess) is now mgcv's s(), the penalized spline from the tuning lecture, with its lambda chosen by GCV. mgcv does not backfit: it fits all the curves in one penalized least-squares problem, and with those penalties fixed backfitting would converge to the same fit. Effective degrees of freedom about `r round(summary(fit_gam)$edf[1], 1)` for length and `r round(summary(fit_gam)$edf[2], 1)` for year. Ratings: variance `r round(var(mv_train$rating), 2)` on the training films.
 :::
-
-IMDb films ([data note](https://ml4ds.com/data/movies.html)): 10,000 at random, split 5,000 training, 2,000 tuning, 3,000 test
 
 ```{r}
 #| label: gam-fit
@@ -684,101 +724,6 @@ cat(sprintf("| %s | %.2f |\n", oob_tab$score, oob_tab$mse), sep = "")
 cat(":::\n")
 ```
 
-## Feature/variable importance
-
-::: {.notes}
-Legacy slide, now a light one (it was dark): importance is core this week. Split improvement is randomForest's IncNodePurity. Permutation importance is the increase in held-out loss when one column is shuffled, with the fitted model unchanged; computed on the tuning films below.
-:::
-
-- Which predictors are *used most* by the model?
-
-- Does not necessarily tell us about **causation** (none of these methods do, but an important reminder)
-
-#### Tree-specific importance
-
-When $x_j$ is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)
-
-#### Permutation importance
-
-Permute values of predictor $x_j$. How much does the accuracy of the model decrease?
-
-$$\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, \text{column } j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)$$
-
-## Permuting forces extrapolation
-
-```{r}
-#| label: permute-counts
-#| include: false
-perm <- mv_tune |> mutate(length = sample(length))
-n_short <- sum(mv_tune$Short == 1)
-n_feat_short <- sum(mv_tune$Short == 0 & mv_tune$length < 40)
-n_long_short <- sum(perm$Short == 1 & perm$length > 60)
-n_short_feat <- sum(perm$Short == 0 & perm$length < 40)
-```
-
-::: {.notes}
-The tuning films, length permuted once. Before the shuffle: no short over an hour, and features under 40 minutes: `r n_feat_short`. After it: `r n_long_short` of the `r n_short` shorts run over an hour and `r n_short_feat` features under 40 minutes. The forest's predictions there are extrapolation, and permutation importance averages over them. Hooker, Mentch and Zhou (2021) show this over-emphasizes correlated inputs, in importance and in partial dependence alike; a PDP sets length on every film, shorts included.
-:::
-
-```{r}
-#| label: permute-length
-#| fig-width: 11.5
-#| fig-height: 3.0
-#| fig-align: center
-bind_rows(mv_tune |> mutate(data = "tuning films"),
-          perm |> mutate(data = "length permuted")) |>
-  mutate(data = fct_inorder(data), kind = if_else(Short == 1, "short", "feature")) |>
-  ggplot(aes(length, kind, colour = kind)) +
-  geom_jitter(height = 0.25, width = 0, alpha = 0.35, size = 1.2, show.legend = FALSE) +
-  facet_wrap(~ data) + scale_colour_manual(values = c(feature = v_blue, short = m_pink)) +
-  labs(x = "length (minutes)", y = NULL) + theme(strip.text = element_text(size = 16))
-```
-
-Shuffling length keeps each film's other inputs: `r n_long_short` of the `r n_short` shorts now run over an hour, and `r n_short_feat` features under 40 minutes. The tuning films have none
-
-The forest is scored where it never saw a film. Permutation importance mixes two things: how much the model's accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)
-
-## Leave one covariate out
-
-::: {.notes}
-Ten more forests: one per input left out, and one without both length and Short; each scored on the same tuning films. Permutation importance is the larger for every input that matters here: part of the gap is the extrapolation on the last slide, part is that a refit without an input can lean on the others. LOCO answers a different question: what the model loses without the input, given the others. Named by Lei et al. (2018); the reading's LOFO.
-:::
-
-::: {.columns}
-::: {.column width="52%"}
-```{r}
-#| label: loco
-#| fig-width: 6.4
-#| fig-height: 4.6
-base_tune <- mse(mv_tune$rating, predict(rf_mv, mv_tune))
-pi_j <- sapply(inputs, function(v) mean(replicate(10, {
-  d <- mv_tune; d[[v]] <- sample(d[[v]]); mse(mv_tune$rating, predict(rf_mv, d)) })) - base_tune)
-refit_without <- function(drop) {
-  fit <- randomForest(reformulate(setdiff(inputs, drop), "rating"), data = mv_train, ntree = 300)
-  mse(mv_tune$rating, predict(fit, mv_tune)) - base_tune
-}
-loco_j <- sapply(inputs, refit_without)
-loco_pair <- refit_without(c("length", "Short"))
-tibble(input = inputs, permutation = pi_j, LOCO = loco_j) |>
-  pivot_longer(-input, names_to = "importance") |>
-  mutate(input = fct_reorder(input, value, .fun = max)) |>
-  ggplot(aes(value, input, colour = importance, shape = importance)) +
-  geom_point(size = 4) +
-  scale_colour_manual(values = c(LOCO = v_blue, permutation = m_pink), name = NULL) +
-  scale_shape_manual(values = c(LOCO = 16, permutation = 17), name = NULL) +
-  labs(x = "increase in tuning MSE", y = NULL) + theme(legend.position = "top")
-```
-:::
-::: {.column width="48%"}
-Refit without input $j$; score on the same held-out films:
-$$\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)$$
-
-No permuted rows, so no extrapolation; any method, at the cost of $p$ refits
-
-Length and Short together: `r sprintf("%.2f", loco_pair)`, more than alone (`r sprintf("%.2f", loco_j[["length"]])` and `r sprintf("%.2f", loco_j[["Short"]])`). LOCO charges neither input for what the two share
-:::
-:::
-
 ## {.inverse .center}
 
 ::: {.notes}
@@ -931,6 +876,109 @@ ggplot(dep, aes(depth, test)) + geom_line(colour = v_blue, linewidth = 1.2) + ge
 
 $f^\star(x) = 4\cdot\mathbf 1\{x_1 > 0,\ x_2 > 0\}$, ten inputs: thresholds with an interaction
 
+## {.inverse .center}
+
+::: {.notes}
+Compress: what did the forest use? Permutation importance shuffles one input; LOCO refits without it.
+:::
+
+### Part 6: feature importance
+
+## Feature/variable importance
+
+::: {.notes}
+Legacy slide, now a light one (it was dark): importance is core this week. The forest is the one from the out-of-bag slide. Split improvement is randomForest's IncNodePurity. Permutation importance is the increase in held-out loss when one column is shuffled, with the fitted model unchanged; computed on the tuning films below.
+:::
+
+- Which predictors are *used most* by the model?
+
+- Does not necessarily tell us about **causation** (none of these methods do, but an important reminder)
+
+#### Tree-specific importance
+
+When $x_j$ is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)
+
+#### Permutation importance
+
+Permute values of predictor $x_j$. How much does the accuracy of the model decrease?
+
+$$\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, \text{column } j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)$$
+
+## Permuting forces extrapolation
+
+```{r}
+#| label: permute-counts
+#| include: false
+perm <- mv_tune |> mutate(length = sample(length))
+n_short <- sum(mv_tune$Short == 1)
+n_feat_short <- sum(mv_tune$Short == 0 & mv_tune$length < 40)
+n_long_short <- sum(perm$Short == 1 & perm$length > 60)
+n_short_feat <- sum(perm$Short == 0 & perm$length < 40)
+```
+
+::: {.notes}
+The tuning films, length permuted once. Before the shuffle: no short over an hour, and features under 40 minutes: `r n_feat_short`. After it: `r n_long_short` of the `r n_short` shorts run over an hour and `r n_short_feat` features under 40 minutes. The forest's predictions there are extrapolation, and permutation importance averages over them. Hooker, Mentch and Zhou (2021) show this over-emphasizes correlated inputs, in importance and in partial dependence alike; a PDP sets length on every film, shorts included.
+:::
+
+```{r}
+#| label: permute-length
+#| fig-width: 11.5
+#| fig-height: 3.0
+#| fig-align: center
+bind_rows(mv_tune |> mutate(data = "tuning films"),
+          perm |> mutate(data = "length permuted")) |>
+  mutate(data = fct_inorder(data), kind = if_else(Short == 1, "short", "feature")) |>
+  ggplot(aes(length, kind, colour = kind)) +
+  geom_jitter(height = 0.25, width = 0, alpha = 0.35, size = 1.2, show.legend = FALSE) +
+  facet_wrap(~ data) + scale_colour_manual(values = c(feature = v_blue, short = m_pink)) +
+  labs(x = "length (minutes)", y = NULL) + theme(strip.text = element_text(size = 16))
+```
+
+Shuffling length keeps each film's other inputs: `r n_long_short` of the `r n_short` shorts now run over an hour, and `r n_short_feat` features under 40 minutes. The tuning films have none
+
+The forest is scored where it never saw a film. Permutation importance mixes two things: how much the model's accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)
+
+## Leave one covariate out
+
+::: {.notes}
+Ten more forests: one per input left out, and one without both length and Short; each scored on the same tuning films. Permutation importance is the larger for every input that matters here: part of the gap is the extrapolation on the last slide, part is that a refit without an input can lean on the others. LOCO answers a different question: what the model loses without the input, given the others. Named by Lei et al. (2018); the reading's LOFO.
+:::
+
+::: {.columns}
+::: {.column width="52%"}
+```{r}
+#| label: loco
+#| fig-width: 6.4
+#| fig-height: 4.6
+base_tune <- mse(mv_tune$rating, predict(rf_mv, mv_tune))
+pi_j <- sapply(inputs, function(v) mean(replicate(10, {
+  d <- mv_tune; d[[v]] <- sample(d[[v]]); mse(mv_tune$rating, predict(rf_mv, d)) })) - base_tune)
+refit_without <- function(drop) {
+  fit <- randomForest(reformulate(setdiff(inputs, drop), "rating"), data = mv_train, ntree = 300)
+  mse(mv_tune$rating, predict(fit, mv_tune)) - base_tune
+}
+loco_j <- sapply(inputs, refit_without)
+loco_pair <- refit_without(c("length", "Short"))
+tibble(input = inputs, permutation = pi_j, LOCO = loco_j) |>
+  pivot_longer(-input, names_to = "importance") |>
+  mutate(input = fct_reorder(input, value, .fun = max)) |>
+  ggplot(aes(value, input, colour = importance, shape = importance)) +
+  geom_point(size = 4) +
+  scale_colour_manual(values = c(LOCO = v_blue, permutation = m_pink), name = NULL) +
+  scale_shape_manual(values = c(LOCO = 16, permutation = 17), name = NULL) +
+  labs(x = "increase in tuning MSE", y = NULL) + theme(legend.position = "top")
+```
+:::
+::: {.column width="48%"}
+Refit without input $j$; score on the same held-out films:
+$$\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)$$
+
+No permuted rows, so no extrapolation; any method, at the cost of $p$ refits
+
+Length and Short together: `r sprintf("%.2f", loco_pair)`, more than alone (`r sprintf("%.2f", loco_j[["length"]])` and `r sprintf("%.2f", loco_j[["Short"]])`). LOCO charges neither input for what the two share
+:::
+:::
+
 ## We're in dangerous territory {.inverse}
 
 ::: {.notes}
@@ -967,13 +1015,17 @@ Compress: an additive model fits one curve per input, each to what the others le
 
 One curve per input, each fitted to what the others leave: partialling out, one input at a time
 
-#### Partial dependence and importance
+#### Partial dependence
 
-A plot of one input exists for any model, and its average can hide an interaction. Permuting an input asks the model about data that do not exist; LOCO refits instead
+A plot of one input exists for any model, and its average can hide an interaction
 
 #### Trees and ensembles
 
 Greedy questions, pruned by validation. Bagging and forests average trees and lower variance down to $\rho\tau^2$; boosting adds small trees, gradient descent on the fitted values
+
+#### Feature importance
+
+Permuting an input asks the model about data that do not exist; LOCO refits instead
 
 ## References {.inverse minutes="0"}
 

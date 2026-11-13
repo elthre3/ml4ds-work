@@ -222,6 +222,7 @@ Joshua Loftus
 <p>Part 3: building a tree</p>
 <p>Part 4: three model improvement strategies</p>
 <p>Part 5: boosting</p>
+<p>Part 6: feature importance</p>
 </section>
 <section id="where-we-left-off" class="slide level2" data-minutes="1">
 <h2>Where we left off</h2>
@@ -232,6 +233,7 @@ Joshua Loftus
 <li>a plot of one input for any fitted model, and what it can hide</li>
 <li>a tree, one question at a time</li>
 <li>many trees: averaged (bagging, random forests) or added (boosting)</li>
+<li>what a forest uses: feature importance</li>
 </ul>
 </section>
 <section id="section-1" class="slide level2 inverse center">
@@ -283,17 +285,45 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <p>With a smoother in place of each line, the same loop fits an additive model: each curve fitted to what the others leave</p>
 </div>
 </section>
+<section id="the-movies-data" class="slide level2">
+<h2>The movies data</h2>
+<div class="columns">
+<div class="column" style="width:52%;">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2movies)</span>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>mv <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span></span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(length <span class="sc">&lt;=</span> <span class="dv">200</span>, length <span class="sc">&gt;</span> <span class="dv">10</span>,</span>
+<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a>         year <span class="sc">&gt;</span> <span class="dv">1918</span>, votes <span class="sc">&gt;=</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>IMDb films up to 2005, 53,388 after this selection (<a href="https://ml4ds.com/data/movies.html">data note</a>)</p>
+<ul>
+<li><strong>Target</strong>: <code>rating</code>, average user rating, 1 to 10</li>
+<li><strong>Inputs</strong>: <code>year</code>, <code>length</code> (minutes), seven genre flags</li>
+<li>Not used: <code>votes</code>, <code>r1</code> to <code>r10</code> (from the same ratings)</li>
+</ul>
+</div><div class="column" style="width:48%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/movies-length-1.png" width="870"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A random 10,000: 5,000 training, 2,000 tuning, 3,000 test</p>
+</div></div>
+</section>
 <section id="additive-combination-of-non-linear-predictors" class="slide level2">
 <h2>Additive combination of non-linear predictors</h2>
-<p>IMDb films (<a href="https://ml4ds.com/data/movies.html">data note</a>): 10,000 at random, split 5,000 training, 2,000 tuning, 3,000 test</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
-<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>fit_gam <span class="ot">&lt;-</span></span>
-<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">gam</span>(rating <span class="sc">~</span> <span class="fu">s</span>(length) <span class="sc">+</span> <span class="fu">s</span>(year), <span class="at">data =</span> mv_train)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
+<span id="cb2-2"><a aria-hidden="true" tabindex="-1"></a>fit_gam <span class="ot">&lt;-</span></span>
+<span id="cb2-3"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">gam</span>(rating <span class="sc">~</span> <span class="fu">s</span>(length) <span class="sc">+</span> <span class="fu">s</span>(year), <span class="at">data =</span> mv_train)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>s</code> is a penalized spline, but can use different methods too</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 5
   term        edf ref.df statistic p.value
@@ -307,8 +337,8 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <section id="replace-each-linear-coefficient-with-2d-plot" class="slide level2">
 <h2>Replace each linear coefficient with 2d plot</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb4-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -363,11 +393,11 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <section id="now-true-model-is-not-additive" class="slide level2">
 <h2>Now true model is <strong>not</strong> additive</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">cos</span>(pi <span class="sc">*</span> x <span class="sc">/</span> <span class="dv">2</span>)</span>
-<span id="cb5-3"><a aria-hidden="true" tabindex="-1"></a>df_int <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(<span class="dv">2000</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">runif</span>(<span class="dv">2000</span>, <span class="sc">-</span><span class="dv">4</span>, <span class="dv">4</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb5-4"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">f1</span>(x1) <span class="sc">*</span> <span class="fu">f2</span>(x2) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">2000</span>))</span>
-<span id="cb5-5"><a aria-hidden="true" tabindex="-1"></a>fit_gam_wrong <span class="ot">&lt;-</span> <span class="fu">gam</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> <span class="fu">s</span>(x2), <span class="at">data =</span> df_int)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">cos</span>(pi <span class="sc">*</span> x <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb6-3"><a aria-hidden="true" tabindex="-1"></a>df_int <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(<span class="dv">2000</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">runif</span>(<span class="dv">2000</span>, <span class="sc">-</span><span class="dv">4</span>, <span class="dv">4</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">f1</span>(x1) <span class="sc">*</span> <span class="fu">f2</span>(x2) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">2000</span>))</span>
+<span id="cb6-5"><a aria-hidden="true" tabindex="-1"></a>fit_gam_wrong <span class="ot">&lt;-</span> <span class="fu">gam</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> <span class="fu">s</span>(x2), <span class="at">data =</span> df_int)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="columns">
 <div class="column" style="width:58%;">
@@ -402,8 +432,8 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <section id="regression-trees-bagging" class="slide level2">
 <h2>Regression trees + bagging</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df_int, <span class="at">ntree =</span> <span class="dv">300</span>, <span class="at">mtry =</span> <span class="dv">2</span>, <span class="at">nodesize =</span> <span class="dv">50</span>)</span>
-<span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a>ice_x1 <span class="ot">&lt;-</span> <span class="fu">partial</span>(fit_rf, <span class="at">pred.var =</span> <span class="st">"x1"</span>, <span class="at">ice =</span> <span class="cn">TRUE</span>, <span class="at">train =</span> df_sub)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df_int, <span class="at">ntree =</span> <span class="dv">300</span>, <span class="at">mtry =</span> <span class="dv">2</span>, <span class="at">nodesize =</span> <span class="dv">50</span>)</span>
+<span id="cb7-2"><a aria-hidden="true" tabindex="-1"></a>ice_x1 <span class="ot">&lt;-</span> <span class="fu">partial</span>(fit_rf, <span class="at">pred.var =</span> <span class="st">"x1"</span>, <span class="at">ice =</span> <span class="cn">TRUE</span>, <span class="at">train =</span> df_sub)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -461,9 +491,9 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <p>This would be like 1-nearest neighbors</p>
 <p><strong>Lab exercise</strong>: create a plot of training error versus tree size</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>fit_tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(rating <span class="sc">~</span> year <span class="sc">+</span> length, <span class="at">data =</span> mv_train,</span>
-<span id="cb7-2"><a aria-hidden="true" tabindex="-1"></a>      <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>, <span class="at">minsplit =</span> <span class="dv">2</span>, <span class="at">minbucket =</span> <span class="dv">1</span>))</span>
-<span id="cb7-3"><a aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(fit_tree<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>) <span class="co"># number of "leaf" endpoints</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a>fit_tree <span class="ot">&lt;-</span> <span class="fu">rpart</span>(rating <span class="sc">~</span> year <span class="sc">+</span> length, <span class="at">data =</span> mv_train,</span>
+<span id="cb8-2"><a aria-hidden="true" tabindex="-1"></a>      <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="dv">0</span>, <span class="at">minsplit =</span> <span class="dv">2</span>, <span class="at">minbucket =</span> <span class="dv">1</span>))</span>
+<span id="cb8-3"><a aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(fit_tree<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>) <span class="co"># number of "leaf" endpoints</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2857</code></pre>
 </div>
@@ -587,51 +617,6 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </table>
 </div>
 </section>
-<section id="featurevariable-importance" class="slide level2">
-<h2>Feature/variable importance</h2>
-<ul>
-<li><p>Which predictors are <em>used most</em> by the model?</p></li>
-<li><p>Does not necessarily tell us about <strong>causation</strong> (none of these methods do, but an important reminder)</p></li>
-</ul>
-<h4 id="tree-specific-importance">Tree-specific importance</h4>
-<p>When <span class="math inline">\(x_j\)</span> is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)</p>
-<h4 id="permutation-importance">Permutation importance</h4>
-<p>Permute values of predictor <span class="math inline">\(x_j\)</span>. How much does the accuracy of the model decrease?</p>
-<p><span class="math display">\[\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, \text{column } j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
-</section>
-<section id="permuting-forces-extrapolation" class="slide level2">
-<h2>Permuting forces extrapolation</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/permute-length-1.png" class="quarto-figure quarto-figure-center" width="1725"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Shuffling length keeps each film’s other inputs: 147 of the 166 shorts now run over an hour, and 146 features under 40 minutes. The tuning films have none</p>
-<p>The forest is scored where it never saw a film. Permutation importance mixes two things: how much the model’s accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)</p>
-</section>
-<section id="leave-one-covariate-out" class="slide level2">
-<h2>Leave one covariate out</h2>
-<div class="columns">
-<div class="column" style="width:52%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/loco-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:48%;">
-<p>Refit without input <span class="math inline">\(j\)</span>; score on the same held-out films: <span class="math display">\[\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
-<p>No permuted rows, so no extrapolation; any method, at the cost of <span class="math inline">\(p\)</span> refits</p>
-<p>Length and Short together: 0.22, more than alone (0.15 and 0.03). LOCO charges neither input for what the two share</p>
-</div></div>
-</section>
 <section id="section-4" class="slide level2 inverse center">
 <h2></h2>
 <h3 id="part-5-boosting">Part 5: boosting</h3>
@@ -712,6 +697,55 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 </div></div>
 <p><span class="math inline">\(f^\star(x) = 4\cdot\mathbf 1\{x_1 &gt; 0,\ x_2 &gt; 0\}\)</span>, ten inputs: thresholds with an interaction</p>
 </section>
+<section id="section-5" class="slide level2 inverse center">
+<h2></h2>
+<h3 id="part-6-feature-importance">Part 6: feature importance</h3>
+</section>
+<section id="featurevariable-importance" class="slide level2">
+<h2>Feature/variable importance</h2>
+<ul>
+<li><p>Which predictors are <em>used most</em> by the model?</p></li>
+<li><p>Does not necessarily tell us about <strong>causation</strong> (none of these methods do, but an important reminder)</p></li>
+</ul>
+<h4 id="tree-specific-importance">Tree-specific importance</h4>
+<p>When <span class="math inline">\(x_j\)</span> is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)</p>
+<h4 id="permutation-importance">Permutation importance</h4>
+<p>Permute values of predictor <span class="math inline">\(x_j\)</span>. How much does the accuracy of the model decrease?</p>
+<p><span class="math display">\[\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, \text{column } j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
+</section>
+<section id="permuting-forces-extrapolation" class="slide level2">
+<h2>Permuting forces extrapolation</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/permute-length-1.png" class="quarto-figure quarto-figure-center" width="1725"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Shuffling length keeps each film’s other inputs: 146 of the 166 shorts now run over an hour, and 145 features under 40 minutes. The tuning films have none</p>
+<p>The forest is scored where it never saw a film. Permutation importance mixes two things: how much the model’s accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)</p>
+</section>
+<section id="leave-one-covariate-out" class="slide level2">
+<h2>Leave one covariate out</h2>
+<div class="columns">
+<div class="column" style="width:52%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/loco-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:48%;">
+<p>Refit without input <span class="math inline">\(j\)</span>; score on the same held-out films: <span class="math display">\[\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
+<p>No permuted rows, so no extrapolation; any method, at the cost of <span class="math inline">\(p\)</span> refits</p>
+<p>Length and Short together: 0.21, more than alone (0.15 and 0.02). LOCO charges neither input for what the two share</p>
+</div></div>
+</section>
 <section id="were-in-dangerous-territory" class="slide level2 inverse">
 <h2>We’re in dangerous territory</h2>
 <ul>
@@ -737,10 +771,12 @@ y - f_2(\mathbf x_2) - f_3(\mathbf x_3)
 <h2>Conclusion</h2>
 <h4 id="additive-models">Additive models</h4>
 <p>One curve per input, each fitted to what the others leave: partialling out, one input at a time</p>
-<h4 id="partial-dependence-and-importance">Partial dependence and importance</h4>
-<p>A plot of one input exists for any model, and its average can hide an interaction. Permuting an input asks the model about data that do not exist; LOCO refits instead</p>
+<h4 id="partial-dependence-1">Partial dependence</h4>
+<p>A plot of one input exists for any model, and its average can hide an interaction</p>
 <h4 id="trees-and-ensembles">Trees and ensembles</h4>
 <p>Greedy questions, pruned by validation. Bagging and forests average trees and lower variance down to <span class="math inline">\(\rho\tau^2\)</span>; boosting adds small trees, gradient descent on the fitted values</p>
+<h4 id="feature-importance">Feature importance</h4>
+<p>Permuting an input asks the model about data that do not exist; LOCO refits instead</p>
 </section>
 <section id="references" class="slide level2 inverse" data-minutes="0">
 <h2>References</h2>

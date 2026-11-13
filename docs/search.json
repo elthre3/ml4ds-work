@@ -2209,14 +2209,14 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#section",
     "title": "Machine learning",
     "section": "",
-    "text": "Week 8: additive models, trees and ensembles\nPart 1: fitting an additive model\nPart 2: plots for other models\nPart 3: building a tree\nPart 4: three model improvement strategies\nPart 5: boosting"
+    "text": "Week 8: additive models, trees and ensembles\nPart 1: fitting an additive model\nPart 2: plots for other models\nPart 3: building a tree\nPart 4: three model improvement strategies\nPart 5: boosting\nPart 6: feature importance"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#where-we-left-off",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#where-we-left-off",
     "title": "Machine learning",
     "section": "Where we left off",
-    "text": "Where we left off\nEvery family has a knob, chosen by cross-validation, and a score on held-out data\nThis week: how some of those fits are built, and how to read them\n\nan additive model, one curve at a time\na plot of one input for any fitted model, and what it can hide\na tree, one question at a time\nmany trees: averaged (bagging, random forests) or added (boosting)"
+    "text": "Where we left off\nEvery family has a knob, chosen by cross-validation, and a score on held-out data\nThis week: how some of those fits are built, and how to read them\n\nan additive model, one curve at a time\na plot of one input for any fitted model, and what it can hide\na tree, one question at a time\nmany trees: averaged (bagging, random forests) or added (boosting)\nwhat a forest uses: feature importance"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section-1",
@@ -2254,11 +2254,18 @@
     "text": "Backfitting is partialling out\nTwo centered inputs and lines for components, \\(\\hat f_j(x) = \\beta_j x\\). Step 2 for \\(j = 1\\) regresses the partial residual on \\(\\mathbf x_1\\): \\[\n\\beta_1 \\leftarrow \\frac{\\mathbf x_1^T(\\mathbf y - \\beta_2 \\mathbf x_2)}{\\mathbf x_1^T \\mathbf x_1}, \\qquad\n\\beta_2 \\leftarrow \\frac{\\mathbf x_2^T(\\mathbf y - \\beta_1 \\mathbf x_1)}{\\mathbf x_2^T \\mathbf x_2}\n\\]\n\nThe loop can stop only where both hold: \\(\\mathbf x_j^T(\\mathbf y - \\beta_1 \\mathbf x_1 - \\beta_2 \\mathbf x_2) = 0\\) for \\(j = 1, 2\\). These are the normal equations: the fixed point is least squares\n\nPartialling-out theorem: the coefficient on \\(\\mathbf x_2\\) is \\(\\tilde{\\mathbf x}_2^T \\mathbf y / \\tilde{\\mathbf x}_2^T \\tilde{\\mathbf x}_2\\), the slope on what is left of \\(\\mathbf x_2\\) after \\(\\mathbf x_1\\) has explained what it can.\n\nWith a smoother in place of each line, the same loop fits an additive model: each curve fitted to what the others leave"
   },
   {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#the-movies-data",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#the-movies-data",
+    "title": "Machine learning",
+    "section": "The movies data",
+    "text": "The movies data\n\n\n\nlibrary(ggplot2movies)\nmv &lt;- movies |&gt;\n  filter(length &lt;= 200, length &gt; 10,\n         year &gt; 1918, votes &gt;= 5)\n\nIMDb films up to 2005, 53,388 after this selection (data note)\n\nTarget: rating, average user rating, 1 to 10\nInputs: year, length (minutes), seven genre flags\nNot used: votes, r1 to r10 (from the same ratings)\n\n\n\n\n\n\n\n\n\n\n\nA random 10,000: 5,000 training, 2,000 tuning, 3,000 test"
+  },
+  {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#additive-combination-of-non-linear-predictors",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#additive-combination-of-non-linear-predictors",
     "title": "Machine learning",
     "section": "Additive combination of non-linear predictors",
-    "text": "Additive combination of non-linear predictors\nIMDb films (data note): 10,000 at random, split 5,000 training, 2,000 tuning, 3,000 test\n\nlibrary(mgcv)\nfit_gam &lt;-\n  gam(rating ~ s(length) + s(year), data = mv_train)\n\ns is a penalized spline, but can use different methods too\n\ntidy(fit_gam)\n\n# A tibble: 2 × 5\n  term        edf ref.df statistic p.value\n  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;\n1 s(length)  7.04   8.00      51.8       0\n2 s(year)    8.00   8.70      29.0       0\n\n\nNo coefficients, so how do we interpret?"
+    "text": "Additive combination of non-linear predictors\n\nlibrary(mgcv)\nfit_gam &lt;-\n  gam(rating ~ s(length) + s(year), data = mv_train)\n\ns is a penalized spline, but can use different methods too\n\ntidy(fit_gam)\n\n# A tibble: 2 × 5\n  term        edf ref.df statistic p.value\n  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;\n1 s(length)  7.04   8.00      51.8       0\n2 s(year)    8.00   8.70      29.0       0\n\n\nNo coefficients, so how do we interpret?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#replace-each-linear-coefficient-with-2d-plot",
@@ -2401,27 +2408,6 @@
     "text": "Out-of-bag predictions\n\nEach bootstrap sample contains some subset of the training data\nRoughly \\(1/e \\approx 0.37\\) portion of the training samples will be left out of each bootstrap sample\nCan use these to estimate test error (e.g. instead of \\(K\\)-fold cross-validation)\n\nSoftware implementations may do this automatically\n\n\n\n\nA forest on the films, 300 trees\nMSE\n\n\n\n\ntraining films, every tree\n1.60\n\n\ntraining films, out-of-bag trees only\n2.03\n\n\ntuning films\n2.04\n\n\ntuning films, predicting the training mean\n2.50"
   },
   {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#featurevariable-importance",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#featurevariable-importance",
-    "title": "Machine learning",
-    "section": "Feature/variable importance",
-    "text": "Feature/variable importance\n\nWhich predictors are used most by the model?\nDoes not necessarily tell us about causation (none of these methods do, but an important reminder)\n\nTree-specific importance\nWhen \\(x_j\\) is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)\nPermutation importance\nPermute values of predictor \\(x_j\\). How much does the accuracy of the model decrease?\n\\[\\mathrm{PI}_j = \\widehat{\\mathrm{Err}}(\\hat f, \\text{column } j \\text{ permuted}) - \\widehat{\\mathrm{Err}}(\\hat f)\\]"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#permuting-forces-extrapolation",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#permuting-forces-extrapolation",
-    "title": "Machine learning",
-    "section": "Permuting forces extrapolation",
-    "text": "Permuting forces extrapolation\n\n\n\n\n\n\n\n\n\nShuffling length keeps each film’s other inputs: 147 of the 166 shorts now run over an hour, and 146 features under 40 minutes. The tuning films have none\nThe forest is scored where it never saw a film. Permutation importance mixes two things: how much the model’s accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#leave-one-covariate-out",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#leave-one-covariate-out",
-    "title": "Machine learning",
-    "section": "Leave one covariate out",
-    "text": "Leave one covariate out\n\n\n\n\n\n\n\n\n\n\n\n\nRefit without input \\(j\\); score on the same held-out films: \\[\\mathrm{LOCO}_j = \\widehat{\\mathrm{Err}}\\big(\\hat f^{(-j)}\\big) - \\widehat{\\mathrm{Err}}(\\hat f)\\]\nNo permuted rows, so no extrapolation; any method, at the cost of \\(p\\) refits\nLength and Short together: 0.22, more than alone (0.15 and 0.03). LOCO charges neither input for what the two share"
-  },
-  {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section-4",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#section-4",
     "title": "Machine learning",
@@ -2464,6 +2450,34 @@
     "text": "Depth is interaction order\n\n\nA stump asks one question, so a sum of stumps is a sum of one-input functions: an additive model\nDepth 2 asks a second question inside the first. Depth \\(d\\): interactions of up to \\(d\\) inputs\nA boosted model is additive in trees, not in the predictors\n\n\n\n\n\n\n\n\n\n\n\n\\(f^\\star(x) = 4\\cdot\\mathbf 1\\{x_1 &gt; 0,\\ x_2 &gt; 0\\}\\), ten inputs: thresholds with an interaction"
   },
   {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section-5",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#section-5",
+    "title": "Machine learning",
+    "section": "",
+    "text": "Part 6: feature importance"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#featurevariable-importance",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#featurevariable-importance",
+    "title": "Machine learning",
+    "section": "Feature/variable importance",
+    "text": "Feature/variable importance\n\nWhich predictors are used most by the model?\nDoes not necessarily tell us about causation (none of these methods do, but an important reminder)\n\nTree-specific importance\nWhen \\(x_j\\) is used for a split, how much does the accuracy improve? Average over all splits (across all bagged trees)\nPermutation importance\nPermute values of predictor \\(x_j\\). How much does the accuracy of the model decrease?\n\\[\\mathrm{PI}_j = \\widehat{\\mathrm{Err}}(\\hat f, \\text{column } j \\text{ permuted}) - \\widehat{\\mathrm{Err}}(\\hat f)\\]"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#permuting-forces-extrapolation",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#permuting-forces-extrapolation",
+    "title": "Machine learning",
+    "section": "Permuting forces extrapolation",
+    "text": "Permuting forces extrapolation\n\n\n\n\n\n\n\n\n\nShuffling length keeps each film’s other inputs: 146 of the 166 shorts now run over an hour, and 145 features under 40 minutes. The tuning films have none\nThe forest is scored where it never saw a film. Permutation importance mixes two things: how much the model’s accuracy depends on the input, and how the model predicts where there are no data (Hooker, Mentch and Zhou 2021)"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#leave-one-covariate-out",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#leave-one-covariate-out",
+    "title": "Machine learning",
+    "section": "Leave one covariate out",
+    "text": "Leave one covariate out\n\n\n\n\n\n\n\n\n\n\n\n\nRefit without input \\(j\\); score on the same held-out films: \\[\\mathrm{LOCO}_j = \\widehat{\\mathrm{Err}}\\big(\\hat f^{(-j)}\\big) - \\widehat{\\mathrm{Err}}(\\hat f)\\]\nNo permuted rows, so no extrapolation; any method, at the cost of \\(p\\) refits\nLength and Short together: 0.21, more than alone (0.15 and 0.02). LOCO charges neither input for what the two share"
+  },
+  {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#were-in-dangerous-territory",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#were-in-dangerous-territory",
     "title": "Machine learning",
@@ -2482,7 +2496,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#conclusion",
     "title": "Machine learning",
     "section": "Conclusion",
-    "text": "Conclusion\nAdditive models\nOne curve per input, each fitted to what the others leave: partialling out, one input at a time\nPartial dependence and importance\nA plot of one input exists for any model, and its average can hide an interaction. Permuting an input asks the model about data that do not exist; LOCO refits instead\nTrees and ensembles\nGreedy questions, pruned by validation. Bagging and forests average trees and lower variance down to \\(\\rho\\tau^2\\); boosting adds small trees, gradient descent on the fitted values"
+    "text": "Conclusion\nAdditive models\nOne curve per input, each fitted to what the others leave: partialling out, one input at a time\nPartial dependence\nA plot of one input exists for any model, and its average can hide an interaction\nTrees and ensembles\nGreedy questions, pruned by validation. Bagging and forests average trees and lower variance down to \\(\\rho\\tau^2\\); boosting adds small trees, gradient descent on the fitted values\nFeature importance\nPermuting an input asks the model about data that do not exist; LOCO refits instead"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#references",
