@@ -53,6 +53,16 @@ $code-block-bg: #f6f6f6;
 .reveal .inverse h1, .reveal .inverse h2, .reveal .inverse h3 { color: #ffffff; }
 .reveal .inverse a { color: #fde725; }
 .reveal .inverse strong { color: #5ec962; }
+// Block quotes on dark slides: Quarto's default blockquote text is a muted
+// grey, hard to read on #440154 (week 8 review, 13-14 November 2026). White
+// text, a yellow rule on the left, a faint light background.
+.reveal .inverse blockquote {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 4px solid #fde725;
+  box-shadow: none;
+}
+.reveal .inverse blockquote p { color: #ffffff; }
 // An inverse slide with a background image: let the image show through
 // (give the slide background-color="#440154" too, so the image sits on dark).
 .reveal .slides section.inverse[data-background-image] { background-color: transparent; }
