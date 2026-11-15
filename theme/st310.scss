@@ -178,9 +178,57 @@ $code-block-bg: #f6f6f6;
 // Tables a little tighter.
 .reveal table { font-size: 0.75em; }
 
-// Boxes keep dark text on inverse (dark) slides.
-.reveal .inverse .ask, .reveal .inverse .leave, .reveal .inverse .recall, .reveal .inverse .retrieval { color: #1f1f1f; }
-.reveal .inverse .ask strong, .reveal .inverse .leave strong, .reveal .inverse .recall strong, .reveal .inverse .retrieval strong { color: #8c2981; }
+// A question on the title slide (theme/title-slide.html, metadata field
+// title-question; week 8, 15 November 2026).
+.reveal .title-question { max-width: 80%; margin: 1.2em auto 0; text-align: left; font-size: 0.9em; }
+
+// ---------------------------------------------------------------------
+// Dark (inverse) slides: boxes, code and output (week 8, 15 November 2026,
+// replacing the same day's rule that kept the boxes light). Quarto and
+// reveal.js change only the text, headings, links and inline code of a dark
+// slide (section.has-dark-background, which reveal.js sets only for a slide
+// with a background-color attribute, not for this class), and Quarto picks one
+// code highlighting style per deck from the theme's background. So boxes, code
+// blocks and output keep their light styling on a dark slide unless given dark
+// versions here. Figures are R's: week 8's setup chunk has the chunk option
+// dark: true, a transparent background with light ink.
+// ---------------------------------------------------------------------
+.reveal .inverse .ask, .reveal .inverse .leave, .reveal .inverse .recall, .reveal .inverse .retrieval {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.reveal .inverse .ask { border-color: #fc8961; }
+.reveal .inverse .ask::before { color: #fc8961; }
+.reveal .inverse .recall { border-color: #fde725; }
+.reveal .inverse .recall::before { color: #fde725; }
+.reveal .inverse .retrieval { border-left-color: #fc8961; }
+// .leave keeps its #5ec962 rule (7.26:1 on #440154).
+
+.reveal .inverse div.sourceCode {
+  background-color: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.reveal .inverse div.sourceCode pre,
+.reveal .inverse div.sourceCode pre code { background-color: transparent; color: #f4f4f4; }
+.reveal .inverse .cell-output pre,
+.reveal .inverse .cell-output pre code { background-color: transparent; color: #ececec; }
+.reveal .inverse .cell-output pre { border-left: 3px solid rgba(255, 255, 255, 0.35); }
+.reveal .inverse :not(pre) > code { color: #fcfdbf; background-color: rgba(255, 255, 255, 0.1); }
+// Syntax colors on dark slides: the light ends of viridis and magma
+// (unclassed tokens first: Quarto colors every code span).
+.reveal .inverse code span { color: #f4f4f4; }
+.reveal .inverse code span.kw, .reveal .inverse code span.cf { color: #fc8961; }
+.reveal .inverse code span.fu { color: #5ec962; }
+.reveal .inverse code span.st, .reveal .inverse code span.ch, .reveal .inverse code span.ss { color: #fde725; }
+.reveal .inverse code span.dv, .reveal .inverse code span.fl, .reveal .inverse code span.bn,
+.reveal .inverse code span.cn, .reveal .inverse code span.dec { color: #febb81; }
+.reveal .inverse code span.co, .reveal .inverse code span.cv, .reveal .inverse code span.do,
+.reveal .inverse code span.an { color: #cdbfe0; font-style: italic; }
+.reveal .inverse code span.at { color: #addc30; }
+.reveal .inverse code span.op, .reveal .inverse code span.ot, .reveal .inverse code span.va,
+.reveal .inverse code span.sc, .reveal .inverse code span.bu, .reveal .inverse code span.ex,
+.reveal .inverse code span.im, .reveal .inverse code span.dt, .reveal .inverse code span.pp,
+.reveal .inverse code span.in { color: #f4f4f4; }
 
 // ---------------------------------------------------------------------
 // MathJax 4 (7 October 2026). Version 4 sets inline math as breakable inline

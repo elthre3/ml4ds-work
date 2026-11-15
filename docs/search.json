@@ -2209,7 +2209,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#section",
     "title": "Machine learning",
     "section": "",
-    "text": "Week 8: additivity vs interactions, and ensembles\nPart 1: fitting an additive model\nPart 2: additivity vs interactions\nPart 3: building a tree\nPart 4: three model improvement strategies\n\nList the modeling assumptions and respective methods"
+    "text": "Week 8: additivity vs interactions, and ensembles\nPart 1: fitting an additive model\nPart 2: additivity vs interactions\nPart 3: building a tree\nPart 4: three model improvement strategies"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#where-we-left-off",
@@ -2324,11 +2324,11 @@
     "text": "True model non-additive; GAM is wrong\n\nf1 &lt;- function(x) x^2\nf2 &lt;- function(x) cos(pi * x / 2)\ndf_int &lt;- tibble(x1 = runif(2000, -1, 1), x2 = runif(2000, -4, 4)) |&gt;\n  mutate(y = f1(x1) * f2(x2) + rnorm(2000))\nfit_gam_wrong &lt;- gam(y ~ s(x1) + s(x2), data = df_int)\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe fitted component for \\(x_1\\) is nearly flat: a parabola opening upward when \\(\\cos(\\pi x_2/2) &gt; 0\\) and downward when \\(\\cos(\\pi x_2/2) &lt; 0\\) cancel when averaged over \\(x_2\\)\nAdditivity assumption is now (importantly) wrong"
   },
   {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#causality-should-we-control-for-party",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#causality-should-we-control-for-party",
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#causality-what-are-we-controlling-for",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#causality-what-are-we-controlling-for",
     "title": "Machine learning",
-    "section": "Causality: should we “control for party”?",
-    "text": "Causality: should we “control for party”?\nLouisiana v. Callais, US Supreme Court, 29 April 2026, 6 to 3: evidence of racially polarized voting must come from “an analysis that controls for party affiliation”\n\nThe majority’s aim: to show that race, not party, explains the divide\nCritics argue that this misuses statistics: party is partly a consequence of race, so holding it fixed removes part of what is to be measured (Morris 2026)\nAfter the decision, several Southern states redrew their congressional maps before the November 2026 midterms\n\nWhat would a GAM of vote share on race and party show?"
+    "section": "Causality: what are we “controlling for”?",
+    "text": "Causality: what are we “controlling for”?\nLouisiana v. Callais, US Supreme Court, 29 April 2026, 6 to 3: evidence of racially polarized voting must come from “an analysis that controls for party affiliation”\n\nThe majority’s reasoning: the divide may be partisan rather than racial, so race counts only where it survives holding party fixed\nCritics argue that this misuses statistics: party is partly a consequence of race, so holding it fixed removes part of what is to be measured (Morris 2026)\nAfter the decision, several Southern states redrew their congressional maps before the November 2026 midterm elections\n\nWhat would a GAM of vote share on race and party show?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#causality-what-partial-dependence-holds-fixed",
@@ -2384,7 +2384,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#growing-a-tree",
     "title": "Machine learning",
     "section": "Growing a tree",
-    "text": "Growing a tree\n\nRecursive: split the data by the most discriminating single-variable question; then do the same inside each leaf, and so on\nGreedy: each split is the best now. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree\nWhen to stop: a leaf too small to split (rpart’s minsplit), or no split that improves the fit enough (cp)\nGrown until no leaf can split, a tree is like 1-nearest neighbors: on the training films, year and length alone give 2,670 leaves\n\n\n\\(k\\) nearest neighbors average the \\(k\\) training points closest to \\(x_0\\); a tree averages those in \\(x_0\\)’s leaf, a neighborhood chosen by subsets of features"
+    "text": "Growing a tree\n\nRecursive: split the data by the most discriminating single-variable question; then do the same inside each leaf, and so on\nGreedy: each split is the best now. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree, then prune (next slide)\nWhen to stop: a leaf too small to split (rpart’s minsplit), or no split that improves the fit enough (cp)\nGrown until no leaf can split, a tree is like 1-nearest neighbors: on the training films, year and length alone give 2,670 leaves\n\n\n\\(k\\) nearest neighbors average the \\(k\\) training points closest to \\(x_0\\); a tree averages those in \\(x_0\\)’s leaf, a neighborhood chosen by subsets of features"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#pruning",
@@ -2412,7 +2412,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#a-downside-of-trees-variance",
     "title": "Machine learning",
     "section": "A downside of trees: variance",
-    "text": "A downside of trees: variance\n\n\n\n\n\n\n\n\n\nDepth 2, each on a random half of the training films. Star Wars: Episode I - The Phantom Menace (rated 6.4): predicted 6.38, 6.64, 6.59, 6.24\n\nSame method, same films, four different models. What should we do about this?"
+    "text": "A downside of trees: variance\n\n\n\n\n\n\n\n\n\nDepth 2, each on a random half of the training films. Star Wars: Episode I - The Phantom Menace (rated 6.4): predicted 6.07, 6.64, 7.00, 5.39\n\nSame method, same films, four different models. What should we do about this?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#part-4-three-model-improvement-strategies",
@@ -2461,7 +2461,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#out-of-bag-predictions",
     "title": "Machine learning",
     "section": "Out-of-bag predictions",
-    "text": "Out-of-bag predictions\n\nEach bootstrap sample contains some subset of the training data\nRoughly \\(1/e \\approx 0.37\\) portion of the training samples will be left out of each bootstrap sample\nCan use these to estimate test error (e.g. instead of \\(K\\)-fold cross-validation)\n\nSoftware implementations may do this automatically\n\n\n\n\nA forest on the films, 300 trees\nMSE\n\n\n\n\ntraining films, every tree\n1.18\n\n\ntraining films, out-of-bag trees only\n1.50\n\n\ntuning films\n1.49\n\n\ntuning films, predicting the training mean\n2.00"
+    "text": "Out-of-bag predictions\n\nEach bootstrap sample contains some subset of the training data\nRoughly \\(1/e \\approx 0.37\\) portion of the training samples will be left out of each bootstrap sample\nCan use these to estimate test error (e.g. instead of \\(K\\)-fold cross-validation)\n\nSoftware implementations may do this automatically\n\n\n\n\nA forest on the films, 300 trees\nMSE\n\n\n\n\ntraining films, every tree\n1.19\n\n\ntraining films, out-of-bag trees only\n1.50\n\n\ntuning films\n1.49\n\n\ntuning films, predicting the training mean\n2.00"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#adding-trees",
@@ -2496,7 +2496,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#iterations-and-learning-rate",
     "title": "Machine learning",
     "section": "Iterations and learning rate",
-    "text": "Iterations and learning rate\n\n\n\n\n\n\n\n\n\n\n\n\nIterations \\(B\\). Training error keeps falling; tuning error turns. Stopping there is early stopping, as for gradient descent\nLearning rate \\(\\gamma\\). Smaller steps, more of them, to reach about the same minimum\nDepth. How many inputs one tree can combine (next)"
+    "text": "Iterations and learning rate\n\n\n\n\n\n\n\n\n\n\n\n\nIterations \\(B\\). Training error keeps falling; tuning error turns. Stopping there is early stopping, as for gradient descent\nLearning rate \\(\\gamma\\). Smaller steps\nDepth. How many inputs one tree can combine (next)"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#tree-depth-and-interactions",
@@ -2511,13 +2511,6 @@
     "title": "Machine learning",
     "section": "We’re in dangerous territory",
     "text": "We’re in dangerous territory\n\nLess interpretable methods/models\nMany tuning parameters\nIncreasingly sophisticated software with many defaults and/or automatically optimized tuning parameters\n\n\nBut consider, Alfred North Whitehead wrote (1911):\n\nIt is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. Civilization advances by extending the number of important operations which we can perform without thinking about them."
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#before-the-seminar",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#before-the-seminar",
-    "title": "Machine learning",
-    "section": "Before the seminar",
-    "text": "Before the seminar\n\nThis week: exercises 1 and 2 at the top of the notebook. The correlated-average variance again, with the slides closed; and one boosting step by hand\nIn the seminar: a split found by hand, bagging’s variance measured against the formula, and boosting on the films"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#conclusion",

@@ -9,7 +9,6 @@
 <link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.10.18">
 
-  <meta name="author" content="Joshua Loftus">
   <title>machine learning 4 data science – Machine learning</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -101,7 +100,7 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-b45c68dc0981b10edf137558c2550bc7.css">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-ee4c55e7dc5b973c77711487f0e8ae43.css">
   <link href="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="../../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -198,21 +197,10 @@
   <div class="reveal">
     <div class="slides">
 
-<section id="title-slide" class="quarto-title-block center">
+<section id="title-slide" class="center">
   <h1 class="title">Machine learning</h1>
   <p class="subtitle">Week 8: additivity vs interactions, and ensembles</p>
-
-<div class="quarto-title-authors">
-<div class="quarto-title-author">
-<div class="quarto-title-author-name">
-Joshua Loftus
-</div>
-        <p class="quarto-title-affiliation">
-            LSE
-          </p>
-    </div>
-</div>
-
+  <div class="ask title-question">List our modeling assumptions and their respective methods</div>
 </section>
 <section id="section" class="slide level2 inverse" data-minutes="3">
 <h2></h2>
@@ -221,9 +209,6 @@ Joshua Loftus
 <p>Part 2: additivity vs interactions</p>
 <p>Part 3: building a tree</p>
 <p>Part 4: three model improvement strategies</p>
-<div class="ask">
-<p>List the modeling assumptions and respective methods</p>
-</div>
 </section>
 <section id="where-we-left-off" class="slide level2" data-minutes="1">
 <h2>Where we left off</h2>
@@ -325,7 +310,7 @@ Joshua Loftus
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
 <span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="cell" data-layout-align="center">
+<div class="cell" data-layout-align="center" data-dark="true">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -476,13 +461,13 @@ Joshua Loftus
 <p>Additivity assumption is now (importantly) wrong</p>
 </div></div>
 </section>
-<section id="causality-should-we-control-for-party" class="slide level2" data-minutes="2">
-<h2>Causality: should we “control for party”?</h2>
+<section id="causality-what-are-we-controlling-for" class="slide level2" data-minutes="2">
+<h2>Causality: what are we “controlling for”?</h2>
 <p><em>Louisiana v. Callais</em>, US Supreme Court, 29 April 2026, 6 to 3: evidence of racially polarized voting must come from “an analysis that controls for party affiliation”</p>
 <ul>
-<li>The majority’s aim: to show that race, not party, explains the divide</li>
+<li>The majority’s reasoning: the divide may be partisan rather than racial, so race counts only where it survives holding party fixed</li>
 <li>Critics argue that this misuses statistics: party is partly a <strong>consequence</strong> of race, so holding it fixed removes part of what is to be measured (Morris 2026)</li>
-<li>After the decision, several Southern states redrew their congressional maps before the November 2026 midterms</li>
+<li>After the decision, several Southern states redrew their congressional maps before the November 2026 midterm elections</li>
 </ul>
 <p>What would a GAM of vote share on race and party show?</p>
 </section>
@@ -501,12 +486,25 @@ Joshua Loftus
 </div>
 <p>Simulated counties, an additive CEF, a GAM that fits it. Each partial dependence plot holds the other input fixed: the <strong>direct</strong> path only. Race acts mostly through party, a <strong>mediator</strong></p>
 </div><div class="column" style="width:55%;">
+<div class="r-stack">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
 <p><img data-src="08-1-ensembles_files/figure-revealjs/mediation-pdp-1.png" width="870"></p>
 </figure>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/mediation-pdp-total-1.png" width="870"></p>
+</figure>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -789,7 +787,7 @@ Joshua Loftus
 <h2>Growing a tree</h2>
 <ul>
 <li><strong>Recursive</strong>: split the data by the most discriminating single-variable question; then do the same inside each leaf, and so on</li>
-<li><strong>Greedy</strong>: each split is the best <em>now</em>. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree</li>
+<li><strong>Greedy</strong>: each split is the best <em>now</em>. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree, then prune (next slide)</li>
 <li><strong>When to stop</strong>: a leaf too small to split (rpart’s <code>minsplit</code>), or no split that improves the fit enough (<code>cp</code>)</li>
 <li>Grown until no leaf can split, a tree is like 1-nearest neighbors: on the training films, year and length alone give 2,670 leaves</li>
 </ul>
@@ -797,10 +795,10 @@ Joshua Loftus
 <p><span class="math inline">\(k\)</span> nearest neighbors average the <span class="math inline">\(k\)</span> training points closest to <span class="math inline">\(x_0\)</span>; a tree averages those in <span class="math inline">\(x_0\)</span>’s leaf, a neighborhood chosen by subsets of features</p>
 </div>
 </section>
-<section id="pruning" class="slide level2">
+<section id="pruning" class="slide level2 inverse">
 <h2>Pruning</h2>
 <p>For each <span class="math inline">\(\alpha \geq 0\)</span>, the sub-tree minimizing <span class="math inline">\(\text{RSS} + \alpha \times (\text{number of leaves})\)</span>. The Star Wars tree, as <span class="math inline">\(\alpha\)</span> increases from 0:</p>
-<div class="cell" data-layout-align="center">
+<div class="cell" data-layout-align="center" data-dark="true">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -811,10 +809,10 @@ Joshua Loftus
 </div>
 <p>Sequence of trees; tuning knob <span class="math inline">\(\alpha\)</span> chosen by cross-validation or held-out data</p>
 </section>
-<section id="choosing-alpha-on-the-films" class="slide level2">
+<section id="choosing-alpha-on-the-films" class="slide level2 inverse">
 <h2>Choosing <span class="math inline">\(\alpha\)</span> on the films</h2>
 <p>A tree on all nine inputs, grown to 272 leaves, pruned back along its sequence. Training error falls with every leaf; tuning error is lowest at 56 leaves</p>
-<div class="cell" data-layout-align="center">
+<div class="cell" data-layout-align="center" data-dark="true">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -824,7 +822,7 @@ Joshua Loftus
 </div>
 </div>
 </section>
-<section id="trees-and-missing-inputs" class="slide level2 inverse">
+<section id="trees-and-missing-inputs" class="slide level2">
 <h2>Trees and missing inputs</h2>
 <p>The films’ <code>budget</code> is missing for 87%: a film with no budget cannot answer “budget &lt; c?”</p>
 <ul>
@@ -844,7 +842,7 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p>Depth 2, each on a random half of the training films. <em>Star Wars: Episode I - The Phantom Menace</em> (rated 6.4): predicted 6.38, 6.64, 6.59, 6.24</p>
+<p>Depth 2, each on a random half of the training films. <em>Star Wars: Episode I - The Phantom Menace</em> (rated 6.4): predicted 6.07, 6.64, 7.00, 5.39</p>
 <div class="ask">
 <p>Same method, same films, four different models. What should we do about this?</p>
 </div>
@@ -939,7 +937,7 @@ Joshua Loftus
 <tbody>
 <tr class="odd">
 <td>training films, every tree</td>
-<td>1.18</td>
+<td>1.19</td>
 </tr>
 <tr class="even">
 <td>training films, out-of-bag trees only</td>
@@ -967,7 +965,7 @@ Joshua Loftus
 <p>The residual from the existing fit: <span class="math inline">\(y - \hat f^{(b)}(x)\)</span></p>
 </div>
 </section>
-<section id="boosting-iterated-fitting-on-residuals" class="slide level2">
+<section id="boosting-iterated-fitting-on-residuals" class="slide level2 inverse">
 <h2>Boosting: iterated fitting on residuals</h2>
 <p><strong>Idea</strong>: train models sequentially, decreasing residuals by a small amount each time. Each model contributes something different</p>
 <p>Can use “weak learners” (e.g.&nbsp;trees with one split, “stumps”) to grow an ensemble model gradually fitting closer to the training data</p>
@@ -1013,7 +1011,7 @@ L(\mathbf f) = \sum_{i=1}^n \tfrac12 (y_i - f_i)^2, \qquad -\frac{\partial L}{\p
 </div>
 </div><div class="column" style="width:44%;">
 <p><strong>Iterations <span class="math inline">\(B\)</span>.</strong> Training error keeps falling; tuning error turns. Stopping there is early stopping, as for gradient descent</p>
-<p><strong>Learning rate <span class="math inline">\(\gamma\)</span>.</strong> Smaller steps, more of them, to reach about the same minimum</p>
+<p><strong>Learning rate <span class="math inline">\(\gamma\)</span>.</strong> Smaller steps</p>
 <p><strong>Depth.</strong> How many inputs one tree can combine (next)</p>
 </div></div>
 </section>
@@ -1041,13 +1039,6 @@ L(\mathbf f) = \sum_{i=1}^n \tfrac12 (y_i - f_i)^2, \qquad -\frac{\partial L}{\p
 <p>It is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. <strong>Civilization advances by extending the number of important operations which we can perform without thinking about them</strong>.</p>
 </blockquote>
 </div>
-</section>
-<section id="before-the-seminar" class="slide level2">
-<h2>Before the seminar</h2>
-<ul>
-<li><p>This week: exercises 1 and 2 at the top of the notebook. The correlated-average variance again, with the slides closed; and one boosting step by hand</p></li>
-<li><p>In the seminar: a split found by hand, bagging’s variance measured against the formula, and boosting on the films</p></li>
-</ul>
 </section>
 <section id="conclusion" class="slide level2 inverse">
 <h2>Conclusion</h2>

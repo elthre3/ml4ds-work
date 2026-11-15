@@ -1,11 +1,13 @@
 ---
 title: "Machine learning"
 subtitle: "Week 8: additivity vs interactions, and ensembles"
-author: "Joshua Loftus"
-institute: "LSE"
+title-question: "List our modeling assumptions and their respective methods"
 format:
   revealjs:
     theme: [default, ../../../theme/st310.scss]
+    # The title slide with the question above (theme/title-slide.html).
+    template-partials:
+      - ../../../theme/title-slide.html
     slide-number: c/t
     width: 1280
     height: 720
@@ -45,6 +47,19 @@ library(xgboost)
 library(pdp)            # partial dependence and ICE curves
 library(ggplot2movies)
 theme_set(theme_minimal(base_size = 18))
+# Figures on dark slides (chunk option dark: true): a transparent background and light ink.
+theme_dark_slide <- theme_minimal(base_size = 18) +
+  theme(text = element_text(colour = "white"), axis.text = element_text(colour = "grey85"),
+        panel.grid = element_line(colour = "#FFFFFF2E"),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.background = element_rect(fill = "transparent", colour = NA),
+        legend.background = element_rect(fill = "transparent", colour = NA),
+        legend.key = element_rect(fill = "transparent", colour = NA))
+knitr::opts_hooks$set(dark = function(options) { if (isTRUE(options$dark)) options$dev.args <- list(bg = "transparent"); options })
+knitr::knit_hooks$set(dark = function(before, options) {
+  if (isTRUE(options$dark)) theme_set(if (before) theme_dark_slide else theme_minimal(base_size = 18))
+  NULL
+})
 options(knitr.table.format = "html")
 # Palette: viridis for the primary scale, magma for the second one.
 v_dark <- "#440154"; v_blue <- "#31688e"; v_teal <- "#21918c"; v_green <- "#5ec962"
@@ -58,7 +73,7 @@ inputs <- c("year", "length", genres)
 mv <- movies |>
   filter(length <= 200, length > 10, year > 1918, votes >= 20) |>
   select(title, rating, year, length, all_of(genres))
-set.seed(310)   # the deck's only seed: the split (the seminar's), then every random step below, in order
+set.seed(310)   # the deck's seed: the split (the seminar's), then every random step below, in order; one example, "A downside of trees", draws with its own and puts this stream back
 mv_id <- sample(nrow(mv), 10000)
 mv_train <- mv[mv_id[1:5000], ]
 mv_tune  <- mv[mv_id[5001:7000], ]
@@ -69,9 +84,9 @@ f_all <- reformulate(inputs, "rating")
 ## {.inverse minutes="3"}
 
 ::: {.notes}
-QUESTION: list the modeling assumptions and their methods
+QUESTION, on the title slide: list our modeling assumptions and their respective methods
 
-Two minutes of answers, while the room settles; the next slide has the table.
+Two minutes of answers, while the room settles. The title slide has no note, so its minutes are counted here; this slide is the outline, the next has the table.
 
 The deck on the spine's scale (2 a content slide, 3 a proof or a pause for the room, 1 a dark slide); the bar at the top of each note is the share done, its denominator the total. Dark = rush or skip. Data: the films throughout (data note: data/movies.md), a random 10,000 split 5,000 / 2,000 / 3,000 with one seed, 310, shared with the seminar; the test films stay shut. Simulations where the truth must be known. One proof in the lecture: the correlated-average variance. Boosting as gradient descent is derived.
 
@@ -91,10 +106,6 @@ Part 2: additivity vs interactions
 Part 3: building a tree
 
 Part 4: three model improvement strategies
-
-::: {.ask}
-List the modeling assumptions and respective methods
-:::
 
 ## Where we left off {minutes="1"}
 
@@ -207,9 +218,10 @@ plot(fit_gam)
 #| fig-width: 11
 #| fig-height: 3.0
 #| fig-align: center
-# The code shown above, with margins, text sizes and axis labels set for a slide (knitr resets par() in every chunk).
-par(mfrow = c(1, 2), mar = c(4.4, 4.5, 0.6, 0.8), cex = 1.3)
-plot(fit_gam, col = v_blue, shade = TRUE, shade.col = "#31688e33", ylab = "centered contribution")
+#| dark: true
+# The code shown above, with margins, text sizes, axis labels and light ink set for a dark slide (knitr resets par() in every chunk).
+par(mfrow = c(1, 2), mar = c(4.4, 4.5, 0.6, 0.8), cex = 1.3, fg = "grey85", col = "grey85", col.axis = "grey85", col.lab = "white")
+plot(fit_gam, col = "#fde725", shade = TRUE, shade.col = "#FFFFFF30", ylab = "centered contribution")
 ```
 
 ::: {.retrieval}
@@ -300,7 +312,7 @@ p_len <- bind_rows(len_iter[sel]) |>
   scale_colour_viridis_c(trans = "log10", breaks = sel, end = 0.9) +
   labs(x = "length (minutes)", y = "length curve")
 p_sh <- tibble(iter = 1:100, beta = beta_sh) |>
-  ggplot(aes(iter, beta)) + geom_line(colour = v_dark, linewidth = 1.2) + scale_x_log10() +
+  ggplot(aes(iter, beta)) + geom_point(colour = v_dark, size = 1.8) + scale_x_log10() +
   labs(x = "iteration (log axis)", y = "Short coefficient")
 p_len + p_sh + plot_layout(widths = c(1.5, 1))
 ```
@@ -451,7 +463,7 @@ Additivity assumption is now (importantly) wrong
 :::
 :::
 
-## Causality: should we "control for party"? {minutes="2"}
+## Causality: what are we "controlling for"? {minutes="2"}
 
 ::: {.notes}
 Context for the next slide. The quotation is from the syllabus of the opinion (608 U.S. 85, at 88). Morris (2026) calls the rule "conditioning on a mediator variable"; the dissent made a related point. After the decision, Tennessee, Alabama, Louisiana and Florida moved to redraw congressional maps before the midterms (press reports, May 2026).
@@ -459,9 +471,9 @@ Context for the next slide. The quotation is from the syllabus of the opinion (6
 
 *Louisiana v. Callais*, US Supreme Court, 29 April 2026, 6 to 3: evidence of racially polarized voting must come from "an analysis that controls for party affiliation"
 
-- The majority's aim: to show that race, not party, explains the divide
+- The majority's reasoning: the divide may be partisan rather than racial, so race counts only where it survives holding party fixed
 - Critics argue that this misuses statistics: party is partly a **consequence** of race, so holding it fixed removes part of what is to be measured (Morris 2026)
-- After the decision, several Southern states redrew their congressional maps before the November 2026 midterms
+- After the decision, several Southern states redrew their congressional maps before the November 2026 midterm elections
 
 What would a GAM of vote share on race and party show?
 
@@ -483,7 +495,7 @@ pdp_d <- tibble(x = g_d, vote = pd(fit_both, "dem", g_d))
 ```
 
 ::: {.notes}
-Simulated counties, not data: % Black from a beta distribution; party (% Democratic identifiers) rises steeply with % Black and then levels off; vote share is an S-shaped function of party plus a smaller direct curve in % Black. So the CEF of vote share given both is additive, and the GAM recovers it. Its partial dependence plots, on the vote-share scale: strong in party, much flatter in % Black (`r round(diff(range(pdp_b$vote)))` points over the range, against `r round(diff(range(pdp_b$total)))` without party in the model, the dashed curve). They show the direct paths only; race acts on vote share mostly through party. Which diagram fits, and whether the law asks about the total or the direct dependence, are not statistical questions. Next lecture: partial dependence for any model.
+Simulated counties, not data: % Black from a beta distribution; party (% Democratic identifiers) rises steeply with % Black and then levels off; vote share is an S-shaped function of party plus a smaller direct curve in % Black. So the CEF of vote share given both is additive, and the GAM recovers it. Its partial dependence plots, on the vote-share scale: strong in party, much flatter in % Black (`r round(diff(range(pdp_b$vote)))` points over the range, against `r round(diff(range(pdp_b$total)))` without party in the model, the dashed curve, which comes after the pause). They show the direct paths only; race acts on vote share mostly through party. Which diagram fits, and whether the law asks about the total or the direct dependence, are not statistical questions. Next lecture: partial dependence for any model.
 :::
 
 ::: {.columns}
@@ -506,18 +518,31 @@ ggplot() +
 Simulated counties, an additive CEF, a GAM that fits it. Each partial dependence plot holds the other input fixed: the **direct** path only. Race acts mostly through party, a **mediator**
 :::
 ::: {.column width="55%"}
+::: {.r-stack}
 ```{r}
 #| label: mediation-pdp
 #| fig-width: 5.8
 #| fig-height: 4.9
 p_race <- ggplot(pdp_b, aes(x, vote)) + geom_line(colour = m_pink, linewidth = 1.5) +
-  geom_line(aes(y = total), colour = v_blue, linewidth = 1.2, linetype = "dashed") +
-  annotate("text", x = 47, y = 71, label = "without party in the model", colour = v_blue, size = 4.6) +
   coord_cartesian(ylim = c(0, 100)) + labs(x = "county % Black", y = "vote share (%)")
 p_party <- ggplot(pdp_d, aes(x, vote)) + geom_line(colour = m_pink, linewidth = 1.5) +
   coord_cartesian(ylim = c(0, 100)) + labs(x = "county % Democratic", y = "vote share (%)")
 p_race / p_party
 ```
+
+::: {.fragment}
+```{r}
+#| label: mediation-pdp-total
+#| fig-width: 5.8
+#| fig-height: 4.9
+# The same figure, with the race curve of a GAM without party added (after the pause).
+p_race_total <- p_race +
+  geom_line(aes(y = total), colour = v_blue, linewidth = 1.2, linetype = "dashed") +
+  annotate("text", x = 47, y = 71, label = "without party in the model", colour = v_blue, size = 4.6)
+p_race_total / p_party
+```
+:::
+:::
 :::
 :::
 
@@ -677,8 +702,8 @@ tree_p <- ggplot() + geom_segment(data = edges, aes(x, y, xend = xend, yend = ye
   geom_label(data = leaves, aes(x, y, label = lab), size = 5.4, colour = v_dark, fill = "white", fontface = "bold", lineheight = 0.9) +
   scale_y_continuous(limits = c(0.6, 3.3)) + scale_x_continuous(limits = c(-1.9, 1.9)) + theme_void()
 part_p <- ggplot(sw, aes(year, rating)) +
-  geom_vline(xintercept = cut0, colour = m_pink, linewidth = 1.1) +
-  geom_vline(xintercept = c(cut_old, cut_new), colour = m_pink, linetype = "dashed") +
+  geom_vline(xintercept = cut0, colour = v_green, linewidth = 1.3) +
+  geom_vline(xintercept = c(cut_old, cut_new), colour = v_green, linewidth = 1.1, linetype = "dashed") +
   geom_segment(data = sw_leaf, aes(x = pmax(lo, 1975), xend = pmin(hi, 2004), y = mean, yend = mean),
                colour = m_pink, linewidth = 1.2, inherit.aes = FALSE) +
   geom_point(size = 4, colour = v_dark) +
@@ -705,7 +730,7 @@ Legacy "Complexity and overfitting" and "Growing and pruning", reworked. Grown o
 :::
 
 - **Recursive**: split the data by the most discriminating single-variable question; then do the same inside each leaf, and so on
-- **Greedy**: each split is the best *now*. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree
+- **Greedy**: each split is the best *now*. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree, then prune (next slide)
 - **When to stop**: a leaf too small to split (rpart's `minsplit`), or no split that improves the fit enough (`cp`)
 - Grown until no leaf can split, a tree is like 1-nearest neighbors: on the training films, year and length alone give `r format(n_leaves, big.mark = ",")` leaves
 
@@ -713,7 +738,7 @@ Legacy "Complexity and overfitting" and "Growing and pruning", reworked. Grown o
 $k$ nearest neighbors average the $k$ training points closest to $x_0$; a tree averages those in $x_0$'s leaf, a neighborhood chosen by subsets of features
 :::
 
-## Pruning
+## Pruning {.inverse}
 
 ```{r}
 #| label: sw-prune
@@ -723,6 +748,8 @@ alpha_cut <- sort(sw_rp$cptable[-nrow(sw_rp$cptable), "CP"] * sw_rp$frame$dev[1]
 ```
 
 ::: {.notes}
+Compress: for each alpha the sub-tree with the least RSS + alpha x leaves; the sub-trees are nested, and alpha is tuned on held-out data.
+
 The grown Star Wars tree: 4 leaves, RSS 0. Thresholds: the prequels' split saves `r sprintf("%.2f", alpha_cut[1])` for its one extra leaf, the originals' `r sprintf("%.2f", alpha_cut[2])`, the root `r sprintf("%.2f", alpha_cut[3])`; rpart's cptable has the same numbers divided by the root RSS. Why nested: for one branch, each way of pruning it costs RSS + alpha x (its leaves), a line in alpha whose slope is its number of leaves; cutting the branch back to one leaf is the line with the smallest slope, so once it is the cheapest it stays the cheapest as alpha grows. A branch cut at some alpha stays cut at every larger alpha (Breiman et al. 1984, ties broken toward the smaller tree). For one alpha, the best sub-tree is a dynamic program from the leaves up: at each node, the cheaper of one leaf and the children's best; the whole sequence comes from cutting the weakest branch, again and again.
 :::
 
@@ -733,6 +760,7 @@ For each $\alpha \geq 0$, the sub-tree minimizing $\text{RSS} + \alpha \times (\
 #| fig-width: 12
 #| fig-height: 3.5
 #| fig-align: center
+#| dark: true
 nodes <- tibble(id = c("root", "old", "new"), x = c(0, -1, 1), y = c(3, 2, 2),
                 lab = paste("year <", c(sw_best$cut, cut_old, cut_new)))
 leaves <- sw_leaf |> mutate(parent = c("old", "old", "new", "new"), x = c(-1.5, -0.5, 0.5, 1.5), y = 1,
@@ -746,15 +774,15 @@ panel <- function(cut, title) {   # cut: the internal nodes pruned to leaves
   if ("root" %in% cut) cut <- c("root", "old", "new")
   e_keep <- !(edges$from %in% cut)
   ggplot() +
-    geom_segment(data = edges[!e_keep, ], aes(x, y, xend = xend, yend = yend), colour = "grey85", linewidth = 0.7, linetype = "dashed") +
-    geom_segment(data = edges[e_keep, ], aes(x, y, xend = xend, yend = yend), colour = "grey35", linewidth = 0.9) +
-    geom_label(data = leaves |> filter(parent %in% cut), aes(x, y, label = lab), size = 4.6, colour = "grey75", fill = "white", lineheight = 0.9) +
-    geom_label(data = leaves |> filter(!parent %in% cut), aes(x, y, label = lab), size = 5, colour = v_dark, fill = "white", fontface = "bold", lineheight = 0.9) +
-    geom_label(data = nodes |> filter(!id %in% cut), aes(x, y, label = lab), size = 4.6, colour = m_pink, fill = "white") +
+    geom_segment(data = edges[!e_keep, ], aes(x, y, xend = xend, yend = yend), colour = "grey45", linewidth = 0.7, linetype = "dashed") +
+    geom_segment(data = edges[e_keep, ], aes(x, y, xend = xend, yend = yend), colour = "grey80", linewidth = 0.9) +
+    geom_label(data = leaves |> filter(parent %in% cut), aes(x, y, label = lab), size = 4.6, colour = "grey55", fill = "#4d0e5d", lineheight = 0.9) +
+    geom_label(data = leaves |> filter(!parent %in% cut), aes(x, y, label = lab), size = 5, colour = "white", fill = "#6b3678", fontface = "bold", lineheight = 0.9) +
+    geom_label(data = nodes |> filter(!id %in% cut), aes(x, y, label = lab), size = 4.6, colour = m_orange, fill = "#5c226a") +
     geom_label(data = nodes |> filter(id %in% cut, !(id != "root" & "root" %in% cut)) |> mutate(lab = merged[id]),
-               aes(x, y, label = lab), size = 5, colour = v_dark, fill = "#fdf4f8", fontface = "bold", lineheight = 0.9) +
+               aes(x, y, label = lab), size = 5, colour = "#fde725", fill = "#5e214d", fontface = "bold", lineheight = 0.9) +   # opaque fills: the slide's purple lightened, so no edge shows through
     scale_y_continuous(limits = c(0.55, 3.35)) + scale_x_continuous(limits = c(-1.95, 1.95)) +
-    labs(title = title) + theme_void() + theme(plot.title = element_text(size = 17, hjust = 0.5, lineheight = 1))
+    labs(title = title) + theme_void() + theme(plot.title = element_text(size = 17, hjust = 0.5, lineheight = 1, colour = "white"))
 }
 a <- sprintf("%.2f", alpha_cut)
 rss_k <- c(0, rss_of(sw_new), rss_of(sw_old) + rss_of(sw_new), sw_root)
@@ -766,7 +794,7 @@ panel(character(0), bquote(atop(0 <= alpha * " < " * .(a[1]), "4 leaves, RSS 0")
 
 Sequence of trees; tuning knob $\alpha$ chosen by cross-validation or held-out data
 
-## Choosing $\alpha$ on the films
+## Choosing $\alpha$ on the films {.inverse}
 
 ```{r}
 #| label: prune-path
@@ -783,6 +811,8 @@ best_prune <- prune_path |> slice_min(tuning, n = 1)
 ```
 
 ::: {.notes}
+Compress: training error falls with every leaf; tuning error picks the size.
+
 In rpart the sequence is the cptable, cp a rescaled alpha; rpart's own cross-validation (xval, 10 folds by default) fills its xerror column. Here the tuning films instead. In bagging and forests the trees are usually not pruned at all: grown deep, and averaged.
 :::
 
@@ -793,15 +823,16 @@ A tree on all nine inputs, grown to `r max(prune_path$leaves)` leaves, pruned ba
 #| fig-width: 11
 #| fig-height: 3.4
 #| fig-align: center
+#| dark: true
 prune_path |> pivot_longer(c(training, tuning), names_to = "films", values_to = "MSE") |>
   ggplot(aes(leaves, MSE, colour = films)) + geom_line(linewidth = 1.2) +
-  geom_vline(xintercept = best_prune$leaves, linetype = "dashed", colour = "grey40") +
-  scale_x_log10() + scale_colour_manual(values = c(training = v_teal, tuning = m_pink), name = NULL) +
+  geom_vline(xintercept = best_prune$leaves, linetype = "dashed", colour = "grey70") +
+  scale_x_log10() + scale_colour_manual(values = c(training = v_green, tuning = m_orange), name = NULL) +
   labs(x = "leaves of the pruned tree (log axis)", y = "MSE")
 ```
 
 
-## Trees and missing inputs {.inverse}
+## Trees and missing inputs
 
 ```{r}
 #| label: budget-missing
@@ -811,7 +842,7 @@ med_votes <- mv_b |> group_by(known) |> summarise(v = median(votes)) |> with(set
 ```
 
 ::: {.notes}
-Skip if behind. Missingness incorporated in attributes (MIA; Twala, Jones and Hand 2008): each split also chooses where the missing values go, or splits missing against observed; Josse et al. (2024) recommend it because it handles both uninformative and informative missingness. xgboost's default direction is this idea (Chen and Guestrin 2016). rpart's surrogates (Breiman et al. 1984) treat missingness as a nuisance. randomForest stops on missing inputs (impute first, e.g. na.roughfix).
+Missingness incorporated in attributes (MIA; Twala, Jones and Hand 2008): each split also chooses where the missing values go, or splits missing against observed; Josse et al. (2024) recommend it because it handles both uninformative and informative missingness. xgboost's default direction is this idea (Chen and Guestrin 2016). rpart's surrogates (Breiman et al. 1984) treat missingness as a nuisance. randomForest stops on missing inputs (impute first, e.g. na.roughfix).
 :::
 
 The films' `budget` is missing for `r round(100 * mean(!mv_b$known))`%: a film with no budget cannot answer "budget < c?"
@@ -825,7 +856,7 @@ The films' `budget` is missing for `r round(100 * mean(!mv_b$known))`%: a film w
 ::: {.notes}
 QUESTION: same method, same films, four different trees: what should we do?
 
-Each tree is grown to depth 2 on a random half of the 5,000 training films. The root question changes between halves, and so do the questions under it. The structures lecture showed the same on the countries, with resamples; some will remember averaging. A minute for the room; the next slide's three strategies are the answers.
+Each tree is grown to depth 2 on a random half of the 5,000 training films. These four halves were picked for the example: seed 21, found by searching for four trees that disagree visibly on this film. Typical spread, computed separately on 15 November: over 400 random halves its prediction has standard deviation 0.35 and runs from 5.3 to 7.1, and about one set of four in five has a prediction below 6 or above 7. The root question changes between halves, and so do the questions under it. The structures lecture showed the same on the countries, with resamples; some will remember averaging. A minute for the room; the next slide's three strategies are the answers.
 :::
 
 ```{r}
@@ -835,8 +866,13 @@ Each tree is grown to depth 2 on a random half of the 5,000 training films. The 
 #| fig-align: center
 # Genre flags as factors, so that a split prints "Drama=yes", not "Drama>=0.5"; the trees are the same.
 mv_train_f <- mv_train |> mutate(across(all_of(genres), function(g) factor(g, levels = 0:1, labels = c("no", "yes"))))
+# The halves draw with their own seed, chosen so that the four trees disagree visibly on the film (see the
+# note); the deck's stream is put back afterwards, so the draws below do not depend on this example.
+rng_deck <- .Random.seed
+set.seed(21)
 half_trees <- map(1:4, function(b) rpart(f_all, data = slice_sample(mv_train_f, n = 2500),
                                          control = rpart.control(maxdepth = 2, cp = 0, minbucket = 30)))
+assign(".Random.seed", rng_deck, envir = globalenv())
 phantom <- mv |> filter(grepl("Phantom Menace", title)) |>
   mutate(across(all_of(genres), function(g) factor(g, levels = 0:1, labels = c("no", "yes"))))
 pred_ph <- sapply(half_trees, function(t) predict(t, phantom))
@@ -1003,9 +1039,11 @@ We may add one small tree to $\hat f^{(b)}$. What should it predict?
 
 The residual from the existing fit: $y - \hat f^{(b)}(x)$
 
-## Boosting: iterated fitting on residuals
+## Boosting: iterated fitting on residuals {.inverse}
 
 ::: {.notes}
+Compress: fit models one after another, each a small step toward the residuals; gradient descent with a weak learner for the step.
+
 Legacy slide, after the answer on the last one; the ESL link is the current address, and two parentheticals are dropped (assessment information; "maximum inner product", unbounded without a norm constraint). The tree is found greedily, so it approximates the closest small tree.
 :::
 
@@ -1100,7 +1138,7 @@ bc |> pivot_longer(c(training, tuning)) |>
 ::: {.column width="44%"}
 **Iterations $B$.** Training error keeps falling; tuning error turns. Stopping there is early stopping, as for gradient descent
 
-**Learning rate $\gamma$.** Smaller steps, more of them, to reach about the same minimum
+**Learning rate $\gamma$.** Smaller steps
 
 **Depth.** How many inputs one tree can combine (next)
 :::
@@ -1141,16 +1179,6 @@ Skip if behind. Legacy slide; the link now goes to the book (References), not a 
 But consider, [Alfred North Whitehead](https://www.gutenberg.org/ebooks/41568) wrote (1911):
 
 > It is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. **Civilization advances by extending the number of important operations which we can perform without thinking about them**.
-
-## Before the seminar
-
-::: {.notes}
-Say it once. The exercises are what the seminar's problems vary (the seminar plan is agreed after this deck).
-:::
-
-- This week: exercises 1 and 2 at the top of the notebook. The correlated-average variance again, with the slides closed; and one boosting step by hand
-
-- In the seminar: a split found by hand, bagging's variance measured against the formula, and boosting on the films
 
 ## Conclusion {.inverse}
 
