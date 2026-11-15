@@ -18,14 +18,14 @@
     "href": "data/movies.html",
     "title": "Movies",
     "section": "",
-    "text": "Source\nIMDb data extracted by Hadley Wickham, shipped in the R package ggplot2movies (GPL-3). IMDb’s terms restrict commercial use.\n\n\nRows\nOne row per film (58,788 rows), films with a known length and at least five user votes, 1893 to 2005.\n\n\nColumns\ntitle, year, length (minutes), budget (91% missing), rating (average user rating, 1 to 10), votes, r1 to r10 (the share of users giving each rating, in coarse bands, so a row need not sum to 100), mpaa (mostly blank), and seven genre indicators (Action, Animation, Comedy, Drama, Documentary, Romance, Short).\n\n\nTarget\nrating. The ratings come from people who chose to watch a film and then to rate it.\n\n\nNotes\nvotes and r1 to r10 are computed from the same users’ ratings as rating, so they are not used as inputs. Lengths are as reported to IMDb; there is no director, cast, language or country. The course uses the 53,388 films from 1919 on that run 11 to 200 minutes (the loader below)."
+    "text": "Source\nIMDb data extracted by Hadley Wickham, shipped in the R package ggplot2movies (GPL-3). IMDb’s terms restrict commercial use.\n\n\nRows\nOne row per film (58,788 rows), films with a known length and at least five user votes, 1893 to 2005.\n\n\nColumns\ntitle, year, length (minutes), budget (91% missing), rating (average user rating, 1 to 10), votes, r1 to r10 (the share of users giving each rating, in coarse bands, so a row need not sum to 100), mpaa (mostly blank), and seven genre indicators (Action, Animation, Comedy, Drama, Documentary, Romance, Short).\n\n\nTarget\nrating. The ratings come from people who chose to watch a film and then to rate it.\n\n\nNotes\nvotes and r1 to r10 are computed from the same users’ ratings as rating, so they are not used as inputs. Lengths are as reported to IMDb; there is no director, cast, language or country. The course uses the 33,287 films from 1919 on that run 11 to 200 minutes and have at least 20 votes (the loader below)."
   },
   {
     "objectID": "data/movies.html#loader",
     "href": "data/movies.html#loader",
     "title": "Movies",
     "section": "Loader",
-    "text": "Loader\nlibrary(tidyverse)\nlibrary(ggplot2movies)\nmv &lt;- movies |&gt;\n  filter(length &lt;= 200, length &gt; 10, year &gt; 1918, votes &gt;= 5)"
+    "text": "Loader\nlibrary(tidyverse)\nlibrary(ggplot2movies)\nmv &lt;- movies |&gt;\n  filter(length &lt;= 200, length &gt; 10, year &gt; 1918, votes &gt;= 20)"
   },
   {
     "objectID": "weeks/07-regularization-highdim/slides/07-1-regularization.html#section",
@@ -560,11 +560,11 @@
     "text": "Week 7: tuning and regularization\nEvery method so far had a knob. This week: choosing it by \\(K\\)-fold cross-validation, with the curve it draws against \\(\\lambda\\), \\(k\\) and tree depth, and the standard error of a held-out score. Then how the error depends on \\(n\\) and the number of inputs: from the bias–variance decomposition, the error of \\(k\\)-nearest neighbors with \\(p\\) inputs, the rate \\(n^{-2/(p+2)}\\), and the faster rates an additive or a sparse truth allows. Ridge and the lasso side by side in the simplest design: shrinkage against soft thresholding, and selection against prediction; the smoothing penalty on a spline as ridge with weights. Double descent: which zero-error fit you get past the interpolation threshold, why the test error can fall again, and why that does not contradict the bias–variance trade-off.\nReading\n\nISLR Chapter 5 (Resampling Methods), section 5.1, pp. 198–208: the validation set, leave-one-out and \\(K\\)-fold cross-validation, and the bias–variance trade-off in choosing \\(K\\). Skim 5.1.5 (classification), pp. 206–208. Section 5.2, the bootstrap, is not needed this week.\nISLR Chapter 6, section 6.2.3, pp. 250–251 (choosing the tuning parameter by cross-validation), picking up where the last reading stopped. Re-read “A simple special case for ridge regression and the lasso”, pp. 247–249: the lecture works in that design.\nISLR Chapter 6, section 6.4, pp. 261–267 (what changes when \\(p &gt; n\\)). Section 6.3, which comes between them, is not part of the course.\nISLR Chapter 7, section 7.5.1, pp. 301–302 (smoothing splines: a penalty on wiggliness instead of a basis size). Skim 7.5.2, pp. 302–304.\n\nOptional: PPA Chapter 6 (Generalization), “Generalization gap” and “Overparameterization: empirical phenomena”, pp. 100–104 (the double-descent curve, and why it is not universal); ISLR section 10.8, pp. 439–443 (interpolation and double descent, with the natural-spline example the lecture demonstrates); ISLR section 3.5, pp. 105–110, re-read (what happens to \\(k\\)-nearest neighbors as the number of inputs grows).\nDeeper: ESL section 7.10.2, pp. 245–247 (the wrong and the right way to do cross-validation, which the seminar meets); ESL section 2.5, pp. 22–28 (local methods in high dimensions); ESL sections 3.4.1–3.4.3, pp. 61–73 (ridge and the lasso in general designs); Belkin, M., Hsu, D., Ma, S. and Mandal, S. (2019), “Reconciling modern machine-learning practice and the classical bias–variance trade-off”, Proceedings of the National Academy of Sciences 116(32), 15849–15854, doi:10.1073/pnas.1903070116; Györfi, L., Kohler, M., Krzyżak, A. and Walk, H. (2002), A Distribution-Free Theory of Nonparametric Regression, Springer, New York, doi:10.1007/b97848, Chapter 6, and Stone, C. J. (1982), “Optimal global rates of convergence for nonparametric regression”, Annals of Statistics 10(4), 1040–1053, doi:10.1214/aos/1176345969, for the rigorous and the minimax form of the nearest-neighbor rate the lecture derives from a stated lemma.\nLecture: slides\nExtra: James-Stein shrinkage, a picture: the lecture’s shrinkage figure done properly, in two and three dimensions, interactive.\nSeminar: notebook (.qmd). Before the seminar, do exercises 1 and 2 at the top of the notebook (the ridge form of the bias–variance decomposition, proved with hints, and the \\(k\\)-nearest-neighbor rate again with the slides closed); the seminar’s problems are variations on them, with one more on the number of folds. Then a cross-validation pipeline on the Spotify tracks (data note); learning curves for \\(k\\)-nearest neighbors in one, two, five and ten dimensions, read against the rate; and, after cross-validation has worked for you, three ways it goes wrong: the same track on both sides of a fold, a random split against a split in time, and inputs chosen on all the rows before cross-validating."
   },
   {
-    "objectID": "index.html#week-8-additive-models-trees-and-ensembles",
-    "href": "index.html#week-8-additive-models-trees-and-ensembles",
+    "objectID": "index.html#week-8-additivity-vs-interactions-and-ensembles",
+    "href": "index.html#week-8-additivity-vs-interactions-and-ensembles",
     "title": "ST310 course page",
-    "section": "Week 8: additive models, trees and ensembles",
-    "text": "Week 8: additive models, trees and ensembles\nHow some flexible fits are built, and how to read them. An additive model fitted one curve at a time, each to what the others leave; partial dependence and ICE plots, which show one input’s part in any fitted model and can hide an interaction. A tree built one greedy split at a time, then pruned. Bagging and random forests: the variance of an average of correlated trees, and the out-of-bag error. Boosting as gradient descent, one small tree at a time. Permutation importance, why permuting an input can mislead, and leave-one-covariate-out importance. Data: IMDb films (data note).\nReading\n\nISLR Chapter 8 (Tree-Based Methods), section 8.1, pp. 327–340, all of it this time: regression trees again, pruning, classification trees, trees against linear models.\nISLR Chapter 8, sections 8.2.1–8.2.3, pp. 340–348: bagging (with out-of-bag error and variable importance measures), random forests, boosting. Section 8.2.4, Bayesian additive regression trees, is not part of the course.\nISLR Chapter 7, section 7.7.1, pp. 307–310, re-read: fitting an additive model one predictor at a time (backfitting).\nIML, Partial Dependence Plot (PDP): the sections “Definition and estimation”, “Examples” and “Limitations”.\nIML, Permutation Feature Importance: the opening paragraph and the sections “Theory” and “Example and interpretation”. Stop before “Conditional feature importance”.\nIML, Leave One Feature Out (LOFO) Importance: from the start of the chapter through “Examples”, then the section “LOFO versus PFI”. The lecture calls this method leave-one-covariate-out (LOCO); it is the same thing.\n\nOptional, deeper: ESL section 10.13, pp. 367–370 (relative importance of predictors and partial dependence plots); ESL section 9.1.1, pp. 297–299 (the backfitting algorithm); Hooker, G., Mentch, L. and Zhou, S. (2021), “Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance”, Statistics and Computing 31(6), article 82, doi:10.1007/s11222-021-10057-z; Lei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018), “Distribution-free predictive inference for regression”, Journal of the American Statistical Association 113(523), 1094–1111, section 6 only, doi:10.1080/01621459.2017.1307116.\nLecture: slides"
+    "section": "Week 8: additivity vs interactions, and ensembles",
+    "text": "Week 8: additivity vs interactions, and ensembles\nHow some flexible fits are built. An additive model fitted one curve at a time, each to what the others leave; its one-input plots, which are partial dependence plots, and how additivity can be importantly wrong when the truth has interactions. A tree built one greedy split at a time, then pruned. Bagging and random forests: the variance of an average of correlated trees, and the out-of-bag error. Boosting as gradient descent, one small tree at a time. Partial dependence for other models, and feature importance, come in the next lecture. Data: IMDb films (data note).\nReading\n\nISLR Chapter 8 (Tree-Based Methods), section 8.1, pp. 327–340, all of it this time: regression trees again, pruning, classification trees, trees against linear models.\nISLR Chapter 8, sections 8.2.1–8.2.3, pp. 340–348: bagging (with out-of-bag error and variable importance measures), random forests, boosting. Section 8.2.4, Bayesian additive regression trees, is not part of the course.\nISLR Chapter 7, section 7.7.1, pp. 307–310, re-read: fitting an additive model one predictor at a time (backfitting).\n\nOptional, deeper: ESL section 9.1.1, pp. 297–299 (the backfitting algorithm).\nLecture: slides"
   },
   {
     "objectID": "index.html#week-9-what-can-we-learn-from-a-fitted-prediction",
@@ -2209,14 +2209,14 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#section",
     "title": "Machine learning",
     "section": "",
-    "text": "Week 8: additive models, trees and ensembles\nPart 1: fitting an additive model\nPart 2: plots for other models\nPart 3: building a tree\nPart 4: three model improvement strategies\nPart 5: feature importance"
+    "text": "Week 8: additivity vs interactions, and ensembles\nPart 1: fitting an additive model\nPart 2: additivity vs interactions\nPart 3: building a tree\nPart 4: three model improvement strategies"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#where-we-left-off",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#where-we-left-off",
     "title": "Machine learning",
     "section": "Where we left off",
-    "text": "Where we left off\nLast time: each modeling assumption makes some models work well, and cross-validation tunes their knobs\n\nName one modeling assumption, and a model that works well when it holds"
+    "text": "Where we left off\n\nList the modeling assumptions and respective methods\n\n\n\n\n\n\n\n\n\nAssumption\nMethods\n\n\n\n\nLinearity\nlinear and logistic regression\n\n\nSmoothness (Lipschitz)\n\\(k\\) nearest neighbors; also trees and networks\n\n\nAdditivity: one curve per input\nadditive models (a spline per input)\n\n\nLimited wiggliness\npenalized splines\n\n\nSparsity: few inputs matter\nthe lasso\n\n\nSmall coefficients\nridge regression"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section-1",
@@ -2230,14 +2230,14 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#the-movies-data",
     "title": "Machine learning",
     "section": "The movies data",
-    "text": "The movies data\n\n\n\nlibrary(ggplot2movies)\nmv &lt;- movies |&gt;\n  filter(length &lt;= 200, length &gt; 10,\n         year &gt; 1918, votes &gt;= 5)\n\nIMDb films up to 2005, 53,388 after this selection (data note)\n\nTarget: rating, average user rating, 1 to 10\nInputs: year, length (minutes), seven genre flags\nNot used: votes, r1 to r10 (from the same ratings)\n\n\n\n\n\n\n\n\n\n\n\nA random 10,000: 5,000 training, 2,000 tuning, 3,000 test"
+    "text": "The movies data\n\n\n\nlibrary(ggplot2movies)\nmv &lt;- movies |&gt;\n  filter(length &lt;= 200, length &gt; 10,\n         year &gt; 1918, votes &gt;= 20)\n\nIMDb films up to 2005, 33,287 after this selection (data note)\n\nTarget: rating, average user rating, 1 to 10\nInputs: year, length (minutes), seven genre flags\nNot used: votes, r1 to r10 (from the same ratings)\n\n\n\n\n\n\n\n\n\n\n\nA random 10,000: 5,000 training, 2,000 tuning, 3,000 test"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#additive-combination-of-non-linear-predictors",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#additive-combination-of-non-linear-predictors",
     "title": "Machine learning",
     "section": "Additive combination of non-linear predictors",
-    "text": "Additive combination of non-linear predictors\n\nlibrary(mgcv)\nfit_gam &lt;-\n  gam(rating ~ s(length) + s(year) + Short, data = mv_train)\n\ns is a penalized spline, but can use different methods too\n\ntidy(fit_gam)\n\n# A tibble: 2 × 5\n  term        edf ref.df statistic p.value\n  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;\n1 s(length)  6.08   7.16      47.9       0\n2 s(year)    8.01   8.71      29.3       0\n\n\nNo single slope per input: how do we interpret the fitted curves?"
+    "text": "Additive combination of non-linear predictors\n\nlibrary(mgcv)\nfit_gam &lt;-\n  gam(rating ~ s(length) + s(year) + Short, data = mv_train)\n\ns is a penalized spline, but can use different methods too\n\ntidy(fit_gam)\n\n# A tibble: 2 x 5\n  term        edf ref.df statistic p.value\n  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;\n1 s(length)  7.60   8.44      76.4       0\n2 s(year)    6.84   7.88      61.7       0\n\n\nNo single slope per input: how do we interpret the fitted curves?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#replace-each-linear-coefficient-with-2d-plot",
@@ -2251,14 +2251,21 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#fitting-several-curves",
     "title": "Machine learning",
     "section": "Fitting several curves",
-    "text": "Fitting several curves\n\nWe know how to fit a spline to one input: least squares on its basis matrix. How could we fit a model with a curve for each of several inputs?\n\n\n\n\nBackfitting algorithm\n\n\nSet \\(\\hat \\beta_0 = \\bar y\\) and start with some initial estimates \\(\\hat f_j\\), e.g. \\(\\hat f_j = 0\\) or from y ~ x_j\nIterate over \\(j\\), updating \\(\\hat f_j\\) by fitting r_j ~ x_j where the partial residual \\(\\mathbf r_j = \\mathbf y - \\hat \\beta_0 - \\sum_{k \\neq j} \\hat f_k(\\mathbf x_k)\\) is computed using the current fits for all the other predictors; then center \\(\\hat f_j\\) (subtract its mean over the data)\nRepeat until “convergence” (some stopping rule)"
+    "text": "Fitting several curves\n\nWe know how to fit a spline to one input: least squares on its basis matrix. How could we fit a model with a curve for each of several inputs?"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-algorithm",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-algorithm",
+    "title": "Machine learning",
+    "section": "Backfitting algorithm",
+    "text": "Backfitting algorithm\nModel: \\(\\hat f(\\mathbf x) = \\hat\\beta_0 + \\hat f_1(x_1) + \\cdots + \\hat f_p(x_p)\\)\n\nStart: \\(\\hat\\beta_0 = \\bar y\\), and \\(\\hat f_j = 0\\) for every \\(j\\)\nSweep \\(t = 1, 2, \\ldots\\): for \\(j = 1, \\ldots, p\\) in turn,\n\npartial residual, with the latest fit of every other curve: \\(r_{ij} = y_i - \\hat\\beta_0 - \\sum_{k \\neq j} \\hat f_k(x_{ik})\\)\nnew \\(\\hat f_j\\): a one-input smoother (e.g. a spline) of the \\(r_{ij}\\) on the \\(x_{ij}\\), centered to mean zero\n\nStop when a sweep barely changes the fitted values"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-and-partialling-out",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-and-partialling-out",
     "title": "Machine learning",
     "section": "Backfitting and partialling out",
-    "text": "Backfitting and partialling out\nTwo centered inputs and lines for components, \\(\\hat f_j(x) = \\beta_j x\\). Step 2 for \\(j = 1\\) regresses the partial residual on \\(\\mathbf x_1\\): \\[\n\\beta_1 \\leftarrow \\frac{\\mathbf x_1^T(\\mathbf y - \\beta_2 \\mathbf x_2)}{\\mathbf x_1^T \\mathbf x_1}, \\qquad\n\\beta_2 \\leftarrow \\frac{\\mathbf x_2^T(\\mathbf y - \\beta_1 \\mathbf x_1)}{\\mathbf x_2^T \\mathbf x_2}\n\\]\n\nThe loop can stop only where both hold: \\(\\mathbf x_j^T(\\mathbf y - \\beta_1 \\mathbf x_1 - \\beta_2 \\mathbf x_2) = 0\\) for \\(j = 1, 2\\). These are the normal equations: the fixed point is least squares\n\nPartialling-out theorem: the coefficient on \\(\\mathbf x_2\\) is \\(\\tilde{\\mathbf x}_2^T \\mathbf y / \\tilde{\\mathbf x}_2^T \\tilde{\\mathbf x}_2\\), the slope on what is left of \\(\\mathbf x_2\\) after \\(\\mathbf x_1\\) has explained what it can.\n\nWith a smoother in place of each line, the same loop fits an additive model: each curve fitted to what the others leave"
+    "text": "Backfitting and partialling out\nTwo centered inputs, and a line for each component: \\(\\hat f_j(x) = \\hat\\beta_j x\\). Start at \\(\\hat\\beta_2^{(0)} = 0\\). Sweep \\(t\\) fits each slope to its partial residual: \\[\n\\hat\\beta_1^{(t)} = \\frac{\\mathbf x_1^T\\big(\\mathbf y - \\hat\\beta_2^{(t-1)} \\mathbf x_2\\big)}{\\mathbf x_1^T \\mathbf x_1}, \\qquad\n\\hat\\beta_2^{(t)} = \\frac{\\mathbf x_2^T\\big(\\mathbf y - \\hat\\beta_1^{(t)} \\mathbf x_1\\big)}{\\mathbf x_2^T \\mathbf x_2}\n\\]\n\nThe slopes stop changing only where both hold: \\(\\mathbf x_j^T(\\mathbf y - \\hat\\beta_1 \\mathbf x_1 - \\hat\\beta_2 \\mathbf x_2) = 0\\) for \\(j = 1, 2\\). These are the normal equations: the fixed point is least squares\n\nPartialling-out theorem: the coefficient on \\(\\mathbf x_2\\) is \\(\\tilde{\\mathbf x}_2^T \\mathbf y / \\tilde{\\mathbf x}_2^T \\tilde{\\mathbf x}_2\\), the slope on what is left of \\(\\mathbf x_2\\) after \\(\\mathbf x_1\\) has explained what it can.\n\nBackfitting does this with smooth curves instead of lines"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-on-the-films",
@@ -2272,14 +2279,28 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-more-generally",
     "title": "Machine learning",
     "section": "Backfitting, more generally",
-    "text": "Backfitting, more generally\nAny number of inputs. With one coefficient per input, each update minimizes the RSS over that coefficient with the others held fixed: coordinate descent (Gauss–Seidel, in numerical linear algebra). It converges to least squares: in one sweep for orthogonal inputs, slowly for strongly related ones\nGram–Schmidt partials out the other way round: it residualizes each input on the ones before it, once. Backfitting leaves the inputs alone and residualizes \\(\\mathbf y\\), again and again\nPartialling out with flexible fits. Residualize both \\(\\mathbf y\\) and \\(\\mathbf x_j\\) on the other inputs, with any regression method, then regress residual on residual: double machine learning, later in the course"
+    "text": "Backfitting, more generally\nAny number of inputs. With one coefficient per input, each update minimizes the RSS over that coefficient with the others held fixed: coordinate descent (Gauss–Seidel, in numerical linear algebra). A spline gives each input a block of coefficients, updated together: block coordinate descent. Fast for unrelated inputs, slow for strongly related ones\nGram–Schmidt residualizes each input (predictor) on the ones before it, once. Backfitting leaves the inputs alone and residualizes \\(\\mathbf y\\) iteratively\nPartialling out with flexible fits. Residualize both \\(\\mathbf y\\) and \\(\\mathbf x_j\\) on the other inputs, with any regression method, then regress residual on residual: double machine learning, later in the course"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section-2",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#section-2",
     "title": "Machine learning",
     "section": "",
-    "text": "Part 2: plots for other models"
+    "text": "Part 2: additivity vs interactions"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#partial-dependence-plots-for-a-gam",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#partial-dependence-plots-for-a-gam",
+    "title": "Machine learning",
+    "section": "Partial dependence plots for a GAM",
+    "text": "Partial dependence plots for a GAM\nThese univariate plots for GAMs are called partial dependence plots (PDPs). They show how the GAM depends on each feature: a simple one-dimensional dependence, because of the additivity assumption\n\n\n\n\n\n\n\n\n\nBut what if additivity is wrong?"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#all-models-are-wrong",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#all-models-are-wrong",
+    "title": "Machine learning",
+    "section": "All models are wrong",
+    "text": "All models are wrong\n\n\n\nGeorge Box, ca. 1974. UW–Madison Archives\n\nAll models are wrong, but some are useful\n\nSince all models are wrong the scientist must be alert to what is importantly wrong. It is inappropriate to be concerned about mice when there are tigers abroad.\n\nBox (1976)\n\nRemember that all models are wrong; the practical question is how wrong do they have to be to not be useful.\n\nBox and Draper (1987)"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#can-additivitygams-be-importantly-wrong",
@@ -2296,39 +2317,11 @@
     "text": "Interactions in the movies data\nIf the slope in length changes with year, the derivative of \\(\\mathbb E[\\text{rating} \\mid \\text{length}, \\text{year}]\\) in length depends on year too, and an additive model is misspecified. Non-shorts, by decade:"
   },
   {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#now-true-model-is-not-additive",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#now-true-model-is-not-additive",
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#true-model-non-additive-gam-is-wrong",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#true-model-non-additive-gam-is-wrong",
     "title": "Machine learning",
-    "section": "Now true model is not additive",
-    "text": "Now true model is not additive\n\nf1 &lt;- function(x) x^2\nf2 &lt;- function(x) cos(pi * x / 2)\ndf_int &lt;- tibble(x1 = runif(2000, -1, 1), x2 = runif(2000, -4, 4)) |&gt;\n  mutate(y = f1(x1) * f2(x2) + rnorm(2000))\nfit_gam_wrong &lt;- gam(y ~ s(x1) + s(x2), data = df_int)\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe fitted component for \\(x_1\\) is nearly flat: a parabola opening upward when \\(\\cos(\\pi x_2/2) &gt; 0\\) and downward when \\(\\cos(\\pi x_2/2) &lt; 0\\) cancel when averaged over \\(x_2\\)\nAdditivity assumption is now (importantly) wrong"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#plotting-one-input",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#plotting-one-input",
-    "title": "Machine learning",
-    "section": "Plotting one input",
-    "text": "Plotting one input\nA forest fitted to these data can hold the interaction, but it has no components: \\(\\hat f(x_1, x_2)\\) is one function of both inputs\n\nWe want a plot of how \\(\\hat f\\) depends on \\(x_1\\). What do we do with \\(x_2\\) while we draw it?\nWrite down one way, and what that plot could hide."
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#partial-dependence",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#partial-dependence",
-    "title": "Machine learning",
-    "section": "Partial dependence",
-    "text": "Partial dependence\nFor models with multiple predictors, partial dependence plots can hide model structure. Options for the other variables:\n\nHold other variables fixed (e.g. at medians), plotmo default\nAverage over them, pdp method\nPlot a curve for each observation: individual conditional expectation (ICE), ice method\n\nUnit \\(i\\)’s inputs with input \\(j\\) set to a value \\(\\tilde x_j\\): \\(\\;\\tilde{\\mathbf x}_{ij} = (x_{i1}, \\ldots, \\tilde x_j, \\ldots, x_{ip})\\) \\[\n\\mathrm{ICE}_i:\\ \\tilde x_j \\mapsto \\hat f(\\tilde{\\mathbf x}_{ij}), \\qquad\n\\mathrm{PDP}_j:\\ \\tilde x_j \\mapsto \\frac1n \\sum_{i=1}^n \\hat f(\\tilde{\\mathbf x}_{ij})\n\\]\nA modified unit may resemble no real unit"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#regression-trees-bagging",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#regression-trees-bagging",
-    "title": "Machine learning",
-    "section": "Regression trees + bagging",
-    "text": "Regression trees + bagging\n\nfit_rf &lt;- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)\nice_x1 &lt;- partial(fit_rf, pred.var = \"x1\", ice = TRUE, train = df_sub)\n\n\n\n\n\n\n\n\n\n\nBlack: the PDP, the forest’s prediction averaged over the 100 units with \\(x_1\\) set and \\(x_2\\) left at each unit’s value. Nearly flat"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#regression-trees-bagging-1",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#regression-trees-bagging-1",
-    "title": "Machine learning",
-    "section": "Regression trees + bagging",
-    "text": "Regression trees + bagging\n\nfit_rf &lt;- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)\nice_x1 &lt;- partial(fit_rf, pred.var = \"x1\", ice = TRUE, train = df_sub)\n\n\n\n\n\n\n\n\n\n\nThin: one curve per unit (ICE), solid where \\(\\cos(\\pi x_2/2) &gt; 0\\), dashed where it is negative. The forest fitted the interaction; the average hides it"
+    "section": "True model non-additive; GAM is wrong",
+    "text": "True model non-additive; GAM is wrong\n\nf1 &lt;- function(x) x^2\nf2 &lt;- function(x) cos(pi * x / 2)\ndf_int &lt;- tibble(x1 = runif(2000, -1, 1), x2 = runif(2000, -4, 4)) |&gt;\n  mutate(y = f1(x1) * f2(x2) + rnorm(2000))\nfit_gam_wrong &lt;- gam(y ~ s(x1) + s(x2), data = df_int)\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe fitted component for \\(x_1\\) is nearly flat: a parabola opening upward when \\(\\cos(\\pi x_2/2) &gt; 0\\) and downward when \\(\\cos(\\pi x_2/2) &lt; 0\\) cancel when averaged over \\(x_2\\)\nAdditivity assumption is now (importantly) wrong"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section-3",
@@ -2352,32 +2345,53 @@
     "text": "Split search\n\n\n\n\n\n\n\n\n\n\n\n\nEvery cutoff between two films, scored by the RSS when each side predicts its own mean\nEach side of a split is a leaf (until it is split again)\nThen every input; keep the best; then recurse into each leaf. Greedy: each split is the best now\nFor a label: the same search, scoring each split by its leaves’ Gini indices \\(\\sum_k \\hat p_k (1 - \\hat p_k)\\), weighted by leaf size"
   },
   {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#growing-and-pruning",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#growing-and-pruning",
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#splitting-the-star-wars-films",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#splitting-the-star-wars-films",
     "title": "Machine learning",
-    "section": "Growing and pruning",
-    "text": "Growing and pruning\nSplit until no leaf can split, and a tree is like 1-nearest neighbors: 2,857 leaves on year and length alone\nGreedy splitting: each split is the best now, and stopping early can miss a weak split that enables a strong one below it. So grow a large tree\nOverfitting: then prune. Of the many sub-trees, take only the path of minimizers of \\[RSS(\\text{Sub-tree}) + \\alpha\\, |\\text{Sub-tree}|, \\qquad \\alpha \\geq 0\\] and choose \\(\\alpha\\), and so a sub-tree, by validation\n\n\\(k\\) nearest neighbors average the \\(k\\) training points closest to \\(x_0\\); a tree averages those in \\(x_0\\)’s leaf, a neighborhood chosen by the data"
+    "section": "Splitting the Star Wars films",
+    "text": "Splitting the Star Wars films\n\n\n\n\n\n\n\n\n\nEach dashed line is a cutoff, with the RSS of the two means above it (no split: 4.69). The best is year at 1991: the original trilogy against the prequels"
   },
   {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#four-samples-four-trees",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#four-samples-four-trees",
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#then-split-each-side-again",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#then-split-each-side-again",
     "title": "Machine learning",
-    "section": "Four samples, four trees",
-    "text": "Four samples, four trees\n\n\n\n\n\n\n\n\n\nDepth 2, each on a random half of the training films. The Shawshank Redemption (rated 9.1): predicted 7.00, 6.95, 6.95, 6.55\n\nSame method, same films, four different models. What should we do about this?"
+    "section": "Then split each side again",
+    "text": "Then split each side again\n\n\n\n\n\n\n\n\n\nThe same search inside each side: 4 leaves, each holding films of one rating, and a training RSS of 0. Grown until it cannot split, a tree memorizes its training data"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#growing-a-tree",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#growing-a-tree",
+    "title": "Machine learning",
+    "section": "Growing a tree",
+    "text": "Growing a tree\n\nRecursive: split the data by the best single question; then do the same inside each leaf, and so on\nGreedy: each split is the best now. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree\nWhen to stop: a leaf too small to split (rpart’s minsplit), or no split that improves the fit enough (cp)\nGrown until no leaf can split, a tree is like 1-nearest neighbors: on the training films, year and length alone give 2,670 leaves\n\n\n\\(k\\) nearest neighbors average the \\(k\\) training points closest to \\(x_0\\); a tree averages those in \\(x_0\\)’s leaf, a neighborhood chosen by the data"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#pruning",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#pruning",
+    "title": "Machine learning",
+    "section": "Pruning",
+    "text": "Pruning\nOf the many sub-trees of a large tree, consider only the path of those that minimize \\[\\text{RSS}(\\text{sub-tree}) + \\alpha\\, |\\text{sub-tree}|, \\qquad \\alpha \\geq 0\\] (\\(|\\text{sub-tree}|\\): its number of leaves), and choose \\(\\alpha\\), and so a sub-tree, on held-out data"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#a-downside-of-trees-variance",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#a-downside-of-trees-variance",
+    "title": "Machine learning",
+    "section": "A downside of trees: variance",
+    "text": "A downside of trees: variance\n\n\n\n\n\n\n\n\n\nDepth 2, each on a random half of the training films. Star Wars: Episode I - The Phantom Menace (rated 6.4): predicted 5.36, 6.25, 6.75, 6.42\n\nSame method, same films, four different models. What should we do about this?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#part-4-three-model-improvement-strategies",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#part-4-three-model-improvement-strategies",
     "title": "Machine learning",
     "section": "Part 4: three model improvement strategies",
-    "text": "Part 4: three model improvement strategies\nSacrifice simplicity/interpretability for prediction accuracy\nCan be used with other models too, not just trees\nBagging: bootstrap aggregating\n\nResample training data, average resulting models\n\nRandom forest: randomly drop predictors\n\nRandomly drop predictors at each split\n\nBoosting: add models one at a time\n\nEach new model is added to the sum of the previous ones"
+    "text": "Part 4: three model improvement strategies\nSacrifice simplicity/interpretability for prediction accuracy\nBagging*: bootstrap aggregating\n\nResample training data, average resulting models\n\nRandom forest\n\nRandomly drop predictors at each split\n\nBoosting*\n\nSuccessively add simple models into the aggregate\n\n* Can be used with other models too, not just trees"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#bagging-bootstrap-aggregating-1",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#bagging-bootstrap-aggregating-1",
     "title": "Machine learning",
     "section": "Bagging: bootstrap aggregating",
-    "text": "Bagging: bootstrap aggregating\nProblem: a single tree model can have high variance (like many non-smooth or non-regularized models)\n\nBootstrap: for each \\(b = 1, \\ldots, B\\) resamples (with replacement) of the training data, fit \\(\\hat f^{*b}\\) on bootstrap sample \\(b\\)\nAggregate: combine the \\(B\\) models, using majority vote for classification or mean for regression\n\n\\[\\hat f_\\text{bag} = \\frac{1}{B} \\sum_{b=1}^B \\hat f^{*b}\\]\n(“Smoothing” useful for low-bias, high-variance models)"
+    "text": "Bagging: bootstrap aggregating\nProblem: a single tree model can have high variance (like many non-smooth or non-regularized models)\n\nBootstrap: for each \\(b = 1, \\ldots, B\\) resamples (with replacement) of the training data, fit \\(\\hat f^b\\) on bootstrap sample \\(b\\)\nAggregate: combine the \\(B\\) models, using majority vote for classification or mean for regression\n\n\\[\\hat f_\\text{bag} = \\frac{1}{B} \\sum_{b=1}^B \\hat f^b\\]\n(“Smoothing” useful for low-bias, high-variance models)"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#averaging-b-trees",
@@ -2405,7 +2419,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#out-of-bag-predictions",
     "title": "Machine learning",
     "section": "Out-of-bag predictions",
-    "text": "Out-of-bag predictions\n\nEach bootstrap sample contains some subset of the training data\nRoughly \\(1/e \\approx 0.37\\) portion of the training samples will be left out of each bootstrap sample\nCan use these to estimate test error (e.g. instead of \\(K\\)-fold cross-validation)\n\nSoftware implementations may do this automatically\n\n\n\n\nA forest on the films, 300 trees\nMSE\n\n\n\n\ntraining films, every tree\n1.61\n\n\ntraining films, out-of-bag trees only\n2.03\n\n\ntuning films\n2.03\n\n\ntuning films, predicting the training mean\n2.50"
+    "text": "Out-of-bag predictions\n\nEach bootstrap sample contains some subset of the training data\nRoughly \\(1/e \\approx 0.37\\) portion of the training samples will be left out of each bootstrap sample\nCan use these to estimate test error (e.g. instead of \\(K\\)-fold cross-validation)\n\nSoftware implementations may do this automatically\n\n\n\n\nA forest on the films, 300 trees\nMSE\n\n\n\n\ntraining films, every tree\n1.19\n\n\ntraining films, out-of-bag trees only\n1.50\n\n\ntuning films\n1.49\n\n\ntuning films, predicting the training mean\n2.00"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#adding-trees",
@@ -2426,7 +2440,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#boosting-as-gradient-descent",
     "title": "Machine learning",
     "section": "Boosting as gradient descent",
-    "text": "Boosting as gradient descent\nGradient descent moves parameters. Take the \\(n\\) fitted values \\(f(x_1), \\ldots, f(x_n)\\) as the parameters, with squared loss \\(L(f) = \\frac12 \\sum_{i=1}^n \\big(y_i - f(x_i)\\big)^2\\): \\[\n-\\frac{\\partial L}{\\partial f(x_i)} = y_i - f(x_i): \\quad \\text{the negative gradient is the residual vector}\n\\]\n\nA step along it moves only those \\(n\\) values. Fit a small tree to the residuals instead (defined at every \\(x\\)), and step along the tree, with learning rate \\(\\gamma\\): \\[\n\\hat f^{(0)} = \\bar y, \\qquad \\hat f^{(b)} = \\hat f^{(b-1)} + \\gamma\\, \\hat t_b, \\qquad \\hat t_b \\text{ a small tree fitted to } y_i - \\hat f^{(b-1)}(x_i)\n\\]\n\nGradient descent, stopped early: the number of steps is a knob. Backfitting replaced a curve; boosting adds a tree, fitted to what the sum leaves."
+    "text": "Boosting as gradient descent\nGradient descent moves parameters. Take the \\(n\\) fitted values \\(f(x_1), \\ldots, f(x_n)\\) as the parameters, with squared loss \\(\\ell(y, f) = \\frac12 (y - f)^2\\) summed over the training data: \\[\n-\\frac{\\partial}{\\partial f(x_i)} \\sum_{k=1}^n \\ell\\big(y_k, f(x_k)\\big) = y_i - f(x_i): \\quad \\text{the negative gradient is the residual vector}\n\\]\n\nA step along it moves only those \\(n\\) values. Fit a small tree to the residuals instead (defined at every \\(x\\)), and step along the tree, with learning rate \\(\\gamma\\): \\[\n\\hat f^{(0)} = \\bar y, \\qquad \\hat f^{(b)} = \\hat f^{(b-1)} + \\gamma\\, \\hat t_b, \\qquad \\hat t_b \\text{ a small tree fitted to } y_i - \\hat f^{(b-1)}(x_i)\n\\]\n\nGradient descent, stopped early: the number of steps is a knob. Backfitting replaced a curve; boosting adds a tree, fitted to what the sum leaves."
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#boosting-in-practice",
@@ -2447,42 +2461,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#tree-depth-and-interactions",
     "title": "Machine learning",
     "section": "Tree depth and interactions",
-    "text": "Tree depth and interactions\n\nCan a tree with one split fit \\(f(x_1, x_2) = x_1 x_2\\) well? Hint: assume the inputs are independent, both \\(\\mathrm{Unif}[-1, 1]\\)\nHow many splits would we want for \\(f = x_1 \\cdots x_p\\)?\n\n\nA stump asks one question, so a sum of stumps is a sum of one-input functions: an additive model. Depth \\(d\\): interactions of up to \\(d\\) inputs\nA boosted model is additive in trees, not in the predictors"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section-4",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#section-4",
-    "title": "Machine learning",
-    "section": "",
-    "text": "Part 5: feature importance"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#featurevariable-importance",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#featurevariable-importance",
-    "title": "Machine learning",
-    "section": "Feature/variable “importance”",
-    "text": "Feature/variable “importance”\n\nWhich predictors are used most by the model?\nDoes not necessarily tell us about causation (none of these methods do)\n\n\n\nTree-specific importance\nSum the RSS decrease of every split on \\(x_j\\) within a tree, then average over trees\nPermutation importance\nPermute values of predictor \\(x_j\\). How much does the accuracy of the model decrease? \\[\\mathrm{PI}_j = \\widehat{\\mathrm{Err}}(\\hat f, x_j \\text{ permuted}) - \\widehat{\\mathrm{Err}}(\\hat f)\\]\n\n\n\n\n\n\n\n\n\n\nEach has pros/cons, no satisfactory answer for dependence"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#permutation-and-extrapolation",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#permutation-and-extrapolation",
-    "title": "Machine learning",
-    "section": "Permutation and extrapolation",
-    "text": "Permutation and extrapolation\n\n\n\n\n\n\n\n\n\nShuffling length keeps each film’s other inputs: 149 of the 166 shorts now run over an hour, and 147 non-shorts under 40 minutes. Before: 0 and 1; in the 5,000 training films, 4 and 2\nThe forest’s predictions there rest on almost no data, and permutation importance averages over them (Hooker, Mentch and Zhou 2021)"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#permutation-with-correlated-inputs",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#permutation-with-correlated-inputs",
-    "title": "Machine learning",
-    "section": "Permutation with correlated inputs",
-    "text": "Permutation with correlated inputs\n\n\n\n\n\n\n\n\n\nWhere the data’s density is below 0.01: 20% of the permuted points, 2% of the data"
-  },
-  {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#leave-one-covariate-out",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#leave-one-covariate-out",
-    "title": "Machine learning",
-    "section": "Leave one covariate out",
-    "text": "Leave one covariate out\n\n\n\n\n\n\n\n\n\n\n\n\nRefit without input \\(j\\), with the same settings; score on the same held-out films (Lei et al. 2018): \\[\\mathrm{LOCO}_j = \\widehat{\\mathrm{Err}}\\big(\\hat f^{(-j)}\\big) - \\widehat{\\mathrm{Err}}(\\hat f)\\]\nNo extrapolation from permuting; any method, at the cost of \\(p\\) refits\nLength and Short together: 0.21, more than length alone and Short alone added up (0.14 + 0.02). Each stands in for part of the other"
+    "text": "Tree depth and interactions\n\nCan a tree with one split fit \\(f(x_1, x_2) = x_1 x_2\\) well? Hint: assume the inputs are independent, both \\(\\mathrm{Unif}[-1, 1]\\)\nHow many splits would we want for \\(f(x_1, \\ldots, x_p) = x_1 \\cdots x_p\\)?\n\n\nA stump asks one question, so a sum of stumps is a sum of one-input functions: an additive model. Depth \\(d\\): interactions of up to \\(d\\) inputs\nA boosted model is additive in trees, not in the predictors"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#were-in-dangerous-territory",
@@ -2496,21 +2475,21 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#before-the-seminar",
     "title": "Machine learning",
     "section": "Before the seminar",
-    "text": "Before the seminar\n\nThis week: exercises 1 and 2 at the top of the notebook. The correlated-average variance again, with the slides closed; and one boosting step by hand\nIn the seminar: a split found by hand, bagging’s variance measured against the formula, and partial dependence and LOCO on the films"
+    "text": "Before the seminar\n\nThis week: exercises 1 and 2 at the top of the notebook. The correlated-average variance again, with the slides closed; and one boosting step by hand\nIn the seminar: a split found by hand, bagging’s variance measured against the formula, and boosting on the films"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#conclusion",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#conclusion",
     "title": "Machine learning",
     "section": "Conclusion",
-    "text": "Conclusion\nAdditive models\nOne curve per input, each fitted to what the others leave: partialling out, one input at a time\nPartial dependence\nA plot of one input at a time, works most naturally with additive models, can be importantly wrong otherwise\nTrees and ensembles\nGreedy questions, pruned by validation. Bagging and forests average trees to lower variance; boosting adds small trees, gradient descent on the fitted values\nFeature importance\nHow much does the model suffer if a feature is scrambled (permuted) or left out before fitting?"
+    "text": "Conclusion\nAdditive models\nOne curve per input, each fitted to what the others leave: partialling out, one input at a time\nAdditivity vs interactions\nA plot of one input at a time works most naturally for additive models, and can be importantly wrong when the truth has interactions\nTrees and ensembles\nGreedy questions, pruned by validation. Bagging and forests average trees to lower variance; boosting adds small trees, gradient descent on the fitted values"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#references",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#references",
     "title": "Machine learning",
     "section": "References",
-    "text": "References\n\n\nHooker, G., Mentch, L. and Zhou, S. (2021). Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance. Statistics and Computing 31(6), article 82. doi:10.1007/s11222-021-10057-z\nLei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. Journal of the American Statistical Association 113(523), 1094–1111. Section 6 (LOCO). doi:10.1080/01621459.2017.1307116\nLoftus, J. R., Bynum, L. E. J. and Hansen, S. (2024). Causal dependence plots. Advances in Neural Information Processing Systems 37. doi:10.52202/079017-3579\nWhitehead, A. N. (1911). An Introduction to Mathematics. London: Williams and Norgate. Project Gutenberg"
+    "text": "References\n\n\nBox, G. E. P. (1976). Science and statistics. Journal of the American Statistical Association 71(356), 791–799. doi:10.1080/01621459.1976.10480949. The quotation is in section 2.4.\nBox, G. E. P. and Draper, N. R. (1987). Empirical Model-Building and Response Surfaces. New York: Wiley.\nWhitehead, A. N. (1911). An Introduction to Mathematics. London: Williams and Norgate. Project Gutenberg"
   },
   {
     "objectID": "data/penguins.html",

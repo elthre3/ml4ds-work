@@ -1,0 +1,285 @@
+<!-- Slides built for week 8 and moved to week 9 by the convenor on 15 November 2026. Not rendered (the folder starts with "_"). See README.md beside this file. -->
+
+## A flexible (e.g. tree-based) model fits interactions, unlike GAM {minutes="3"}
+
+::: {.notes}
+QUESTION: plot f-hat against x_1: what do we do with x_2?
+
+Two minutes, written, then three answers before the next slide. Expected: fix x_2 at a typical value, its median or mean (one curve); one curve for each unit, at its own x_2; the average of those curves. What each hides here: at the median of x_2 (about 0, where the cosine is 1) the curve opens upward, while for about half the units it opens downward; the average of all the curves is nearly flat.
+:::
+
+But can we still create univariate feature dependence plots?
+
+::: {.ask}
+We want a plot of how $\hat f$ depends on $x_1$. What do we do with $x_2$ while we draw it?
+:::
+
+## Partial dependence
+
+::: {.notes}
+The answers to the last slide: legacy "What to do about other variables?". Notation from Loftus, Bynum and Hansen (2024), without their prime for the explained units. The PDP is a computation on f-hat: set, leave, predict, average. ICE evaluates f-hat at a modified input that may correspond to no plausible unit (the spine's wording rule). For an additive f-hat it is the component plus a constant (the other components' averages). Fixing the others at their medians gives a different curve in general.
+:::
+
+For models with multiple predictors, partial dependence plots can hide model structure. Options for the other variables:
+
+- Hold other variables fixed (e.g. at medians), `plotmo` default
+- Average over them, `pdp` method
+- Plot a curve for each observation: individual conditional expectation (ICE), `ice` method
+
+Unit $i$'s inputs with input $j$ set to a value $\tilde x_j$: $\;\tilde{\mathbf x}_{ij} = (x_{i1}, \ldots, \tilde x_j, \ldots, x_{ip})$
+$$
+\mathrm{ICE}_i:\ \tilde x_j \mapsto \hat f(\tilde{\mathbf x}_{ij}), \qquad
+\mathrm{PDP}_j:\ \tilde x_j \mapsto \frac1n \sum_{i=1}^n \hat f(\tilde{\mathbf x}_{ij})
+$$
+
+Compute at every point on a grid of $\tilde x_j$ values and plot the curve(s)
+
+## Flexible model fits, unlike GAM; but the univariate plot is wrong {minutes="1"}
+
+::: {.notes}
+Legacy slide, shown twice: first the average alone. A forest on the same data, every input offered at every split (bagging); nodes under 50 units are not split. Flat, like the GAM's x_1 curve on "Now true model is not additive". Does the forest ignore x_1? Go to the next slide.
+:::
+
+```{r}
+#| label: rf-ice
+#| echo: true
+#| eval: false
+fit_rf <- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)
+ice_x1 <- partial(fit_rf, pred.var = "x1", ice = TRUE, train = df_sub)
+```
+
+```{r}
+#| label: rf-pdp-plot
+#| fig-width: 8
+#| fig-height: 3.9
+#| out-width: 62%
+#| fig-align: center
+# The code shown above, on 100 of the 2,000 units, and the plot.
+fit_rf <- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)
+df_sub <- df_int |> slice_sample(n = 100) |> mutate(yhat.id = row_number(), sign = if_else(f2(x2) > 0, "positive", "negative"), strength = f2(x2)^4)
+ice_x1 <- partial(fit_rf, pred.var = "x1", ice = TRUE, train = as.data.frame(df_sub[, c("x1", "x2")]), grid.resolution = 30) |>
+  as_tibble() |> left_join(df_sub |> select(yhat.id, sign, strength), by = "yhat.id")
+pdp_x1 <- ice_x1 |> group_by(x1) |> summarise(yhat = mean(yhat), .groups = "drop")
+ice_ylim <- range(ice_x1$yhat)
+ggplot(pdp_x1, aes(x1, yhat)) +
+  geom_line(colour = "black", linewidth = 1.8) +
+  coord_cartesian(ylim = ice_ylim) + labs(x = "x1", y = "prediction")
+```
+
+Black: the PDP, the forest's prediction averaged over the 100 units with $x_1$ set and $x_2$ left at each unit's value. Nearly flat
+
+## Flexible model fits, unlike GAM; but the univariate plot is wrong
+
+::: {.notes}
+The same slide with the ICE curves. Solid teal: units with cos(pi x_2 / 2) > 0; dashed orange: < 0. The GAM's x_1 curve was flat too, but the GAM has no interaction to hide; only the ICE curves tell the two apart.
+:::
+
+```{r}
+#| label: rf-ice-shown-again
+#| echo: true
+#| eval: false
+fit_rf <- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)
+ice_x1 <- partial(fit_rf, pred.var = "x1", ice = TRUE, train = df_sub)
+```
+
+```{r}
+#| label: rf-ice-plot
+#| fig-width: 8
+#| fig-height: 3.9
+#| out-width: 62%
+#| fig-align: center
+# The same forest, curves and axes as on the last slide, with the ICE curves added.
+ggplot(ice_x1, aes(x1, yhat)) +
+  geom_line(aes(group = yhat.id, colour = sign, linetype = sign, alpha = strength), linewidth = 0.8, show.legend = FALSE) +
+  geom_line(data = pdp_x1, colour = "black", linewidth = 1.8) +
+  scale_colour_manual(values = c(positive = v_teal, negative = m_orange)) +
+  scale_linetype_manual(values = c(positive = "solid", negative = "dashed")) +
+  scale_alpha_continuous(range = c(0.03, 0.75), limits = c(0, 1)) +
+  coord_cartesian(ylim = ice_ylim) + labs(x = "x1", y = "prediction")
+```
+
+Thin: one curve per unit (ICE), solid where $\cos(\pi x_2/2) > 0$, dashed where it is negative, more opaque the larger $|\cos(\pi x_2/2)|$. The forest fitted the interaction, PDP hides it, and ICE might show it
+
+## PDP and ICE: recap {minutes="1"}
+
+::: {.notes}
+A minute. Causality: a model's dependence plot is not an effect; later in the course.
+:::
+
+- PDP can hide model structure if the model isn't additive
+- ICE might reveal more structure, with a busier plot
+- Both methods have more limitations (related to causality) that we may discuss later
+
+## {.inverse .center}
+
+::: {.notes}
+Compress: what did the forest use? Permutation importance shuffles one input; LOCO refits without it.
+:::
+
+### Part 5: feature importance
+
+## Feature/variable "importance"
+
+::: {.notes}
+Legacy slide, now light (it was dark), with the forest from the out-of-bag slide. Split improvement is randomForest's IncNodePurity; permutation is on the tuning films, the forest unchanged, ten shuffles each. Each measure is shown as a share of its total over the nine inputs, so the two can share an axis.
+:::
+
+- Which predictors are *used most* by the model?
+- Does not necessarily tell us about **causation** (none of these methods do)
+
+::: {.columns}
+::: {.column width="55%"}
+#### Tree-specific importance
+
+Sum the RSS decrease of every split on $x_j$ within a tree, then average over trees
+
+#### Permutation importance
+
+Permute values of predictor $x_j$. How much does the accuracy of the model decrease?
+$$\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, x_j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)$$
+:::
+::: {.column width="45%"}
+```{r}
+#| label: importance
+#| fig-width: 5.0
+#| fig-height: 3.15
+base_tune <- mse(mv_tune$rating, predict(rf_mv, mv_tune))
+pi_j <- sapply(inputs, function(v) mean(replicate(10, {
+  d <- mv_tune; d[[v]] <- sample(d[[v]]); mse(mv_tune$rating, predict(rf_mv, d)) })) - base_tune)
+split_j <- importance(rf_mv)[inputs, "IncNodePurity"]
+tibble(input = factor(inputs, levels = inputs[order(split_j)]),
+       `split improvement` = split_j / sum(split_j), permutation = pi_j / sum(pi_j)) |>
+  pivot_longer(-input, names_to = "measure") |>
+  ggplot(aes(value, input, colour = measure, shape = measure)) + geom_point(size = 3.5) +
+  scale_colour_manual(values = c(`split improvement` = v_dark, permutation = m_pink), name = NULL) +
+  scale_shape_manual(values = c(`split improvement` = 15, permutation = 17), name = NULL) +
+  labs(x = "share of the measure's total", y = NULL) +
+  theme(legend.position = "top", legend.margin = ggplot2::margin(0, 0, -8, 0), axis.text.y = element_text(size = 13))
+```
+
+Each has pros/cons, no satisfactory answer for dependence
+:::
+:::
+
+## Permutation and extrapolation
+
+```{r}
+#| label: permute-counts
+#| include: false
+perm <- mv_tune |> mutate(length = sample(length))
+odd <- function(d) c(long_short = sum(d$Short == 1 & d$length > 60), short_other = sum(d$Short == 0 & d$length < 40))
+n_short <- sum(mv_tune$Short == 1)
+odd_perm <- odd(perm); odd_tune <- odd(mv_tune); odd_train <- odd(mv_train)
+```
+
+::: {.notes}
+The tuning films, length shuffled once. Hooker, Mentch and Zhou (2021): with dependent inputs, shuffling puts weight where there are few data, in importance and in partial dependence alike; a PDP sets length on every film, shorts included.
+:::
+
+```{r}
+#| label: permute-length
+#| fig-width: 11.5
+#| fig-height: 2.7
+#| fig-align: center
+bind_rows(mv_tune |> mutate(data = "tuning films"),
+          perm |> mutate(data = "length permuted")) |>
+  mutate(data = fct_inorder(data), kind = if_else(Short == 1, "short", "non-short")) |>
+  ggplot(aes(length, kind, colour = kind)) +
+  geom_jitter(height = 0.25, width = 0, alpha = 0.35, size = 1.2, show.legend = FALSE) +
+  facet_wrap(~ data) + scale_colour_manual(values = c(`non-short` = v_blue, short = m_pink)) +
+  labs(x = "length (minutes)", y = NULL) + theme(strip.text = element_text(size = 16))
+```
+
+Shuffling length keeps each film's other inputs: `r odd_perm[["long_short"]]` of the `r n_short` shorts now run over an hour, and `r odd_perm[["short_other"]]` non-shorts under 40 minutes. Before: `r odd_tune[["long_short"]]` and `r odd_tune[["short_other"]]`; in the 5,000 training films, `r odd_train[["long_short"]]` and `r odd_train[["short_other"]]`
+
+The forest's predictions there rest on almost no data, and permutation importance averages over them (Hooker, Mentch and Zhou 2021)
+
+## Permutation with correlated inputs
+
+```{r}
+#| label: biv-perm
+#| include: false
+n_biv <- 400; rho_biv <- -0.8
+b1 <- rnorm(n_biv); b2 <- rho_biv * b1 + sqrt(1 - rho_biv^2) * rnorm(n_biv)
+biv <- tibble(x1 = b1, x2 = b2); biv_perm <- tibble(x1 = b1, x2 = sample(b2))
+biv_lims <- c(-3.6, 3.6)
+biv_kde <- MASS::kde2d(biv$x1, biv$x2, n = 120, lims = c(biv_lims, biv_lims))
+biv_grid <- expand_grid(x2 = biv_kde$y, x1 = biv_kde$x) |> mutate(z = as.vector(t(biv_kde$z)))
+biv_breaks <- c(0.002, 0.01, 0.03, 0.06, 0.1, 0.15, 0.3)
+dens_at <- function(x, y) biv_kde$z[cbind(pmax(findInterval(x, biv_kde$x), 1), pmax(findInterval(y, biv_kde$y), 1))]
+low_perm <- mean(dens_at(biv_perm$x1, biv_perm$x2) < 0.01); low_data <- mean(dens_at(biv$x1, biv$x2) < 0.01)
+```
+
+::: {.notes}
+Away from the films: x_1, x_2 standard normal with correlation -0.8. Permuting x_2 keeps both marginals and breaks the dependence, so the pairs come from the product of the marginals. Both panels shade the density estimated from the data on the left. A model fitted to the left panel has seen almost nothing where many right-panel points fall.
+:::
+
+```{r}
+#| label: biv-perm-plot
+#| fig-width: 11
+#| fig-height: 4.4
+#| fig-align: center
+biv_panel <- function(d, title) ggplot() +
+  geom_contour_filled(data = biv_grid, aes(x1, x2, z = z), breaks = biv_breaks, alpha = 0.85, show.legend = FALSE) +
+  geom_point(data = d, aes(x1, x2), size = 1.2, alpha = 0.7, colour = "#1f1f1f") +
+  scale_fill_viridis_d(option = "mako", direction = -1, begin = 0.15) +
+  coord_equal(xlim = biv_lims, ylim = biv_lims, expand = FALSE) + labs(title = title, x = "x1", y = "x2") +
+  theme(plot.title = element_text(size = 17))
+biv_panel(biv, "the data, and their density") + biv_panel(biv_perm, "x2 permuted, the same density")
+```
+
+Where the data's density is below 0.01: `r round(100 * low_perm)`% of the permuted points, `r round(100 * low_data)`% of the data
+
+## Leave one covariate out
+
+::: {.notes}
+Ten more forests, mtry = 3 as in the full one: one per input left out, one without length and Short; all scored on the tuning films. Permutation is larger for every input that matters, with or without extrapolation: for an additive f with independent inputs, permuting x_j adds 2 Var f_j(X_j) to the error, refitting without it Var f_j(X_j). Two questions: how much the fitted model relies on x_j; what the method loses without it. The reading's LOFO.
+:::
+
+::: {.columns}
+::: {.column width="52%"}
+```{r}
+#| label: loco
+#| fig-width: 6.4
+#| fig-height: 4.6
+refit_without <- function(drop) {
+  fit <- randomForest(reformulate(setdiff(inputs, drop), "rating"), data = mv_train, ntree = 300, mtry = 3)
+  mse(mv_tune$rating, predict(fit, mv_tune)) - base_tune
+}
+loco_j <- sapply(inputs, refit_without)
+loco_pair <- refit_without(c("length", "Short"))
+tibble(input = inputs, permutation = pi_j, LOCO = loco_j) |>
+  pivot_longer(-input, names_to = "importance") |>
+  mutate(input = fct_reorder(input, value, .fun = max)) |>
+  ggplot(aes(value, input, colour = importance, shape = importance)) +
+  geom_point(size = 4) +
+  scale_colour_manual(values = c(LOCO = v_blue, permutation = m_pink), name = NULL) +
+  scale_shape_manual(values = c(LOCO = 16, permutation = 17), name = NULL) +
+  labs(x = "increase in tuning MSE", y = NULL) + theme(legend.position = "top")
+```
+:::
+::: {.column width="48%"}
+Refit without input $j$, with the same settings; score on the same held-out films (Lei et al. 2018):
+$$\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)$$
+
+No extrapolation from permuting; any method, at the cost of $p$ refits
+
+Length and Short together: `r sprintf("%.2f", loco_pair)`, more than length alone and Short alone added up (`r sprintf("%.2f", loco_j[["length"]])` + `r sprintf("%.2f", loco_j[["Short"]])`). Each stands in for part of the other
+:::
+:::
+
+## Conclusion lines (from week 8's conclusion slide)
+
+#### Partial dependence
+
+A plot of one input at a time, works most naturally with additive models, can be importantly wrong otherwise
+
+#### Feature importance
+
+How much does the model suffer if a feature is scrambled (permuted) or left out before fitting?
+
+## References these slides cite (from week 8's references)
+
+- Hooker, G., Mentch, L. and Zhou, S. (2021). Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance. *Statistics and Computing* 31(6), article 82. [doi:10.1007/s11222-021-10057-z](https://doi.org/10.1007/s11222-021-10057-z)
+- Lei, J., G'Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. *Journal of the American Statistical Association* 113(523), 1094--1111. Section 6 (LOCO). [doi:10.1080/01621459.2017.1307116](https://doi.org/10.1080/01621459.2017.1307116)
+- Loftus, J. R., Bynum, L. E. J. and Hansen, S. (2024). Causal dependence plots. *Advances in Neural Information Processing Systems* 37. [doi:10.52202/079017-3579](https://doi.org/10.52202/079017-3579)

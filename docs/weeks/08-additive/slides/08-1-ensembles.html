@@ -200,7 +200,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Machine learning</h1>
-  <p class="subtitle">Week 8: additive models, trees and ensembles</p>
+  <p class="subtitle">Week 8: additivity vs interactions, and ensembles</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -216,18 +216,56 @@ Joshua Loftus
 </section>
 <section id="section" class="slide level2 inverse">
 <h2></h2>
-<h3 id="week-8-additive-models-trees-and-ensembles">Week 8: additive models, trees and ensembles</h3>
+<h3 id="week-8-additivity-vs-interactions-and-ensembles">Week 8: additivity vs interactions, and ensembles</h3>
 <p>Part 1: fitting an additive model</p>
-<p>Part 2: plots for other models</p>
+<p>Part 2: additivity vs interactions</p>
 <p>Part 3: building a tree</p>
 <p>Part 4: three model improvement strategies</p>
-<p>Part 5: feature importance</p>
 </section>
-<section id="where-we-left-off" class="slide level2">
+<section id="where-we-left-off" class="slide level2" data-minutes="3">
 <h2>Where we left off</h2>
-<p>Last time: each modeling assumption makes some models work well, and cross-validation tunes their knobs</p>
 <div class="ask">
-<p>Name one modeling assumption, and a model that works well when it holds</p>
+<p>List the modeling assumptions and respective methods</p>
+</div>
+<div class="fragment">
+<table class="caption-top">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Assumption</th>
+<th>Methods</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Linearity</td>
+<td>linear and logistic regression</td>
+</tr>
+<tr class="even">
+<td>Smoothness (Lipschitz)</td>
+<td><span class="math inline">\(k\)</span> nearest neighbors; also trees and networks</td>
+</tr>
+<tr class="odd">
+<td>Additivity: one curve per input</td>
+<td>additive models (a spline per input)</td>
+</tr>
+<tr class="even">
+<td>Limited wiggliness</td>
+<td>penalized splines</td>
+</tr>
+<tr class="odd">
+<td>Sparsity: few inputs matter</td>
+<td>the lasso</td>
+</tr>
+<tr class="even">
+<td>Small coefficients</td>
+<td>ridge regression</td>
+</tr>
+</tbody>
+</table>
 </div>
 </section>
 <section id="section-1" class="slide level2 inverse center">
@@ -242,9 +280,9 @@ Joshua Loftus
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2movies)</span>
 <span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>mv <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span></span>
 <span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(length <span class="sc">&lt;=</span> <span class="dv">200</span>, length <span class="sc">&gt;</span> <span class="dv">10</span>,</span>
-<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a>         year <span class="sc">&gt;</span> <span class="dv">1918</span>, votes <span class="sc">&gt;=</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a>         year <span class="sc">&gt;</span> <span class="dv">1918</span>, votes <span class="sc">&gt;=</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>IMDb films up to 2005, 53,388 after this selection (<a href="https://ml4ds.com/data/movies.html">data note</a>)</p>
+<p>IMDb films up to 2005, 33,287 after this selection (<a href="https://ml4ds.com/data/movies.html">data note</a>)</p>
 <ul>
 <li><strong>Target</strong>: <code>rating</code>, average user rating, 1 to 10</li>
 <li><strong>Inputs</strong>: <code>year</code>, <code>length</code> (minutes), seven genre flags</li>
@@ -274,11 +312,11 @@ Joshua Loftus
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 5
+<pre><code># A tibble: 2 x 5
   term        edf ref.df statistic p.value
   &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
-1 s(length)  6.08   7.16      47.9       0
-2 s(year)    8.01   8.71      29.3       0</code></pre>
+1 s(length)  7.60   8.44      76.4       0
+2 s(year)    6.84   7.88      61.7       0</code></pre>
 </div>
 </div>
 <p>No single slope per input: how do we interpret the fitted curves?</p>
@@ -302,36 +340,37 @@ Joshua Loftus
 <p>The cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input curves (additivity, plus design conditions) has the one-input rate, <span class="math inline">\(n^{-2/3}\)</span>.</p>
 </div>
 </section>
-<section id="fitting-several-curves" class="slide level2" data-minutes="3">
+<section id="fitting-several-curves" class="slide level2">
 <h2>Fitting several curves</h2>
 <div class="ask">
 <p>We know how to fit a spline to one input: least squares on its basis matrix. How could we fit a model with a curve for each of several inputs?</p>
 </div>
-<div class="fragment">
-<div class="fragment">
-<h3>
-Backfitting algorithm
-</h3>
+</section>
+<section id="backfitting-algorithm" class="slide level2">
+<h2>Backfitting algorithm</h2>
+<p>Model: <span class="math inline">\(\hat f(\mathbf x) = \hat\beta_0 + \hat f_1(x_1) + \cdots + \hat f_p(x_p)\)</span></p>
 <ol type="1">
-<li><p>Set <span class="math inline">\(\hat \beta_0 = \bar y\)</span> and start with some initial estimates <span class="math inline">\(\hat f_j\)</span>, e.g.&nbsp;<span class="math inline">\(\hat f_j = 0\)</span> or from <code>y ~ x_j</code></p></li>
-<li><p>Iterate over <span class="math inline">\(j\)</span>, updating <span class="math inline">\(\hat f_j\)</span> by fitting <code>r_j ~ x_j</code> where the partial residual <span class="math inline">\(\mathbf r_j = \mathbf y - \hat \beta_0 - \sum_{k \neq j} \hat f_k(\mathbf x_k)\)</span> is computed using the current fits for all the other predictors; then center <span class="math inline">\(\hat f_j\)</span> (subtract its mean over the data)</p></li>
-<li><p>Repeat until “convergence” (some stopping rule)</p></li>
+<li>Start: <span class="math inline">\(\hat\beta_0 = \bar y\)</span>, and <span class="math inline">\(\hat f_j = 0\)</span> for every <span class="math inline">\(j\)</span></li>
+<li>Sweep <span class="math inline">\(t = 1, 2, \ldots\)</span>: for <span class="math inline">\(j = 1, \ldots, p\)</span> in turn,
+<ul>
+<li>partial residual, with the latest fit of every other curve: <span class="math inline">\(r_{ij} = y_i - \hat\beta_0 - \sum_{k \neq j} \hat f_k(x_{ik})\)</span></li>
+<li>new <span class="math inline">\(\hat f_j\)</span>: a one-input smoother (e.g.&nbsp;a spline) of the <span class="math inline">\(r_{ij}\)</span> on the <span class="math inline">\(x_{ij}\)</span>, centered to mean zero</li>
+</ul></li>
+<li>Stop when a sweep barely changes the fitted values</li>
 </ol>
-</div>
-</div>
 </section>
 <section id="backfitting-and-partialling-out" class="slide level2" data-minutes="3">
 <h2>Backfitting and partialling out</h2>
-<p>Two centered inputs and lines for components, <span class="math inline">\(\hat f_j(x) = \beta_j x\)</span>. Step 2 for <span class="math inline">\(j = 1\)</span> regresses the partial residual on <span class="math inline">\(\mathbf x_1\)</span>: <span class="math display">\[
-\beta_1 \leftarrow \frac{\mathbf x_1^T(\mathbf y - \beta_2 \mathbf x_2)}{\mathbf x_1^T \mathbf x_1}, \qquad
-\beta_2 \leftarrow \frac{\mathbf x_2^T(\mathbf y - \beta_1 \mathbf x_1)}{\mathbf x_2^T \mathbf x_2}
+<p>Two centered inputs, and a line for each component: <span class="math inline">\(\hat f_j(x) = \hat\beta_j x\)</span>. Start at <span class="math inline">\(\hat\beta_2^{(0)} = 0\)</span>. Sweep <span class="math inline">\(t\)</span> fits each slope to its partial residual: <span class="math display">\[
+\hat\beta_1^{(t)} = \frac{\mathbf x_1^T\big(\mathbf y - \hat\beta_2^{(t-1)} \mathbf x_2\big)}{\mathbf x_1^T \mathbf x_1}, \qquad
+\hat\beta_2^{(t)} = \frac{\mathbf x_2^T\big(\mathbf y - \hat\beta_1^{(t)} \mathbf x_1\big)}{\mathbf x_2^T \mathbf x_2}
 \]</span></p>
 <div class="fragment">
-<p>The loop can stop only where both hold: <span class="math inline">\(\mathbf x_j^T(\mathbf y - \beta_1 \mathbf x_1 - \beta_2 \mathbf x_2) = 0\)</span> for <span class="math inline">\(j = 1, 2\)</span>. These are the normal equations: the fixed point is least squares</p>
+<p>The slopes stop changing only where both hold: <span class="math inline">\(\mathbf x_j^T(\mathbf y - \hat\beta_1 \mathbf x_1 - \hat\beta_2 \mathbf x_2) = 0\)</span> for <span class="math inline">\(j = 1, 2\)</span>. These are the normal equations: the fixed point is least squares</p>
 <div class="retrieval">
 <p>Partialling-out theorem: the coefficient on <span class="math inline">\(\mathbf x_2\)</span> is <span class="math inline">\(\tilde{\mathbf x}_2^T \mathbf y / \tilde{\mathbf x}_2^T \tilde{\mathbf x}_2\)</span>, the slope on what is left of <span class="math inline">\(\mathbf x_2\)</span> after <span class="math inline">\(\mathbf x_1\)</span> has explained what it can.</p>
 </div>
-<p>With a smoother in place of each line, the same loop fits an additive model: each curve fitted to what the others leave</p>
+<p>Backfitting does this with smooth curves instead of lines</p>
 </div>
 </section>
 <section id="backfitting-on-the-films" class="slide level2">
@@ -347,15 +386,47 @@ Backfitting algorithm
 </div>
 <p>Length, year and Short on the training films, starting from zero. Length and Short are closely related: each sweep moves a little more of the shorts’ higher ratings from the length curve to the Short coefficient, which settles after about 70 sweeps</p>
 </section>
-<section id="backfitting-more-generally" class="slide level2">
+<section id="backfitting-more-generally" class="slide level2 inverse">
 <h2>Backfitting, more generally</h2>
-<p><strong>Any number of inputs.</strong> With one coefficient per input, each update minimizes the RSS over that coefficient with the others held fixed: <strong>coordinate descent</strong> (Gauss–Seidel, in numerical linear algebra). It converges to least squares: in one sweep for orthogonal inputs, slowly for strongly related ones</p>
-<p><strong>Gram–Schmidt</strong> partials out the other way round: it residualizes each <em>input</em> on the ones before it, once. Backfitting leaves the inputs alone and residualizes <span class="math inline">\(\mathbf y\)</span>, again and again</p>
-<p><strong>Partialling out with flexible fits.</strong> Residualize both <span class="math inline">\(\mathbf y\)</span> and <span class="math inline">\(\mathbf x_j\)</span> on the other inputs, with any regression method, then regress residual on residual: double machine learning, later in the course</p>
+<p><strong>Any number of inputs.</strong> With one coefficient per input, each update minimizes the RSS over that coefficient with the others held fixed: <strong>coordinate descent</strong> (Gauss–Seidel, in numerical linear algebra). A spline gives each input a block of coefficients, updated together: <strong>block coordinate descent</strong>. Fast for unrelated inputs, slow for strongly related ones</p>
+<p><strong>Gram–Schmidt</strong> residualizes each input (predictor) on the ones before it, once. Backfitting leaves the inputs alone and residualizes <span class="math inline">\(\mathbf y\)</span> iteratively</p>
+<p><strong>Partialling out with flexible fits.</strong> Residualize both <span class="math inline">\(\mathbf y\)</span> and <span class="math inline">\(\mathbf x_j\)</span> on the other inputs, with any regression method, then regress residual on residual: <strong>double machine learning</strong>, later in the course</p>
 </section>
 <section id="section-2" class="slide level2 inverse center">
 <h2></h2>
-<h3 id="part-2-plots-for-other-models">Part 2: plots for other models</h3>
+<h3 id="part-2-additivity-vs-interactions">Part 2: additivity vs interactions</h3>
+</section>
+<section id="partial-dependence-plots-for-a-gam" class="slide level2">
+<h2>Partial dependence plots for a GAM</h2>
+<p>These univariate plots for GAMs are called <strong>partial dependence plots</strong> (PDPs). They show how the GAM depends on each feature: a simple one-dimensional dependence, because of the additivity assumption</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/gam-pdp-again-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>But what if additivity is wrong?</p>
+</section>
+<section id="all-models-are-wrong" class="slide level2" data-minutes="2">
+<h2>All models are wrong</h2>
+<div class="columns">
+<div class="column" style="width:30%;">
+<p><img data-src="img/george-box.jpg" style="width:100.0%"></p>
+<p><a href="https://search.library.wisc.edu/digital/AVKGAZNVOXF4YF9B">George Box, ca. 1974</a>. UW–Madison Archives</p>
+</div><div class="column" style="width:70%;">
+<p><a href="https://en.wikipedia.org/wiki/All_models_are_wrong">All models are wrong, but some are useful</a></p>
+<blockquote>
+<p>Since all models are wrong the scientist must be alert to what is <strong>importantly wrong</strong>. It is inappropriate to be concerned about mice when there are tigers abroad.</p>
+</blockquote>
+<p>Box (1976)</p>
+<blockquote>
+<p>Remember that all models are wrong; the practical question is how wrong do they have to be to not be useful.</p>
+</blockquote>
+<p>Box and Draper (1987)</p>
+</div></div>
 </section>
 <section id="can-additivitygams-be-importantly-wrong" class="slide level2">
 <h2>Can additivity/GAMs be <em>importantly wrong</em>?</h2>
@@ -379,8 +450,8 @@ Backfitting algorithm
 </div>
 </div>
 </section>
-<section id="now-true-model-is-not-additive" class="slide level2">
-<h2>Now true model is <strong>not</strong> additive</h2>
+<section id="true-model-non-additive-gam-is-wrong" class="slide level2">
+<h2>True model non-additive; GAM is wrong</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span></span>
 <span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">cos</span>(pi <span class="sc">*</span> x <span class="sc">/</span> <span class="dv">2</span>)</span>
@@ -403,62 +474,6 @@ Backfitting algorithm
 <p>The fitted component for <span class="math inline">\(x_1\)</span> is nearly flat: a parabola opening upward when <span class="math inline">\(\cos(\pi x_2/2) &gt; 0\)</span> and downward when <span class="math inline">\(\cos(\pi x_2/2) &lt; 0\)</span> cancel when averaged over <span class="math inline">\(x_2\)</span></p>
 <p>Additivity assumption is now (importantly) wrong</p>
 </div></div>
-</section>
-<section id="plotting-one-input" class="slide level2" data-minutes="3">
-<h2>Plotting one input</h2>
-<p>A forest fitted to these data can hold the interaction, but it has no components: <span class="math inline">\(\hat f(x_1, x_2)\)</span> is one function of both inputs</p>
-<div class="ask">
-<p>We want a plot of how <span class="math inline">\(\hat f\)</span> depends on <span class="math inline">\(x_1\)</span>. What do we do with <span class="math inline">\(x_2\)</span> while we draw it?</p>
-<p>Write down one way, and what that plot could hide.</p>
-</div>
-</section>
-<section id="partial-dependence" class="slide level2">
-<h2>Partial dependence</h2>
-<p>For models with multiple predictors, partial dependence plots can hide model structure. Options for the other variables:</p>
-<ul>
-<li>Hold other variables fixed (e.g.&nbsp;at medians), <code>plotmo</code> default</li>
-<li>Average over them, <code>pdp</code> method</li>
-<li>Plot a curve for each observation: individual conditional expectation (ICE), <code>ice</code> method</li>
-</ul>
-<p>Unit <span class="math inline">\(i\)</span>’s inputs with input <span class="math inline">\(j\)</span> set to a value <span class="math inline">\(\tilde x_j\)</span>: <span class="math inline">\(\;\tilde{\mathbf x}_{ij} = (x_{i1}, \ldots, \tilde x_j, \ldots, x_{ip})\)</span> <span class="math display">\[
-\mathrm{ICE}_i:\ \tilde x_j \mapsto \hat f(\tilde{\mathbf x}_{ij}), \qquad
-\mathrm{PDP}_j:\ \tilde x_j \mapsto \frac1n \sum_{i=1}^n \hat f(\tilde{\mathbf x}_{ij})
-\]</span></p>
-<p>A modified unit may resemble no real unit</p>
-</section>
-<section id="regression-trees-bagging" class="slide level2" data-minutes="1">
-<h2>Regression trees + bagging</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df_int, <span class="at">ntree =</span> <span class="dv">300</span>, <span class="at">mtry =</span> <span class="dv">2</span>, <span class="at">nodesize =</span> <span class="dv">50</span>)</span>
-<span id="cb7-2"><a aria-hidden="true" tabindex="-1"></a>ice_x1 <span class="ot">&lt;-</span> <span class="fu">partial</span>(fit_rf, <span class="at">pred.var =</span> <span class="st">"x1"</span>, <span class="at">ice =</span> <span class="cn">TRUE</span>, <span class="at">train =</span> df_sub)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/rf-pdp-plot-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Black: the PDP, the forest’s prediction averaged over the 100 units with <span class="math inline">\(x_1\)</span> set and <span class="math inline">\(x_2\)</span> left at each unit’s value. Nearly flat</p>
-</section>
-<section id="regression-trees-bagging-1" class="slide level2">
-<h2>Regression trees + bagging</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df_int, <span class="at">ntree =</span> <span class="dv">300</span>, <span class="at">mtry =</span> <span class="dv">2</span>, <span class="at">nodesize =</span> <span class="dv">50</span>)</span>
-<span id="cb8-2"><a aria-hidden="true" tabindex="-1"></a>ice_x1 <span class="ot">&lt;-</span> <span class="fu">partial</span>(fit_rf, <span class="at">pred.var =</span> <span class="st">"x1"</span>, <span class="at">ice =</span> <span class="cn">TRUE</span>, <span class="at">train =</span> df_sub)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/rf-ice-plot-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Thin: one curve per unit (ICE), solid where <span class="math inline">\(\cos(\pi x_2/2) &gt; 0\)</span>, dashed where it is negative. The forest fitted the interaction; the average hides it</p>
 </section>
 <section id="section-3" class="slide level2 inverse center">
 <h2></h2>
@@ -499,17 +514,59 @@ Backfitting algorithm
 <p>For a label: the same search, scoring each split by its leaves’ <strong>Gini indices</strong> <span class="math inline">\(\sum_k \hat p_k (1 - \hat p_k)\)</span>, weighted by leaf size</p>
 </div></div>
 </section>
-<section id="growing-and-pruning" class="slide level2">
-<h2>Growing and pruning</h2>
-<p>Split until no leaf can split, and a tree is like 1-nearest neighbors: 2,857 leaves on year and length alone</p>
-<p><strong>Greedy splitting</strong>: each split is the best now, and stopping early can miss a weak split that enables a strong one below it. So grow a large tree</p>
-<p><strong>Overfitting</strong>: then prune. Of the many sub-trees, take only the path of minimizers of <span class="math display">\[RSS(\text{Sub-tree}) + \alpha\, |\text{Sub-tree}|, \qquad \alpha \geq 0\]</span> and choose <span class="math inline">\(\alpha\)</span>, and so a sub-tree, by validation</p>
+<section id="splitting-the-star-wars-films" class="slide level2">
+<h2>Splitting the Star Wars films</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/star-wars-plot-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each dashed line is a cutoff, with the RSS of the two means above it (no split: 4.69). The best is year at 1991: the original trilogy against the prequels</p>
+</section>
+<section id="then-split-each-side-again" class="slide level2">
+<h2>Then split each side again</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/star-wars-tree-plot-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The same search inside each side: 4 leaves, each holding films of one rating, and a training RSS of 0. Grown until it cannot split, a tree memorizes its training data</p>
+</section>
+<section id="growing-a-tree" class="slide level2">
+<h2>Growing a tree</h2>
+<ul>
+<li><strong>Recursive</strong>: split the data by the best single question; then do the same inside each leaf, and so on</li>
+<li><strong>Greedy</strong>: each split is the best <em>now</em>. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree</li>
+<li><strong>When to stop</strong>: a leaf too small to split (rpart’s <code>minsplit</code>), or no split that improves the fit enough (<code>cp</code>)</li>
+<li>Grown until no leaf can split, a tree is like 1-nearest neighbors: on the training films, year and length alone give 2,670 leaves</li>
+</ul>
 <div class="retrieval">
 <p><span class="math inline">\(k\)</span> nearest neighbors average the <span class="math inline">\(k\)</span> training points closest to <span class="math inline">\(x_0\)</span>; a tree averages those in <span class="math inline">\(x_0\)</span>’s leaf, a neighborhood chosen by the data</p>
 </div>
 </section>
-<section id="four-samples-four-trees" class="slide level2" data-minutes="3">
-<h2>Four samples, four trees</h2>
+<section id="pruning" class="slide level2">
+<h2>Pruning</h2>
+<p>Of the many sub-trees of a large tree, consider only the path of those that minimize <span class="math display">\[\text{RSS}(\text{sub-tree}) + \alpha\, |\text{sub-tree}|, \qquad \alpha \geq 0\]</span> (<span class="math inline">\(|\text{sub-tree}|\)</span>: its number of leaves), and choose <span class="math inline">\(\alpha\)</span>, and so a sub-tree, on held-out data</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/prune-plot-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="a-downside-of-trees-variance" class="slide level2" data-minutes="3">
+<h2>A downside of trees: variance</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -519,7 +576,7 @@ Backfitting algorithm
 </div>
 </div>
 </div>
-<p>Depth 2, each on a random half of the training films. <em>The Shawshank Redemption</em> (rated 9.1): predicted 7.00, 6.95, 6.95, 6.55</p>
+<p>Depth 2, each on a random half of the training films. <em>Star Wars: Episode I - The Phantom Menace</em> (rated 6.4): predicted 5.36, 6.25, 6.75, 6.42</p>
 <div class="ask">
 <p>Same method, same films, four different models. What should we do about this?</p>
 </div>
@@ -527,28 +584,28 @@ Backfitting algorithm
 <section id="part-4-three-model-improvement-strategies" class="slide level2 inverse">
 <h2>Part 4: three model improvement strategies</h2>
 <p>Sacrifice simplicity/interpretability for prediction accuracy</p>
-<p>Can be used with other models too, not just trees</p>
-<h4 id="bagging-bootstrap-aggregating"><strong>Bagging</strong>: bootstrap aggregating</h4>
+<h4 id="bagging-bootstrap-aggregating"><strong>Bagging</strong>*: bootstrap aggregating</h4>
 <ul>
 <li>Resample training data, average resulting models</li>
 </ul>
-<h4 id="random-forest-randomly-drop-predictors"><strong>Random forest</strong>: randomly drop predictors</h4>
+<h4 id="random-forest"><strong>Random forest</strong></h4>
 <ul>
 <li>Randomly drop predictors at each split</li>
 </ul>
-<h4 id="boosting-add-models-one-at-a-time"><strong>Boosting</strong>: add models one at a time</h4>
+<h4 id="boosting"><strong>Boosting</strong>*</h4>
 <ul>
-<li>Each new model is added to the sum of the previous ones</li>
+<li>Successively add simple models into the aggregate</li>
 </ul>
+<p>* Can be used with other models too, not just trees</p>
 </section>
 <section id="bagging-bootstrap-aggregating-1" class="slide level2">
 <h2>Bagging: bootstrap aggregating</h2>
 <p><strong>Problem</strong>: a single tree model can have high variance (like many non-smooth or non-regularized models)</p>
 <ol type="1">
-<li><p><strong>Bootstrap</strong>: for each <span class="math inline">\(b = 1, \ldots, B\)</span> resamples (with replacement) of the training data, fit <span class="math inline">\(\hat f^{*b}\)</span> on bootstrap sample <span class="math inline">\(b\)</span></p></li>
+<li><p><strong>Bootstrap</strong>: for each <span class="math inline">\(b = 1, \ldots, B\)</span> resamples (with replacement) of the training data, fit <span class="math inline">\(\hat f^b\)</span> on bootstrap sample <span class="math inline">\(b\)</span></p></li>
 <li><p><strong>Aggregate</strong>: combine the <span class="math inline">\(B\)</span> models, using majority vote for classification or mean for regression</p></li>
 </ol>
-<p><span class="math display">\[\hat f_\text{bag} = \frac{1}{B} \sum_{b=1}^B \hat f^{*b}\]</span></p>
+<p><span class="math display">\[\hat f_\text{bag} = \frac{1}{B} \sum_{b=1}^B \hat f^b\]</span></p>
 <p>(“Smoothing” useful for low-bias, high-variance models)</p>
 </section>
 <section id="averaging-b-trees" class="slide level2" data-minutes="3">
@@ -608,19 +665,19 @@ Backfitting algorithm
 <tbody>
 <tr class="odd">
 <td>training films, every tree</td>
-<td>1.61</td>
+<td>1.19</td>
 </tr>
 <tr class="even">
 <td>training films, out-of-bag trees only</td>
-<td>2.03</td>
+<td>1.50</td>
 </tr>
 <tr class="odd">
 <td>tuning films</td>
-<td>2.03</td>
+<td>1.49</td>
 </tr>
 <tr class="even">
 <td>tuning films, predicting the training mean</td>
-<td>2.50</td>
+<td>2.00</td>
 </tr>
 </tbody>
 </table>
@@ -647,8 +704,8 @@ Backfitting algorithm
 </section>
 <section id="boosting-as-gradient-descent" class="slide level2" data-minutes="3">
 <h2>Boosting as gradient descent</h2>
-<p>Gradient descent moves parameters. Take the <span class="math inline">\(n\)</span> fitted values <span class="math inline">\(f(x_1), \ldots, f(x_n)\)</span> as the parameters, with squared loss <span class="math inline">\(L(f) = \frac12 \sum_{i=1}^n \big(y_i - f(x_i)\big)^2\)</span>: <span class="math display">\[
--\frac{\partial L}{\partial f(x_i)} = y_i - f(x_i): \quad \text{the negative gradient is the residual vector}
+<p>Gradient descent moves parameters. Take the <span class="math inline">\(n\)</span> fitted values <span class="math inline">\(f(x_1), \ldots, f(x_n)\)</span> as the parameters, with squared loss <span class="math inline">\(\ell(y, f) = \frac12 (y - f)^2\)</span> summed over the training data: <span class="math display">\[
+-\frac{\partial}{\partial f(x_i)} \sum_{k=1}^n \ell\big(y_k, f(x_k)\big) = y_i - f(x_i): \quad \text{the negative gradient is the residual vector}
 \]</span></p>
 <div class="fragment">
 <p>A step along it moves only those <span class="math inline">\(n\)</span> values. Fit a small tree to the residuals instead (defined at every <span class="math inline">\(x\)</span>), and step along the tree, with <strong>learning rate</strong> <span class="math inline">\(\gamma\)</span>: <span class="math display">\[
@@ -690,87 +747,12 @@ Backfitting algorithm
 <h2>Tree depth and interactions</h2>
 <div class="ask">
 <p>Can a tree with one split fit <span class="math inline">\(f(x_1, x_2) = x_1 x_2\)</span> well? Hint: assume the inputs are independent, both <span class="math inline">\(\mathrm{Unif}[-1, 1]\)</span></p>
-<p>How many splits would we want for <span class="math inline">\(f = x_1 \cdots x_p\)</span>?</p>
+<p>How many splits would we want for <span class="math inline">\(f(x_1, \ldots, x_p) = x_1 \cdots x_p\)</span>?</p>
 </div>
 <div class="fragment">
 <p>A stump asks one question, so a sum of stumps is a sum of one-input functions: an <strong>additive</strong> model. Depth <span class="math inline">\(d\)</span>: interactions of up to <span class="math inline">\(d\)</span> inputs</p>
 <p>A boosted model is additive in trees, not in the predictors</p>
 </div>
-</section>
-<section id="section-4" class="slide level2 inverse center">
-<h2></h2>
-<h3 id="part-5-feature-importance">Part 5: feature importance</h3>
-</section>
-<section id="featurevariable-importance" class="slide level2">
-<h2>Feature/variable “importance”</h2>
-<ul>
-<li>Which predictors are <em>used most</em> by the model?</li>
-<li>Does not necessarily tell us about <strong>causation</strong> (none of these methods do)</li>
-</ul>
-<div class="columns">
-<div class="column" style="width:55%;">
-<h4 id="tree-specific-importance">Tree-specific importance</h4>
-<p>Sum the RSS decrease of every split on <span class="math inline">\(x_j\)</span> within a tree, then average over trees</p>
-<h4 id="permutation-importance">Permutation importance</h4>
-<p>Permute values of predictor <span class="math inline">\(x_j\)</span>. How much does the accuracy of the model decrease? <span class="math display">\[\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, x_j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
-</div><div class="column" style="width:45%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/importance-1.png" width="750"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Each has pros/cons, no satisfactory answer for dependence</p>
-</div></div>
-</section>
-<section id="permutation-and-extrapolation" class="slide level2">
-<h2>Permutation and extrapolation</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/permute-length-1.png" class="quarto-figure quarto-figure-center" width="1725"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Shuffling length keeps each film’s other inputs: 149 of the 166 shorts now run over an hour, and 147 non-shorts under 40 minutes. Before: 0 and 1; in the 5,000 training films, 4 and 2</p>
-<p>The forest’s predictions there rest on almost no data, and permutation importance averages over them (Hooker, Mentch and Zhou 2021)</p>
-</section>
-<section id="permutation-with-correlated-inputs" class="slide level2">
-<h2>Permutation with correlated inputs</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/biv-perm-plot-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Where the data’s density is below 0.01: 20% of the permuted points, 2% of the data</p>
-</section>
-<section id="leave-one-covariate-out" class="slide level2">
-<h2>Leave one covariate out</h2>
-<div class="columns">
-<div class="column" style="width:52%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/loco-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:48%;">
-<p>Refit without input <span class="math inline">\(j\)</span>, with the same settings; score on the same held-out films (Lei et al.&nbsp;2018): <span class="math display">\[\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
-<p>No extrapolation from permuting; any method, at the cost of <span class="math inline">\(p\)</span> refits</p>
-<p>Length and Short together: 0.21, more than length alone and Short alone added up (0.14 + 0.02). Each stands in for part of the other</p>
-</div></div>
 </section>
 <section id="were-in-dangerous-territory" class="slide level2 inverse">
 <h2>We’re in dangerous territory</h2>
@@ -790,27 +772,24 @@ Backfitting algorithm
 <h2>Before the seminar</h2>
 <ul>
 <li><p>This week: exercises 1 and 2 at the top of the notebook. The correlated-average variance again, with the slides closed; and one boosting step by hand</p></li>
-<li><p>In the seminar: a split found by hand, bagging’s variance measured against the formula, and partial dependence and LOCO on the films</p></li>
+<li><p>In the seminar: a split found by hand, bagging’s variance measured against the formula, and boosting on the films</p></li>
 </ul>
 </section>
 <section id="conclusion" class="slide level2 inverse">
 <h2>Conclusion</h2>
 <h4 id="additive-models">Additive models</h4>
 <p>One curve per input, each fitted to what the others leave: partialling out, one input at a time</p>
-<h4 id="partial-dependence-1">Partial dependence</h4>
-<p>A plot of one input at a time, works most naturally with additive models, can be importantly wrong otherwise</p>
+<h4 id="additivity-vs-interactions">Additivity vs interactions</h4>
+<p>A plot of one input at a time works most naturally for additive models, and can be importantly wrong when the truth has interactions</p>
 <h4 id="trees-and-ensembles">Trees and ensembles</h4>
 <p>Greedy questions, pruned by validation. Bagging and forests average trees to lower variance; boosting adds small trees, gradient descent on the fitted values</p>
-<h4 id="feature-importance">Feature importance</h4>
-<p>How much does the model suffer if a feature is scrambled (permuted) or left out before fitting?</p>
 </section>
 <section id="references" class="slide level2 inverse" data-minutes="0">
 <h2>References</h2>
 <div style="font-size: 0.78em">
 <ul>
-<li>Hooker, G., Mentch, L. and Zhou, S. (2021). Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance. <em>Statistics and Computing</em> 31(6), article 82. <a href="https://doi.org/10.1007/s11222-021-10057-z">doi:10.1007/s11222-021-10057-z</a></li>
-<li>Lei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. <em>Journal of the American Statistical Association</em> 113(523), 1094–1111. Section 6 (LOCO). <a href="https://doi.org/10.1080/01621459.2017.1307116">doi:10.1080/01621459.2017.1307116</a></li>
-<li>Loftus, J. R., Bynum, L. E. J. and Hansen, S. (2024). Causal dependence plots. <em>Advances in Neural Information Processing Systems</em> 37. <a href="https://doi.org/10.52202/079017-3579">doi:10.52202/079017-3579</a></li>
+<li>Box, G. E. P. (1976). Science and statistics. <em>Journal of the American Statistical Association</em> 71(356), 791–799. <a href="https://doi.org/10.1080/01621459.1976.10480949">doi:10.1080/01621459.1976.10480949</a>. The quotation is in section 2.4.</li>
+<li>Box, G. E. P. and Draper, N. R. (1987). <em>Empirical Model-Building and Response Surfaces</em>. New York: Wiley.</li>
 <li>Whitehead, A. N. (1911). <em>An Introduction to Mathematics</em>. London: Williams and Norgate. <a href="https://www.gutenberg.org/ebooks/41568">Project Gutenberg</a></li>
 </ul>
 </div>
