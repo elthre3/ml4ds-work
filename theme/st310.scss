@@ -179,7 +179,8 @@ $code-block-bg: #f6f6f6;
 .reveal table { font-size: 0.75em; }
 
 // Boxes keep dark text on inverse (dark) slides.
-.reveal .inverse .ask, .reveal .inverse .leave, .reveal .inverse .recall { color: #1f1f1f; }
+.reveal .inverse .ask, .reveal .inverse .leave, .reveal .inverse .recall, .reveal .inverse .retrieval { color: #1f1f1f; }
+.reveal .inverse .ask strong, .reveal .inverse .leave strong, .reveal .inverse .recall strong, .reveal .inverse .retrieval strong { color: #8c2981; }
 
 // ---------------------------------------------------------------------
 // MathJax 4 (7 October 2026). Version 4 sets inline math as breakable inline

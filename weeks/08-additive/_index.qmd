@@ -1,6 +1,6 @@
 ## Week 8: additivity vs interactions, and ensembles
 
-How some flexible fits are built. An additive model fitted one curve at a time, each to what the others leave; its one-input plots, which are partial dependence plots, and how additivity can be importantly wrong when the truth has interactions. A tree built one greedy split at a time, then pruned. Bagging and random forests: the variance of an average of correlated trees, and the out-of-bag error. Boosting as gradient descent, one small tree at a time. Partial dependence for other models, and feature importance, come in the next lecture. Data: IMDb films ([data note](data/movies.html)).
+How some flexible fits are built. An additive model fitted one curve at a time, each to what the others leave; its one-input plots, which are partial dependence plots; how additivity can be importantly wrong when the truth has interactions, and how a correct additive fit can still answer the wrong causal question. A tree built one greedy split at a time, then pruned. Bagging and random forests: the variance of an average of correlated trees, and the out-of-bag error. Boosting as gradient descent, one small tree at a time. Partial dependence for other models, and feature importance, come in the next lecture. Data: IMDb films ([data note](data/movies.html)).
 
 **Reading**
 

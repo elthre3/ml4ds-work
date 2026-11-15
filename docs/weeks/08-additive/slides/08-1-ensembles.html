@@ -101,7 +101,7 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-c19863d77d1c94ca44c663aaa1e450de.css">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-b45c68dc0981b10edf137558c2550bc7.css">
   <link href="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="../../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -214,20 +214,19 @@ Joshua Loftus
 </div>
 
 </section>
-<section id="section" class="slide level2 inverse">
+<section id="section" class="slide level2 inverse" data-minutes="3">
 <h2></h2>
 <h3 id="week-8-additivity-vs-interactions-and-ensembles">Week 8: additivity vs interactions, and ensembles</h3>
 <p>Part 1: fitting an additive model</p>
 <p>Part 2: additivity vs interactions</p>
 <p>Part 3: building a tree</p>
 <p>Part 4: three model improvement strategies</p>
-</section>
-<section id="where-we-left-off" class="slide level2" data-minutes="3">
-<h2>Where we left off</h2>
 <div class="ask">
 <p>List the modeling assumptions and respective methods</p>
 </div>
-<div class="fragment">
+</section>
+<section id="where-we-left-off" class="slide level2" data-minutes="1">
+<h2>Where we left off</h2>
 <table class="caption-top">
 <colgroup>
 <col style="width: 50%">
@@ -266,7 +265,6 @@ Joshua Loftus
 </tr>
 </tbody>
 </table>
-</div>
 </section>
 <section id="section-1" class="slide level2 inverse center">
 <h2></h2>
@@ -301,7 +299,7 @@ Joshua Loftus
 <p>A random 10,000: 5,000 training, 2,000 tuning, 3,000 test</p>
 </div></div>
 </section>
-<section id="additive-combination-of-non-linear-predictors" class="slide level2">
+<section id="additive-combination-of-non-linear-predictors" class="slide level2 inverse">
 <h2>Additive combination of non-linear predictors</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
@@ -321,7 +319,7 @@ Joshua Loftus
 </div>
 <p>No single slope per input: how do we interpret the fitted curves?</p>
 </section>
-<section id="replace-each-linear-coefficient-with-2d-plot" class="slide level2">
+<section id="replace-each-linear-coefficient-with-2d-plot" class="slide level2 inverse">
 <h2>Replace each linear coefficient with 2d plot</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
@@ -348,20 +346,23 @@ Joshua Loftus
 </section>
 <section id="backfitting-algorithm" class="slide level2">
 <h2>Backfitting algorithm</h2>
-<p>Model: <span class="math inline">\(\hat f(\mathbf x) = \hat\beta_0 + \hat f_1(x_1) + \cdots + \hat f_p(x_p)\)</span></p>
+<p>Model: <span class="math inline">\(\hat f(\mathbf x) = \hat\beta_0 + \hat f_1(x_1) + \cdots + \hat f_p(x_p)\)</span>. Columns <span class="math inline">\(\mathbf x_1, \ldots, \mathbf x_p\)</span>; <span class="math inline">\(\hat f_k(\mathbf x_k)\)</span> is the vector of fitted values of curve <span class="math inline">\(k\)</span></p>
 <ol type="1">
-<li>Start: <span class="math inline">\(\hat\beta_0 = \bar y\)</span>, and <span class="math inline">\(\hat f_j = 0\)</span> for every <span class="math inline">\(j\)</span></li>
-<li>Sweep <span class="math inline">\(t = 1, 2, \ldots\)</span>: for <span class="math inline">\(j = 1, \ldots, p\)</span> in turn,
+<li>Initialize: <span class="math inline">\(\hat\beta_0 = \bar y\)</span>, and <span class="math inline">\(\hat f_j^{(0)} = 0\)</span> for every <span class="math inline">\(j\)</span></li>
+<li>For iteration <span class="math inline">\(t = 1, 2, \ldots\)</span>:
 <ul>
-<li>partial residual, with the latest fit of every other curve: <span class="math inline">\(r_{ij} = y_i - \hat\beta_0 - \sum_{k \neq j} \hat f_k(x_{ik})\)</span></li>
-<li>new <span class="math inline">\(\hat f_j\)</span>: a one-input smoother (e.g.&nbsp;a spline) of the <span class="math inline">\(r_{ij}\)</span> on the <span class="math inline">\(x_{ij}\)</span>, centered to mean zero</li>
+<li>for <span class="math inline">\(j = 1, \ldots, p\)</span>:
+<ul>
+<li>partial residual <span class="math inline">\(\mathbf r_j^{(t)} = \mathbf y - \hat\beta_0 - \sum_{k &lt; j} \hat f_k^{(t)}(\mathbf x_k) - \sum_{k &gt; j} \hat f_k^{(t-1)}(\mathbf x_k)\)</span></li>
+<li><span class="math inline">\(\hat f_j^{(t)}\)</span>: a one-input smoother (e.g.&nbsp;a spline) of <span class="math inline">\(\mathbf r_j^{(t)}\)</span> on <span class="math inline">\(\mathbf x_j\)</span>, centered to mean zero</li>
 </ul></li>
-<li>Stop when a sweep barely changes the fitted values</li>
+<li>stop when iteration <span class="math inline">\(t\)</span> barely changes the fitted values</li>
+</ul></li>
 </ol>
 </section>
 <section id="backfitting-and-partialling-out" class="slide level2" data-minutes="3">
 <h2>Backfitting and partialling out</h2>
-<p>Two centered inputs, and a line for each component: <span class="math inline">\(\hat f_j(x) = \hat\beta_j x\)</span>. Start at <span class="math inline">\(\hat\beta_2^{(0)} = 0\)</span>. Sweep <span class="math inline">\(t\)</span> fits each slope to its partial residual: <span class="math display">\[
+<p>Two centered inputs, and a line for each component: <span class="math inline">\(\hat f_j(x) = \hat\beta_j x\)</span>. Start at <span class="math inline">\(\hat\beta_2^{(0)} = 0\)</span>. Iteration <span class="math inline">\(t\)</span> fits each slope to its partial residual: <span class="math display">\[
 \hat\beta_1^{(t)} = \frac{\mathbf x_1^T\big(\mathbf y - \hat\beta_2^{(t-1)} \mathbf x_2\big)}{\mathbf x_1^T \mathbf x_1}, \qquad
 \hat\beta_2^{(t)} = \frac{\mathbf x_2^T\big(\mathbf y - \hat\beta_1^{(t)} \mathbf x_1\big)}{\mathbf x_2^T \mathbf x_2}
 \]</span></p>
@@ -384,7 +385,7 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p>Length, year and Short on the training films, starting from zero. Length and Short are closely related: each sweep moves a little more of the shorts’ higher ratings from the length curve to the Short coefficient, which settles after about 70 sweeps</p>
+<p>Length, year and Short on the training films, starting from zero. Length and Short are closely related: each iteration moves a little more of the shorts’ higher ratings from the length curve to the Short coefficient, which settles after about 70 iterations</p>
 </section>
 <section id="backfitting-more-generally" class="slide level2 inverse">
 <h2>Backfitting, more generally</h2>
@@ -430,7 +431,7 @@ Joshua Loftus
 </section>
 <section id="can-additivitygams-be-importantly-wrong" class="slide level2">
 <h2>Can additivity/GAMs be <em>importantly wrong</em>?</h2>
-<p>Interpretation: think carefully about <strong>calculus</strong> and <strong>causality</strong> (causality: later in the course). To simplify let’s consider the identity link function (rather than e.g.&nbsp;logistic regression, those cases are more complicated)</p>
+<p>Interpretation: think carefully about <strong>calculus</strong> and <strong>causality</strong> (causality: briefly, after the interactions). To simplify let’s consider the identity link function (rather than e.g.&nbsp;logistic regression, those cases are more complicated)</p>
 <h4 id="calculus">Calculus</h4>
 <p>Does the CEF really decompose into additive terms? Is this approximation good:</p>
 <p><span class="math display">\[
@@ -475,60 +476,304 @@ Joshua Loftus
 <p>Additivity assumption is now (importantly) wrong</p>
 </div></div>
 </section>
-<section id="section-3" class="slide level2 inverse center">
-<h2></h2>
-<h3 id="part-3-building-a-tree">Part 3: building a tree</h3>
+<section id="causality-should-we-control-for-party" class="slide level2" data-minutes="2">
+<h2>Causality: should we “control for party”?</h2>
+<p><em>Louisiana v. Callais</em>, US Supreme Court, 29 April 2026, 6 to 3: evidence of racially polarized voting must come from “an analysis that controls for party affiliation”</p>
+<ul>
+<li>The majority’s aim: to show that race, not party, explains the divide</li>
+<li>Critics argue that this misuses statistics: party is partly a <strong>consequence</strong> of race, so holding it fixed removes part of what is to be measured (Morris 2026)</li>
+<li>After the decision, several Southern states redrew their congressional maps before the November 2026 midterms</li>
+</ul>
+<p>What would a GAM of vote share on race and party show?</p>
 </section>
-<section id="where-would-you-cut" class="slide level2" data-minutes="3">
-<h2>Where would you cut?</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/cut-ask-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="ask">
-<p>One question about length, then one constant on each side. Write down your cutoff.</p>
-</div>
-</section>
-<section id="split-search" class="slide level2">
-<h2>Split search</h2>
+<section id="causality-what-partial-dependence-holds-fixed" class="slide level2" data-minutes="3">
+<h2>Causality: what partial dependence holds fixed</h2>
 <div class="columns">
-<div class="column" style="width:56%;">
+<div class="column" style="width:45%;">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/split-search-1.png" width="990"></p>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/mediation-dag-1.png" width="750"></p>
 </figure>
 </div>
 </div>
 </div>
-</div><div class="column" style="width:44%;">
-<p>Every cutoff between two films, scored by the RSS when each side predicts its own mean</p>
-<p>Each side of a split is a <strong>leaf</strong> (until it is split again)</p>
-<p>Then every input; keep the best; then <strong>recurse</strong> into each leaf. Greedy: each split is the best <em>now</em></p>
-<p>For a label: the same search, scoring each split by its leaves’ <strong>Gini indices</strong> <span class="math inline">\(\sum_k \hat p_k (1 - \hat p_k)\)</span>, weighted by leaf size</p>
+<p>Simulated counties, an additive CEF, a GAM that fits it. Each partial dependence plot holds the other input fixed: the <strong>direct</strong> path only. Race acts mostly through party, a <strong>mediator</strong></p>
+</div><div class="column" style="width:55%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/mediation-pdp-1.png" width="870"></p>
+</figure>
+</div>
+</div>
+</div>
 </div></div>
 </section>
-<section id="splitting-the-star-wars-films" class="slide level2">
-<h2>Splitting the Star Wars films</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/star-wars-plot-1.png" class="quarto-figure quarto-figure-center" width="1650"></p>
-</figure>
+<section id="recap-the-causal-example" class="slide level2 inverse">
+<h2>Recap: the causal example</h2>
+<p>The GAM fits correctly, the plot interprets the GAM correctly, but the plot answers the wrong (uninteresting) causal question</p>
+<div class="retrieval">
+<p>Adjustment theorem: adjust for common causes of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span>, and for <strong>no consequence</strong> of <span class="math inline">\(T\)</span></p>
 </div>
-</div>
-</div>
-<p>Each dashed line is a cutoff, with the RSS of the two means above it (no split: 4.69). The best is year at 1991: the original trilogy against the prequels</p>
 </section>
-<section id="then-split-each-side-again" class="slide level2">
-<h2>Then split each side again</h2>
+<section id="section-3" class="slide level2 inverse center">
+<h2></h2>
+<h3 id="part-3-building-a-tree">Part 3: building a tree</h3>
+</section>
+<section id="the-star-wars-films" class="slide level2">
+<h2>The Star Wars films</h2>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Episode</th>
+<th>Film</th>
+<th>Year</th>
+<th>Length (minutes)</th>
+<th>Rating</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IV</td>
+<td>Star Wars</td>
+<td>1977</td>
+<td>125</td>
+<td>8.8</td>
+</tr>
+<tr class="even">
+<td>V</td>
+<td>The Empire Strikes Back</td>
+<td>1980</td>
+<td>129</td>
+<td>8.8</td>
+</tr>
+<tr class="odd">
+<td>VI</td>
+<td>Return of the Jedi</td>
+<td>1983</td>
+<td>135</td>
+<td>8.1</td>
+</tr>
+<tr class="even">
+<td>I</td>
+<td>The Phantom Menace</td>
+<td>1999</td>
+<td>133</td>
+<td>6.4</td>
+</tr>
+<tr class="odd">
+<td>II</td>
+<td>Attack of the Clones</td>
+<td>2002</td>
+<td>120</td>
+<td>7.0</td>
+</tr>
+</tbody>
+</table>
+<p>Ratings: IMDb users’ averages, up to 2005</p>
+<p>We’ll walk through growing and pruning a tree on this small subset of the data</p>
+</section>
+<section id="rss-for-each-possible-split" class="slide level2 inverse">
+<h2>RSS for each possible split</h2>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Split</th>
+<th>Yes</th>
+<th>No</th>
+<th>Mean, yes</th>
+<th>Mean, no</th>
+<th>RSS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>year&nbsp;&lt;&nbsp;1978.5</td>
+<td>IV</td>
+<td>V, VI, I, II</td>
+<td>8.80</td>
+<td>7.58</td>
+<td>3.49</td>
+</tr>
+<tr class="even">
+<td>year&nbsp;&lt;&nbsp;1981.5</td>
+<td>IV, V</td>
+<td>VI, I, II</td>
+<td>8.80</td>
+<td>7.17</td>
+<td>1.49</td>
+</tr>
+<tr class="odd">
+<td><strong>year&nbsp;&lt;&nbsp;1991</strong></td>
+<td><strong>IV, V, VI</strong></td>
+<td><strong>I, II</strong></td>
+<td><strong>8.57</strong></td>
+<td><strong>6.70</strong></td>
+<td><strong>0.51</strong></td>
+</tr>
+<tr class="even">
+<td>year&nbsp;&lt;&nbsp;2000.5</td>
+<td>IV, V, VI, I</td>
+<td>II</td>
+<td>8.03</td>
+<td>7.00</td>
+<td>3.85</td>
+</tr>
+<tr class="odd">
+<td>length&nbsp;&lt;&nbsp;122.5</td>
+<td>II</td>
+<td>IV, V, VI, I</td>
+<td>7.00</td>
+<td>8.03</td>
+<td>3.85</td>
+</tr>
+<tr class="even">
+<td>length&nbsp;&lt;&nbsp;127</td>
+<td>IV, II</td>
+<td>V, VI, I</td>
+<td>7.90</td>
+<td>7.77</td>
+<td>4.67</td>
+</tr>
+<tr class="odd">
+<td>length&nbsp;&lt;&nbsp;131</td>
+<td>IV, V, II</td>
+<td>VI, I</td>
+<td>8.20</td>
+<td>7.25</td>
+<td>3.61</td>
+</tr>
+<tr class="even">
+<td>length&nbsp;&lt;&nbsp;134</td>
+<td>IV, V, I, II</td>
+<td>VI</td>
+<td>7.75</td>
+<td>8.10</td>
+<td>4.59</td>
+</tr>
+</tbody>
+</table>
+<p>No split: every film predicted by the mean, 7.82, RSS 4.69. Each side of a split is a <strong>leaf</strong>; the search then <strong>recurses</strong> into each leaf</p>
+</section>
+<section id="recursion-rss-for-each-split-inside-each-leaf" class="slide level2 inverse">
+<h2>Recursion: RSS for each split inside each leaf</h2>
+<div class="columns">
+<div class="column" style="width:56%;">
+<p><strong>Yes to year &lt; 1991: IV, V, VI</strong> (RSS 0.33)</p>
+<div style="font-size: 0.75em">
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Split</th>
+<th>Yes</th>
+<th>No</th>
+<th>Mean, yes</th>
+<th>Mean, no</th>
+<th>RSS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>year&nbsp;&lt;&nbsp;1978.5</td>
+<td>IV</td>
+<td>V, VI</td>
+<td>8.80</td>
+<td>8.45</td>
+<td>0.25</td>
+</tr>
+<tr class="even">
+<td><strong>year&nbsp;&lt;&nbsp;1981.5</strong></td>
+<td><strong>IV, V</strong></td>
+<td><strong>VI</strong></td>
+<td><strong>8.80</strong></td>
+<td><strong>8.10</strong></td>
+<td><strong>0.00</strong></td>
+</tr>
+<tr class="odd">
+<td>length&nbsp;&lt;&nbsp;127</td>
+<td>IV</td>
+<td>V, VI</td>
+<td>8.80</td>
+<td>8.45</td>
+<td>0.25</td>
+</tr>
+<tr class="even">
+<td>length&nbsp;&lt;&nbsp;132</td>
+<td>IV, V</td>
+<td>VI</td>
+<td>8.80</td>
+<td>8.10</td>
+<td>0.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div><div class="column" style="width:44%;">
+<p><strong>No: I, II</strong> (RSS 0.18)</p>
+<div style="font-size: 0.75em">
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Split</th>
+<th>Yes</th>
+<th>No</th>
+<th>Mean, yes</th>
+<th>Mean, no</th>
+<th>RSS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>year&nbsp;&lt;&nbsp;2000.5</strong></td>
+<td><strong>I</strong></td>
+<td><strong>II</strong></td>
+<td><strong>6.40</strong></td>
+<td><strong>7.00</strong></td>
+<td><strong>0.00</strong></td>
+</tr>
+<tr class="even">
+<td>length&nbsp;&lt;&nbsp;126.5</td>
+<td>II</td>
+<td>I</td>
+<td>7.00</td>
+<td>6.40</td>
+<td>0.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div></div>
+<p>Ties go to the first input, year. Every new leaf holds films of one rating: RSS 0, and growing stops</p>
+</section>
+<section id="the-grown-tree" class="slide level2">
+<h2>The grown tree</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -538,23 +783,37 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p>The same search inside each side: 4 leaves, each holding films of one rating, and a training RSS of 0. Grown until it cannot split, a tree memorizes its training data</p>
+<p>4 leaves, each holding films of one rating: a training RSS of 0. Grown until it cannot split, a tree memorizes its training data</p>
 </section>
 <section id="growing-a-tree" class="slide level2">
 <h2>Growing a tree</h2>
 <ul>
-<li><strong>Recursive</strong>: split the data by the best single question; then do the same inside each leaf, and so on</li>
+<li><strong>Recursive</strong>: split the data by the most discriminating single-variable question; then do the same inside each leaf, and so on</li>
 <li><strong>Greedy</strong>: each split is the best <em>now</em>. A weak split that would enable a strong one below it can be missed, so stopping early is risky: grow a large tree</li>
 <li><strong>When to stop</strong>: a leaf too small to split (rpart’s <code>minsplit</code>), or no split that improves the fit enough (<code>cp</code>)</li>
 <li>Grown until no leaf can split, a tree is like 1-nearest neighbors: on the training films, year and length alone give 2,670 leaves</li>
 </ul>
 <div class="retrieval">
-<p><span class="math inline">\(k\)</span> nearest neighbors average the <span class="math inline">\(k\)</span> training points closest to <span class="math inline">\(x_0\)</span>; a tree averages those in <span class="math inline">\(x_0\)</span>’s leaf, a neighborhood chosen by the data</p>
+<p><span class="math inline">\(k\)</span> nearest neighbors average the <span class="math inline">\(k\)</span> training points closest to <span class="math inline">\(x_0\)</span>; a tree averages those in <span class="math inline">\(x_0\)</span>’s leaf, a neighborhood chosen by subsets of features</p>
 </div>
 </section>
 <section id="pruning" class="slide level2">
 <h2>Pruning</h2>
-<p>Of the many sub-trees of a large tree, consider only the path of those that minimize <span class="math display">\[\text{RSS}(\text{sub-tree}) + \alpha\, |\text{sub-tree}|, \qquad \alpha \geq 0\]</span> (<span class="math inline">\(|\text{sub-tree}|\)</span>: its number of leaves), and choose <span class="math inline">\(\alpha\)</span>, and so a sub-tree, on held-out data</p>
+<p>For each <span class="math inline">\(\alpha \geq 0\)</span>, the sub-tree minimizing <span class="math inline">\(\text{RSS} + \alpha \times (\text{number of leaves})\)</span>. The Star Wars tree, as <span class="math inline">\(\alpha\)</span> increases from 0:</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/sw-prune-plot-1.png" class="quarto-figure quarto-figure-center" width="1800"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Sequence of trees; tuning knob <span class="math inline">\(\alpha\)</span> chosen by cross-validation or held-out data</p>
+</section>
+<section id="choosing-alpha-on-the-films" class="slide level2">
+<h2>Choosing <span class="math inline">\(\alpha\)</span> on the films</h2>
+<p>A tree on all nine inputs, grown to 272 leaves, pruned back along its sequence. Training error falls with every leaf; tuning error is lowest at 56 leaves</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -564,6 +823,15 @@ Joshua Loftus
 </div>
 </div>
 </div>
+</section>
+<section id="trees-and-missing-inputs" class="slide level2 inverse">
+<h2>Trees and missing inputs</h2>
+<p>The films’ <code>budget</code> is missing for 87%: a film with no budget cannot answer “budget &lt; c?”</p>
+<ul>
+<li><strong>Missingness as information</strong>: a split also chooses which side the films with no budget go to, like its cutoff, to lower the RSS (xgboost’s <em>default direction</em>); or a budget missing indicator that the tree can split on</li>
+<li><strong>Missingness as a nuisance</strong>: rpart’s <em>surrogate splits</em>, backup questions on other inputs that send the training films the same way; a film missing the split’s input follows the best backup it can answer</li>
+<li>Informative here: budgets were recorded mostly for widely rated films (median 1,238 votes, against 71). Useful for prediction</li>
+</ul>
 </section>
 <section id="a-downside-of-trees-variance" class="slide level2" data-minutes="3">
 <h2>A downside of trees: variance</h2>
@@ -576,7 +844,7 @@ Joshua Loftus
 </div>
 </div>
 </div>
-<p>Depth 2, each on a random half of the training films. <em>Star Wars: Episode I - The Phantom Menace</em> (rated 6.4): predicted 5.36, 6.25, 6.75, 6.42</p>
+<p>Depth 2, each on a random half of the training films. <em>Star Wars: Episode I - The Phantom Menace</em> (rated 6.4): predicted 6.38, 6.64, 6.59, 6.24</p>
 <div class="ask">
 <p>Same method, same films, four different models. What should we do about this?</p>
 </div>
@@ -594,7 +862,7 @@ Joshua Loftus
 </ul>
 <h4 id="boosting"><strong>Boosting</strong>*</h4>
 <ul>
-<li>Successively add simple models into the aggregate</li>
+<li>Successively add simple models to improve the aggregate</li>
 </ul>
 <p>* Can be used with other models too, not just trees</p>
 </section>
@@ -606,7 +874,7 @@ Joshua Loftus
 <li><p><strong>Aggregate</strong>: combine the <span class="math inline">\(B\)</span> models, using majority vote for classification or mean for regression</p></li>
 </ol>
 <p><span class="math display">\[\hat f_\text{bag} = \frac{1}{B} \sum_{b=1}^B \hat f^b\]</span></p>
-<p>(“Smoothing” useful for low-bias, high-variance models)</p>
+<p>(“Smoothing” useful for high-variance models)</p>
 </section>
 <section id="averaging-b-trees" class="slide level2" data-minutes="3">
 <h2>Averaging <span class="math inline">\(B\)</span> trees</h2>
@@ -620,9 +888,15 @@ Joshua Loftus
 </ul>
 </div>
 </section>
+<section id="recall-variance-of-a-sum" class="slide level2">
+<h2>Recall: variance of a sum</h2>
+<p>For random variables <span class="math inline">\(V_1, \ldots, V_n\)</span> and constants <span class="math inline">\(a_1, \ldots, a_n\)</span>, every variance plus every covariance: <span class="math display">\[
+\mathrm{Var}\Big(\sum_{i=1}^n a_i V_i\Big) = \sum_{i=1}^n a_i^2\, \mathrm{Var}(V_i) + \underbrace{\sum_{i=1}^n \sum_{j \neq i} a_i a_j\, \mathrm{Cov}(V_i, V_j)}_{n(n-1) \text{ terms; } \binom{n}{2} \text{ distinct}}
+\]</span></p>
+</section>
 <section id="correlated-average-variance" class="slide level2" data-minutes="3">
 <h2>Correlated-average variance</h2>
-<p>The variance of a sum is every variance plus every covariance, <span class="math inline">\(B\)</span> terms <span class="math inline">\(\tau^2\)</span> and <span class="math inline">\(B(B - 1)\)</span> terms <span class="math inline">\(\rho\tau^2\)</span>: <span class="math inline">\(\;\mathrm{Var}\big(\sum_{b} V_b\big) = B\tau^2 + B(B - 1)\rho\tau^2\)</span></p>
+<p>With <span class="math inline">\(n = B\)</span> and every <span class="math inline">\(a_i = 1\)</span>: <span class="math inline">\(B\)</span> terms <span class="math inline">\(\tau^2\)</span> and <span class="math inline">\(B(B - 1)\)</span> terms <span class="math inline">\(\rho\tau^2\)</span>, <span class="math inline">\(\;\mathrm{Var}\big(\sum_{b} V_b\big) = B\tau^2 + B(B - 1)\rho\tau^2\)</span></p>
 <div class="fragment">
 <div class="leave">
 <p><strong>Correlated-average variance.</strong> <span class="math inline">\(V_1, \ldots, V_B\)</span>, each with variance <span class="math inline">\(\tau^2\)</span>, every pair with correlation <span class="math inline">\(\rho\)</span>: <span class="math display">\[
@@ -665,7 +939,7 @@ Joshua Loftus
 <tbody>
 <tr class="odd">
 <td>training films, every tree</td>
-<td>1.19</td>
+<td>1.18</td>
 </tr>
 <tr class="even">
 <td>training films, out-of-bag trees only</td>
@@ -689,6 +963,9 @@ Joshua Loftus
 <div class="ask">
 <p>We may add one small tree to <span class="math inline">\(\hat f^{(b)}\)</span>. What should it predict?</p>
 </div>
+<div class="fragment">
+<p>The residual from the existing fit: <span class="math inline">\(y - \hat f^{(b)}(x)\)</span></p>
+</div>
 </section>
 <section id="boosting-iterated-fitting-on-residuals" class="slide level2">
 <h2>Boosting: iterated fitting on residuals</h2>
@@ -702,18 +979,15 @@ Joshua Loftus
 <p>Optional additional reading: <a href="https://hastie.su.domains/ElemStatLearn/">ESL</a> Chapter 10</p>
 </div>
 </section>
-<section id="boosting-as-gradient-descent" class="slide level2" data-minutes="3">
-<h2>Boosting as gradient descent</h2>
-<p>Gradient descent moves parameters. Take the <span class="math inline">\(n\)</span> fitted values <span class="math inline">\(f(x_1), \ldots, f(x_n)\)</span> as the parameters, with squared loss <span class="math inline">\(\ell(y, f) = \frac12 (y - f)^2\)</span> summed over the training data: <span class="math display">\[
--\frac{\partial}{\partial f(x_i)} \sum_{k=1}^n \ell\big(y_k, f(x_k)\big) = y_i - f(x_i): \quad \text{the negative gradient is the residual vector}
-\]</span></p>
+<section id="boosting-as-approximate-gradient-descent" class="slide level2" data-minutes="3">
+<h2>Boosting as approximate gradient descent</h2>
+<p>The training loss depends on a model only through its <span class="math inline">\(n\)</span> fitted values <span class="math inline">\(\mathbf f = (f_1, \ldots, f_n)\)</span>, <span class="math inline">\(f_i = f(x_i)\)</span>: a function of <span class="math inline">\(n\)</span> numbers <span class="math display">\[
+L(\mathbf f) = \sum_{i=1}^n \tfrac12 (y_i - f_i)^2, \qquad -\frac{\partial L}{\partial f_i} = y_i - f_i
+\]</span> The negative gradient is the residual vector</p>
 <div class="fragment">
-<p>A step along it moves only those <span class="math inline">\(n\)</span> values. Fit a small tree to the residuals instead (defined at every <span class="math inline">\(x\)</span>), and step along the tree, with <strong>learning rate</strong> <span class="math inline">\(\gamma\)</span>: <span class="math display">\[
+<p>A gradient step, <span class="math inline">\(\mathbf f^{(b)} = \mathbf f^{(b-1)} + \gamma\,(\mathbf y - \mathbf f^{(b-1)})\)</span>, changes only those <span class="math inline">\(n\)</span> values. Boosting trees fits a small tree to the residuals, the small tree closest to the negative gradient, and steps along it, with <strong>learning rate</strong> <span class="math inline">\(\gamma\)</span>: <span class="math display">\[
 \hat f^{(0)} = \bar y, \qquad \hat f^{(b)} = \hat f^{(b-1)} + \gamma\, \hat t_b, \qquad \hat t_b \text{ a small tree fitted to } y_i - \hat f^{(b-1)}(x_i)
 \]</span></p>
-<div class="retrieval">
-<p>Gradient descent, stopped early: the number of steps is a knob. Backfitting replaced a curve; boosting adds a tree, fitted to what the sum leaves.</p>
-</div>
 </div>
 </section>
 <section id="boosting-in-practice" class="slide level2" data-minutes="1">
@@ -724,22 +998,22 @@ Joshua Loftus
 <h4 id="bagging-and-boosting">Bagging and boosting</h4>
 <p>Bagging and forests start with large trees, which have high variance individually, and average them to lower the variance. Boosting starts with weak learners like tree stumps, which have high bias individually, and fits iteratively on residuals to lower the bias</p>
 </section>
-<section id="rounds-and-learning-rate" class="slide level2">
-<h2>Rounds and learning rate</h2>
+<section id="iterations-and-learning-rate" class="slide level2">
+<h2>Iterations and learning rate</h2>
 <div class="columns">
 <div class="column" style="width:56%;">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="08-1-ensembles_files/figure-revealjs/rounds-1.png" width="990"></p>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/iterations-1.png" width="990"></p>
 </figure>
 </div>
 </div>
 </div>
 </div><div class="column" style="width:44%;">
-<p><strong>Rounds <span class="math inline">\(B\)</span>.</strong> Training error keeps falling; tuning error turns. Stopping there is early stopping, as for gradient descent</p>
-<p><strong>Learning rate <span class="math inline">\(\gamma\)</span>.</strong> Smaller steps, more of them; often a lower minimum, not always</p>
+<p><strong>Iterations <span class="math inline">\(B\)</span>.</strong> Training error keeps falling; tuning error turns. Stopping there is early stopping, as for gradient descent</p>
+<p><strong>Learning rate <span class="math inline">\(\gamma\)</span>.</strong> Smaller steps, more of them, to reach about the same minimum</p>
 <p><strong>Depth.</strong> How many inputs one tree can combine (next)</p>
 </div></div>
 </section>
@@ -786,10 +1060,16 @@ Joshua Loftus
 </section>
 <section id="references" class="slide level2 inverse" data-minutes="0">
 <h2>References</h2>
-<div style="font-size: 0.78em">
+<div style="font-size: 0.66em">
 <ul>
 <li>Box, G. E. P. (1976). Science and statistics. <em>Journal of the American Statistical Association</em> 71(356), 791–799. <a href="https://doi.org/10.1080/01621459.1976.10480949">doi:10.1080/01621459.1976.10480949</a>. The quotation is in section 2.4.</li>
 <li>Box, G. E. P. and Draper, N. R. (1987). <em>Empirical Model-Building and Response Surfaces</em>. New York: Wiley.</li>
+<li>Breiman, L., Friedman, J. H., Olshen, R. A. and Stone, C. J. (1984). <em>Classification and Regression Trees</em>. Belmont, CA: Wadsworth.</li>
+<li>Chen, T. and Guestrin, C. (2016). XGBoost: a scalable tree boosting system. <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 785–794. <a href="https://doi.org/10.1145/2939672.2939785">doi:10.1145/2939672.2939785</a></li>
+<li>Josse, J., Chen, J. M., Prost, N., Varoquaux, G. and Scornet, E. (2024). On the consistency of supervised learning with missing values. <em>Statistical Papers</em> 65(9), 5447–5479. <a href="https://doi.org/10.1007/s00362-024-01550-4">doi:10.1007/s00362-024-01550-4</a></li>
+<li><em>Louisiana v. Callais</em>, 608 U.S. 85 (2026), No.&nbsp;24-109, decided 29 April 2026. <a href="https://www.supremecourt.gov/opinions/25pdf/608us1r29_n648.pdf">Opinion (preliminary print)</a></li>
+<li>Morris, G. E. (2026). The simple statistical error Republican Supreme Court justices used to gut the VRA. <em>Strength In Numbers</em>, 8 May 2026. <a href="https://www.gelliottmorris.com/p/2026-05-08-simple-math-error-scotus-callais-vra">Link</a></li>
+<li>Twala, B. E. T. H., Jones, M. C. and Hand, D. J. (2008). Good methods for coping with missing data in decision trees. <em>Pattern Recognition Letters</em> 29(7), 950–956. <a href="https://doi.org/10.1016/j.patrec.2008.01.010">doi:10.1016/j.patrec.2008.01.010</a></li>
 <li>Whitehead, A. N. (1911). <em>An Introduction to Mathematics</em>. London: Williams and Norgate. <a href="https://www.gutenberg.org/ebooks/41568">Project Gutenberg</a></li>
 </ul>
 </div>
