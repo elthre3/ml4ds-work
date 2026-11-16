@@ -2205,18 +2205,18 @@
     "text": "References\n\nHastie, T., Tibshirani, R. and Friedman, J. (2009). The Elements of Statistical Learning: Data Mining, Inference, and Prediction, 2nd edition. Springer, New York. Section 7.10.2, “The Wrong and Right Way to Do Cross-validation”, pp. 245–247. hastie.su.domains/ElemStatLearn\nJames, G., Witten, D., Hastie, T. and Tibshirani, R. (2021). An Introduction to Statistical Learning with Applications in R, 2nd edition. Springer, New York. Section 5.1.4, “Bias-Variance Trade-Off for k-Fold Cross-Validation”, pp. 205–206, and equation (5.2), p. 202. statlearning.com"
   },
   {
-    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section",
-    "href": "weeks/08-additive/slides/08-1-ensembles.html#section",
-    "title": "Machine learning",
-    "section": "",
-    "text": "Week 8: additivity vs interactions, and ensembles\nPart 1: fitting an additive model\nPart 2: additivity vs interactions\nPart 3: building a tree\nPart 4: three model improvement strategies"
-  },
-  {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#where-we-left-off",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#where-we-left-off",
     "title": "Machine learning",
     "section": "Where we left off",
     "text": "Where we left off\n\n\n\n\n\n\n\nAssumption\nMethods\n\n\n\n\nLinearity\nlinear and logistic regression\n\n\nSmoothness (Lipschitz)\n\\(k\\) nearest neighbors; also trees and networks\n\n\nAdditivity: one curve per input\nadditive models (a spline per input)\n\n\nLimited wiggliness\npenalized splines\n\n\nSparsity: few inputs matter\nthe lasso\n\n\nSmall coefficients\nridge regression"
+  },
+  {
+    "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section",
+    "href": "weeks/08-additive/slides/08-1-ensembles.html#section",
+    "title": "Machine learning",
+    "section": "",
+    "text": "Week 8: additivity vs interactions, and ensembles\nPart 1: fitting an additive model\nPart 2: additivity vs interactions\nPart 3: building a tree\nPart 4: three model improvement strategies"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#section-1",
