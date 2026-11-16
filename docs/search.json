@@ -564,7 +564,7 @@
     "href": "index.html#week-8-additivity-vs-interactions-and-ensembles",
     "title": "ST310 course page",
     "section": "Week 8: additivity vs interactions, and ensembles",
-    "text": "Week 8: additivity vs interactions, and ensembles\nHow some flexible fits are built. An additive model fitted one curve at a time, each to what the others leave; its one-input plots, which are partial dependence plots; how additivity can be importantly wrong when the truth has interactions, and how a correct additive fit can still answer the wrong causal question. A tree built one greedy split at a time, then pruned. Bagging and random forests: the variance of an average of correlated trees, and the out-of-bag error. Boosting as gradient descent, one small tree at a time. Partial dependence for other models, and feature importance, come in the next lecture. Data: IMDb films (data note).\nReading\n\nISLR Chapter 8 (Tree-Based Methods), section 8.1, pp. 327–340, all of it this time: regression trees again, pruning, classification trees, trees against linear models.\nISLR Chapter 8, sections 8.2.1–8.2.3, pp. 340–348: bagging (with out-of-bag error and variable importance measures), random forests, boosting. Section 8.2.4, Bayesian additive regression trees, is not part of the course.\nISLR Chapter 7, section 7.7.1, pp. 307–310, re-read: fitting an additive model one predictor at a time (backfitting).\n\nOptional, deeper: ESL section 9.1.1, pp. 297–299 (the backfitting algorithm).\nLecture: slides"
+    "text": "Week 8: additivity vs interactions, and ensembles\nHow some flexible fits are built. An additive model fitted one curve at a time, each to what the others leave; its one-input plots, which are partial dependence plots; how additivity can be importantly wrong when the truth has interactions, and how a correct additive fit can still answer the wrong causal question. A tree built one greedy split at a time, then pruned. Bagging and random forests: the variance of an average of correlated trees, and the out-of-bag error. Boosting as approximate gradient descent, one small tree at a time. Partial dependence for other models, and feature importance, come later in the course. Data: IMDb films (data note).\nReading\n\nISLR Chapter 8 (Tree-Based Methods), section 8.1, pp. 327–340, all of it this time: regression trees again, pruning, classification trees, trees against linear models.\nISLR Chapter 8, sections 8.2.1–8.2.3, pp. 340–348: bagging (with out-of-bag error and variable importance measures), random forests, boosting. Section 8.2.4, Bayesian additive regression trees, is not part of the course.\nISLR Chapter 7, section 7.7.1, pp. 307–310, re-read: fitting an additive model one predictor at a time (backfitting).\n\nOptional, deeper: ESL section 9.1.1, pp. 297–299 (the backfitting algorithm); sections 10.10–10.12 (gradient boosting, tree size, regularization).\nLecture: slides"
   },
   {
     "objectID": "index.html#week-9-what-can-we-learn-from-a-fitted-prediction",
@@ -2237,28 +2237,28 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#additive-combination-of-non-linear-predictors",
     "title": "Machine learning",
     "section": "Additive combination of non-linear predictors",
-    "text": "Additive combination of non-linear predictors\n\nlibrary(mgcv)\nfit_gam &lt;-\n  gam(rating ~ s(length) + s(year) + Short, data = mv_train)\n\ns is a penalized spline, but can use different methods too\n\ntidy(fit_gam)\n\n# A tibble: 2 x 5\n  term        edf ref.df statistic p.value\n  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;\n1 s(length)  7.60   8.44      76.4       0\n2 s(year)    6.84   7.88      61.7       0\n\n\nNo single slope per input: how do we interpret the fitted curves?"
+    "text": "Additive combination of non-linear predictors\n\nlibrary(gam)\nfit_gam &lt;-\n  gam(rating ~ s(length, df = 8) + s(year, df = 8) + Short, data = mv_train)\n\ns is a smoothing spline with df fixed by us; lo would use local regression\n\nsummary(fit_gam)$anova\n\nAnova for Nonparametric Effects\n                  Npar Df Npar F     Pr(F)    \n(Intercept)                                   \ns(length, df = 8)       7 19.535 &lt; 2.2e-16 ***\ns(year, df = 8)         7 38.841 &lt; 2.2e-16 ***\nShort                                         \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n\nNo single slope per input: how do we interpret the fitted curves?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#replace-each-linear-coefficient-with-2d-plot",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#replace-each-linear-coefficient-with-2d-plot",
     "title": "Machine learning",
     "section": "Replace each linear coefficient with 2d plot",
-    "text": "Replace each linear coefficient with 2d plot\n\npar(mfrow = c(1,2))\nplot(fit_gam)\n\n\n\n\n\n\n\n\n\n\n\nThe cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input curves (additivity, plus design conditions) has the one-input rate, \\(n^{-2/3}\\)."
+    "text": "Replace each linear coefficient with 2d plot\n\npar(mfrow = c(1, 2))\nplot(fit_gam, se = TRUE, terms = c(\"s(length, df = 8)\", \"s(year, df = 8)\"))\n\n\n\n\n\n\n\n\n\n\n\nThe cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input curves (additivity, plus design conditions) has the one-input rate, \\(n^{-2/3}\\)."
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#fitting-several-curves",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#fitting-several-curves",
     "title": "Machine learning",
     "section": "Fitting several curves",
-    "text": "Fitting several curves\n\nWe know how to fit a spline to one input: least squares on its basis matrix. How could we fit a model with a curve for each of several inputs?"
+    "text": "Fitting several curves\n\nCould we fit this model one curve at a time?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-algorithm",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-algorithm",
     "title": "Machine learning",
     "section": "Backfitting algorithm",
-    "text": "Backfitting algorithm\nModel: \\(\\hat f(\\mathbf x) = \\hat\\beta_0 + \\hat f_1(x_1) + \\cdots + \\hat f_p(x_p)\\). Columns \\(\\mathbf x_1, \\ldots, \\mathbf x_p\\); \\(\\hat f_k(\\mathbf x_k)\\) is the vector of fitted values of curve \\(k\\)\n\nInitialize: \\(\\hat\\beta_0 = \\bar y\\), and \\(\\hat f_j^{(0)} = 0\\) for every \\(j\\)\nFor iteration \\(t = 1, 2, \\ldots\\):\n\nfor \\(j = 1, \\ldots, p\\):\n\npartial residual \\(\\mathbf r_j^{(t)} = \\mathbf y - \\hat\\beta_0 - \\sum_{k &lt; j} \\hat f_k^{(t)}(\\mathbf x_k) - \\sum_{k &gt; j} \\hat f_k^{(t-1)}(\\mathbf x_k)\\)\n\\(\\hat f_j^{(t)}\\): a one-input smoother (e.g. a spline) of \\(\\mathbf r_j^{(t)}\\) on \\(\\mathbf x_j\\), centered to mean zero\n\nstop when iteration \\(t\\) barely changes the fitted values"
+    "text": "Backfitting algorithm\nModel: \\(\\hat f(x_1, \\ldots, x_p) = \\hat\\beta_0 + \\hat f_1(x_1) + \\cdots + \\hat f_p(x_p)\\). Columns \\(\\mathbf x_1, \\ldots, \\mathbf x_p\\); \\(\\hat f_k(\\mathbf x_k)\\) is the vector of fitted values of curve \\(k\\)\n\nInitialize: \\(\\hat\\beta_0 = \\bar y\\), and \\(\\hat f_j^{(0)} = 0\\) for every \\(j\\)\nFor iteration \\(t = 1, 2, \\ldots\\):\n\nfor \\(j = 1, \\ldots, p\\):\n\npartial residual \\(\\mathbf r_j^{(t)} = \\mathbf y - \\hat\\beta_0 - \\sum_{k &lt; j} \\hat f_k^{(t)}(\\mathbf x_k) - \\sum_{k &gt; j} \\hat f_k^{(t-1)}(\\mathbf x_k)\\)\n\\(\\hat f_j^{(t)}\\): a one-input smoother (e.g. a spline) of \\(\\mathbf r_j^{(t)}\\) on \\(\\mathbf x_j\\), centered to mean zero\n\nstop when iteration \\(t\\) barely changes the fitted values"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#backfitting-and-partialling-out",
@@ -2293,21 +2293,21 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#partial-dependence-plots-for-a-gam",
     "title": "Machine learning",
     "section": "Partial dependence plots for a GAM",
-    "text": "Partial dependence plots for a GAM\nThese univariate plots for GAMs are called partial dependence plots (PDPs). They show how the GAM depends on each feature: a simple one-dimensional dependence, because of the additivity assumption\n\n\n\n\n\n\n\n\n\nBut what if additivity is wrong?"
+    "text": "Partial dependence plots for a GAM\nThese univariate plots for GAMs are called partial dependence plots (PDPs), each up to a constant: for an additive fit, the partial dependence on \\(x_j\\) is \\(\\hat f_j\\) plus a constant. They show how the GAM depends on each feature: a simple one-dimensional dependence, because of the additivity assumption\n\n\n\n\n\n\n\n\n\nBut what if additivity is wrong?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#all-models-are-wrong",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#all-models-are-wrong",
     "title": "Machine learning",
     "section": "All models are wrong",
-    "text": "All models are wrong\n\n\n\nGeorge Box, ca. 1974. UW–Madison Archives\n\nAll models are wrong, but some are useful\n\nSince all models are wrong the scientist must be alert to what is importantly wrong. It is inappropriate to be concerned about mice when there are tigers abroad.\n\nBox (1976)\n\nRemember that all models are wrong; the practical question is how wrong do they have to be to not be useful.\n\nBox and Draper (1987)"
+    "text": "All models are wrong\n\n\n\nGeorge Box, ca. 1974. UW–Madison Archives\n\nAll models are wrong, but some are useful\n\nSince all models are wrong the scientist must be alert to what is importantly wrong. It is inappropriate to be concerned about mice when there are tigers abroad.\n\nBox (1976), emphasis added\n\nRemember that all models are wrong; the practical question is how wrong do they have to be to not be useful.\n\nBox and Draper (1987)"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#can-additivitygams-be-importantly-wrong",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#can-additivitygams-be-importantly-wrong",
     "title": "Machine learning",
     "section": "Can additivity/GAMs be importantly wrong?",
-    "text": "Can additivity/GAMs be importantly wrong?\nInterpretation: think carefully about calculus and causality (causality: briefly, after the interactions). To simplify let’s consider the identity link function (rather than e.g. logistic regression, those cases are more complicated)\nCalculus\nDoes the CEF really decompose into additive terms? Is this approximation good:\n\\[\n\\frac{\\partial}{\\partial x_j} \\mathbb E[Y | \\mathbf X] \\approx g(x_j)\n\\] Or does the relationship between the average of \\(Y\\) and \\(x_j\\) vary depending on the value of another predictor \\(x_k\\)?"
+    "text": "Can additivity/GAMs be importantly wrong?\nInterpretation: think carefully about calculus and causality (causality: briefly, after the interactions). To simplify let’s consider the identity link function (rather than e.g. logistic regression, those cases are more complicated)\nCalculus\nDoes the CEF really decompose into additive terms? Is this approximation good:\n\\[\n\\frac{\\partial}{\\partial x_j} \\mathbb E[Y | \\mathbf X] \\approx f_j'(x_j)\n\\] Or does the relationship between the average of \\(Y\\) and \\(x_j\\) vary depending on the value of another predictor \\(x_k\\)?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#interactions-in-the-movies-data",
@@ -2321,7 +2321,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#true-model-non-additive-gam-is-wrong",
     "title": "Machine learning",
     "section": "True model non-additive; GAM is wrong",
-    "text": "True model non-additive; GAM is wrong\n\nf1 &lt;- function(x) x^2\nf2 &lt;- function(x) cos(pi * x / 2)\ndf_int &lt;- tibble(x1 = runif(2000, -1, 1), x2 = runif(2000, -4, 4)) |&gt;\n  mutate(y = f1(x1) * f2(x2) + rnorm(2000))\nfit_gam_wrong &lt;- gam(y ~ s(x1) + s(x2), data = df_int)\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe fitted component for \\(x_1\\) is nearly flat: a parabola opening upward when \\(\\cos(\\pi x_2/2) &gt; 0\\) and downward when \\(\\cos(\\pi x_2/2) &lt; 0\\) cancel when averaged over \\(x_2\\)\nAdditivity assumption is now (importantly) wrong"
+    "text": "True model non-additive; GAM is wrong\n\nf1 &lt;- function(x) x^2\nf2 &lt;- function(x) cos(pi * x / 2)\ndf_int &lt;- tibble(x1 = runif(2000, -1, 1), x2 = runif(2000, -4, 4)) |&gt;\n  mutate(y = f1(x1) * f2(x2) + rnorm(2000))\nfit_gam_wrong &lt;- gam(y ~ s(x1) + s(x2), data = df_int)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThe fitted component for \\(x_1\\) is nearly flat: the parabolas cancel when averaged over \\(x_2\\). Additivity assumption is now (importantly) wrong"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#causality-what-are-we-controlling-for",
@@ -2405,14 +2405,14 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#trees-and-missing-inputs",
     "title": "Machine learning",
     "section": "Trees and missing inputs",
-    "text": "Trees and missing inputs\nThe films’ budget is missing for 87%: a film with no budget cannot answer “budget &lt; c?”\n\nMissingness as information: a split also chooses which side the films with no budget go to, like its cutoff, to lower the RSS (xgboost’s default direction); or a budget missing indicator that the tree can split on\nMissingness as a nuisance: rpart’s surrogate splits, backup questions on other inputs that send the training films the same way; a film missing the split’s input follows the best backup it can answer\nInformative here: budgets were recorded mostly for widely rated films (median 1,238 votes, against 71). Useful for prediction"
+    "text": "Trees and missing inputs\nThe films’ budget is missing for 87%: a film with no budget cannot answer “budget &lt; c?”\n\nMissingness as information: a split also chooses which side the films with no budget go to, like its cutoff, to lower the RSS (xgboost’s default direction); or a budget missing indicator that the tree can split on\nMissingness as a nuisance: rpart’s surrogate splits, backup questions on other inputs that send the training films the same way; a film missing the split’s input follows the best backup it can answer\nInformative here: budgets were recorded mostly for widely rated films (median 1,238 votes, against 71). Potentially useful for prediction"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#a-downside-of-trees-variance",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#a-downside-of-trees-variance",
     "title": "Machine learning",
     "section": "A downside of trees: variance",
-    "text": "A downside of trees: variance\n\n\n\n\n\n\n\n\n\nDepth 2, each on a random half of the training films. Star Wars: Episode I - The Phantom Menace (rated 6.4): predicted 6.07, 6.64, 7.00, 5.39\n\nSame method, same films, four different models. What should we do about this?"
+    "text": "A downside of trees: variance\n\n\n\n\n\n\n\n\n\nDepth 2, each on a random half of the training films. Star Wars: Episode I - The Phantom Menace (rated 6.4): predicted 6.07, 6.64, 7.00, 5.39\n\nSame method, random halves of the same films, four different models. What should we do?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#part-4-three-model-improvement-strategies",
@@ -2433,7 +2433,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#averaging-b-trees",
     "title": "Machine learning",
     "section": "Averaging \\(B\\) trees",
-    "text": "Averaging \\(B\\) trees\nAverage \\(B\\) trees’ predictions at one input \\(x\\)\n\nWhat is the variance of their average if the \\(B\\) trees are\n\ncopies of the same tree, with variance \\(\\tau^2\\)?\nindependent, each with variance \\(\\tau^2\\)?\neach with variance \\(\\tau^2\\), every pair with correlation \\(\\rho\\)?"
+    "text": "Averaging \\(B\\) trees\nAverage \\(B\\) trees’ predictions at one input \\(x\\) (variance over the draw of the training data, and of the resampling)\n\nWhat is the variance of their average if the \\(B\\) trees are\n\ncopies of the same tree, with variance \\(\\tau^2\\)?\nindependent, each with variance \\(\\tau^2\\)?\neach with variance \\(\\tau^2\\), every pair with correlation \\(\\rho\\)?"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#recall-variance-of-a-sum",
@@ -2454,7 +2454,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#random-forest-dropping-predictors",
     "title": "Machine learning",
     "section": "Random forest: dropping predictors",
-    "text": "Random forest: dropping predictors\n\n\\(B\\) is already 300. Which term of the correlated-average variance is left, and how could we make it smaller?\n\n\nProblem: aggregation does not increase information if the aggregates are highly correlated, e.g. averaging 1000 trees but each one uses the same small set of predictor variables\n\nDrop predictors randomly, at every split\ne.g. each split chooses among a random \\(\\sqrt{p}\\) of the \\(p\\) predictors\nAggregate models which are now (typically) less correlated, achieving greater variance reduction"
+    "text": "Random forest: dropping predictors\n\nSuppose \\(B\\) is large, say 300. Which term of the correlated-average variance is left, and how could we make it smaller?\n\n\nProblem: aggregation does not increase information if the aggregates are highly correlated, e.g. averaging 1000 trees but each one uses the same small set of predictor variables\n\nDrop predictors randomly, at every split\ne.g. each split chooses among a random \\(\\sqrt{p}\\) of the \\(p\\) predictors\nAggregate models which are now (typically) less correlated, achieving greater variance reduction"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#out-of-bag-predictions",
@@ -2475,14 +2475,14 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#boosting-iterated-fitting-on-residuals",
     "title": "Machine learning",
     "section": "Boosting: iterated fitting on residuals",
-    "text": "Boosting: iterated fitting on residuals\nIdea: train models sequentially, decreasing residuals by a small amount each time. Each model contributes something different\nCan use “weak learners” (e.g. trees with one split, “stumps”) to grow an ensemble model gradually fitting closer to the training data\n\nRelationship with gradient descent\nGradient descent: small step in direction of negative gradient\nBoosting: small step in direction of weak learner closest to negative gradient\nInstead of computing gradients, we reduce the loss by taking a small step in the direction of a weak learner: a simple, low-cost model\nOptional additional reading: ESL Chapter 10"
+    "text": "Boosting: iterated fitting on residuals\nIdea: train models sequentially, decreasing residuals by a small amount each time. Each model contributes something different\nCan use “weak learners” (e.g. trees with one split, “stumps”) to grow an ensemble model gradually fitting closer to the training data\n\nRelationship with gradient descent\nGradient descent: small step in direction of negative gradient\nBoosting: small step in direction of weak learner approximating the negative gradient\nInstead of taking an unrestricted gradient step, we reduce the loss by taking a small step in the direction of a weak learner: a simple, low-cost model\nOptional additional reading: ESL sections 10.10–10.12 (gradient boosting, tree size, regularization)"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#boosting-as-approximate-gradient-descent",
     "href": "weeks/08-additive/slides/08-1-ensembles.html#boosting-as-approximate-gradient-descent",
     "title": "Machine learning",
     "section": "Boosting as approximate gradient descent",
-    "text": "Boosting as approximate gradient descent\nThe training loss depends on a model only through its \\(n\\) fitted values \\(\\mathbf f = (f_1, \\ldots, f_n)\\), \\(f_i = f(x_i)\\): a function of \\(n\\) numbers \\[\nL(\\mathbf f) = \\sum_{i=1}^n \\tfrac12 (y_i - f_i)^2, \\qquad -\\frac{\\partial L}{\\partial f_i} = y_i - f_i\n\\] The negative gradient is the residual vector\n\nA gradient step, \\(\\mathbf f^{(b)} = \\mathbf f^{(b-1)} + \\gamma\\,(\\mathbf y - \\mathbf f^{(b-1)})\\), changes only those \\(n\\) values. Boosting trees fits a small tree to the residuals, the small tree closest to the negative gradient, and steps along it, with learning rate \\(\\gamma\\): \\[\n\\hat f^{(0)} = \\bar y, \\qquad \\hat f^{(b)} = \\hat f^{(b-1)} + \\gamma\\, \\hat t_b, \\qquad \\hat t_b \\text{ a small tree fitted to } y_i - \\hat f^{(b-1)}(x_i)\n\\]"
+    "text": "Boosting as approximate gradient descent\nThe training loss depends on a model only through its \\(n\\) fitted values \\(\\mathbf f = (f_1, \\ldots, f_n)\\), \\(f_i = f(x_i)\\): a function of \\(n\\) numbers \\[\nL(\\mathbf f) = \\sum_{i=1}^n \\tfrac12 (y_i - f_i)^2, \\qquad -\\frac{\\partial L}{\\partial f_i} = y_i - f_i\n\\] The negative gradient is the residual vector\n\nA gradient step, \\(\\mathbf f^{(b)} = \\mathbf f^{(b-1)} + \\gamma\\,(\\mathbf y - \\mathbf f^{(b-1)})\\), changes only those \\(n\\) values. Boosting trees fits a small tree approximating the negative gradient (the residuals) and steps along it, with learning rate \\(\\gamma\\): \\[\n\\hat f^{(0)} = \\bar y, \\qquad \\hat f^{(b)} = \\hat f^{(b-1)} + \\gamma\\, \\hat t_b, \\qquad \\hat t_b \\text{ a small tree fitted to } y_i - \\hat f^{(b-1)}(x_i)\n\\]"
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#boosting-in-practice",
@@ -2510,7 +2510,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#were-in-dangerous-territory",
     "title": "Machine learning",
     "section": "We’re in dangerous territory",
-    "text": "We’re in dangerous territory\n\nLess interpretable methods/models\nMany tuning parameters\nIncreasingly sophisticated software with many defaults and/or automatically optimized tuning parameters\n\n\nBut consider, Alfred North Whitehead wrote (1911):\n\nIt is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. Civilization advances by extending the number of important operations which we can perform without thinking about them."
+    "text": "We’re in dangerous territory\n\nLess interpretable methods/models\nMany tuning parameters\nIncreasingly sophisticated software with many defaults and/or automatically optimized tuning parameters\n\n\nBut consider, Alfred North Whitehead wrote (1911; emphasis added):\n\nIt is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. Civilization advances by extending the number of important operations which we can perform without thinking about them."
   },
   {
     "objectID": "weeks/08-additive/slides/08-1-ensembles.html#conclusion",
@@ -2524,7 +2524,7 @@
     "href": "weeks/08-additive/slides/08-1-ensembles.html#references",
     "title": "Machine learning",
     "section": "References",
-    "text": "References\n\n\nBox, G. E. P. (1976). Science and statistics. Journal of the American Statistical Association 71(356), 791–799. doi:10.1080/01621459.1976.10480949. The quotation is in section 2.4.\nBox, G. E. P. and Draper, N. R. (1987). Empirical Model-Building and Response Surfaces. New York: Wiley.\nBreiman, L., Friedman, J. H., Olshen, R. A. and Stone, C. J. (1984). Classification and Regression Trees. Belmont, CA: Wadsworth.\nChen, T. and Guestrin, C. (2016). XGBoost: a scalable tree boosting system. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 785–794. doi:10.1145/2939672.2939785\nJosse, J., Chen, J. M., Prost, N., Varoquaux, G. and Scornet, E. (2024). On the consistency of supervised learning with missing values. Statistical Papers 65(9), 5447–5479. doi:10.1007/s00362-024-01550-4\nLouisiana v. Callais, 608 U.S. 85 (2026), No. 24-109, decided 29 April 2026. Opinion (preliminary print)\nMorris, G. E. (2026). The simple statistical error Republican Supreme Court justices used to gut the VRA. Strength In Numbers, 8 May 2026. Link\nTwala, B. E. T. H., Jones, M. C. and Hand, D. J. (2008). Good methods for coping with missing data in decision trees. Pattern Recognition Letters 29(7), 950–956. doi:10.1016/j.patrec.2008.01.010\nWhitehead, A. N. (1911). An Introduction to Mathematics. London: Williams and Norgate. Project Gutenberg"
+    "text": "References\n\n\nBox, G. E. P. (1976). Science and statistics. Journal of the American Statistical Association 71(356), 791–799. doi:10.1080/01621459.1976.10480949. The quotation is in section 2.4.\nBox, G. E. P. and Draper, N. R. (1987). Empirical Model-Building and Response Surfaces. New York: Wiley.\nBreiman, L., Friedman, J. H., Olshen, R. A. and Stone, C. J. (1984). Classification and Regression Trees. Belmont, CA: Wadsworth.\nChen, T. and Guestrin, C. (2016). XGBoost: a scalable tree boosting system. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 785–794. doi:10.1145/2939672.2939785\nJosse, J., Chen, J. M., Prost, N., Varoquaux, G. and Scornet, E. (2024). On the consistency of supervised learning with missing values. Statistical Papers 65(9), 5447–5479. doi:10.1007/s00362-024-01550-4\nLouisiana v. Callais, 608 U.S. 85 (2026), No. 24-109, decided 29 April 2026. Opinion (preliminary print). The quotation is in the syllabus, at 88.\nMorris, G. E. (2026). The simple statistical error Republican Supreme Court justices used to gut the VRA. Strength In Numbers, 8 May 2026. Link\nTwala, B. E. T. H., Jones, M. C. and Hand, D. J. (2008). Good methods for coping with missing data in decision trees. Pattern Recognition Letters 29(7), 950–956. doi:10.1016/j.patrec.2008.01.010\nWhitehead, A. N. (1911). An Introduction to Mathematics. London: Williams and Norgate. Project Gutenberg. The quotation is in chapter 5, “The Symbolism of Mathematics”."
   },
   {
     "objectID": "data/penguins.html",

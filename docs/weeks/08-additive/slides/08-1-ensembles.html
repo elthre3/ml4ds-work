@@ -287,19 +287,22 @@
 <section id="additive-combination-of-non-linear-predictors" class="slide level2 inverse">
 <h2>Additive combination of non-linear predictors</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gam)</span>
 <span id="cb2-2"><a aria-hidden="true" tabindex="-1"></a>fit_gam <span class="ot">&lt;-</span></span>
-<span id="cb2-3"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">gam</span>(rating <span class="sc">~</span> <span class="fu">s</span>(length) <span class="sc">+</span> <span class="fu">s</span>(year) <span class="sc">+</span> Short, <span class="at">data =</span> mv_train)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-3"><a aria-hidden="true" tabindex="-1"></a>  <span class="fu">gam</span>(rating <span class="sc">~</span> <span class="fu">s</span>(length, <span class="at">df =</span> <span class="dv">8</span>) <span class="sc">+</span> <span class="fu">s</span>(year, <span class="at">df =</span> <span class="dv">8</span>) <span class="sc">+</span> Short, <span class="at">data =</span> mv_train)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><code>s</code> is a penalized spline, but can use different methods too</p>
+<p><code>s</code> is a smoothing spline with <code>df</code> fixed by us; <code>lo</code> would use local regression</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_gam)<span class="sc">$</span>anova</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 x 5
-  term        edf ref.df statistic p.value
-  &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
-1 s(length)  7.60   8.44      76.4       0
-2 s(year)    6.84   7.88      61.7       0</code></pre>
+<pre><code>Anova for Nonparametric Effects
+                  Npar Df Npar F     Pr(F)    
+(Intercept)                                   
+s(length, df = 8)       7 19.535 &lt; 2.2e-16 ***
+s(year, df = 8)         7 38.841 &lt; 2.2e-16 ***
+Short                                         
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 </div>
 <p>No single slope per input: how do we interpret the fitted curves?</p>
@@ -307,8 +310,8 @@
 <section id="replace-each-linear-coefficient-with-2d-plot" class="slide level2 inverse">
 <h2>Replace each linear coefficient with 2d plot</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_gam)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_gam, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">terms =</span> <span class="fu">c</span>(<span class="st">"s(length, df = 8)"</span>, <span class="st">"s(year, df = 8)"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center" data-dark="true">
 <div class="cell-output-display">
@@ -326,12 +329,12 @@
 <section id="fitting-several-curves" class="slide level2">
 <h2>Fitting several curves</h2>
 <div class="ask">
-<p>We know how to fit a spline to one input: least squares on its basis matrix. How could we fit a model with a curve for each of several inputs?</p>
+<p>Could we fit this model one curve at a time?</p>
 </div>
 </section>
 <section id="backfitting-algorithm" class="slide level2">
 <h2>Backfitting algorithm</h2>
-<p>Model: <span class="math inline">\(\hat f(\mathbf x) = \hat\beta_0 + \hat f_1(x_1) + \cdots + \hat f_p(x_p)\)</span>. Columns <span class="math inline">\(\mathbf x_1, \ldots, \mathbf x_p\)</span>; <span class="math inline">\(\hat f_k(\mathbf x_k)\)</span> is the vector of fitted values of curve <span class="math inline">\(k\)</span></p>
+<p>Model: <span class="math inline">\(\hat f(x_1, \ldots, x_p) = \hat\beta_0 + \hat f_1(x_1) + \cdots + \hat f_p(x_p)\)</span>. Columns <span class="math inline">\(\mathbf x_1, \ldots, \mathbf x_p\)</span>; <span class="math inline">\(\hat f_k(\mathbf x_k)\)</span> is the vector of fitted values of curve <span class="math inline">\(k\)</span></p>
 <ol type="1">
 <li>Initialize: <span class="math inline">\(\hat\beta_0 = \bar y\)</span>, and <span class="math inline">\(\hat f_j^{(0)} = 0\)</span> for every <span class="math inline">\(j\)</span></li>
 <li>For iteration <span class="math inline">\(t = 1, 2, \ldots\)</span>:
@@ -384,7 +387,7 @@
 </section>
 <section id="partial-dependence-plots-for-a-gam" class="slide level2">
 <h2>Partial dependence plots for a GAM</h2>
-<p>These univariate plots for GAMs are called <strong>partial dependence plots</strong> (PDPs). They show how the GAM depends on each feature: a simple one-dimensional dependence, because of the additivity assumption</p>
+<p>These univariate plots for GAMs are called <strong>partial dependence plots</strong> (PDPs), each up to a constant: for an additive fit, the partial dependence on <span class="math inline">\(x_j\)</span> is <span class="math inline">\(\hat f_j\)</span> plus a constant. They show how the GAM depends on each feature: a simple one-dimensional dependence, because of the additivity assumption</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -407,7 +410,7 @@
 <blockquote>
 <p>Since all models are wrong the scientist must be alert to what is <strong>importantly wrong</strong>. It is inappropriate to be concerned about mice when there are tigers abroad.</p>
 </blockquote>
-<p>Box (1976)</p>
+<p>Box (1976), emphasis added</p>
 <blockquote>
 <p>Remember that all models are wrong; the practical question is how wrong do they have to be to not be useful.</p>
 </blockquote>
@@ -420,7 +423,7 @@
 <h4 id="calculus">Calculus</h4>
 <p>Does the CEF really decompose into additive terms? Is this approximation good:</p>
 <p><span class="math display">\[
-\frac{\partial}{\partial x_j} \mathbb E[Y | \mathbf X] \approx g(x_j)
+\frac{\partial}{\partial x_j} \mathbb E[Y | \mathbf X] \approx f_j'(x_j)
 \]</span> Or does the relationship between the average of <span class="math inline">\(Y\)</span> and <span class="math inline">\(x_j\)</span> vary depending on the value of another predictor <span class="math inline">\(x_k\)</span>?</p>
 </section>
 <section id="interactions-in-the-movies-data" class="slide level2">
@@ -446,7 +449,18 @@
 <span id="cb6-5"><a aria-hidden="true" tabindex="-1"></a>fit_gam_wrong <span class="ot">&lt;-</span> <span class="fu">gam</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1) <span class="sc">+</span> <span class="fu">s</span>(x2), <span class="at">data =</span> df_int)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="columns">
-<div class="column" style="width:58%;">
+<div class="column" style="width:42%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="08-1-ensembles_files/figure-revealjs/int-truth-1.png" width="750"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:58%;">
+<div class="fragment">
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -456,10 +470,11 @@
 </div>
 </div>
 </div>
-</div><div class="column" style="width:42%;">
-<p>The fitted component for <span class="math inline">\(x_1\)</span> is nearly flat: a parabola opening upward when <span class="math inline">\(\cos(\pi x_2/2) &gt; 0\)</span> and downward when <span class="math inline">\(\cos(\pi x_2/2) &lt; 0\)</span> cancel when averaged over <span class="math inline">\(x_2\)</span></p>
-<p>Additivity assumption is now (importantly) wrong</p>
+</div>
 </div></div>
+<div class="fragment">
+<p>The fitted component for <span class="math inline">\(x_1\)</span> is nearly flat: the parabolas cancel when averaged over <span class="math inline">\(x_2\)</span>. Additivity assumption is now (importantly) wrong</p>
+</div>
 </section>
 <section id="causality-what-are-we-controlling-for" class="slide level2" data-minutes="2">
 <h2>Causality: what are we “controlling for”?</h2>
@@ -828,7 +843,7 @@
 <ul>
 <li><strong>Missingness as information</strong>: a split also chooses which side the films with no budget go to, like its cutoff, to lower the RSS (xgboost’s <em>default direction</em>); or a budget missing indicator that the tree can split on</li>
 <li><strong>Missingness as a nuisance</strong>: rpart’s <em>surrogate splits</em>, backup questions on other inputs that send the training films the same way; a film missing the split’s input follows the best backup it can answer</li>
-<li>Informative here: budgets were recorded mostly for widely rated films (median 1,238 votes, against 71). Useful for prediction</li>
+<li>Informative here: budgets were recorded mostly for widely rated films (median 1,238 votes, against 71). Potentially useful for prediction</li>
 </ul>
 </section>
 <section id="a-downside-of-trees-variance" class="slide level2" data-minutes="3">
@@ -844,7 +859,7 @@
 </div>
 <p>Depth 2, each on a random half of the training films. <em>Star Wars: Episode I - The Phantom Menace</em> (rated 6.4): predicted 6.07, 6.64, 7.00, 5.39</p>
 <div class="ask">
-<p>Same method, same films, four different models. What should we do about this?</p>
+<p>Same method, random halves of the same films, four different models. What should we do?</p>
 </div>
 </section>
 <section id="part-4-three-model-improvement-strategies" class="slide level2 inverse">
@@ -876,7 +891,7 @@
 </section>
 <section id="averaging-b-trees" class="slide level2" data-minutes="3">
 <h2>Averaging <span class="math inline">\(B\)</span> trees</h2>
-<p>Average <span class="math inline">\(B\)</span> trees’ predictions at one input <span class="math inline">\(x\)</span></p>
+<p>Average <span class="math inline">\(B\)</span> trees’ predictions at one input <span class="math inline">\(x\)</span> (variance over the draw of the training data, and of the resampling)</p>
 <div class="ask">
 <p>What is the variance of their average if the <span class="math inline">\(B\)</span> trees are</p>
 <ul>
@@ -907,7 +922,7 @@
 <section id="random-forest-dropping-predictors" class="slide level2">
 <h2>Random forest: dropping predictors</h2>
 <div class="ask">
-<p><span class="math inline">\(B\)</span> is already 300. Which term of the correlated-average variance is left, and how could we make it smaller?</p>
+<p>Suppose <span class="math inline">\(B\)</span> is large, say 300. Which term of the correlated-average variance is left, and how could we make it smaller?</p>
 </div>
 <div class="fragment">
 <p><strong>Problem</strong>: aggregation does not increase information if the aggregates are highly correlated, e.g.&nbsp;averaging 1000 trees but each one uses the same small set of predictor variables</p>
@@ -972,9 +987,9 @@
 <div class="fragment">
 <h4 id="relationship-with-gradient-descent">Relationship with gradient descent</h4>
 <p><strong>Gradient descent</strong>: small step in direction of negative gradient</p>
-<p><strong>Boosting</strong>: small step in direction of <em>weak learner closest to negative gradient</em></p>
-<p>Instead of computing gradients, we reduce the loss by taking a small step in the direction of a weak learner: a simple, low-cost model</p>
-<p>Optional additional reading: <a href="https://hastie.su.domains/ElemStatLearn/">ESL</a> Chapter 10</p>
+<p><strong>Boosting</strong>: small step in direction of <em>weak learner approximating the negative gradient</em></p>
+<p>Instead of taking an unrestricted gradient step, we reduce the loss by taking a small step in the direction of a weak learner: a simple, low-cost model</p>
+<p>Optional additional reading: <a href="https://hastie.su.domains/ElemStatLearn/">ESL</a> sections 10.10–10.12 (gradient boosting, tree size, regularization)</p>
 </div>
 </section>
 <section id="boosting-as-approximate-gradient-descent" class="slide level2" data-minutes="3">
@@ -983,7 +998,7 @@
 L(\mathbf f) = \sum_{i=1}^n \tfrac12 (y_i - f_i)^2, \qquad -\frac{\partial L}{\partial f_i} = y_i - f_i
 \]</span> The negative gradient is the residual vector</p>
 <div class="fragment">
-<p>A gradient step, <span class="math inline">\(\mathbf f^{(b)} = \mathbf f^{(b-1)} + \gamma\,(\mathbf y - \mathbf f^{(b-1)})\)</span>, changes only those <span class="math inline">\(n\)</span> values. Boosting trees fits a small tree to the residuals, the small tree closest to the negative gradient, and steps along it, with <strong>learning rate</strong> <span class="math inline">\(\gamma\)</span>: <span class="math display">\[
+<p>A gradient step, <span class="math inline">\(\mathbf f^{(b)} = \mathbf f^{(b-1)} + \gamma\,(\mathbf y - \mathbf f^{(b-1)})\)</span>, changes only those <span class="math inline">\(n\)</span> values. Boosting trees fits a small tree approximating the negative gradient (the residuals) and steps along it, with <strong>learning rate</strong> <span class="math inline">\(\gamma\)</span>: <span class="math display">\[
 \hat f^{(0)} = \bar y, \qquad \hat f^{(b)} = \hat f^{(b-1)} + \gamma\, \hat t_b, \qquad \hat t_b \text{ a small tree fitted to } y_i - \hat f^{(b-1)}(x_i)
 \]</span></p>
 </div>
@@ -1034,7 +1049,7 @@ L(\mathbf f) = \sum_{i=1}^n \tfrac12 (y_i - f_i)^2, \qquad -\frac{\partial L}{\p
 <li>Increasingly sophisticated software with many defaults and/or automatically optimized tuning parameters</li>
 </ul>
 <div class="fragment">
-<p>But consider, <a href="https://www.gutenberg.org/ebooks/41568">Alfred North Whitehead</a> wrote (1911):</p>
+<p>But consider, <a href="https://www.gutenberg.org/ebooks/41568">Alfred North Whitehead</a> wrote (1911; emphasis added):</p>
 <blockquote>
 <p>It is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. <strong>Civilization advances by extending the number of important operations which we can perform without thinking about them</strong>.</p>
 </blockquote>
@@ -1058,10 +1073,10 @@ L(\mathbf f) = \sum_{i=1}^n \tfrac12 (y_i - f_i)^2, \qquad -\frac{\partial L}{\p
 <li>Breiman, L., Friedman, J. H., Olshen, R. A. and Stone, C. J. (1984). <em>Classification and Regression Trees</em>. Belmont, CA: Wadsworth.</li>
 <li>Chen, T. and Guestrin, C. (2016). XGBoost: a scalable tree boosting system. <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 785–794. <a href="https://doi.org/10.1145/2939672.2939785">doi:10.1145/2939672.2939785</a></li>
 <li>Josse, J., Chen, J. M., Prost, N., Varoquaux, G. and Scornet, E. (2024). On the consistency of supervised learning with missing values. <em>Statistical Papers</em> 65(9), 5447–5479. <a href="https://doi.org/10.1007/s00362-024-01550-4">doi:10.1007/s00362-024-01550-4</a></li>
-<li><em>Louisiana v. Callais</em>, 608 U.S. 85 (2026), No.&nbsp;24-109, decided 29 April 2026. <a href="https://www.supremecourt.gov/opinions/25pdf/608us1r29_n648.pdf">Opinion (preliminary print)</a></li>
+<li><em>Louisiana v. Callais</em>, 608 U.S. 85 (2026), No.&nbsp;24-109, decided 29 April 2026. <a href="https://www.supremecourt.gov/opinions/25pdf/608us1r29_n648.pdf">Opinion (preliminary print)</a>. The quotation is in the syllabus, at 88.</li>
 <li>Morris, G. E. (2026). The simple statistical error Republican Supreme Court justices used to gut the VRA. <em>Strength In Numbers</em>, 8 May 2026. <a href="https://www.gelliottmorris.com/p/2026-05-08-simple-math-error-scotus-callais-vra">Link</a></li>
 <li>Twala, B. E. T. H., Jones, M. C. and Hand, D. J. (2008). Good methods for coping with missing data in decision trees. <em>Pattern Recognition Letters</em> 29(7), 950–956. <a href="https://doi.org/10.1016/j.patrec.2008.01.010">doi:10.1016/j.patrec.2008.01.010</a></li>
-<li>Whitehead, A. N. (1911). <em>An Introduction to Mathematics</em>. London: Williams and Norgate. <a href="https://www.gutenberg.org/ebooks/41568">Project Gutenberg</a></li>
+<li>Whitehead, A. N. (1911). <em>An Introduction to Mathematics</em>. London: Williams and Norgate. <a href="https://www.gutenberg.org/ebooks/41568">Project Gutenberg</a>. The quotation is in chapter 5, “The Symbolism of Mathematics”.</li>
 </ul>
 </div>
 

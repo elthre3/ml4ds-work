@@ -1,6 +1,6 @@
 ## Week 8: additivity vs interactions, and ensembles
 
-How some flexible fits are built. An additive model fitted one curve at a time, each to what the others leave; its one-input plots, which are partial dependence plots; how additivity can be importantly wrong when the truth has interactions, and how a correct additive fit can still answer the wrong causal question. A tree built one greedy split at a time, then pruned. Bagging and random forests: the variance of an average of correlated trees, and the out-of-bag error. Boosting as gradient descent, one small tree at a time. Partial dependence for other models, and feature importance, come in the next lecture. Data: IMDb films ([data note](data/movies.html)).
+How some flexible fits are built. An additive model fitted one curve at a time, each to what the others leave; its one-input plots, which are partial dependence plots; how additivity can be importantly wrong when the truth has interactions, and how a correct additive fit can still answer the wrong causal question. A tree built one greedy split at a time, then pruned. Bagging and random forests: the variance of an average of correlated trees, and the out-of-bag error. Boosting as approximate gradient descent, one small tree at a time. Partial dependence for other models, and feature importance, come later in the course. Data: IMDb films ([data note](data/movies.html)).
 
 **Reading**
 
@@ -8,6 +8,6 @@ How some flexible fits are built. An additive model fitted one curve at a time, 
 - ISLR Chapter 8, sections 8.2.1–8.2.3, pp. 340–348: bagging (with out-of-bag error and variable importance measures), random forests, boosting. Section 8.2.4, Bayesian additive regression trees, is not part of the course.
 - ISLR Chapter 7, section 7.7.1, pp. 307–310, re-read: fitting an additive model one predictor at a time (backfitting).
 
-Optional, deeper: ESL section 9.1.1, pp. 297–299 (the backfitting algorithm).
+Optional, deeper: ESL section 9.1.1, pp. 297–299 (the backfitting algorithm); sections 10.10–10.12 (gradient boosting, tree size, regularization).
 
 **Lecture:** [slides](weeks/08-additive/slides/08-1-ensembles.html)

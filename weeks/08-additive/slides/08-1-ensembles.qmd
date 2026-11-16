@@ -40,11 +40,10 @@ library(tidyverse)
 library(knitr)
 library(broom)
 library(patchwork)
-library(mgcv)           # gam() with s(), a penalized spline for each input; ships with R
+library(mgcv)           # gam() with s(), a penalized spline for each input; ships with R (the films GAM in Part 1 uses the gam package)
 library(rpart)
 library(randomForest)
 library(xgboost)
-library(pdp)            # partial dependence and ICE curves
 library(ggplot2movies)
 theme_set(theme_minimal(base_size = 18))
 # Figures on dark slides (chunk option dark: true): a transparent background and light ink.
@@ -65,8 +64,8 @@ options(knitr.table.format = "html")
 v_dark <- "#440154"; v_blue <- "#31688e"; v_teal <- "#21918c"; v_green <- "#5ec962"
 m_pink <- "#b73779"; m_purple <- "#8c2981"; m_orange <- "#fc8961"
 mse <- function(y, pred) mean((y - pred)^2)
-# The films (data note: data/movies.md), with the legacy deck's selection: 53,388 films from 1919 on,
-# 11 to 200 minutes long. A random 10,000, split three ways as in the seminar: 5,000 training,
+# The films (data note: data/movies.md), with the legacy deck's selection (from 1919 on,
+# 11 to 200 minutes long) and at least 20 votes: 33,287 films. A random 10,000, split three ways as in the seminar: 5,000 training,
 # 2,000 tuning, 3,000 test. The test films are not used in the lecture.
 genres <- c("Action", "Animation", "Comedy", "Drama", "Documentary", "Romance", "Short")
 inputs <- c("year", "length", genres)
@@ -92,7 +91,7 @@ The deck on the spine's scale (2 a content slide, 3 a proof or a pause for the r
 
 Questions before big ideas (QUESTION in the note): fitting several curves; a downside of trees (averaging); averaging B trees; which term a forest shrinks; what the next tree should predict. Also asked: the modeling assumptions (title slide), tree depth. Partial dependence for other models and feature importance moved to the next lecture (convenor, 15 November): the slides are in weeks/08-additive/_for_w09/.
 
-Cut order: (1) "Iterations and learning rate" to its first sentence on "Boosting in practice", (2) the decade figure on "Interactions in the movies data" to its first sentence, (3) "Tree depth and interactions" to its first sentence. The questions, the Star Wars splits and pruning, the causal example, the proof and boosting as gradient descent do not move.
+Cut order: (1) "Iterations and learning rate" to its first sentence on "Boosting in practice", (2) the decade figure on "Interactions in the movies data" to its first sentence, (3) "Tree depth and interactions" to its first sentence. The questions, the causal example, the proof and boosting as approximate gradient descent do not move; the dark Star Wars tables, pruning and choosing alpha can be rushed.
 
 In the notebook (to be agreed): exercise 1 redoes the correlated-average variance with the slides closed; exercise 2 is one boosting step by hand.
 :::
@@ -174,27 +173,35 @@ A random 10,000: 5,000 training, 2,000 tuning, 3,000 test
 ```{r}
 #| label: gam-fit-quiet
 #| include: false
-fit_gam <- gam(rating ~ s(length) + s(year) + Short, data = mv_train)   # refitted, unchanged, in the shown chunk below
+suppressPackageStartupMessages(library(gam))   # the gam package fits by backfitting; it masks gam() and s() until detached below
+fit_gam <- gam(rating ~ s(length, df = 8) + s(year, df = 8) + Short, data = mv_train)   # refitted, unchanged, in the shown chunk below
 ```
 
 ::: {.notes}
-Compress: the additive model from the structures lecture, now fitted with mgcv. Legacy slide; gam::lo() (loess) is now mgcv's s(), the penalized spline from the tuning lecture, with its lambda chosen by GCV, and Short enters as a plain term (coefficient `r round(coef(fit_gam)[["Short"]], 2)`). Effective degrees of freedom about `r round(summary(fit_gam)$edf[1], 1)` for length and `r round(summary(fit_gam)$edf[2], 1)` for year. Ratings: variance `r round(var(mv_train$rating), 2)` on the training films.
+Compress: the additive model from the structures lecture, now fitted by the gam package, which uses backfitting (next slides). Legacy slide. s(x, df = 8) is a smoothing spline with 8 degrees of freedom besides its constant, fixed by us: the package does not choose it. lo() would use local regression instead. Short enters as a plain term (coefficient `r round(coef(fit_gam)[["Short"]], 2)`). The table: each curve's degrees of freedom beyond a straight line (Npar Df), with a test that it is not straight. Ratings: variance `r round(var(mv_train$rating), 2)` on the training films.
 :::
 
 ```{r}
 #| label: gam-fit
 #| echo: true
-library(mgcv)
+#| message: false
+library(gam)
 fit_gam <-
-  gam(rating ~ s(length) + s(year) + Short, data = mv_train)
+  gam(rating ~ s(length, df = 8) + s(year, df = 8) + Short, data = mv_train)
 ```
 
-`s` is a penalized spline, but can use different methods too
+`s` is a smoothing spline with `df` fixed by us; `lo` would use local regression
 
 ```{r}
 #| label: gam-tidy
 #| echo: true
-tidy(fit_gam)
+summary(fit_gam)$anova
+```
+
+```{r}
+#| label: gam-detach
+#| include: false
+detach("package:gam")   # mgcv's gam() and s() again for the rest of the deck; plot() still finds the gam package's method
 ```
 
 No single slope per input: how do we interpret the fitted curves?
@@ -202,15 +209,15 @@ No single slope per input: how do we interpret the fitted curves?
 ## Replace each linear coefficient with 2d plot {.inverse}
 
 ::: {.notes}
-Compress: one curve per input in place of each slope. Legacy slide. Each panel is a fitted component, centered (the y label says so); the band is uncertainty in the curve, not the spread of ratings; the rug shows where the films are. Length: ratings rise past about 100 minutes; the shorts' own bonus goes to the Short term, not to this curve. Year: the older films rate higher, with a steady fall to the 2000s.
+Compress: one curve per input in place of each slope. Legacy slide. Each panel is a fitted component, centered (the y label says so); Short, a plain 0/1 term, is not plotted; the dotted lines, two standard errors either side, are uncertainty in the curve, not the spread of ratings; the rug shows where the films are. Length: ratings rise past about 100 minutes; the shorts' own bonus goes to the Short term, not to this curve. Year: the older films rate higher, with a steady fall to the 2000s.
 :::
 
 ```{r}
 #| label: gam-components-shown
 #| echo: true
 #| eval: false
-par(mfrow = c(1,2))
-plot(fit_gam)
+par(mfrow = c(1, 2))
+plot(fit_gam, se = TRUE, terms = c("s(length, df = 8)", "s(year, df = 8)"))
 ```
 
 ```{r}
@@ -221,7 +228,7 @@ plot(fit_gam)
 #| dark: true
 # The code shown above, with margins, text sizes, axis labels and light ink set for a dark slide (knitr resets par() in every chunk).
 par(mfrow = c(1, 2), mar = c(4.4, 4.5, 0.6, 0.8), cex = 1.3, fg = "grey85", col = "grey85", col.axis = "grey85", col.lab = "white")
-plot(fit_gam, col = "#fde725", shade = TRUE, shade.col = "#FFFFFF30", ylab = "centered contribution")
+plot(fit_gam, se = TRUE, terms = c("s(length, df = 8)", "s(year, df = 8)"), col = "#fde725", lwd = 2, ylab = "centered contribution")
 ```
 
 ::: {.retrieval}
@@ -231,13 +238,13 @@ The cost of a non-free lunch: a sum of a fixed number of Lipschitz one-input cur
 ## Fitting several curves
 
 ::: {.notes}
-QUESTION: how could we fit this model, one spline per input?
+QUESTION: could we fit this model one curve at a time?
 
-Two minutes. Expected: one curve at a time, each fitted to what the others leave; the next slide is the answer.
+Two minutes. Expected: yes, fit each curve to what the others leave, and repeat; the next slide is the algorithm.
 :::
 
 ::: {.ask}
-We know how to fit a spline to one input: least squares on its basis matrix. How could we fit a model with a curve for each of several inputs?
+Could we fit this model one curve at a time?
 :::
 
 
@@ -247,7 +254,7 @@ We know how to fit a spline to one input: least squares on its basis matrix. How
 The legacy "Backfitting algorithm", rewritten. Iteration t updates the curves in turn, each from the latest fit of the others: the curves before j are already at iteration t, those after j still at t - 1. Centering keeps the constants from drifting between components, since only their sum is determined. Vectors: x_j is the column of input j, and f_k(x_k) applies f_k to each of its n entries.
 :::
 
-Model: $\hat f(\mathbf x) = \hat\beta_0 + \hat f_1(x_1) + \cdots + \hat f_p(x_p)$. Columns $\mathbf x_1, \ldots, \mathbf x_p$; $\hat f_k(\mathbf x_k)$ is the vector of fitted values of curve $k$
+Model: $\hat f(x_1, \ldots, x_p) = \hat\beta_0 + \hat f_1(x_1) + \cdots + \hat f_p(x_p)$. Columns $\mathbf x_1, \ldots, \mathbf x_p$; $\hat f_k(\mathbf x_k)$ is the vector of fitted values of curve $k$
 
 1. Initialize: $\hat\beta_0 = \bar y$, and $\hat f_j^{(0)} = 0$ for every $j$
 2. For iteration $t = 1, 2, \ldots$:
@@ -259,7 +266,7 @@ Model: $\hat f(\mathbf x) = \hat\beta_0 + \hat f_1(x_1) + \cdots + \hat f_p(x_p)
 ## Backfitting and partialling out {minutes="3"}
 
 ::: {.notes}
-Two centered inputs, so beta_0-hat = y-bar drops out. Each line of the display is one pass of the inner loop: the one-input least-squares slope of its partial residual, using the other slope's latest value; beta_2-hat^(0) = 0 is step 1. A fixed point satisfies both normal equations, so it is least squares. With standardized inputs of correlation rho, each iteration multiplies the distance to least squares by rho squared: the next slide shows what that looks like.
+Two centered inputs, so beta_0-hat = y-bar drops out. Each line of the display is one pass of the inner loop: the one-input least-squares slope of its partial residual, using the other slope's latest value; beta_2-hat^(0) = 0 is step 1. A fixed point satisfies both normal equations, so it is least squares. With standardized inputs of correlation rho, each iteration multiplies the distance to least squares by rho squared. The next slide's iterations are slower than that; its note says why.
 :::
 
 Two centered inputs, and a line for each component: $\hat f_j(x) = \hat\beta_j x$. Start at $\hat\beta_2^{(0)} = 0$. Iteration $t$ fits each slope to its partial residual:
@@ -283,8 +290,9 @@ Backfitting does this with smooth curves instead of lines
 ```{r}
 #| label: backfit-films
 #| include: false
-# Backfitting by hand: smoothing splines (8 effective parameters each) for length and year, a slope for Short.
-smooth_c <- function(x, r) { p <- predict(smooth.spline(x, r, df = 8), x)$y; p - mean(p) }
+# Backfitting by hand: smoothing splines for length and year (smooth.spline with df = 9 is the gam package's df = 8:
+# the package counts a curve's degrees of freedom without its constant), a slope for Short.
+smooth_c <- function(x, r) { p <- predict(smooth.spline(x, r, df = 9), x)$y; p - mean(p) }
 y_bf <- mv_train$rating; b0_bf <- mean(y_bf); short_c <- mv_train$Short - mean(mv_train$Short)
 f_len <- f_yr <- f_sh <- rep(0, nrow(mv_train)); beta_sh <- numeric(100); len_iter <- list()
 for (k in 1:100) {
@@ -295,10 +303,11 @@ for (k in 1:100) {
 }
 settle <- which(abs(beta_sh - beta_sh[100]) < 0.01 * abs(beta_sh[100]))[1]
 cor_ls <- cor(mv_train$length, mv_train$Short)
+bf_diff <- max(abs(b0_bf + f_len + f_yr + f_sh - fitted(fit_gam)))   # the loop against the gam fit of "Additive combination"
 ```
 
 ::: {.notes}
-Smoothing splines with 8 effective parameters each (smooth.spline, df = 8), not mgcv's penalties, so the curves differ a little from the last fit. Length and Short have correlation `r round(cor_ls, 2)`, so rho squared would suggest fast convergence; but the length curve can bend to mimic the Short flag, which a line cannot, so the iterations shrink the distance far more slowly. The coefficient is within 1% of its final value after `r settle` iterations.
+The same smoothing splines as the gam fit on "Additive combination of non-linear predictors" (smooth.spline with df = 9 is the package's df = 8), so the loop reproduces that fit: fitted values agree to within `r format(signif(bf_diff, 1), scientific = FALSE)`. Length and Short have correlation `r round(cor_ls, 2)`, so rho squared would suggest fast convergence; but the length curve can bend to mimic the Short flag, which a line cannot, so the iterations shrink the distance far more slowly. The coefficient is within 1% of its final value after `r settle` iterations.
 :::
 
 ```{r}
@@ -345,16 +354,16 @@ Compress: for an additive fit, each component curve is a partial dependence plot
 The figure from "Replace each linear coefficient with 2d plot", again. For an additive fit the partial dependence of f-hat on x_j is f_j-hat plus a constant, so these are its partial dependence plots; the definition for any model is next lecture's.
 :::
 
-These univariate plots for GAMs are called **partial dependence plots** (PDPs). They show how the GAM depends on each feature: a simple one-dimensional dependence, because of the additivity assumption
+These univariate plots for GAMs are called **partial dependence plots** (PDPs), each up to a constant: for an additive fit, the partial dependence on $x_j$ is $\hat f_j$ plus a constant. They show how the GAM depends on each feature: a simple one-dimensional dependence, because of the additivity assumption
 
 ```{r}
 #| label: gam-pdp-again
 #| fig-width: 11
-#| fig-height: 3.0
+#| fig-height: 2.5
 #| fig-align: center
 # The GAM's component plots, as on "Replace each linear coefficient with 2d plot".
-par(mfrow = c(1, 2), mar = c(4.4, 4.5, 0.6, 0.8), cex = 1.3)
-plot(fit_gam, col = v_blue, shade = TRUE, shade.col = "#31688e33", ylab = "centered contribution")
+par(mfrow = c(1, 2), mar = c(3.6, 4.2, 0.4, 0.8), mgp = c(2.4, 0.8, 0), cex = 1.15)
+plot(fit_gam, se = TRUE, terms = c("s(length, df = 8)", "s(year, df = 8)"), col = v_blue, lwd = 2, ylab = "centered contribution")
 ```
 
 But what if additivity is wrong?
@@ -376,7 +385,7 @@ Box (1976), section 2.4, "Worrying selectively", checked against a scan of the p
 
 > Since all models are wrong the scientist must be alert to what is **importantly wrong**. It is inappropriate to be concerned about mice when there are tigers abroad.
 
-Box (1976)
+Box (1976), emphasis added
 
 > Remember that all models are wrong; the practical question is how wrong do they have to be to not be useful.
 
@@ -397,7 +406,7 @@ Interpretation: think carefully about **calculus** and **causality** (causality:
 Does the CEF really decompose into additive terms?  Is this approximation good:
 
 $$
-\frac{\partial}{\partial x_j} \mathbb E[Y | \mathbf X] \approx g(x_j)
+\frac{\partial}{\partial x_j} \mathbb E[Y | \mathbf X] \approx f_j'(x_j)
 $$
 Or does the relationship between the average of $Y$ and $x_j$ vary depending on the value of another predictor $x_k$?
 
@@ -433,7 +442,7 @@ mv_dec |> filter(decade >= 1950, Short == 0) |>
 ## True model non-additive; GAM is wrong
 
 ::: {.notes}
-Legacy slides from the interpretation deck, merged. The CEF (conditional expectation function, E[Y | X]) is x_1 squared times cos(pi x_2 / 2): a parabola in x_1 opening up where the cosine is positive and down where it is negative, which average to almost nothing. The legacy text wrote cos(x_2).
+Legacy slides from the interpretation deck, merged. The CEF (conditional expectation function, E[Y | X]) is x_1 squared times cos(pi x_2 / 2): a parabola in x_1 opening up where the cosine is positive and down where it is negative, which average to almost nothing. The legacy text wrote cos(x_2). The left panel is the truth at x_2 = 0, 1, 2; the GAM's components and the sentence come after the pause.
 :::
 
 ```{r}
@@ -447,20 +456,36 @@ fit_gam_wrong <- gam(y ~ s(x1) + s(x2), data = df_int)
 ```
 
 ::: {.columns}
+::: {.column width="42%"}
+```{r}
+#| label: int-truth
+#| fig-width: 5
+#| fig-height: 3.0
+# The true curve in x_1 at three values of x_2.
+expand_grid(x1 = seq(-1, 1, length.out = 101), x2 = c(0, 1, 2)) |>
+  mutate(fx = f1(x1) * f2(x2)) |>
+  ggplot(aes(x1, fx, colour = factor(x2))) + geom_line(linewidth = 1.5) +
+  annotate("text", x = 0.55, y = c(0.62, 0.17, -0.62), label = c("x[2] == 0", "x[2] == 1", "x[2] == 2"),
+           parse = TRUE, colour = c(v_dark, v_teal, m_pink), size = 5.2) +
+  scale_colour_manual(values = c(v_dark, v_teal, m_pink), guide = "none") +
+  labs(x = expression(x[1]), y = expression(E(Y ~ "|" ~ x[1], x[2]))) + theme(text = element_text(size = 15))
+```
+:::
 ::: {.column width="58%"}
+::: {.fragment}
 ```{r}
 #| label: int-gam
 #| fig-width: 7.4
-#| fig-height: 3.2
+#| fig-height: 3.0
 par(mfrow = c(1, 2), mar = c(4.5, 4.5, 0.6, 0.6), cex = 1.2)
 plot(fit_gam_wrong, col = v_blue, shade = TRUE, shade.col = "#31688e33", ylim = c(-1, 1))
 ```
 :::
-::: {.column width="42%"}
-The fitted component for $x_1$ is nearly flat: a parabola opening upward when $\cos(\pi x_2/2) > 0$ and downward when $\cos(\pi x_2/2) < 0$ cancel when averaged over $x_2$
-
-Additivity assumption is now (importantly) wrong
 :::
+:::
+
+::: {.fragment}
+The fitted component for $x_1$ is nearly flat: the parabolas cancel when averaged over $x_2$. Additivity assumption is now (importantly) wrong
 :::
 
 ## Causality: what are we "controlling for"? {minutes="2"}
@@ -485,7 +510,7 @@ What would a GAM of vote share on race and party show?
 n_cty <- 3000
 cty <- tibble(black = 100 * rbeta(n_cty, 0.6, 3.5)) |>
   mutate(dem  = pmin(97, pmax(3, 20 + 55 * (1 - exp(-black / 20)) + rnorm(n_cty, 0, 7))),         # party: % Democratic identifiers
-         vote = 100 * plogis((dem - 45) / 12) + 10 * (1 - exp(-black / 30)) + rnorm(n_cty, 0, 3))  # % Democratic two-party vote
+         vote = 5 + 80 * plogis((dem - 45) / 12) + 10 * (1 - exp(-black / 30)) + runif(n_cty, -3, 3))  # % Democratic two-party vote; bounded noise keeps it between 4 and 97
 fit_both <- gam(vote ~ s(black) + s(dem), data = cty)
 fit_race <- gam(vote ~ s(black), data = cty)
 pd <- function(fit, v, grid) map_dbl(grid, function(t) { nd <- cty; nd[[v]] <- t; mean(predict(fit, nd)) })
@@ -538,7 +563,7 @@ p_race / p_party
 # The same figure, with the race curve of a GAM without party added (after the pause).
 p_race_total <- p_race +
   geom_line(aes(y = total), colour = v_blue, linewidth = 1.2, linetype = "dashed") +
-  annotate("text", x = 47, y = 71, label = "without party in the model", colour = v_blue, size = 4.6)
+  annotate("text", x = 47, y = 64, label = "without party in the model", colour = v_blue, size = 4.6)
 p_race_total / p_party
 ```
 :::
@@ -839,30 +864,34 @@ prune_path |> pivot_longer(c(training, tuning), names_to = "films", values_to = 
 #| include: false
 mv_b <- movies |> filter(length <= 200, length > 10, year > 1918, votes >= 20) |> mutate(known = !is.na(budget))
 med_votes <- mv_b |> group_by(known) |> summarise(v = median(votes)) |> with(setNames(v, known))
+# Held out: a missing-budget indicator in a GAM of rating (mv_b has the rows of mv, in the same order).
+nob_train <- mutate(mv_train, nob = !mv_b$known[mv_id[1:5000]]); nob_tune <- mutate(mv_tune, nob = !mv_b$known[mv_id[5001:7000]])
+mse_nob <- c(without = mse(nob_tune$rating, predict(gam(rating ~ s(length) + s(year) + Short, data = nob_train), nob_tune)),
+             with    = mse(nob_tune$rating, predict(gam(rating ~ s(length) + s(year) + Short + nob, data = nob_train), nob_tune)))
 ```
 
 ::: {.notes}
-Missingness incorporated in attributes (MIA; Twala, Jones and Hand 2008): each split also chooses where the missing values go, or splits missing against observed; Josse et al. (2024) recommend it because it handles both uninformative and informative missingness. xgboost's default direction is this idea (Chen and Guestrin 2016). rpart's surrogates (Breiman et al. 1984) treat missingness as a nuisance. randomForest stops on missing inputs (impute first, e.g. na.roughfix).
+Missingness incorporated in attributes (MIA; Twala, Jones and Hand 2008): each split also chooses where the missing values go, or splits missing against observed; Josse et al. (2024) recommend it because it handles both uninformative and informative missingness. xgboost's default direction is this idea (Chen and Guestrin 2016). rpart's surrogates (Breiman et al. 1984) treat missingness as a nuisance. randomForest stops on missing inputs (impute first, e.g. na.roughfix). Here the missing-budget indicator says how widely a film is rated, but hardly predicts its rating: added to a GAM of rating, it moves the tuning MSE from `r round(mse_nob[["without"]], 4)` to `r round(mse_nob[["with"]], 4)`.
 :::
 
 The films' `budget` is missing for `r round(100 * mean(!mv_b$known))`%: a film with no budget cannot answer "budget < c?"
 
 - **Missingness as information**: a split also chooses which side the films with no budget go to, like its cutoff, to lower the RSS (xgboost's *default direction*); or a budget missing indicator that the tree can split on
 - **Missingness as a nuisance**: rpart's *surrogate splits*, backup questions on other inputs that send the training films the same way; a film missing the split's input follows the best backup it can answer
-- Informative here: budgets were recorded mostly for widely rated films (median `r format(med_votes[["TRUE"]], big.mark = ",")` votes, against `r med_votes[["FALSE"]]`). Useful for prediction
+- Informative here: budgets were recorded mostly for widely rated films (median `r format(med_votes[["TRUE"]], big.mark = ",")` votes, against `r med_votes[["FALSE"]]`). Potentially useful for prediction
 
 ## A downside of trees: variance {minutes="3"}
 
 ::: {.notes}
-QUESTION: same method, same films, four different trees: what should we do?
+QUESTION: same method, random halves of the same films, four different trees: what should we do?
 
-Each tree is grown to depth 2 on a random half of the 5,000 training films. These four halves were picked for the example: seed 21, found by searching for four trees that disagree visibly on this film. Typical spread, computed separately on 15 November: over 400 random halves its prediction has standard deviation 0.35 and runs from 5.3 to 7.1, and about one set of four in five has a prediction below 6 or above 7. The root question changes between halves, and so do the questions under it. The structures lecture showed the same on the countries, with resamples; some will remember averaging. A minute for the room; the next slide's three strategies are the answers.
+Each tree is grown to depth 2 on a random half of the 5,000 training films. These four halves were picked for the example: seed 21, found by searching for four trees that disagree visibly on this film. Typical spread, computed separately on 16 November from 2,000 random halves: the prediction has standard deviation 0.32; about a quarter of sets of four trees have a prediction below 6 or above 7, but a spread as wide as this one (5.39 to 7.00) comes up in fewer than 1 set in 100. The root question changes between halves, and so do the questions under it. The structures lecture showed the same on the countries, with resamples; some will remember averaging. A minute for the room; the next slide's three strategies are the answers.
 :::
 
 ```{r}
 #| label: unstable-trees
 #| fig-width: 12
-#| fig-height: 3.0
+#| fig-height: 2.6
 #| fig-align: center
 # Genre flags as factors, so that a split prints "Drama=yes", not "Drama>=0.5"; the trees are the same.
 mv_train_f <- mv_train |> mutate(across(all_of(genres), function(g) factor(g, levels = 0:1, labels = c("no", "yes"))))
@@ -877,13 +906,21 @@ phantom <- mv |> filter(grepl("Phantom Menace", title)) |>
   mutate(across(all_of(genres), function(g) factor(g, levels = 0:1, labels = c("no", "yes"))))
 pred_ph <- sapply(half_trees, function(t) predict(t, phantom))
 par(mfrow = c(2, 2), mar = c(0.7, 1.5, 0.7, 1.5), xpd = NA)
-for (t in half_trees) { plot(t, uniform = TRUE, margin = 0.1); text(t, cex = 1.45, digits = 3, pretty = 0) }
+for (t in half_trees) {
+  plot(t, uniform = TRUE, margin = 0.1)
+  # White boxes behind the split labels, where rpart's text() puts them, so the branches do not run through them.
+  xy <- rpart:::rpartco(t); node <- as.numeric(rownames(t$frame)); inner <- t$frame$var != "<leaf>"
+  lab <- labels(t, pretty = 0)[match(2 * node, node)][inner]
+  w <- strwidth(lab, cex = 1.45); h <- strheight("Ay", cex = 1.45); yl <- xy$y[inner] + 0.5 * par("cxy")[2]
+  rect(xy$x[inner] - w / 2 - 0.02, xy$y[inner] + 0.012 * diff(par("usr")[3:4]), xy$x[inner] + w / 2 + 0.02, yl + 0.8 * h, col = "white", border = NA)
+  text(t, cex = 1.45, digits = 3, pretty = 0)
+}
 ```
 
 Depth 2, each on a random half of the training films. *`r phantom$title`* (rated `r phantom$rating`): predicted `r paste(sprintf("%.2f", pred_ph), collapse = ", ")`
 
 ::: {.ask}
-Same method, same films, four different models. What should we do about this?
+Same method, random halves of the same films, four different models. What should we do?
 :::
 
 ## Part 4: three model improvement strategies {.inverse}
@@ -932,7 +969,7 @@ QUESTION: variance of an average of B trees: copies, independent, correlation rh
 Two minutes, written. Expected: tau^2 (no reduction), then tau^2 / B; the third is the next slide. Collect all three first.
 :::
 
-Average $B$ trees' predictions at one input $x$
+Average $B$ trees' predictions at one input $x$ (variance over the draw of the training data, and of the resampling)
 
 ::: {.ask}
 What is the variance of their average if the $B$ trees are
@@ -975,13 +1012,13 @@ $$
 ## Random forest: dropping predictors
 
 ::: {.notes}
-QUESTION: B is already 300: which term is left, and how could we shrink it?
+QUESTION: suppose B is large, say 300: which term is left, and how could we shrink it?
 
 A minute. Expected: rho tau^2; make the trees less alike. Legacy edits: predictors redrawn at every split, not once per tree; "(typically)". randomForest's default for regression offers p/3 predictors, here 3 of the 9.
 :::
 
 ::: {.ask}
-$B$ is already 300. Which term of the correlated-average variance is left, and how could we make it smaller?
+Suppose $B$ is large, say 300. Which term of the correlated-average variance is left, and how could we make it smaller?
 :::
 
 . . .
@@ -1057,11 +1094,11 @@ Can use "weak learners" (e.g. trees with one split, "stumps") to grow an ensembl
 
 **Gradient descent**: small step in direction of negative gradient
 
-**Boosting**: small step in direction of *weak learner closest to negative gradient*
+**Boosting**: small step in direction of *weak learner approximating the negative gradient*
 
-Instead of computing gradients, we reduce the loss by taking a small step in the direction of a weak learner: a simple, low-cost model
+Instead of taking an unrestricted gradient step, we reduce the loss by taking a small step in the direction of a weak learner: a simple, low-cost model
 
-Optional additional reading: [ESL](https://hastie.su.domains/ElemStatLearn/) Chapter 10
+Optional additional reading: [ESL](https://hastie.su.domains/ElemStatLearn/) sections 10.10–10.12 (gradient boosting, tree size, regularization)
 
 ## Boosting as approximate gradient descent {minutes="3"}
 
@@ -1077,7 +1114,7 @@ The negative gradient is the residual vector
 
 . . .
 
-A gradient step, $\mathbf f^{(b)} = \mathbf f^{(b-1)} + \gamma\,(\mathbf y - \mathbf f^{(b-1)})$, changes only those $n$ values. Boosting trees fits a small tree to the residuals, the small tree closest to the negative gradient, and steps along it, with **learning rate** $\gamma$:
+A gradient step, $\mathbf f^{(b)} = \mathbf f^{(b-1)} + \gamma\,(\mathbf y - \mathbf f^{(b-1)})$, changes only those $n$ values. Boosting trees fits a small tree approximating the negative gradient (the residuals) and steps along it, with **learning rate** $\gamma$:
 $$
 \hat f^{(0)} = \bar y, \qquad \hat f^{(b)} = \hat f^{(b-1)} + \gamma\, \hat t_b, \qquad \hat t_b \text{ a small tree fitted to } y_i - \hat f^{(b-1)}(x_i)
 $$
@@ -1167,7 +1204,7 @@ A boosted model is additive in trees, not in the predictors
 ## We're in dangerous territory {.inverse}
 
 ::: {.notes}
-Skip if behind. Legacy slide; the link now goes to the book (References), not a blog.
+Skip if behind. Legacy slide; the link now goes to the book (References), not a blog. Chapter 5 is from two secondary sources (zhurnaly.com and Jodi Schneider's blog); not checked against the text.
 :::
 
 - Less interpretable methods/models
@@ -1176,7 +1213,7 @@ Skip if behind. Legacy slide; the link now goes to the book (References), not a 
 
 . . .
 
-But consider, [Alfred North Whitehead](https://www.gutenberg.org/ebooks/41568) wrote (1911):
+But consider, [Alfred North Whitehead](https://www.gutenberg.org/ebooks/41568) wrote (1911; emphasis added):
 
 > It is a profoundly erroneous truism, repeated by all copy-books and by eminent people when they are making speeches, that we should cultivate the habit of thinking of what we are doing. The precise opposite is the case. **Civilization advances by extending the number of important operations which we can perform without thinking about them**.
 
@@ -1210,8 +1247,8 @@ Skip: the works named on the slides, in full. Not lecture content.
 - Breiman, L., Friedman, J. H., Olshen, R. A. and Stone, C. J. (1984). *Classification and Regression Trees*. Belmont, CA: Wadsworth.
 - Chen, T. and Guestrin, C. (2016). XGBoost: a scalable tree boosting system. *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, 785–794. [doi:10.1145/2939672.2939785](https://doi.org/10.1145/2939672.2939785)
 - Josse, J., Chen, J. M., Prost, N., Varoquaux, G. and Scornet, E. (2024). On the consistency of supervised learning with missing values. *Statistical Papers* 65(9), 5447–5479. [doi:10.1007/s00362-024-01550-4](https://doi.org/10.1007/s00362-024-01550-4)
-- *Louisiana v. Callais*, 608 U.S. 85 (2026), No. 24-109, decided 29 April 2026. [Opinion (preliminary print)](https://www.supremecourt.gov/opinions/25pdf/608us1r29_n648.pdf)
+- *Louisiana v. Callais*, 608 U.S. 85 (2026), No. 24-109, decided 29 April 2026. [Opinion (preliminary print)](https://www.supremecourt.gov/opinions/25pdf/608us1r29_n648.pdf). The quotation is in the syllabus, at 88.
 - Morris, G. E. (2026). The simple statistical error Republican Supreme Court justices used to gut the VRA. *Strength In Numbers*, 8 May 2026. [Link](https://www.gelliottmorris.com/p/2026-05-08-simple-math-error-scotus-callais-vra)
 - Twala, B. E. T. H., Jones, M. C. and Hand, D. J. (2008). Good methods for coping with missing data in decision trees. *Pattern Recognition Letters* 29(7), 950–956. [doi:10.1016/j.patrec.2008.01.010](https://doi.org/10.1016/j.patrec.2008.01.010)
-- Whitehead, A. N. (1911). *An Introduction to Mathematics*. London: Williams and Norgate. [Project Gutenberg](https://www.gutenberg.org/ebooks/41568)
+- Whitehead, A. N. (1911). *An Introduction to Mathematics*. London: Williams and Norgate. [Project Gutenberg](https://www.gutenberg.org/ebooks/41568). The quotation is in chapter 5, "The Symbolism of Mathematics".
 :::
