@@ -80,12 +80,27 @@ mv_test  <- mv[mv_id[7001:10000], ]
 f_all <- reformulate(inputs, "rating")
 ```
 
-## {.inverse minutes="3"}
+## Where we left off {minutes="3"}
 
 ::: {.notes}
 QUESTION, on the title slide: list our modeling assumptions and their respective methods
 
-Two minutes of answers, while the room settles. The title slide has no note, so its minutes are counted here; this slide is the outline, the next has the table.
+Two minutes of answers, while the room settles, then the table. The title slide has no note, so its minutes are counted here. This lecture fits additive models, asks what plots of one input show, and builds trees, which drop additivity. New data: the films, the same protocol; the test films stay shut.
+:::
+
+| Assumption | Methods |
+|---|---|
+| Linearity | linear and logistic regression |
+| Smoothness (Lipschitz) | $k$ nearest neighbors; also trees and networks |
+| Additivity: one curve per input | additive models (a spline per input) |
+| Limited wiggliness | penalized splines |
+| Sparsity: few inputs matter | the lasso |
+| Small coefficients | ridge regression |
+
+## {.inverse}
+
+::: {.notes}
+Compress: the outline of the four parts.
 
 The deck on the spine's scale (2 a content slide, 3 a proof or a pause for the room, 1 a dark slide); the bar at the top of each note is the share done, its denominator the total. Dark = rush or skip. Data: the films throughout (data note: data/movies.md), a random 10,000 split 5,000 / 2,000 / 3,000 with one seed, 310, shared with the seminar; the test films stay shut. Simulations where the truth must be known. One proof in the lecture: the correlated-average variance. Boosting as gradient descent is derived.
 
@@ -105,21 +120,6 @@ Part 2: additivity vs interactions
 Part 3: building a tree
 
 Part 4: three model improvement strategies
-
-## Where we left off {minutes="1"}
-
-::: {.notes}
-The answers to the title slide's question. Then: this lecture fits additive models, asks what plots of one input show, and builds trees, which drop additivity. New data: the films, the same protocol; the test films stay shut.
-:::
-
-| Assumption | Methods |
-|---|---|
-| Linearity | linear and logistic regression |
-| Smoothness (Lipschitz) | $k$ nearest neighbors; also trees and networks |
-| Additivity: one curve per input | additive models (a spline per input) |
-| Limited wiggliness | penalized splines |
-| Sparsity: few inputs matter | the lasso |
-| Small coefficients | ridge regression |
 
 ## {.inverse .center}
 
