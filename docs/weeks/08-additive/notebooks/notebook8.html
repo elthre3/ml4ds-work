@@ -261,8 +261,9 @@ Note
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xgboost)         <span class="co"># version 3 or later; if xgboost(x = ...) fails, install.packages("xgboost") again</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)            <span class="co"># used only in the optional items; ships with R</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_minimal</span>())</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>mse <span class="ot">&lt;-</span> <span class="cf">function</span>(y, pred) <span class="fu">mean</span>((y <span class="sc">-</span> pred)<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>se_loss <span class="ot">&lt;-</span> <span class="cf">function</span>(loss) <span class="fu">sd</span>(loss) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(loss))   <span class="co"># standard error of a mean of losses</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">pillar.sigfig =</span> <span class="dv">4</span>)   <span class="co"># tables print four significant digits</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>mse <span class="ot">&lt;-</span> <span class="cf">function</span>(y, pred) <span class="fu">mean</span>((y <span class="sc">-</span> pred)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>se_loss <span class="ot">&lt;-</span> <span class="cf">function</span>(loss) <span class="fu">sd</span>(loss) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(loss))   <span class="co"># standard error of a mean of losses</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="before-the-seminar" class="level2">
 <h2 class="anchored" data-anchor-id="before-the-seminar">Before the seminar</h2>
@@ -379,7 +380,7 @@ Note
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
-<li><span class="math inline">\(\partial L/\partial f_i = -(y_i - f_i)\)</span>: the negative gradient is the vector of residuals.</li>
+<li>The derivative of <span class="math inline">\(\frac12(y_i - f_i)^2\)</span> with respect to <span class="math inline">\(f_i\)</span>.</li>
 </ol>
 </div>
 </div>
@@ -462,22 +463,22 @@ Note
 <li><p>Now add the two seasons of <em>Andor</em>. Which values of <span class="math inline">\(\alpha\)</span> do the seven titles choose?</p></li>
 <li><p>Two titles changed the choice. Explain why with one formula, and say whether these seven titles should be used to choose <span class="math inline">\(\alpha\)</span> for predicting films like the training films.</p></li>
 </ol>
-<p><strong>Problem 2 (the size of a boosting step).</strong> A boosting fit has fitted values <span class="math inline">\(\mathbf f = (f_1, \ldots, f_n)\)</span> and residuals <span class="math inline">\(r_i = y_i - f_i\)</span>, with training loss <span class="math inline">\(L(\mathbf f) = \sum_i \frac12(y_i - f_i)^2\)</span>. A tree <span class="math inline">\(t\)</span> with leaves <span class="math inline">\(l = 1, \ldots, m\)</span> is fitted to the residuals: in leaf <span class="math inline">\(l\)</span>, which holds <span class="math inline">\(n_l\)</span> of the units, it predicts the mean <span class="math inline">\(\bar r_l\)</span> of their residuals. Write <span class="math inline">\(t_i\)</span> for its prediction for unit <span class="math inline">\(i\)</span>.</p>
+<p><strong>Problem 2 (the size of a boosting step).</strong> A boosting fit has fitted values <span class="math inline">\(\mathbf f = (f_1, \ldots, f_n)\)</span> and residuals <span class="math inline">\(r_i = y_i - f_i\)</span>, with training loss <span class="math inline">\(L(\mathbf f) = \sum_i \frac12(y_i - f_i)^2\)</span>. A tree <span class="math inline">\(t\)</span> is fitted to the residuals: in leaf <span class="math inline">\(l\)</span>, which holds <span class="math inline">\(n_l\)</span> of the units, it predicts the mean <span class="math inline">\(\bar r_l\)</span> of their residuals. Write <span class="math inline">\(t_i\)</span> for its prediction for unit <span class="math inline">\(i\)</span>.</p>
 <ol type="a">
-<li><p>Show that <span class="math inline">\(L(\mathbf f + \gamma\,\mathbf t) = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)\sum_{l=1}^m n_l\,\bar r_l^{\,2}\)</span>.</p></li>
+<li><p>Show that <span class="math inline">\(L(\mathbf f + \gamma\,\mathbf t) = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)\sum_l n_l\,\bar r_l^{\,2}\)</span>, the sum over the tree’s leaves.</p></li>
 <li><p>For which <span class="math inline">\(\gamma \ge 0\)</span> does a step not raise the training loss? Which <span class="math inline">\(\gamma\)</span> lowers it most?</p></li>
 <li><p>The five residuals <span class="math inline">\(0.98, 0.98, 0.28, -1.42, -0.82\)</span>, with a tree whose leaves hold the first three and the last two. Compute <span class="math inline">\(\sum_l n_l\bar r_l^{\,2}\)</span> and the loss after a step of <span class="math inline">\(\gamma = 0.5\)</span>, <span class="math inline">\(1\)</span> and <span class="math inline">\(2\)</span>.</p></li>
 <li><p>Part (b) gives the <span class="math inline">\(\gamma\)</span> that lowers the training loss most at every step. Why do boosting libraries use a much smaller <span class="math inline">\(\gamma\)</span> by default?</p></li>
 </ol>
-<p><strong>Problem 3 (what a larger search costs).</strong> A model’s risk is its expected loss on a new unit, <span class="math inline">\(R = \mathbb E[\ell]\)</span>, for a loss with <span class="math inline">\(0 \le \ell \le 1\)</span> (for example, the 0–1 loss of a classifier). Before the tuning data are seen, <span class="math inline">\(K\)</span> candidate models are fixed, fitted on the training data, with risks <span class="math inline">\(R_1, \ldots, R_K\)</span>; treat the fitted models as fixed, so that everything below is conditional on the training data. On <span class="math inline">\(m\)</span> tuning units, drawn independently of each other and of the training data, candidate <span class="math inline">\(k\)</span> scores <span class="math inline">\(\hat R_k\)</span>, the mean of its <span class="math inline">\(m\)</span> losses. You may use Hoeffding’s inequality (Hoeffding 1963): if <span class="math inline">\(Z_1, \ldots, Z_m\)</span> are independent with <span class="math inline">\(0 \le Z_i \le 1\)</span> and <span class="math inline">\(\bar Z\)</span> is their mean, then for every <span class="math inline">\(t &gt; 0\)</span>, <span class="math display">\[
+<p><strong>Problem 3 (the size of a search).</strong> A model’s risk is its expected loss on a new unit, <span class="math inline">\(R = \mathbb E[\ell]\)</span>, for a loss with <span class="math inline">\(0 \le \ell \le 1\)</span> (for example, the 0–1 loss of a classifier). Before the tuning data are seen, <span class="math inline">\(K\)</span> candidate models are fixed, fitted on the training data, with risks <span class="math inline">\(R_1, \ldots, R_K\)</span>; treat the fitted models as fixed, so that everything below is conditional on the training data. On <span class="math inline">\(m\)</span> tuning units, drawn independently of each other and of the training data, candidate <span class="math inline">\(k\)</span> scores <span class="math inline">\(\hat R_k\)</span>, the mean of its <span class="math inline">\(m\)</span> losses. You may use Hoeffding’s inequality (Hoeffding 1963): if <span class="math inline">\(Z_1, \ldots, Z_m\)</span> are independent with <span class="math inline">\(0 \le Z_i \le 1\)</span> and <span class="math inline">\(\bar Z\)</span> is their mean, then for every <span class="math inline">\(t &gt; 0\)</span>, <span class="math display">\[
 P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 \]</span></p>
 <ol type="a">
-<li><p><span class="math inline">\(K = 1\)</span>. Find the <span class="math inline">\(t\)</span> for which <span class="math inline">\(|\hat R_1 - R_1| &lt; t\)</span> with probability at least <span class="math inline">\(1 - \delta\)</span>.</p></li>
+<li><p><span class="math inline">\(K = 1\)</span>. Find the smallest <span class="math inline">\(t\)</span> that Hoeffding’s inequality gives for which <span class="math inline">\(|\hat R_1 - R_1| &lt; t\)</span> with probability at least <span class="math inline">\(1 - \delta\)</span>.</p></li>
 <li><p>Find <span class="math inline">\(t_K\)</span> such that, with probability at least <span class="math inline">\(1 - \delta\)</span>, <span class="math inline">\(|\hat R_k - R_k| &lt; t_K\)</span> for every <span class="math inline">\(k\)</span> at once. Did you need the <span class="math inline">\(K\)</span> scores to be independent of each other?</p></li>
 <li><p>Let <span class="math inline">\(\hat k\)</span> be the candidate with the lowest tuning score and <span class="math inline">\(k^\star\)</span> the candidate with the lowest risk. On the event of (b), show that <span class="math inline">\(R_{\hat k} &lt; \hat R_{\hat k} + t_K\)</span> and <span class="math inline">\(R_{\hat k} &lt; R_{k^\star} + 2t_K\)</span>.</p></li>
 <li><p>Take <span class="math inline">\(m = 2000\)</span> and <span class="math inline">\(\delta = 0.05\)</span>. Compute <span class="math inline">\(t_K\)</span> for <span class="math inline">\(K = 1\)</span>, <span class="math inline">\(10\)</span>, <span class="math inline">\(100\)</span> and <span class="math inline">\(1{,}000{,}000\)</span>. How many candidates double <span class="math inline">\(t_1\)</span>? How many tuning units halve <span class="math inline">\(t_K\)</span>? What does this say about searching a larger grid?</p></li>
-<li><p>The argument needs the <span class="math inline">\(K\)</span> candidates to be fixed before any tuning score is seen. Give an example of a search that breaks this.</p></li>
+<li><p>The argument needs the <span class="math inline">\(K\)</span> candidates to be fixed before any tuning score is seen. Give an example of a search that breaks this, and one that chooses adaptively but does not.</p></li>
 </ol>
 </section>
 <section id="coding" class="level2">
@@ -516,7 +517,7 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   out_of_bag = mse(mv_train$rating, ____),</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   tuning = mse(mv_tune$rating, ____))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><strong>Question 2.</strong> Tune one knob at a time, leaving the other at its default: <code>mtry</code> in 1, 2, 3, 5 and 9 with <code>nodesize = 5</code>; then <code>nodesize</code> in 5, 50 and 200 with <code>mtry = 3</code>. Which value of each wins? (Seven forests, about 20 seconds.)</p>
+<p><strong>Question 2.</strong> Tune one knob at a time, leaving the other at its default: <code>mtry</code> in 1, 2, 3, 5 and 9 with <code>nodesize = 5</code>; then <code>nodesize</code> in 5, 50 and 200 with <code>mtry = 3</code>. Which value of each wins? (Eight forests, the default twice, about 20 seconds.)</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mtrys <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">9</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>nodesizes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">50</span>, <span class="dv">200</span>)</span>
@@ -539,18 +540,18 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 <pre><code># A tibble: 5 x 4
    mtry `nodesize 5` `nodesize 50` `nodesize 200`
   &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;          &lt;dbl&gt;
-1     1         1.69          1.69           1.69
-2     2         1.50          1.52           1.52
-3     3         1.49          1.48           1.49
-4     5         1.56          1.49           1.48
-5     9         1.72          1.51           1.49</code></pre>
+1     1        1.687         1.689          1.691
+2     2        1.505         1.516          1.523
+3     3        1.489         1.48           1.488
+4     5        1.563         1.491          1.482
+5     9        1.721         1.509          1.491</code></pre>
 </div>
 </div>
 </section>
 <section id="boosted-trees-three-knobs" class="level3">
 <h3 class="anchored" data-anchor-id="boosted-trees-three-knobs">2. Boosted trees, three knobs</h3>
 <!-- 11 min: questions 4 to 7. -->
-<p>xgboost has three knobs that matter most here: the depth of each tree, the learning rate <span class="math inline">\(\gamma\)</span>, and the number of iterations. Its defaults are depth 6, rate 0.3 and 100 iterations. One fit of 800 iterations gives the predictions after any smaller number, so the chunk below fits 12 models (4 depths, 3 rates) and scores each after 5, 10, 25, …, 800 iterations: 96 models in a table, <code>models</code>, with each one’s MSE on the tuning films. <code>loss</code> holds every model’s squared errors on the 2,000 tuning films, one column per model, in the order of the rows of <code>models</code>; <code>col</code> is that column. (About 5 seconds.)</p>
+<p>xgboost has three knobs that matter most here: the depth of each tree, the learning rate <span class="math inline">\(\gamma\)</span>, and the number of iterations. Its defaults are depth 6, rate 0.3 and 100 iterations. One fit of 800 iterations gives the predictions after any smaller number, so the chunk below makes 12 fits (4 depths, 3 rates) and scores each after 5, 10, 25, …, 800 iterations: 96 models in a table, <code>models</code>, with each one’s MSE on the tuning films. <code>loss</code> holds every model’s squared errors on the 2,000 tuning films, one column per model, in the order of the rows of <code>models</code>; <code>col</code> is that column. (About 5 seconds.)</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">select</span>(mv_train, <span class="sc">-</span>title, <span class="sc">-</span>rating))</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>X_tune <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">select</span>(mv_tune, <span class="sc">-</span>title, <span class="sc">-</span>rating))</span>
@@ -578,7 +579,7 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 <pre><code># A tibble: 1 x 5
   depth  rate iters   col tune_mse
   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;
-1     6   0.3   100    93     1.68</code></pre>
+1     6   0.3   100    93    1.683</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fit_default_boost <span class="ot">&lt;-</span> <span class="fu">boost_fit</span>(<span class="at">depth =</span> <span class="dv">6</span>, <span class="at">rate =</span> <span class="fl">0.3</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mse</span>(mv_train<span class="sc">$</span>rating, <span class="fu">predict</span>(fit_default_boost, X_train, <span class="at">iteration_range =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">100</span>)))   <span class="co"># training MSE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -586,7 +587,7 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 <pre><code>[1] 0.8182678</code></pre>
 </div>
 </div>
-<p><strong>Question 5.</strong> Tune one knob at a time, from the defaults: the number of iterations with depth 6 and rate 0.3; the depth with rate 0.3 and 100 iterations; the rate with depth 6 and 100 iterations. Then score the model that takes all three winners together. What went wrong?</p>
+<p><strong>Question 5.</strong> Tune one knob at a time, from the defaults: the number of iterations with depth 6 and rate 0.3; the depth with rate 0.3 and 100 iterations; the rate with depth 6 and 100 iterations. Before scoring the model that takes all three winners together, predict: should it be at least as good as each winner alone? Then score it.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># models |&gt; filter(____) |&gt; slice_min(tune_mse)                  # iterations alone</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># models |&gt; filter(____) |&gt; slice_min(tune_mse)                  # depth alone</span></span>
@@ -595,7 +596,7 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 </div>
 <p><strong>Question 6.</strong> Tune the knobs in sequence instead: the number of iterations first (depth 6, rate 0.3), then the depth at the winning number of iterations, then the rate at the winning depth and number of iterations. Then search the whole grid. Compare the two models, and the number of fits each search needed.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># step1 &lt;- models |&gt; filter(depth == 6, rate == 0.3) |&gt; slice_min(tune_mse)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># step1 &lt;- models |&gt; filter(____) |&gt; slice_min(tune_mse)                 # iterations, at depth 6 and rate 0.3</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># step2 &lt;- models |&gt; filter(rate == 0.3, iters == ____) |&gt; slice_min(tune_mse)</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># step3 &lt;- models |&gt; filter(depth == ____, iters == ____) |&gt; slice_min(tune_mse)</span></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># models |&gt; slice_min(tune_mse)                                  # the whole grid</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -607,84 +608,90 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 <pre><code># A tibble: 4 x 5
   depth  rate iters   col tune_mse
   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;
-1     1  0.1    400    15     1.51
-2     2  0.1    400    39     1.50
-3     4  0.1    100    61     1.49
-4     6  0.03   100    77     1.49</code></pre>
+1     1  0.1    400    15    1.515
+2     2  0.1    400    39    1.502
+3     4  0.1    100    61    1.490
+4     6  0.03   100    77    1.492</code></pre>
 </div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>j_additive <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">filter</span>(depth <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse) <span class="sc">|&gt;</span> <span class="fu">pull</span>(col)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>j_best <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse) <span class="sc">|&gt;</span> <span class="fu">pull</span>(col)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># d &lt;- ____</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># d_add &lt;- ____</span></span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># c(difference = ____, se = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="how-the-size-of-the-search-changes-the-best-score" class="level3">
-<h3 class="anchored" data-anchor-id="how-the-size-of-the-search-changes-the-best-score">3. How the size of the search changes the best score</h3>
+<section id="the-size-of-the-search" class="level3">
+<h3 class="anchored" data-anchor-id="the-size-of-the-search">3. The size of the search</h3>
 <!-- 6 min: question 8. -->
-<p>Three searches over the same 96 boosting models: one model fixed in advance, the defaults (<code>fixed</code>); the 13 models that question 5’s one-knob-at-a-time searches looked at (<code>one_knob</code>); and all 96. On one split of the tuning films the effect is too small to see, so the function below repeats the search on many random halves.</p>
-<p><strong>Question 8.</strong> Complete <code>half_gap(cols)</code>: draw a random half <code>A</code> of the tuning films; among the models in <code>cols</code>, find the one with the lowest MSE on <code>A</code>; return that MSE and the same model’s MSE on the other half. Then average it over 2,000 random halves for each search. Which search’s best model looks best on the films that chose it? Which is best on the other films?</p>
+<p>Three searches over the same 96 boosting models: one model fixed in advance, the defaults (<code>fixed</code>); the 13 models that question 5’s one-knob-at-a-time searches looked at (<code>one_knob</code>); and all 96. On one split of the tuning films the effect is too small to see, so we repeat the searches on many random halves, all three on the same halves.</p>
+<p><strong>Question 8.</strong> Complete <code>half_gap(cols, A)</code>: among the models in <code>cols</code>, find the one with the lowest MSE on the half <code>A</code> of the tuning films; return that MSE and the same model’s MSE on the other half. The chunk then draws 2,000 random halves, runs the three searches on each and averages. Which search’s best model looks best on the films that chose it? Which is best on the other films?</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fixed <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">filter</span>(depth <span class="sc">==</span> <span class="dv">6</span>, rate <span class="sc">==</span> <span class="fl">0.3</span>, iters <span class="sc">==</span> <span class="dv">100</span>) <span class="sc">|&gt;</span> <span class="fu">pull</span>(col)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>one_knob <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">filter</span>((depth <span class="sc">==</span> <span class="dv">6</span> <span class="sc">&amp;</span> rate <span class="sc">==</span> <span class="fl">0.3</span>) <span class="sc">|</span> (rate <span class="sc">==</span> <span class="fl">0.3</span> <span class="sc">&amp;</span> iters <span class="sc">==</span> <span class="dv">100</span>) <span class="sc">|</span> (depth <span class="sc">==</span> <span class="dv">6</span> <span class="sc">&amp;</span> iters <span class="sc">==</span> <span class="dv">100</span>)) <span class="sc">|&gt;</span> <span class="fu">pull</span>(col)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>all_models <span class="ot">&lt;-</span> models<span class="sc">$</span>col</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>half_gap <span class="ot">&lt;-</span> <span class="cf">function</span>(cols) {</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  A <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(loss), <span class="fu">nrow</span>(loss) <span class="sc">/</span> <span class="dv">2</span>)              <span class="co"># a random half of the tuning films</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  mse_A <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(loss[A, cols, <span class="at">drop =</span> <span class="cn">FALSE</span>])       <span class="co"># each model's MSE on that half</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># w &lt;- ____                                          # the model with the lowest MSE on A</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># c(chosen_on = ____, other_half = ____)</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># rbind(fixed = rowMeans(replicate(2000, half_gap(fixed))),</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co">#       one_knob = ____,</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co">#       all_models = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>half_gap <span class="ot">&lt;-</span> <span class="cf">function</span>(cols, A) {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  mse_A <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(loss[A, cols, <span class="at">drop =</span> <span class="cn">FALSE</span>])       <span class="co"># each model's MSE on the half A</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># w &lt;- ____                                          # the model with the lowest MSE on A</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># c(chosen_on = ____, other_half = ____)</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>halves <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">2000</span>, {</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  A <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(loss), <span class="fu">nrow</span>(loss) <span class="sc">/</span> <span class="dv">2</span>)              <span class="co"># one random half of the tuning films</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(<span class="at">fixed =</span> <span class="fu">half_gap</span>(fixed, A), <span class="at">one_knob =</span> <span class="fu">half_gap</span>(one_knob, A), <span class="at">all_models =</span> <span class="fu">half_gap</span>(all_models, A))</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>q8 <span class="ot">&lt;-</span> <span class="fu">apply</span>(halves, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, mean)                         <span class="co"># average over the 2,000 halves</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(q8, <span class="at">gap =</span> q8[, <span class="st">"other_half"</span>] <span class="sc">-</span> q8[, <span class="st">"chosen_on"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Checkpoint: one fixed model is not chosen by anything, so on average its two halves should agree.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(q8[<span class="st">"fixed"</span>, <span class="st">"other_half"</span>] <span class="sc">-</span> q8[<span class="st">"fixed"</span>, <span class="st">"chosen_on"</span>]) <span class="sc">&lt;</span> <span class="fl">0.01</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="the-test-films-once" class="level3">
 <h3 class="anchored" data-anchor-id="the-test-films-once">4. The test films, once</h3>
 <!-- 5 min: question 9. -->
-<p><strong>Question 9.</strong> Before running the chunk below, write down which two models you will score on the test films: the forest and the boosting model that won their grids on the tuning films. Then compute each one’s test MSE with its standard error, the training mean’s, and the paired difference between the forest and the boosting model, with its standard error. Every test MSE is higher than the same model’s tuning MSE, the training mean’s too. What does that say?</p>
+<p><strong>Question 9.</strong> Before running the chunk below, write down which two models you will score on the test films: the forest and the boosting model that won their grids on the tuning films. Then compute each one’s test MSE with its standard error, the training mean’s, and the paired difference between the forest and the boosting model, with its standard error. Compare each test MSE with the same model’s tuning MSE, the training mean’s too. What can you conclude from the differences?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rf_best <span class="ot">&lt;-</span> rf_grid <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse)          <span class="co"># the forest that won its grid</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>boost_best <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse)        <span class="co"># the boosting model that won its grid</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">&lt;-</span> <span class="fu">rf_fit</span>(rf_best<span class="sc">$</span>mtry, rf_best<span class="sc">$</span>nodesize)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>fit_boost <span class="ot">&lt;-</span> <span class="fu">boost_fit</span>(boost_best<span class="sc">$</span>depth, boost_best<span class="sc">$</span>rate)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>loss_test <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">forest =</span> (mv_test<span class="sc">$</span>rating <span class="sc">-</span> <span class="fu">predict</span>(fit_rf, mv_test))<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">boosting =</span> (mv_test<span class="sc">$</span>rating <span class="sc">-</span> <span class="fu">predict</span>(fit_boost, X_test, <span class="at">iteration_range =</span> <span class="fu">c</span>(<span class="dv">1</span>, boost_best<span class="sc">$</span>iters)))<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">training_mean =</span> (mv_test<span class="sc">$</span>rating <span class="sc">-</span> <span class="fu">mean</span>(mv_train<span class="sc">$</span>rating))<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># loss_test |&gt; summarize(across(everything(), list(mse = ____, se = ____)))</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co"># d_test &lt;- ____</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co"># c(difference = ____, se = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>rf_best <span class="ot">&lt;-</span> rf_grid <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse)          <span class="co"># the forest that won its grid</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>boost_best <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse)        <span class="co"># the boosting model that won its grid</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">&lt;-</span> <span class="fu">rf_fit</span>(rf_best<span class="sc">$</span>mtry, rf_best<span class="sc">$</span>nodesize)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>fit_boost <span class="ot">&lt;-</span> <span class="fu">boost_fit</span>(boost_best<span class="sc">$</span>depth, boost_best<span class="sc">$</span>rate)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>loss_test <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">forest =</span> (mv_test<span class="sc">$</span>rating <span class="sc">-</span> <span class="fu">predict</span>(fit_rf, mv_test))<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">boosting =</span> (mv_test<span class="sc">$</span>rating <span class="sc">-</span> <span class="fu">predict</span>(fit_boost, X_test, <span class="at">iteration_range =</span> <span class="fu">c</span>(<span class="dv">1</span>, boost_best<span class="sc">$</span>iters)))<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">training_mean =</span> (mv_test<span class="sc">$</span>rating <span class="sc">-</span> <span class="fu">mean</span>(mv_train<span class="sc">$</span>rating))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co"># round(sapply(loss_test, function(l) c(mse = ____, se = ____)), 3)</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co"># d_test &lt;- ____</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co"># c(difference = ____, se = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="optional-can-be-done-at-home-a-truth-with-an-interaction" class="level3">
 <h3 class="anchored" data-anchor-id="optional-can-be-done-at-home-a-truth-with-an-interaction">Optional, can be done at home: a truth with an interaction</h3>
 <p>The lecture’s simulated truth, <span class="math inline">\(y = x_1^2\cos(\pi x_2/2) + \varepsilon\)</span> with <span class="math inline">\(x_1\)</span> uniform on <span class="math inline">\([-1, 1]\)</span> and <span class="math inline">\(x_2\)</span> uniform on <span class="math inline">\([-4, 4]\)</span>, independent, but with less noise (standard deviation 0.2), so that the differences are large enough to see. Fit an additive model (<code>gam(y ~ s(x1) + s(x2))</code>) and boosted trees of depth 1, 2 and 4 (rate 0.1, 400 iterations) on 2,000 units, and score each on 2,000 fresh units. What is the lowest MSE any model could reach, and which models come near it? What does the additive model’s curve for <span class="math inline">\(x_2\)</span> look like?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>f_true <span class="ot">&lt;-</span> <span class="cf">function</span>(x1, x2) x1<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="fu">cos</span>(pi <span class="sc">*</span> x2 <span class="sc">/</span> <span class="dv">2</span>)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="cf">function</span>(n) <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">4</span>, <span class="dv">4</span>)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">f_true</span>(x1, x2) <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.2</span>))</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>sim_train <span class="ot">&lt;-</span> <span class="fu">sim</span>(<span class="dv">2000</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>sim_fresh <span class="ot">&lt;-</span> <span class="fu">sim</span>(<span class="dv">2000</span>)</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>f_true <span class="ot">&lt;-</span> <span class="cf">function</span>(x1, x2) x1<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="fu">cos</span>(pi <span class="sc">*</span> x2 <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="cf">function</span>(n) <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">x2 =</span> <span class="fu">runif</span>(n, <span class="sc">-</span><span class="dv">4</span>, <span class="dv">4</span>)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">f_true</span>(x1, x2) <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.2</span>))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>sim_train <span class="ot">&lt;-</span> <span class="fu">sim</span>(<span class="dv">2000</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>sim_fresh <span class="ot">&lt;-</span> <span class="fu">sim</span>(<span class="dv">2000</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="optional-can-be-done-at-home-backfitting-by-hand" class="level3">
 <h3 class="anchored" data-anchor-id="optional-can-be-done-at-home-backfitting-by-hand">Optional, can be done at home: backfitting by hand</h3>
 <p>Fit the additive model <span class="math inline">\(\text{rating} = \beta_0 + f_1(\text{length}) + f_2(\text{year})\)</span> on the training films by backfitting: start with both curves at zero and <span class="math inline">\(\hat\beta_0\)</span> the mean rating; then, in turn, fit a smoothing spline (<code>smooth.spline(x, r, df = 9)</code>) of each input’s partial residual on that input, centered to mean zero, until the fitted values stop changing. How many iterations does it take? Compare its tuning MSE with <code>gam(rating ~ s(length) + s(year))</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> mv_train<span class="sc">$</span>rating</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>f_len <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(mv_train))</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>f_yr <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(mv_train))</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>) {</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># r_len &lt;- ____                                     # the partial residual for length</span></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># s_len &lt;- smooth.spline(mv_train$length, r_len, df = 9)</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># f_len &lt;- predict(s_len, mv_train$length)$y; f_len &lt;- f_len - mean(f_len)</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ... the same for year</span></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> mv_train<span class="sc">$</span>rating</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>f_len <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(mv_train))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>f_yr <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(mv_train))</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>) {</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># r_len &lt;- ____                                     # the partial residual for length</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># s_len &lt;- smooth.spline(mv_train$length, r_len, df = 9)</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># f_len &lt;- predict(s_len, mv_train$length)$y; f_len &lt;- f_len - mean(f_len)</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ... the same for year</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 </section>
@@ -692,7 +699,7 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <ul>
 <li>Hoeffding, W. (1963). Probability inequalities for sums of bounded random variables. <em>Journal of the American Statistical Association</em>, 58(301), 13–30. <a href="https://doi.org/10.1080/01621459.1963.10500830">doi:10.1080/01621459.1963.10500830</a></li>
-<li>IMDb user ratings of the later films in problem 1, read in November 2026: <a href="https://www.imdb.com/title/tt0121766/">Revenge of the Sith</a>, <a href="https://www.imdb.com/title/tt2488496/">The Force Awakens</a>, <a href="https://www.imdb.com/title/tt3748528/">Rogue One</a>, <a href="https://www.imdb.com/title/tt2527336/">The Last Jedi</a>, <a href="https://www.imdb.com/title/tt2527338/">The Rise of Skywalker</a>. The two seasons of <em>Andor</em> are the averages of their episodes’ IMDb ratings, as summarized by <a href="https://episodes.cool/title/tt9253284/andor/">episodes.cool</a>.</li>
+<li>IMDb user ratings of the later films in problem 1, read on 17 November 2026: <a href="https://www.imdb.com/title/tt0121766/">Revenge of the Sith</a>, <a href="https://www.imdb.com/title/tt2488496/">The Force Awakens</a>, <a href="https://www.imdb.com/title/tt3748528/">Rogue One</a>, <a href="https://www.imdb.com/title/tt2527336/">The Last Jedi</a>, <a href="https://www.imdb.com/title/tt2527338/">The Rise of Skywalker</a>. The two seasons of <em>Andor</em> are the averages of their episodes’ IMDb ratings (8.32 and 8.65, rounded), as summarized by <a href="https://episodes.cool/title/tt9253284/andor/">episodes.cool</a>.</li>
 <li>The films: <a href="https://ml4ds.com/data/movies.html">data note</a>.</li>
 </ul>
 

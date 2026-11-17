@@ -2334,7 +2334,7 @@ window.Quarto = {
 
 <section id="keep-or-rush" class="level2">
 <h2 class="anchored" data-anchor-id="keep-or-rush">Keep or rush</h2>
-<p>In seminar order. Planned total 60 minutes, with no slack: a room that runs slow cuts in the order marked, and the minimum seminar is below the table. Question 3’s chunk fits 15 forests (about 40 seconds in the build container, longer on a laptop): start it while the room discusses question 2. The numbers below are for a run in order.</p>
+<p>In seminar order. Planned total 60 minutes, with no slack: a room that runs slow cuts in the order marked, and the minimum seminar is below the table. Question 3’s chunk fits 15 forests (about 40 seconds in the build container, longer on a laptop): start it while the room discusses question 2. Question 9 uses its grid, so it must run even when question 3 is cut. The numbers below are for a run in order.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 52%">
@@ -2382,7 +2382,7 @@ window.Quarto = {
 <td>The union bound, then the two inequalities</td>
 </tr>
 <tr class="even">
-<td>Problem 3(d, e): <span class="math inline">\(t_K\)</span> = 0.030, 0.039, 0.046, 0.066 for <span class="math inline">\(K = 1, 10, 100, 10^6\)</span> (<span class="math inline">\(m = 2000\)</span>, <span class="math inline">\(\delta = 0.05\)</span>); 64,000 candidates double <span class="math inline">\(t_1\)</span>; four times the tuning units halve any <span class="math inline">\(t_K\)</span>; the grid enters through <span class="math inline">\(\sqrt{\log K}\)</span>; a search that adapts to its scores breaks the argument</td>
+<td>Problem 3(d, e): <span class="math inline">\(t_K\)</span> = 0.030, 0.039, 0.046, 0.066 for <span class="math inline">\(K = 1, 10, 100, 10^6\)</span> (<span class="math inline">\(m = 2000\)</span>, <span class="math inline">\(\delta = 0.05\)</span>); 64,000 candidates double <span class="math inline">\(t_1\)</span>; four times the tuning units halve any <span class="math inline">\(t_K\)</span>; the grid enters through <span class="math inline">\(\sqrt{\log K}\)</span>; the bound limits the optimism, it does not measure it; candidates added after seeing scores break the argument, while choosing adaptively within a fixed list does not</td>
 <td style="text-align: right;">3</td>
 <td>Keep (d); cut (e) third</td>
 <td>The four numbers, then the sentence on <span class="math inline">\(\sqrt{\log K}\)</span> against <span class="math inline">\(1/\sqrt m\)</span></td>
@@ -2394,13 +2394,13 @@ window.Quarto = {
 <td>The three <code>predict()</code> calls</td>
 </tr>
 <tr class="even">
-<td>Coding 1, question 2: <code>mtry</code> 1, 2, 3, 5, 9 give 1.70, 1.51, 1.49, 1.56, 1.71; <code>nodesize</code> 5, 50, 200 give 1.487, 1.480, 1.489, within the run-to-run noise</td>
+<td>Coding 1, question 2: <code>mtry</code> 1, 2, 3, 5, 9 give 1.70, 1.51, 1.49, 1.56, 1.71; <code>nodesize</code> 5, 50, 200 give 1.487, 1.480, 1.489: small beside a tuning MSE’s standard error (about 0.05), though larger than the run-to-run change (about 0.003)</td>
 <td style="text-align: right;">4</td>
 <td>Keep</td>
 <td><code>rf_score(m, 5)</code> and <code>rf_score(3, s)</code></td>
 </tr>
 <tr class="odd">
-<td>Coding 1, question 3: with <code>mtry = 9</code> (bagging) the node size matters (1.72, 1.50, 1.49); with <code>mtry = 3</code> it does not; the grid’s best is (3, 50) at 1.481, within 0.009 of the default</td>
+<td>Coding 1, question 3: with <code>mtry = 9</code> (bagging) the node size matters (1.72, 1.50, 1.49); with <code>mtry = 3</code> it hardly does; the grid’s best is (3, 50) at 1.481, the cell question 2 found, within 0.009 of the default</td>
 <td style="text-align: right;">5</td>
 <td>Rush; cut fourth</td>
 <td>Run it during question 2; read the <code>mtry = 9</code> row and the best cell</td>
@@ -2412,13 +2412,13 @@ window.Quarto = {
 <td>Read the two numbers</td>
 </tr>
 <tr class="odd">
-<td>Coding 2, question 5: each knob alone from the defaults: 10 iterations 1.497, depth 2 1.505, rate 0.03 1.492; the three winners together 1.898, worse than the defaults</td>
+<td>Coding 2, question 5: each knob alone from the defaults: 10 iterations 1.497, depth 2 1.505, rate 0.03 1.492; the three winners together 1.898, worse than the defaults; the figure shows why</td>
 <td style="text-align: right;">4</td>
 <td>Keep</td>
-<td>The four <code>filter()</code> lines; this is the seminar’s main point about tuning</td>
+<td>Ask for the prediction first; then the four <code>filter()</code> lines and the figure. This is the seminar’s main point about tuning</td>
 </tr>
 <tr class="even">
-<td>Coding 2, question 6: in sequence, 10 iterations, depth 6, rate 0.3, 1.497; the whole grid, depth 4, rate 0.1, 100 iterations, 1.490; paired difference 0.008 (standard error 0.010); 6 fits against 12</td>
+<td>Coding 2, question 6: in sequence, 10 iterations, depth 6, rate 0.3, 1.497; the whole grid, depth 4, rate 0.1, 100 iterations, 1.490; paired difference 0.008 (standard error 0.010); 6 fits against 12; a single pass can miss better combinations, but here it did not</td>
 <td style="text-align: right;">3</td>
 <td>Keep</td>
 <td><code>iters == step1$iters</code>, then <code>depth == step2$depth</code></td>
@@ -2427,23 +2427,23 @@ window.Quarto = {
 <td>Coding 2, question 7: best by depth 1.515, 1.502, 1.490, 1.492; the best additive model (depth 1) is worse by 0.025, standard error 0.014</td>
 <td style="text-align: right;">2</td>
 <td>Cut first</td>
-<td>Say the conclusion: some interaction, weak evidence</td>
+<td>Say the conclusion: deeper trees help a little, which is compatible with interactions but does not establish them</td>
 </tr>
 <tr class="even">
-<td>Coding 3, question 8: over 2,000 random halves of the tuning films, the reported minimum’s optimism is 0.000, 0.010 and 0.015 for 1, 13 and 96 models, while the winner’s MSE on the other half is 1.683, 1.500 and 1.500; one tuning MSE on 1,000 films has a standard error of about 0.078</td>
+<td>Coding 3, question 8: over 2,000 random halves of the tuning films, the reported minimum’s optimism is 0.000, 0.010 and 0.018 for 1, 13 and 96 models (each with a Monte Carlo standard error of about 0.0025; the 96-minus-13 difference, 0.008, has 0.0003, since all three searches use the same halves), while the winner’s MSE on the other half is 1.683, 1.500 and 1.501; one tuning MSE on 1,000 films has a standard error of about 0.078</td>
 <td style="text-align: right;">6</td>
 <td>Keep</td>
 <td><code>w &lt;- which.min(mse_A)</code>, then <code>mean(loss[-A, cols[w]])</code></td>
 </tr>
 <tr class="odd">
-<td>Coding 4, question 9: on the test films, forest 1.56 (standard error 0.045), boosting 1.57 (0.047), training mean 2.06; forest minus boosting −0.010 (0.012); the untuned mean rose by 0.06 from tuning to test, the split’s luck</td>
+<td>Coding 4, question 9: on the test films, forest 1.56 (standard error 0.045), boosting 1.57 (0.047), training mean 2.06; forest minus boosting −0.006 (0.012); the untuned training mean also rose from tuning to test, by 0.06 with a standard error of 0.08, so these results do not separate that variation from the search’s optimism</td>
 <td style="text-align: right;">5</td>
 <td>Keep</td>
 <td>Name the pair before running; read the paired difference</td>
 </tr>
 </tbody>
 </table>
-<p>Minimum seminar, about 45 minutes: problem 1(a, b, c), problem 2(a, b), problem 3(a to d), coding questions 2, 4, 5, 6, 8 and 9. With more time, add question 3 back first, then problem 2(c, d).</p>
+<p>Minimum seminar, about 45 minutes: problem 1(a, b, c), problem 2(a, b), problem 3(a to d), coding questions 2, 4, 5, 6, 8 and 9. Still run question 3’s chunk, without discussion: question 9 needs its grid. With more time, add question 3’s discussion back first, then problem 2(c, d).</p>
 </section>
 <section id="if-you-read-on" class="level2">
 <h2 class="anchored" data-anchor-id="if-you-read-on">If you read on</h2>
@@ -2451,26 +2451,24 @@ window.Quarto = {
 <ul>
 <li>Students did exercises 1 and 2 at home (the correlated-average variance with the slides closed, and one boosting step by hand on the five <em>Star Wars</em> films). Open the <a href="https://ml4ds.com/teachers/notebook8_complete.html">complete notebook</a> on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are answers. Show an exercise’s solution only if asked. Each problem’s solution stands on its own, so a skipped problem costs nothing later.</li>
 <li>Everything headed “Optional, can be done at home” is outside the seminar: the lecture’s interaction with less noise, and backfitting by hand.</li>
-<li>One seed, <code>set.seed(310)</code> at the split, the same split as the lecture. Forests draw from the same random stream, so a student who skips question 2 or runs question 3 twice gets slightly different forest numbers from then on (by about 0.005), and question 8’s averages move in the third decimal. Boosting with these settings is deterministic. No lesson depends on the third decimal.</li>
+<li>One seed, <code>set.seed(310)</code> at the split, the same split as the lecture. Forests draw from the same random stream, so a student who skips question 2 or runs question 3 twice gets slightly different forest numbers from then on (by a few thousandths), and question 8’s gaps by a few thousandths too (their Monte Carlo standard error is about 0.0025), though the 96-model gap stays about 0.008 above the 13-model gap. Boosting with these settings is deterministic. No lesson depends on the third decimal.</li>
 </ul>
 <p>What students should see</p>
 <ul>
 <li>Exercise 1: <span class="math inline">\(B\)</span> variances and <span class="math inline">\(B(B - 1)\)</span> covariances, divided by <span class="math inline">\(B^2\)</span>; <span class="math inline">\(\rho\tau^2\)</span> is left as <span class="math inline">\(B \to \infty\)</span>. Exercise 2: <span class="math inline">\(\bar y = 7.82\)</span>, residuals <span class="math inline">\(0.98, 0.98, 0.28, -1.42, -0.82\)</span>; RSS 3.49, 1.49, 0.51, 3.85 for the cutoffs 1978.5, 1981.5, 1991, 2000.5; after the step 8.19 and 7.26, loss 2.344 to 0.776.</li>
-<li>Problem 1 uses IMDb’s ratings of November 2026 (references in the notebook); <em>The Rise of Skywalker</em> is 6.4. Problem 3’s numbers are <span class="math inline">\(\sqrt{\log(40K)/4000}\)</span>.</li>
+<li>Problem 1 uses IMDb’s ratings read on 17 November 2026 (references in the notebook); <em>The Rise of Skywalker</em> is 6.4. Problem 3’s numbers are <span class="math inline">\(\sqrt{\log(40K)/4000}\)</span>.</li>
 <li>Coding: the training mean scores 2.00 on the tuning films. Everything else is in the table.</li>
-<li>Run times in the build container (R 4.3, randomForest 4.7-1.2, xgboost 3.2.1.1): the whole notebook in under two minutes; question 2 about 20 seconds, question 3 about 40, the boosting grid about 5, question 8 about 2. A laptop may take two or three times as long.</li>
+<li>Run times in the build container (R 4.3, randomForest 4.7-1.2, xgboost 3.2.1.1): the whole notebook in about two minutes; question 2 about 20 seconds, question 3 about 40, the boosting grid about 5, question 8 about 2. A laptop may take two or three times as long.</li>
 </ul>
 <p>Where they get stuck</p>
 <ul>
 <li>Problem 1: sending a title down the tree by its rating, or giving <em>Revenge of the Sith</em> (2005) the leaf 6.4, which covers 1991 to 2000.5.</li>
-<li>Problem 3: dividing <span class="math inline">\(\delta\)</span> among the candidates in (a); thinking the union bound needs independent scores; reading (d) as “the optimism grows like <span class="math inline">\(\sqrt{\log K}\)</span>”. The bound only says it grows at most that fast; that it grows at all comes from the minimum of more scores being lower, which question 8 shows.</li>
-<li>Question 1: <code>predict(fit_default, mv_train)</code> for the out-of-bag line, which gives the training error again.</li>
+<li>Problem 3: dividing <span class="math inline">\(\delta\)</span> among the candidates in (a); thinking the union bound needs independent scores; reading (d) as “the optimism grows like <span class="math inline">\(\sqrt{\log K}\)</span>”. The bound limits the optimism; it does not measure it. More candidates can increase it (when they are equally good, it never falls), but one much better candidate can remove it.</li>
 <li>Question 5: filtering on the knob being tuned, so each line returns one model; or adding up the three winning MSEs.</li>
 <li>Question 8: computing the minimum over the other half too, which hides the optimism; or reading the <code>chosen_on</code> column alone and concluding that the largest search found the best model.</li>
-<li><code>xgboost(x = ..., y = ...)</code> and <code>learning_rate</code> need xgboost 3 or later. A student whose <code>xgboost()</code> call fails with an unused-argument error has an older version: <code>install.packages(&quot;xgboost&quot;)</code>.</li>
-<li>In the student file, a chunk with a blank starts with <code>#| eval: false</code>; they delete that line once the blank is filled. The <code># ...</code> lines can stay.</li>
+<li>Setup: <code>xgboost(x = ..., y = ...)</code> and <code>learning_rate</code> need xgboost 3 or later; an unused-argument error means an older version, so <code>install.packages(&quot;xgboost&quot;)</code>. In the student file, a chunk with a blank starts with <code>#| eval: false</code>: students uncomment the <code># x &lt;- ____</code> lines, fill the blanks and delete the <code>#| eval: false</code> line.</li>
 </ul>
-<p>Sources: the data note at <a href="https://ml4ds.com/data/movies.html">ml4ds.com/data/movies.html</a>; problem 3 uses Hoeffding, W. (1963), Probability inequalities for sums of bounded random variables, <em>Journal of the American Statistical Association</em> 58(301), 13–30.</p>
+<p>Sources: the data note at <a href="https://ml4ds.com/data/movies.html">ml4ds.com/data/movies.html</a>; problem 3 uses Hoeffding, W. (1963), Probability inequalities for sums of bounded random variables, <em>Journal of the American Statistical Association</em> 58(301), 13–30, <a href="https://doi.org/10.1080/01621459.1963.10500830">doi:10.1080/01621459.1963.10500830</a>; problem 1’s ratings: see the notebook’s references.</p>
 </section>
 
 </main>
