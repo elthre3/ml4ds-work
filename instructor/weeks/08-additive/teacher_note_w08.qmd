@@ -1,0 +1,61 @@
+---
+title: "Teacher note: week 8 seminar"
+subtitle: "For class teachers"
+format:
+  html:
+    toc: false
+    embed-resources: true
+---
+
+## Keep or rush
+
+In seminar order. Planned total 60 minutes, with no slack: a room that runs slow cuts in the order marked, and the minimum seminar is below the table. Question 3's chunk fits 15 forests (about 40 seconds in the build container, longer on a laptop): start it while the room discusses question 2. The numbers below are for a run in order.
+
+| Item | Min | | If short |
+|---|---:|---|---|
+| Problem 1(a, b, c): every later title is after the last split, so each tree predicts one constant for all of them (7.0, 6.7, 6.7, 7.82, and the same for 2050); the five films choose the grown tree (2.01, against 3.36 and 2.91), and with *Andor* the tree with no split (3.92, against 6.59 and 9.92) | 8 | Keep | Ask which leaf 2022 is in; then the three sums |
+| Problem 1(d): the error is $\sum_i(y_i - \bar y)^2 + n(\bar y - c)^2$; the titles' mean moves from 7.30 to 7.64, past 7.41, the midpoint of 7.0 and 7.82; later titles, a series and 2026 ratings are a poor tuning set for films up to 2005 | 2 | Rush | The formula and the two means |
+| Problem 2(a, b): expand the square; $\sum_i r_i t_i = \sum_i t_i^2 = \sum_l n_l\bar r_l^{\,2}$; the loss does not rise for $0 \le \gamma \le 2$ and falls most at $\gamma = 1$ | 5 | Keep | Write the expansion and the leaf-by-leaf sum |
+| Problem 2(c, d): $\sum_l n_l\bar r_l^{\,2} = 4.181$; loss 0.776, 0.253 and 2.344 at $\gamma = 0.5, 1, 2$; small steps make the number of iterations the knob, and held-out data choose both | 3 | Rush; cut second | Read the three losses; (d) is what coding part 2 shows |
+| Problem 3(a, b, c): $t_K = \sqrt{\log(2K/\delta)/(2m)}$ by the union bound, with no independence between the scores; the winner's risk is below its score plus $t_K$, and below the best candidate's risk plus $2t_K$ | 6 | Keep | The union bound, then the two inequalities |
+| Problem 3(d, e): $t_K$ = 0.030, 0.039, 0.046, 0.066 for $K = 1, 10, 100, 10^6$ ($m = 2000$, $\delta = 0.05$); 64,000 candidates double $t_1$; four times the tuning units halve any $t_K$; the grid enters through $\sqrt{\log K}$; a search that adapts to its scores breaks the argument | 3 | Keep (d); cut (e) third | The four numbers, then the sentence on $\sqrt{\log K}$ against $1/\sqrt m$ |
+| Coding 1, question 1: the default forest's MSE is 1.19 on the training films, 1.50 out of bag and 1.49 on the tuning films; more trees only shrink $(1 - \rho)\tau^2/B$ | 2 | Rush | The three `predict()` calls |
+| Coding 1, question 2: `mtry` 1, 2, 3, 5, 9 give 1.70, 1.51, 1.49, 1.56, 1.71; `nodesize` 5, 50, 200 give 1.487, 1.480, 1.489, within the run-to-run noise | 4 | Keep | `rf_score(m, 5)` and `rf_score(3, s)` |
+| Coding 1, question 3: with `mtry = 9` (bagging) the node size matters (1.72, 1.50, 1.49); with `mtry = 3` it does not; the grid's best is (3, 50) at 1.481, within 0.009 of the default | 5 | Rush; cut fourth | Run it during question 2; read the `mtry = 9` row and the best cell |
+| Coding 2, question 4: xgboost's defaults (depth 6, rate 0.3, 100 iterations) score 1.68 on the tuning films and 0.82 on the training films: overfitted | 2 | Keep | Read the two numbers |
+| Coding 2, question 5: each knob alone from the defaults: 10 iterations 1.497, depth 2 1.505, rate 0.03 1.492; the three winners together 1.898, worse than the defaults | 4 | Keep | The four `filter()` lines; this is the seminar's main point about tuning |
+| Coding 2, question 6: in sequence, 10 iterations, depth 6, rate 0.3, 1.497; the whole grid, depth 4, rate 0.1, 100 iterations, 1.490; paired difference 0.008 (standard error 0.010); 6 fits against 12 | 3 | Keep | `iters == step1$iters`, then `depth == step2$depth` |
+| Coding 2, question 7: best by depth 1.515, 1.502, 1.490, 1.492; the best additive model (depth 1) is worse by 0.025, standard error 0.014 | 2 | Cut first | Say the conclusion: some interaction, weak evidence |
+| Coding 3, question 8: over 2,000 random halves of the tuning films, the reported minimum's optimism is 0.000, 0.010 and 0.015 for 1, 13 and 96 models, while the winner's MSE on the other half is 1.683, 1.500 and 1.500; one tuning MSE on 1,000 films has a standard error of about 0.078 | 6 | Keep | `w <- which.min(mse_A)`, then `mean(loss[-A, cols[w]])` |
+| Coding 4, question 9: on the test films, forest 1.56 (standard error 0.045), boosting 1.57 (0.047), training mean 2.06; forest minus boosting −0.010 (0.012); the untuned mean rose by 0.06 from tuning to test, the split's luck | 5 | Keep | Name the pair before running; read the paired difference |
+
+: {tbl-colwidths="[52,6,14,28]"}
+
+Minimum seminar, about 45 minutes: problem 1(a, b, c), problem 2(a, b), problem 3(a to d), coding questions 2, 4, 5, 6, 8 and 9. With more time, add question 3 back first, then problem 2(c, d).
+
+## If you read on
+
+How it runs
+
+- Students did exercises 1 and 2 at home (the correlated-average variance with the slides closed, and one boosting step by hand on the five *Star Wars* films). Open the [complete notebook](https://ml4ds.com/teachers/notebook8_complete.html) on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are answers. Show an exercise's solution only if asked. Each problem's solution stands on its own, so a skipped problem costs nothing later.
+- Everything headed "Optional, can be done at home" is outside the seminar: the lecture's interaction with less noise, and backfitting by hand.
+- One seed, `set.seed(310)` at the split, the same split as the lecture. Forests draw from the same random stream, so a student who skips question 2 or runs question 3 twice gets slightly different forest numbers from then on (by about 0.005), and question 8's averages move in the third decimal. Boosting with these settings is deterministic. No lesson depends on the third decimal.
+
+What students should see
+
+- Exercise 1: $B$ variances and $B(B - 1)$ covariances, divided by $B^2$; $\rho\tau^2$ is left as $B \to \infty$. Exercise 2: $\bar y = 7.82$, residuals $0.98, 0.98, 0.28, -1.42, -0.82$; RSS 3.49, 1.49, 0.51, 3.85 for the cutoffs 1978.5, 1981.5, 1991, 2000.5; after the step 8.19 and 7.26, loss 2.344 to 0.776.
+- Problem 1 uses IMDb's ratings of November 2026 (references in the notebook); *The Rise of Skywalker* is 6.4. Problem 3's numbers are $\sqrt{\log(40K)/4000}$.
+- Coding: the training mean scores 2.00 on the tuning films. Everything else is in the table.
+- Run times in the build container (R 4.3, randomForest 4.7-1.2, xgboost 3.2.1.1): the whole notebook in under two minutes; question 2 about 20 seconds, question 3 about 40, the boosting grid about 5, question 8 about 2. A laptop may take two or three times as long.
+
+Where they get stuck
+
+- Problem 1: sending a title down the tree by its rating, or giving *Revenge of the Sith* (2005) the leaf 6.4, which covers 1991 to 2000.5.
+- Problem 3: dividing $\delta$ among the candidates in (a); thinking the union bound needs independent scores; reading (d) as "the optimism grows like $\sqrt{\log K}$". The bound only says it grows at most that fast; that it grows at all comes from the minimum of more scores being lower, which question 8 shows.
+- Question 1: `predict(fit_default, mv_train)` for the out-of-bag line, which gives the training error again.
+- Question 5: filtering on the knob being tuned, so each line returns one model; or adding up the three winning MSEs.
+- Question 8: computing the minimum over the other half too, which hides the optimism; or reading the `chosen_on` column alone and concluding that the largest search found the best model.
+- `xgboost(x = ..., y = ...)` and `learning_rate` need xgboost 3 or later. A student whose `xgboost()` call fails with an unused-argument error has an older version: `install.packages("xgboost")`.
+- In the student file, a chunk with a blank starts with `#| eval: false`; they delete that line once the blank is filled. The `# ...` lines can stay.
+
+Sources: the data note at [ml4ds.com/data/movies.html](https://ml4ds.com/data/movies.html); problem 3 uses Hoeffding, W. (1963), Probability inequalities for sums of bounded random variables, *Journal of the American Statistical Association* 58(301), 13--30.

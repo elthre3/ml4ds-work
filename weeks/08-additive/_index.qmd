@@ -11,3 +11,5 @@ How some flexible fits are built. An additive model fitted one curve at a time, 
 Optional, deeper: ESL section 9.1.1, pp. 297–299 (the backfitting algorithm); sections 10.10–10.12 (gradient boosting, tree size, regularization).
 
 **Lecture:** [slides](weeks/08-additive/slides/08-1-ensembles.html)
+
+**Seminar:** [notebook](weeks/08-additive/notebooks/notebook8.html) ([.qmd](https://ml4ds.com/weeks/08-additive/notebooks/notebook8.qmd){download="notebook8.qmd"}). Before the seminar, do exercises 1 and 2 at the top of the notebook (the variance of an average of correlated trees, with the slides closed, and one boosting step by hand); the seminar's problems are variations on them, with one more on what a larger search costs. Then tuning a random forest and boosted trees on the films ([data note](data/movies.html)): one knob at a time against all of them together, how the size of the search changes what the best score means, and the test films opened once.

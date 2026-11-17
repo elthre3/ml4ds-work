@@ -1,0 +1,653 @@
+---
+title: "Week 8 seminar (complete)"
+author: "Joshua Loftus"
+format:
+  html:
+    toc: true
+    embed-resources: false
+execute:
+  echo: true
+  warning: false
+  message: false
+  error: false
+---
+
+<!-- Teacher version. This file is shown on screen in the seminar, so nothing in it
+is addressed to the teacher except this comment. Boxes: blue "Hint 1, 2, ..." and
+green "Reveal solution/answer", all collapsed; click to open. Hints are revealed in
+order, after the room has had a few minutes, the solution last. Hints and solutions
+carrying the class .answer are removed from the student file notebook8.qmd by
+_build_env/make_incomplete.py; hints without it (the pre-seminar exercises) stay in
+the student file, behind a warning not to open them early. Do not edit the student
+file by hand.
+
+How this seminar runs: students do exercises 1 and 2 at home (neither is gone
+through in the room unless asked). In the room: problems 1 to 3 (about 27 minutes:
+10, 8, 9; hints then answers), then the coding (about 33: part 1 11, part 2 11,
+part 3 6, part 4 5), 60 in all, with no slack; the teacher note has the cut order.
+The 15 forests of question 3 take about 40 seconds: start that chunk while the room
+discusses question 2. Everything headed "Optional, can be done at home" is outside
+the seminar. One seed, set at the split: every student who runs the chunks in order
+sees the numbers in the teacher note; skipping a chunk that fits forests changes the
+random draws after it, and the numbers move a little. -->
+
+```{r}
+#| label: setup
+library(tidyverse)       # should've already install.packages("tidyverse")
+library(ggplot2movies)   # the films; might need to install.packages("ggplot2movies")
+library(randomForest)    # might need to install.packages("randomForest")
+library(xgboost)         # version 3 or later; if xgboost(x = ...) fails, install.packages("xgboost") again
+library(mgcv)            # used only in the optional items; ships with R
+theme_set(theme_minimal())
+mse <- function(y, pred) mean((y - pred)^2)
+se_loss <- function(loss) sd(loss) / sqrt(length(loss))   # standard error of a mean of losses
+```
+
+## Before the seminar
+
+<!-- At home, before the seminar. -->
+
+The lecture proved the variance of an average of correlated variables; exercise 1 is that proof again, with the slides closed. It derived boosting as approximate gradient descent; exercise 2 takes one boosting step by hand. Do both on paper before the seminar; the seminar's problems are variations on them. You may use, without proof: $\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b'}\mathrm{Cov}(V_b, V_{b'})$, and $\mathrm{Cov}(V, V) = \mathrm{Var}(V)$.
+
+::: {.callout-warning title="Hints"}
+Each exercise has hints, collapsed below it. Do not open a hint unless you have been stuck for at least a few minutes, and open them in order. Solutions are shown in the seminar if you ask.
+:::
+
+**Exercise 1 (correlated-average variance, with the slides closed).** $V_1, \ldots, V_B$ are random variables, each with variance $\tau^2 > 0$, and every pair has correlation $\rho$.
+
+(a) Show that $\mathrm{Var}\big(\frac1B\sum_{b=1}^B V_b\big) = \rho\tau^2 + (1 - \rho)\tau^2/B$.
+
+(b) What is left as $B \to \infty$? What does the formula give when $\rho = 1$, and when $\rho = 0$?
+
+(c) In a bagged ensemble or a random forest, $V_b$ is the $b$th tree's prediction at one input $x$, and the randomness is the draw of the training data and of the resampling. Which term can more trees shrink, and which term does a random forest try to shrink instead?
+
+::: {.callout-note collapse="true" title="Hint 1"}
+(a) Write the variance of the sum as a double sum of covariances. How many terms have $b = b'$, and how many have $b \ne b'$? What is each one?
+:::
+
+::: {.callout-note collapse="true" title="Hint 2"}
+(a) The covariance of two variables with correlation $\rho$ and variances $\tau^2$ is $\rho\tau^2$. Divide the variance of the sum by $B^2$, then write $\frac{B(B-1)}{B^2} = 1 - \frac1B$ and regroup.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+(a) $\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b'}\mathrm{Cov}(V_b, V_{b'})$. The $B$ terms with $b = b'$ are variances, $\tau^2$ each; the $B(B - 1)$ terms with $b \ne b'$ are covariances, $\rho\tau^2$ each (correlation times the two standard deviations). So
+$$
+\mathrm{Var}\Big(\frac1B\sum_b V_b\Big) = \frac{1}{B^2}\Big(B\tau^2 + B(B - 1)\rho\tau^2\Big) = \frac{\tau^2}{B} + \Big(1 - \frac1B\Big)\rho\tau^2 = \rho\tau^2 + \frac{(1 - \rho)\tau^2}{B}. \qquad \blacksquare
+$$
+
+(b) As $B \to \infty$ the second term vanishes and $\rho\tau^2$ is left. With $\rho = 1$ the average has variance $\tau^2$, as if there were one variable: copies do not help. With $\rho = 0$ it is $\tau^2/B$, the familiar variance of a mean of uncorrelated variables.
+
+(c) More trees shrink only $(1 - \rho)\tau^2/B$; with hundreds of trees it is already small. A random forest tries each split on a random subset of the inputs, so that the trees differ more and $\rho$ is smaller, which shrinks $\rho\tau^2$ (it can raise $\tau^2$ a little: each tree is a little worse).
+
+Common errors: counting $B^2$ covariances of $\rho\tau^2$ (the $B$ diagonal terms are variances); dividing by $B$ instead of $B^2$; answering (c) with "more trees" for both terms.
+:::
+
+**Exercise 2 (one boosting step by hand).** The five *Star Wars* films in the lecture's data, with their year and average IMDb rating (in the data, which end in 2005):
+
+| Film | Year | Rating |
+|---|---:|---:|
+| Star Wars | 1977 | 8.8 |
+| The Empire Strikes Back | 1980 | 8.8 |
+| Return of the Jedi | 1983 | 8.1 |
+| The Phantom Menace | 1999 | 6.4 |
+| Attack of the Clones | 2002 | 7.0 |
+
+The training loss of fitted values $\mathbf f = (f_1, \ldots, f_5)$ is $L(\mathbf f) = \sum_i \frac12(y_i - f_i)^2$.
+
+(a) Start from $f_i = \bar y$ for every film. Compute $\bar y$ and the negative gradient of $L$ at this $\mathbf f$.
+
+(b) Fit a tree with one split on year to the negative gradient: for each of the four cutoffs halfway between consecutive years, compute the residual sum of squares of the two leaves, each predicting its mean. Which cutoff wins, and what does each leaf predict?
+
+(c) Take a step of size $\gamma = 0.5$ along that tree. Give the new fitted values, and the training loss before and after the step.
+
+::: {.callout-note collapse="true" title="Hint 1"}
+(a) $\partial L/\partial f_i = -(y_i - f_i)$: the negative gradient is the vector of residuals.
+:::
+
+::: {.callout-note collapse="true" title="Hint 2"}
+(b), (c) A leaf predicts the mean of the residuals in it. The step is $f_i \leftarrow f_i + \gamma\,t(x_i)$, with $t$ the tree.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+(a) $\bar y = 39.1/5 = 7.82$. The negative gradient is the residual vector $\mathbf y - \mathbf f = (0.98, 0.98, 0.28, -1.42, -0.82)$.
+
+(b) The cutoffs and the residual sum of squares of the two leaves:
+
+| Cutoff | Left leaf (mean) | Right leaf (mean) | RSS |
+|---:|---|---|---:|
+| 1978.5 | 0.98 | 0.98, 0.28, −1.42, −0.82 ($-0.245$) | 3.49 |
+| 1981.5 | 0.98, 0.98 ($0.98$) | 0.28, −1.42, −0.82 ($-0.653$) | 1.49 |
+| 1991 | 0.98, 0.98, 0.28 ($0.747$) | −1.42, −0.82 ($-1.12$) | 0.51 |
+| 2000.5 | 0.98, 0.98, 0.28, −1.42 ($0.205$) | −0.82 | 3.85 |
+
+The cutoff at 1991 wins: the tree predicts $0.747$ for the films before 1991 and $-1.12$ for the two after.
+
+(c) $f_i \leftarrow 7.82 + 0.5 \times 0.747 = 8.19$ for the first three films and $7.82 - 0.5 \times 1.12 = 7.26$ for the last two. The loss before the step is $\frac12(0.98^2 + 0.98^2 + 0.28^2 + 1.42^2 + 0.82^2) = 2.344$; after it, the residuals are $0.61, 0.61, -0.09, -0.86, -0.26$ and the loss is $0.776$.
+
+Common errors: fitting the tree to the ratings instead of the residuals (it then predicts the leaf means of the ratings, and the step adds them to $\bar y$); forgetting $\gamma$; writing the gradient without its sign, which steps uphill.
+:::
+
+## Problems
+
+<!-- About 27 min: problems 1 to 3 (10, 8, 9), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
+
+**Problem 1 (Andor).** The lecture grew a tree on the five *Star Wars* films in the data (exercise 2's table), splitting on year:
+
+- before 1991: 8.8 if the year is before 1981.5, 8.1 otherwise;
+- from 1991 on: 6.4 if the year is before 2000.5, 7.0 otherwise.
+
+Cost-complexity pruning, with penalty $\alpha$ per leaf, gives a sequence of trees: the four leaves above for $\alpha < 0.18$; three leaves for $0.18 < \alpha < 0.33$, the two films from 1991 on merged into one leaf predicting 6.7; two leaves for $0.33 < \alpha < 4.18$, predicting 8.57 before 1991 and 6.7 from 1991 on; and one leaf, 7.82, for $\alpha > 4.18$. Later titles, with their IMDb ratings in November 2026:
+
+| Title | Year | Rating |
+|---|---:|---:|
+| Revenge of the Sith | 2005 | 7.6 |
+| The Force Awakens | 2015 | 7.8 |
+| Rogue One | 2016 | 7.8 |
+| The Last Jedi | 2017 | 6.9 |
+| The Rise of Skywalker | 2019 | 6.4 |
+| Andor, season 1 | 2022 | 8.3 |
+| Andor, season 2 | 2025 | 8.7 |
+
+(a) What does each tree in the sequence predict for *Andor*, season 1? For a title made in 2050?
+
+(b) Use the five films (not *Andor*) as held-out data: compute each tree's sum of squared errors on them. Which values of $\alpha$ do they choose?
+
+(c) Now add the two seasons of *Andor*. Which values of $\alpha$ do the seven titles choose?
+
+(d) Two titles changed the choice. Explain why with one formula, and say whether these seven titles should be used to choose $\alpha$ for predicting films like the training films.
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+(a), (b) Every later title is from after 2000.5. Which leaf does it fall in, in each tree?
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 2"}
+(d) If a tree predicts the same number $c$ for all $n$ held-out titles, its sum of squared errors is $\sum_i (y_i - \bar y)^2 + n(\bar y - c)^2$, with $\bar y$ the titles' mean.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) Every title from after 2000.5 falls in the leaf of the latest films: the grown tree predicts 7.0, the three- and two-leaf trees 6.7, the one-leaf tree 7.82. A title from 2050 gets the same predictions: a tree predicts a constant beyond its last split, whatever the year.
+
+(b) Each tree predicts one number for all five films (ratings 7.6, 7.8, 7.8, 6.9, 6.4), so its sum of squared errors is $\sum_i(y_i - c)^2$: 2.01 for $c = 7.0$ (four leaves), 3.36 for $c = 6.7$ (three or two leaves), 2.91 for $c = 7.82$ (one leaf). The five films choose the grown tree: any $\alpha < 0.18$.
+
+(c) With 8.3 and 8.7 added: 6.59 for $c = 7.0$, 9.92 for $c = 6.7$, 3.92 for $c = 7.82$. The seven titles choose the tree with no split: any $\alpha > 4.18$.
+
+(d) All the titles fall in one leaf of every tree, so each tree predicts one constant $c$ for all of them, and its error is $\sum_i(y_i - \bar y)^2 + n(\bar y - c)^2$. The first term is the same for every tree; the choice is the constant nearest the titles' mean. That mean is 7.30 for the five films, nearest 7.0, and 7.64 with *Andor*, nearest 7.82. Two titles with high ratings moved the mean past the midpoint between 7.0 and 7.82, which is 7.41. These seven titles are a poor tuning set for films like the training films: they are all from after the training data end, all on the far side of the last split, one is a television series rated by its episodes, and the ratings were read in 2026, not in 2005. Held-out data choose well for data like themselves.
+
+Common errors: sending a title down the tree by its rating instead of its year; giving *Revenge of the Sith* (2005) the leaf 6.4, which is for 1991 to 2000.5; computing the error of the two-leaf tree with 8.57 (no later title falls in that leaf).
+:::
+
+**Problem 2 (the size of a boosting step).** A boosting fit has fitted values $\mathbf f = (f_1, \ldots, f_n)$ and residuals $r_i = y_i - f_i$, with training loss $L(\mathbf f) = \sum_i \frac12(y_i - f_i)^2$. A tree $t$ with leaves $l = 1, \ldots, m$ is fitted to the residuals: in leaf $l$, which holds $n_l$ of the units, it predicts the mean $\bar r_l$ of their residuals. Write $t_i$ for its prediction for unit $i$.
+
+(a) Show that $L(\mathbf f + \gamma\,\mathbf t) = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)\sum_{l=1}^m n_l\,\bar r_l^{\,2}$.
+
+(b) For which $\gamma \ge 0$ does a step not raise the training loss? Which $\gamma$ lowers it most?
+
+(c) The five residuals $0.98, 0.98, 0.28, -1.42, -0.82$, with a tree whose leaves hold the first three and the last two. Compute $\sum_l n_l\bar r_l^{\,2}$ and the loss after a step of $\gamma = 0.5$, $1$ and $2$.
+
+(d) Part (b) gives the $\gamma$ that lowers the training loss most at every step. Why do boosting libraries use a much smaller $\gamma$ by default?
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+(a) $y_i - f_i - \gamma t_i = r_i - \gamma t_i$. Expand the square, then compute $\sum_i r_i t_i$ and $\sum_i t_i^2$ one leaf at a time: within leaf $l$, $t_i = \bar r_l$.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) $L(\mathbf f + \gamma\mathbf t) = \frac12\sum_i (r_i - \gamma t_i)^2 = \frac12\sum_i r_i^2 - \gamma\sum_i r_i t_i + \frac{\gamma^2}{2}\sum_i t_i^2$. Within leaf $l$, $t_i = \bar r_l$, so $\sum_{i \in l} r_i t_i = \bar r_l \sum_{i \in l} r_i = n_l\bar r_l^{\,2}$ and $\sum_{i \in l} t_i^2 = n_l\bar r_l^{\,2}$. Writing $S = \sum_l n_l\bar r_l^{\,2}$, $L(\mathbf f + \gamma\mathbf t) = L(\mathbf f) - \gamma S + \frac{\gamma^2}{2}S = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)S$. $\blacksquare$
+
+(b) $S \ge 0$, so the loss does not rise when $\gamma(1 - \gamma/2) \ge 0$, that is, for $0 \le \gamma \le 2$ (when $S > 0$ it falls strictly for $0 < \gamma < 2$). The decrease $\gamma - \gamma^2/2$ is largest at $\gamma = 1$, where each leaf's residuals are moved by their full mean.
+
+(c) The leaf means are $0.747$ and $-1.12$, so $S = 3(0.747)^2 + 2(1.12)^2 = 4.181$. The loss before the step is $\frac12\sum_i r_i^2 = 2.344$, and after it $2.344 - 4.181\,\gamma(1 - \gamma/2)$: $0.776$ at $\gamma = 0.5$, $0.253$ at $\gamma = 1$, and $2.344$ again at $\gamma = 2$, which overshoots by as much as $\gamma = 0$ undershoots.
+
+(d) The training loss is not what we want to make small. With $\gamma = 1$ each tree fits what is left of the training data as hard as it can, so a few iterations already fit the noise. Small steps let many trees, each fitted to slightly different residuals, share the work, and the number of iterations becomes the knob that stops the fit; the learning rate and the number of iterations are then chosen together, on held-out data. The coding below does that.
+
+Common errors: forgetting that $\sum_i r_i t_i$ is a sum over units, not over leaves; concluding from (b) that $\gamma = 1$ is best for prediction.
+:::
+
+**Problem 3 (what a larger search costs).** A model's risk is its expected loss on a new unit, $R = \mathbb E[\ell]$, for a loss with $0 \le \ell \le 1$ (for example, the 0--1 loss of a classifier). Before the tuning data are seen, $K$ candidate models are fixed, fitted on the training data, with risks $R_1, \ldots, R_K$; treat the fitted models as fixed, so that everything below is conditional on the training data. On $m$ tuning units, drawn independently of each other and of the training data, candidate $k$ scores $\hat R_k$, the mean of its $m$ losses. You may use Hoeffding's inequality (Hoeffding 1963): if $Z_1, \ldots, Z_m$ are independent with $0 \le Z_i \le 1$ and $\bar Z$ is their mean, then for every $t > 0$,
+$$
+P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
+$$
+
+(a) $K = 1$. Find the $t$ for which $|\hat R_1 - R_1| < t$ with probability at least $1 - \delta$.
+
+(b) Find $t_K$ such that, with probability at least $1 - \delta$, $|\hat R_k - R_k| < t_K$ for every $k$ at once. Did you need the $K$ scores to be independent of each other?
+
+(c) Let $\hat k$ be the candidate with the lowest tuning score and $k^\star$ the candidate with the lowest risk. On the event of (b), show that $R_{\hat k} < \hat R_{\hat k} + t_K$ and $R_{\hat k} < R_{k^\star} + 2t_K$.
+
+(d) Take $m = 2000$ and $\delta = 0.05$. Compute $t_K$ for $K = 1$, $10$, $100$ and $1{,}000{,}000$. How many candidates double $t_1$? How many tuning units halve $t_K$? What does this say about searching a larger grid?
+
+(e) The argument needs the $K$ candidates to be fixed before any tuning score is seen. Give an example of a search that breaks this.
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+(a), (b) Set $2e^{-2mt^2} = \delta$ and solve for $t$. For $K$ candidates, the probability that at least one of $K$ events happens is at most the sum of their probabilities.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 2"}
+(c) $\hat k$ has the lowest score, so $\hat R_{\hat k} \le \hat R_{k^\star}$. Use the event of (b) once for $\hat k$ and once for $k^\star$.
+:::
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+(a) Given the fitted model, its $m$ tuning losses are independent, between 0 and 1, with mean $R_1$, so $P(|\hat R_1 - R_1| \ge t) \le 2e^{-2mt^2}$. This equals $\delta$ at $t = \sqrt{\log(2/\delta)/(2m)}$.
+
+(b) $P\big(\text{some } k \text{ has } |\hat R_k - R_k| \ge t\big) \le \sum_{k=1}^K P\big(|\hat R_k - R_k| \ge t\big) \le 2Ke^{-2mt^2}$, which equals $\delta$ at
+$$
+t_K = \sqrt{\frac{\log(2K/\delta)}{2m}}.
+$$
+The union bound needs no independence between the events: the $K$ scores use the same tuning units and are usually strongly dependent, and the bound still holds.
+
+(c) On the event of (b), $R_{\hat k} < \hat R_{\hat k} + t_K$: the winner's risk is less than its reported score plus $t_K$, so the reported score may understate its risk by up to $t_K$. Then $\hat R_{\hat k} \le \hat R_{k^\star}$, because $\hat k$ has the lowest score, and $\hat R_{k^\star} < R_{k^\star} + t_K$. Together, $R_{\hat k} < R_{k^\star} + 2t_K$. $\blacksquare$
+
+(d) $t_K = \sqrt{\log(40K)/4000}$: 0.030 for $K = 1$, 0.039 for $K = 10$, 0.046 for $K = 100$ and 0.066 for $K = 1{,}000{,}000$. Doubling $t_1$ needs $\log(40K) = 4\log 40$, that is, $K = 40^3 = 64{,}000$ candidates. Halving $t_K$ needs four times the tuning units, whatever $K$ is. The grid's size enters only through $\sqrt{\log K}$: a much larger grid costs little, while it can only lower $R_{k^\star}$, the best risk among the candidates. So searching widely is cheap when the tuning set is large, and the tuning set's size counts for far more than the grid's. Two caveats. The bound is an upper bound that grows with $K$; it does not show that the optimism grows with $K$. That holds for another reason: the minimum over more scores can only be lower, while the risks do not change. And the reported minimum is still biased low, so the error of the chosen model should be estimated on data that the search never used.
+
+(e) Any search whose later candidates depend on earlier tuning scores: refining the grid around the current best value of a knob, or trying models until one scores well. The candidates are then not a list fixed in advance, and the union bound over a fixed list of $K$ does not apply. Reusing the tuning set after changing a model in response to its tuning errors is the same thing.
+
+Common errors: dividing $\delta$ among the candidates in (a); requiring independent scores in (b); in (c), using $R_{\hat k} \le R_{k^\star}$ (false: $k^\star$ has the lowest risk); reading (d) as "the optimism of a search grows like $\sqrt{\log K}$" (an upper bound, not the size).
+:::
+
+## Coding
+
+<!-- About 33 min: part 1 11, part 2 11, part 3 6, part 4 5. Skeleton lines in comments are scaffolds: the statistical operation is what you write. Everything headed "Optional, can be done at home" is outside the seminar. -->
+
+The lecture's task: predict a film's average IMDb rating from its year, length and seven genre indicators, squared loss ([data note](https://ml4ds.com/data/movies.html)). The same split as the lecture: 5,000 training, 2,000 tuning and 3,000 test films, one seed. The tuning films choose the knobs; the test films are opened once, at the end.
+
+```{r}
+#| label: data
+mv <- movies |>
+  filter(length <= 200, length > 10, year > 1918, votes >= 20) |>
+  select(title, rating, year, length, Action, Animation, Comedy, Drama, Documentary, Romance, Short)
+set.seed(310)   # change this number: a different split, and different numbers below
+mv_id <- sample(nrow(mv), 10000)
+mv_train <- mv[mv_id[1:5000], ]
+mv_tune <- mv[mv_id[5001:7000], ]
+mv_test <- mv[mv_id[7001:10000], ]
+mse(mv_tune$rating, mean(mv_train$rating))   # the training mean, scored on the tuning films
+```
+
+### 1. A random forest, two knobs
+
+<!-- 11 min: questions 1 to 3. -->
+
+`rf_fit(mtry, nodesize)` fits a forest of 300 trees on the training films. Its two knobs: `mtry`, the number of inputs tried at each split (randomForest's default for 9 inputs is 3), and `nodesize`, the size below which a node is not split (default 5). `rf_score()` returns a forest's MSE on the tuning films.
+
+```{r}
+#| label: rf-fit
+rf_fit <- function(mtry, nodesize) {
+  randomForest(rating ~ year + length + Action + Animation + Comedy + Drama + Documentary + Romance + Short,
+               data = mv_train, ntree = 300, mtry = mtry, nodesize = nodesize)
+}
+rf_score <- function(mtry, nodesize) mse(mv_tune$rating, predict(rf_fit(mtry, nodesize), mv_tune))
+```
+
+**Question 1.** Fit the forest with the default knobs. Compute its MSE on the training films, out of bag (`predict(fit)` with no new data predicts each training film from the trees that did not have it in their bootstrap sample), and on the tuning films. Which two agree, and why is the third lower? Why do we not tune the number of trees?
+
+```{r}
+#| eval: false
+fit_default <- rf_fit(mtry = 3, nodesize = 5)
+# c(training = mse(mv_train$rating, ____),
+#   out_of_bag = mse(mv_train$rating, ____),
+#   tuning = mse(mv_tune$rating, ____))
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+fit_default <- rf_fit(mtry = 3, nodesize = 5)
+q1 <- c(training = mse(mv_train$rating, predict(fit_default, mv_train)),
+        out_of_bag = mse(mv_train$rating, predict(fit_default)),
+        tuning = mse(mv_tune$rating, predict(fit_default, mv_tune)))
+round(q1, 3)
+```
+
+The out-of-bag MSE (`r sprintf("%.2f", q1[["out_of_bag"]])`) and the tuning MSE (`r sprintf("%.2f", q1[["tuning"]])`) agree; the training MSE (`r sprintf("%.2f", q1[["training"]])`) is lower, because each training film is predicted partly by the trees that were fitted on it. Out of bag, each film is predicted only by the trees that never saw it, so the out-of-bag error is an estimate on held-out data that costs no extra films. The number of trees is not tuned because more trees only shrink the $(1 - \rho)\tau^2/B$ term of the variance of an average: past a few hundred, more trees cost time and change little.
+
+Common errors: `predict(fit_default, mv_train)` for the out-of-bag line, which is the training error again.
+:::
+
+**Question 2.** Tune one knob at a time, leaving the other at its default: `mtry` in 1, 2, 3, 5 and 9 with `nodesize = 5`; then `nodesize` in 5, 50 and 200 with `mtry = 3`. Which value of each wins? (Seven forests, about 20 seconds.)
+
+```{r}
+#| eval: false
+mtrys <- c(1, 2, 3, 5, 9)
+nodesizes <- c(5, 50, 200)
+# mse_mtry <- sapply(mtrys, function(m) ____)
+# mse_node <- sapply(nodesizes, function(s) ____)
+# rbind(mtry = mtrys, tune_mse = round(mse_mtry, 3))
+# rbind(nodesize = nodesizes, tune_mse = round(mse_node, 3))
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+mtrys <- c(1, 2, 3, 5, 9)
+nodesizes <- c(5, 50, 200)
+mse_mtry <- sapply(mtrys, function(m) rf_score(m, 5))
+mse_node <- sapply(nodesizes, function(s) rf_score(3, s))
+rbind(mtry = mtrys, tune_mse = round(mse_mtry, 3))
+rbind(nodesize = nodesizes, tune_mse = round(mse_node, 3))
+```
+
+`mtry = `r mtrys[which.min(mse_mtry)]`` wins, and both ends are worse: with 1 input tried the trees are weak, and with all 9 (`mtry = 9` is bagging) they are alike. `nodesize = `r nodesizes[which.min(mse_node)]`` wins, but the three values are within `r sprintf("%.3f", diff(range(mse_node)))` of each other, about as much as two forests with the same knobs differ (each forest draws its own bootstrap samples): with `mtry = 3` this knob hardly matters.
+
+Common errors: `rf_score(5, m)`, which swaps the knobs; tuning `nodesize` at the winning `mtry` instead of the default (that is the next question's idea).
+:::
+
+Checkpoint (run it; if it stops, fix question 2 before going on): the default's two scores should be close.
+
+```{r}
+#| eval: !expr exists("mse_mtry")
+stopifnot(abs(mse_mtry[mtrys == 3] - mse_node[nodesizes == 5]) < 0.03)
+```
+
+**Question 3.** The chunk below fits all 15 forests of the grid (about 40 seconds). Does the best `nodesize` depend on `mtry`? Did searching both knobs together find a better forest than question 2?
+
+```{r}
+#| label: rf-grid
+rf_grid <- expand_grid(mtry = c(1, 2, 3, 5, 9), nodesize = c(5, 50, 200)) |>
+  mutate(tune_mse = map2_dbl(mtry, nodesize, rf_score))
+rf_grid |> mutate(tune_mse = round(tune_mse, 3)) |>
+  pivot_wider(names_from = nodesize, values_from = tune_mse, names_prefix = "nodesize ")
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+```{r}
+rf_wide <- rf_grid |> pivot_wider(names_from = nodesize, values_from = tune_mse)
+rf_best <- rf_grid |> slice_min(tune_mse)
+```
+Yes. With `mtry = 9` (bagging) the larger nodes are much better (`r sprintf("%.2f", rf_wide[["5"]][5])`, `r sprintf("%.2f", rf_wide[["50"]][5])`, `r sprintf("%.2f", rf_wide[["200"]][5])` for nodes of 5, 50 and 200); with `mtry = 3` the row is flat. In the variance of an average of trees, $\rho\tau^2 + (1 - \rho)\tau^2/B$, a small `mtry` lowers the correlation $\rho$ between trees and a large `nodesize` lowers each tree's variance $\tau^2$. When every tree tries all the inputs the trees are alike, so each must vary less; when each tries 3, averaging removes more of the variance, and smaller trees add nothing. The grid's best forest is `mtry = `r rf_best$mtry``, `nodesize = `r rf_best$nodesize`` (`r sprintf("%.3f", rf_best$tune_mse)`), within `r sprintf("%.3f", mse_mtry[mtrys == 3] - rf_best$tune_mse)` of the default: on these films a forest with its default knobs is already about as good as the grid can make it.
+
+Common errors: reading a difference of 0.005 between two cells as a winner; forests with the same knobs differ by about that much.
+:::
+
+### 2. Boosted trees, three knobs
+
+<!-- 11 min: questions 4 to 7. -->
+
+xgboost has three knobs that matter most here: the depth of each tree, the learning rate $\gamma$, and the number of iterations. Its defaults are depth 6, rate 0.3 and 100 iterations. One fit of 800 iterations gives the predictions after any smaller number, so the chunk below fits 12 models (4 depths, 3 rates) and scores each after 5, 10, 25, ..., 800 iterations: 96 models in a table, `models`, with each one's MSE on the tuning films. `loss` holds every model's squared errors on the 2,000 tuning films, one column per model, in the order of the rows of `models`; `col` is that column. (About 5 seconds.)
+
+```{r}
+#| label: boost-grid
+X_train <- as.matrix(select(mv_train, -title, -rating))
+X_tune <- as.matrix(select(mv_tune, -title, -rating))
+X_test <- as.matrix(select(mv_test, -title, -rating))
+boost_fit <- function(depth, rate) {
+  xgboost(x = X_train, y = mv_train$rating, nrounds = 800, max_depth = depth, learning_rate = rate, nthread = 1)
+}
+iters <- c(5, 10, 25, 50, 100, 200, 400, 800)
+models <- expand_grid(depth = c(1, 2, 4, 6), rate = c(0.03, 0.1, 0.3), iters = iters) |>
+  mutate(col = row_number())
+loss <- matrix(NA, nrow(mv_tune), nrow(models))
+for (d in c(1, 2, 4, 6)) for (r in c(0.03, 0.1, 0.3)) {
+  fit <- boost_fit(d, r)
+  for (b in iters) {
+    j <- models |> filter(depth == d, rate == r, iters == b) |> pull(col)
+    loss[, j] <- (mv_tune$rating - predict(fit, X_tune, iteration_range = c(1, b)))^2
+  }
+}
+models$tune_mse <- colMeans(loss)
+```
+
+**Question 4.** The chunk below scores the defaults on the tuning films and on the training films. Compare with the forest and with the training mean. What has happened?
+
+```{r}
+#| label: boost-default
+models |> filter(depth == 6, rate == 0.3, iters == 100)
+fit_default_boost <- boost_fit(depth = 6, rate = 0.3)
+mse(mv_train$rating, predict(fit_default_boost, X_train, iteration_range = c(1, 100)))   # training MSE
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+```{r}
+boost_default <- models |> filter(depth == 6, rate == 0.3, iters == 100)
+boost_default_train <- mse(mv_train$rating, predict(fit_default_boost, X_train, iteration_range = c(1, 100)))
+```
+The defaults score `r sprintf("%.2f", boost_default$tune_mse)` on the tuning films, worse than the default forest (`r sprintf("%.2f", q1[["tuning"]])`) and much closer to the training mean (`r sprintf("%.2f", mse(mv_tune$rating, mean(mv_train$rating)))`) than a tuned model should be, while their training MSE is `r sprintf("%.2f", boost_default_train)`. A hundred steps of size 0.3 with trees of depth 6 fit the training films' noise: the defaults overfit these data.
+
+Common errors: comparing the default's training MSE with the forest's tuning MSE.
+:::
+
+**Question 5.** Tune one knob at a time, from the defaults: the number of iterations with depth 6 and rate 0.3; the depth with rate 0.3 and 100 iterations; the rate with depth 6 and 100 iterations. Then score the model that takes all three winners together. What went wrong?
+
+```{r}
+#| eval: false
+# models |> filter(____) |> slice_min(tune_mse)                  # iterations alone
+# models |> filter(____) |> slice_min(tune_mse)                  # depth alone
+# models |> filter(____) |> slice_min(tune_mse)                  # rate alone
+# models |> filter(depth == ____, rate == ____, iters == ____)   # the three winners together
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+alone_iters <- models |> filter(depth == 6, rate == 0.3) |> slice_min(tune_mse)
+alone_depth <- models |> filter(rate == 0.3, iters == 100) |> slice_min(tune_mse)
+alone_rate <- models |> filter(depth == 6, iters == 100) |> slice_min(tune_mse)
+together <- models |> filter(depth == alone_depth$depth, rate == alone_rate$rate, iters == alone_iters$iters)
+bind_rows(alone_iters, alone_depth, alone_rate, together)
+```
+
+Each knob alone fixes the defaults' overfitting: `r alone_iters$iters` iterations (`r sprintf("%.3f", alone_iters$tune_mse)`), depth `r alone_depth$depth` (`r sprintf("%.3f", alone_depth$tune_mse)`) or rate `r alone_rate$rate` (`r sprintf("%.3f", alone_rate$tune_mse)`). Together they score `r sprintf("%.3f", together$tune_mse)`, worse than the defaults: `r together$iters` small steps with trees of depth `r together$depth` have hardly moved from the training mean. Each winner was the best answer to "how do we stop overfitting?" with the other two knobs at the defaults; once one knob has stopped it, the others should move the other way. The rate and the number of iterations trade off against each other, and the depth with both.
+
+Common errors: filtering on the knob being tuned (`filter(iters == 100)` when tuning the iterations); combining the three winning tuning MSEs instead of finding the model that has all three winning knobs.
+:::
+
+**Question 6.** Tune the knobs in sequence instead: the number of iterations first (depth 6, rate 0.3), then the depth at the winning number of iterations, then the rate at the winning depth and number of iterations. Then search the whole grid. Compare the two models, and the number of fits each search needed.
+
+```{r}
+#| eval: false
+# step1 <- models |> filter(depth == 6, rate == 0.3) |> slice_min(tune_mse)
+# step2 <- models |> filter(rate == 0.3, iters == ____) |> slice_min(tune_mse)
+# step3 <- models |> filter(depth == ____, iters == ____) |> slice_min(tune_mse)
+# models |> slice_min(tune_mse)                                  # the whole grid
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+step1 <- models |> filter(depth == 6, rate == 0.3) |> slice_min(tune_mse)
+step2 <- models |> filter(rate == 0.3, iters == step1$iters) |> slice_min(tune_mse)
+step3 <- models |> filter(depth == step2$depth, iters == step1$iters) |> slice_min(tune_mse)
+boost_best <- models |> slice_min(tune_mse)
+bind_rows(sequence = step3, grid = boost_best, .id = "search")
+d_seq <- loss[, step3$col] - loss[, boost_best$col]
+c(difference = mean(d_seq), se = se_loss(d_seq))
+```
+
+In sequence: `r step3$iters` iterations, depth `r step3$depth`, rate `r step3$rate`, scoring `r sprintf("%.3f", step3$tune_mse)`. The whole grid: depth `r boost_best$depth`, rate `r boost_best$rate`, `r boost_best$iters` iterations, scoring `r sprintf("%.3f", boost_best$tune_mse)`. The difference is `r sprintf("%.3f", mean(d_seq))` with a standard error of `r sprintf("%.3f", se_loss(d_seq))` (paired: the two models are scored on the same films), so the sequence came close. It needed 6 fits (one for the iterations, since one fit gives every number of iterations, then 3 more depths and 2 more rates) against the grid's 12. Tuning in sequence works when each step starts from the last step's winner; tuning each knob from the defaults, as in question 5, does not.
+
+Common errors: tuning the depth at 100 iterations in step 2 (the defaults again, as in question 5).
+:::
+
+**Question 7.** The chunk below gives the best model at each depth. Boosted trees of depth 1 are an additive model: each tree splits on one input, so the sum is a sum of one-input functions. Compute the paired difference in tuning loss between the best depth-1 model and the grid's best, with its standard error. What does it suggest about interactions between the inputs?
+
+```{r}
+#| label: boost-depth
+models |> group_by(depth) |> slice_min(tune_mse) |> ungroup()
+```
+
+```{r}
+#| eval: false
+j_additive <- models |> filter(depth == 1) |> slice_min(tune_mse) |> pull(col)
+j_best <- models |> slice_min(tune_mse) |> pull(col)
+# d <- ____
+# c(difference = ____, se = ____)
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+j_additive <- models |> filter(depth == 1) |> slice_min(tune_mse) |> pull(col)
+j_best <- models |> slice_min(tune_mse) |> pull(col)
+d <- loss[, j_additive] - loss[, j_best]
+c(difference = mean(d), se = se_loss(d))
+```
+
+The best additive model is worse by `r sprintf("%.3f", mean(d))`, with a standard error of `r sprintf("%.3f", se_loss(d))`: about `r sprintf("%.1f", mean(d) / se_loss(d))` standard errors. Deeper trees help a little, which suggests some interaction (length and year, say, or genre and length), but the evidence is not strong, and the gain is small beside the `r sprintf("%.2f", mse(mv_tune$rating, mean(mv_train$rating)) - boost_best$tune_mse)` that the grid's best gains over the training mean. This difference also favors the grid's best, which was chosen as the minimum of these same tuning scores.
+
+Common errors: `sd(d)` without dividing by $\sqrt{2000}$; comparing the two tuning MSEs without pairing (the two models are scored on the same films, so their losses are correlated, and the unpaired standard error is much larger).
+:::
+
+### 3. How the size of the search changes the best score
+
+<!-- 6 min: question 8. -->
+
+Three searches over the same 96 boosting models: one model fixed in advance, the defaults (`fixed`); the 13 models that question 5's one-knob-at-a-time searches looked at (`one_knob`); and all 96. On one split of the tuning films the effect is too small to see, so the function below repeats the search on many random halves.
+
+**Question 8.** Complete `half_gap(cols)`: draw a random half `A` of the tuning films; among the models in `cols`, find the one with the lowest MSE on `A`; return that MSE and the same model's MSE on the other half. Then average it over 2,000 random halves for each search. Which search's best model looks best on the films that chose it? Which is best on the other films?
+
+```{r}
+#| label: search-sets
+fixed <- models |> filter(depth == 6, rate == 0.3, iters == 100) |> pull(col)
+one_knob <- models |> filter((depth == 6 & rate == 0.3) | (rate == 0.3 & iters == 100) | (depth == 6 & iters == 100)) |> pull(col)
+all_models <- models$col
+```
+
+```{r}
+#| eval: false
+half_gap <- function(cols) {
+  A <- sample(nrow(loss), nrow(loss) / 2)              # a random half of the tuning films
+  mse_A <- colMeans(loss[A, cols, drop = FALSE])       # each model's MSE on that half
+  # w <- ____                                          # the model with the lowest MSE on A
+  # c(chosen_on = ____, other_half = ____)
+}
+# rbind(fixed = rowMeans(replicate(2000, half_gap(fixed))),
+#       one_knob = ____,
+#       all_models = ____)
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+half_gap <- function(cols) {
+  A <- sample(nrow(loss), nrow(loss) / 2)
+  mse_A <- colMeans(loss[A, cols, drop = FALSE])
+  w <- which.min(mse_A)
+  c(chosen_on = mse_A[[w]], other_half = mean(loss[-A, cols[w]]))
+}
+q8 <- rbind(fixed = rowMeans(replicate(2000, half_gap(fixed))),
+            one_knob = rowMeans(replicate(2000, half_gap(one_knob))),
+            all_models = rowMeans(replicate(2000, half_gap(all_models))))
+q8 <- cbind(q8, gap = q8[, "other_half"] - q8[, "chosen_on"])
+round(q8, 4)
+```
+
+The largest search reports the lowest MSE on the films that chose its model (`r sprintf("%.3f", q8["all_models", "chosen_on"])`, against `r sprintf("%.3f", q8["one_knob", "chosen_on"])` for 13 models), but on the other half its winner does no better (`r sprintf("%.3f", q8["all_models", "other_half"])` against `r sprintf("%.3f", q8["one_knob", "other_half"])`). The gap between the two, the optimism of the reported minimum, is about `r sprintf("%.3f", q8["fixed", "gap"])` for the fixed model, `r sprintf("%.3f", q8["one_knob", "gap"])` for 13 models and `r sprintf("%.3f", q8["all_models", "gap"])` for 96: it grows with the size of the search. It is small beside the standard error of one tuning MSE on 1,000 films (about `r sprintf("%.3f", sd(loss[, boost_best$col]) / sqrt(1000))`), which is why one split cannot show it, and it grows slowly with the number of models. A larger search can find a better model, and its reported score is more optimistic; the error to report is the one on films the search never used.
+
+Common errors: returning the minimum over the other half (`min(colMeans(loss[-A, cols]))`), which chooses on the other half too; comparing the three `chosen_on` values alone and concluding that the largest search found the best model.
+:::
+
+### 4. The test films, once
+
+<!-- 5 min: question 9. -->
+
+**Question 9.** Before running the chunk below, write down which two models you will score on the test films: the forest and the boosting model that won their grids on the tuning films. Then compute each one's test MSE with its standard error, the training mean's, and the paired difference between the forest and the boosting model, with its standard error. Every test MSE is higher than the same model's tuning MSE, the training mean's too. What does that say?
+
+```{r}
+#| eval: false
+rf_best <- rf_grid |> slice_min(tune_mse)          # the forest that won its grid
+boost_best <- models |> slice_min(tune_mse)        # the boosting model that won its grid
+fit_rf <- rf_fit(rf_best$mtry, rf_best$nodesize)
+fit_boost <- boost_fit(boost_best$depth, boost_best$rate)
+loss_test <- tibble(
+  forest = (mv_test$rating - predict(fit_rf, mv_test))^2,
+  boosting = (mv_test$rating - predict(fit_boost, X_test, iteration_range = c(1, boost_best$iters)))^2,
+  training_mean = (mv_test$rating - mean(mv_train$rating))^2)
+# loss_test |> summarize(across(everything(), list(mse = ____, se = ____)))
+# d_test <- ____
+# c(difference = ____, se = ____)
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+rf_best <- rf_grid |> slice_min(tune_mse)
+boost_best <- models |> slice_min(tune_mse)
+fit_rf <- rf_fit(rf_best$mtry, rf_best$nodesize)
+fit_boost <- boost_fit(boost_best$depth, boost_best$rate)
+loss_test <- tibble(
+  forest = (mv_test$rating - predict(fit_rf, mv_test))^2,
+  boosting = (mv_test$rating - predict(fit_boost, X_test, iteration_range = c(1, boost_best$iters)))^2,
+  training_mean = (mv_test$rating - mean(mv_train$rating))^2)
+loss_test |> summarize(across(everything(), list(mse = mean, se = se_loss)))
+d_test <- loss_test$forest - loss_test$boosting
+c(difference = mean(d_test), se = se_loss(d_test))
+```
+
+The forest scores `r sprintf("%.2f", mean(loss_test$forest))` and the boosting model `r sprintf("%.2f", mean(loss_test$boosting))`, each with a standard error near `r sprintf("%.2f", se_loss(loss_test$forest))`; the paired difference is `r sprintf("%.3f", mean(d_test))` with a standard error of `r sprintf("%.3f", se_loss(d_test))`, so the test films do not separate them. The training mean, which was never tuned, scores `r sprintf("%.2f", mean(loss_test$training_mean))` against `r sprintf("%.2f", mse(mv_tune$rating, mean(mv_train$rating)))` on the tuning films: the test films are harder to predict than the tuning films by about `r sprintf("%.2f", mean(loss_test$training_mean) - mse(mv_tune$rating, mean(mv_train$rating)))`, by the luck of the split. Most of each model's rise from tuning to test is that; the optimism of choosing on the tuning films, which question 8 put near `r sprintf("%.3f", q8["all_models", "gap"])`, is the smaller part.
+
+Common errors: choosing the pair after seeing test scores; an unpaired standard error for the difference.
+:::
+
+### Optional, can be done at home: a truth with an interaction
+
+The lecture's simulated truth, $y = x_1^2\cos(\pi x_2/2) + \varepsilon$ with $x_1$ uniform on $[-1, 1]$ and $x_2$ uniform on $[-4, 4]$, independent, but with less noise (standard deviation 0.2), so that the differences are large enough to see. Fit an additive model (`gam(y ~ s(x1) + s(x2))`) and boosted trees of depth 1, 2 and 4 (rate 0.1, 400 iterations) on 2,000 units, and score each on 2,000 fresh units. What is the lowest MSE any model could reach, and which models come near it? What does the additive model's curve for $x_2$ look like?
+
+```{r}
+#| eval: false
+f_true <- function(x1, x2) x1^2 * cos(pi * x2 / 2)
+sim <- function(n) tibble(x1 = runif(n, -1, 1), x2 = runif(n, -4, 4)) |> mutate(y = f_true(x1, x2) + rnorm(n, 0, 0.2))
+sim_train <- sim(2000)
+sim_fresh <- sim(2000)
+# ...
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+f_true <- function(x1, x2) x1^2 * cos(pi * x2 / 2)
+sim <- function(n) tibble(x1 = runif(n, -1, 1), x2 = runif(n, -4, 4)) |> mutate(y = f_true(x1, x2) + rnorm(n, 0, 0.2))
+sim_train <- sim(2000)
+sim_fresh <- sim(2000)
+fit_add <- gam(y ~ s(x1) + s(x2), data = sim_train)
+boost_sim <- function(depth) {
+  fit <- xgboost(x = as.matrix(sim_train[, 1:2]), y = sim_train$y, nrounds = 400, max_depth = depth, learning_rate = 0.1, nthread = 1)
+  mse(sim_fresh$y, predict(fit, as.matrix(sim_fresh[, 1:2])))
+}
+sim_mse <- c(floor = 0.2^2, training_mean = mse(sim_fresh$y, mean(sim_train$y)),
+             additive = mse(sim_fresh$y, predict(fit_add, sim_fresh)),
+             depth_1 = boost_sim(1), depth_2 = boost_sim(2), depth_4 = boost_sim(4))
+round(sim_mse, 3)
+plot(fit_add, select = 2)
+```
+
+The lowest MSE any model can reach is the noise variance, 0.04. The additive model (`r sprintf("%.3f", sim_mse[["additive"]])`) and boosted stumps (`r sprintf("%.3f", sim_mse[["depth_1"]])`) agree, well above it; trees of depth 4 (`r sprintf("%.3f", sim_mse[["depth_4"]])`) come close, since each tree can split on both inputs. The additive model is not flat in $x_2$: with independent inputs, the best additive approximation is $\mathbb E[Y \mid x_1] + \mathbb E[Y \mid x_2] - \mathbb E[Y]$. $\mathbb E[\cos(\pi X_2/2)] = 0$ over $[-4, 4]$, so the curve for $x_1$ is flat, while $\mathbb E[X_1^2] = \frac13$, so the curve for $x_2$ is $\frac13\cos(\pi x_2/2)$: the additive model keeps the part of the interaction that is a function of $x_2$ alone.
+:::
+
+### Optional, can be done at home: backfitting by hand
+
+Fit the additive model $\text{rating} = \beta_0 + f_1(\text{length}) + f_2(\text{year})$ on the training films by backfitting: start with both curves at zero and $\hat\beta_0$ the mean rating; then, in turn, fit a smoothing spline (`smooth.spline(x, r, df = 9)`) of each input's partial residual on that input, centered to mean zero, until the fitted values stop changing. How many iterations does it take? Compare its tuning MSE with `gam(rating ~ s(length) + s(year))`.
+
+```{r}
+#| eval: false
+y <- mv_train$rating
+b0 <- mean(y)
+f_len <- rep(0, nrow(mv_train))
+f_yr <- rep(0, nrow(mv_train))
+for (t in 1:20) {
+  # r_len <- ____                                     # the partial residual for length
+  # s_len <- smooth.spline(mv_train$length, r_len, df = 9)
+  # f_len <- predict(s_len, mv_train$length)$y; f_len <- f_len - mean(f_len)
+  # ... the same for year
+}
+```
+
+::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+```{r}
+y <- mv_train$rating
+b0 <- mean(y)
+f_len <- rep(0, nrow(mv_train))
+f_yr <- rep(0, nrow(mv_train))
+for (t in 1:20) {
+  fitted_before <- f_len + f_yr
+  s_len <- smooth.spline(mv_train$length, y - b0 - f_yr, df = 9)
+  shift_len <- mean(predict(s_len, mv_train$length)$y)
+  f_len <- predict(s_len, mv_train$length)$y - shift_len
+  s_yr <- smooth.spline(mv_train$year, y - b0 - f_len, df = 9)
+  shift_yr <- mean(predict(s_yr, mv_train$year)$y)
+  f_yr <- predict(s_yr, mv_train$year)$y - shift_yr
+  change <- max(abs(f_len + f_yr - fitted_before))
+  if (change < 1e-6) break
+}
+pred_bf <- b0 + predict(s_len, mv_tune$length)$y - shift_len + predict(s_yr, mv_tune$year)$y - shift_yr
+c(iterations = t, backfitting = mse(mv_tune$rating, pred_bf),
+  mgcv = mse(mv_tune$rating, predict(gam(rating ~ s(length) + s(year), data = mv_train), mv_tune)))
+```
+
+The fitted values stop changing (by less than $10^{-6}$) after `r t` iterations. The two tuning MSEs are close and not equal: `smooth.spline` with `df = 9` fixes each curve's flexibility, while `mgcv` chooses its own. The centering keeps $\hat\beta_0$ the mean rating; without it the curves could trade a constant back and forth.
+:::
+
+## References
+
+- Hoeffding, W. (1963). Probability inequalities for sums of bounded random variables. *Journal of the American Statistical Association*, 58(301), 13--30. [doi:10.1080/01621459.1963.10500830](https://doi.org/10.1080/01621459.1963.10500830)
+- IMDb user ratings of the later films in problem 1, read in November 2026: [Revenge of the Sith](https://www.imdb.com/title/tt0121766/), [The Force Awakens](https://www.imdb.com/title/tt2488496/), [Rogue One](https://www.imdb.com/title/tt3748528/), [The Last Jedi](https://www.imdb.com/title/tt2527336/), [The Rise of Skywalker](https://www.imdb.com/title/tt2527338/). The two seasons of *Andor* are the averages of their episodes' IMDb ratings, as summarized by [episodes.cool](https://episodes.cool/title/tt9253284/andor/).
+- The films: [data note](https://ml4ds.com/data/movies.html).
