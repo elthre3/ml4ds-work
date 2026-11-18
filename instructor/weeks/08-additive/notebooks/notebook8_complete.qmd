@@ -12,24 +12,31 @@ execute:
   error: false
 ---
 
-<!-- Teacher version. This file is shown on screen in the seminar, so nothing in it
-is addressed to the teacher except this comment. Boxes: blue "Hint 1, 2, ..." and
-green "Reveal solution/answer", all collapsed; click to open. Hints are revealed in
-order, after the room has had a few minutes, the solution last. Hints and solutions
-carrying the class .answer are removed from the student file notebook8.qmd by
-_build_env/make_incomplete.py; hints without it (the pre-seminar exercises) stay in
-the student file, behind a warning not to open them early. Do not edit the student
-file by hand.
+<!-- Teacher version. Nothing in this file is addressed to the teacher except this
+comment. Boxes: blue "Hint 1, 2, ..." and green "Reveal solution/answer", all
+collapsed; click to open. Hints are revealed in order, after the room has had a few
+minutes, the solution last. Hints and solutions carrying the class .answer are
+removed from the student file notebook8.qmd by _build_env/make_incomplete.py; hints
+without it (the pre-seminar exercises) stay in the student file, behind a warning not
+to open them early. Do not edit the student file by hand.
+
+The teacher shows the instructor notebook, notebook8_instructor, which the build
+makes from this file: the same questions, hints and solution code, with each full
+answer (class .full) replaced by its short twin (class .brief, hidden here), and
+without the parts between the "not in the instructor notebook" comments. Edit a full
+answer and its short twin together. The notebook with solutions, for students the
+week after, is this file without the short twins.
 
 How this seminar runs: students do exercises 1 and 2 at home (neither is gone
-through in the room unless asked). In the room: problems 1 to 3 (about 27 minutes:
-10, 8, 9; hints then answers), then the coding (about 33: part 1 11, part 2 11,
-part 3 6, part 4 5), 60 in all, with no slack; the teacher note has the cut order.
-The 15 forests of question 3 take about 40 seconds: start that chunk while the room
-discusses question 2. Everything headed "Optional, can be done at home" is outside
-the seminar. One seed, set at the split: every student who runs the chunks in order
-sees the numbers in the teacher note; skipping a chunk that fits forests changes the
-random draws after it, and the numbers move a little. -->
+through in the room unless asked). In the room: problems 1 and 2 (about 20 minutes,
+10 each; hints then answers; problem 1(f) is optional), then the coding (about 33:
+part 1 11, part 2 11, part 3 6, part 4 5), 53 in all, leaving about 7 minutes of
+slack; the teacher note has the cut order. The 15 forests of question 3 take about
+40 seconds: start that chunk while the room discusses question 2. Everything headed
+"Optional, can be done at home" is outside the seminar. One seed, set at the split:
+every student who runs the chunks in order sees the numbers in the teacher note;
+skipping a chunk that fits forests changes the random draws after it, and the
+numbers move a little. -->
 
 ```{r}
 #| label: setup
@@ -48,7 +55,7 @@ se_loss <- function(loss) sd(loss) / sqrt(length(loss))   # standard error of a 
 
 <!-- At home, before the seminar. -->
 
-The lecture proved the variance of an average of correlated variables; exercise 1 is that proof again, with the slides closed. It derived boosting as approximate gradient descent; exercise 2 takes one boosting step by hand. Do both on paper before the seminar; the seminar's problems are variations on them. You may use, without proof: $\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b'}\mathrm{Cov}(V_b, V_{b'})$, and $\mathrm{Cov}(V, V) = \mathrm{Var}(V)$.
+The lecture proved the variance of an average of correlated variables; exercise 1 is that proof again, with the slides closed. It derived boosting as approximate gradient descent; exercise 2 takes one boosting step by hand. Do both on paper before the seminar. You may use, without proof: $\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b'}\mathrm{Cov}(V_b, V_{b'})$, and $\mathrm{Cov}(V, V) = \mathrm{Var}(V)$.
 
 ::: {.callout-warning title="Hints"}
 Each exercise has hints, collapsed below it. Do not open a hint unless you have been stuck for at least a few minutes, and open them in order. Solutions are shown in the seminar if you ask.
@@ -70,7 +77,15 @@ Each exercise has hints, collapsed below it. Do not open a hint unless you have 
 (a) The covariance of two variables with correlation $\rho$ and variances $\tau^2$ is $\rho\tau^2$. Divide the variance of the sum by $B^2$, then write $\frac{B(B-1)}{B^2} = 1 - \frac1B$ and regroup.
 :::
 
-::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+::: {.content-hidden .answer .brief title="Reveal solution"}
+(a) The double sum of covariances has $B$ variances, $\tau^2$ each, and $B(B - 1)$ covariances, $\rho\tau^2$ each. Dividing by $B^2$ gives $\frac{\tau^2}{B} + \big(1 - \frac1B\big)\rho\tau^2 = \rho\tau^2 + \frac{(1 - \rho)\tau^2}{B}$.
+
+(b) $\rho\tau^2$ is left. $\rho = 1$ gives $\tau^2$: copies do not help. $\rho = 0$ gives $\tau^2/B$.
+
+(c) More trees shrink only $(1 - \rho)\tau^2/B$. A random forest lowers $\rho$, by trying each split on a random subset of the inputs.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal solution"}
 (a) $\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b'}\mathrm{Cov}(V_b, V_{b'})$. The $B$ terms with $b = b'$ are variances, $\tau^2$ each; the $B(B - 1)$ terms with $b \ne b'$ are covariances, $\rho\tau^2$ each (correlation times the two standard deviations). So
 $$
 \mathrm{Var}\Big(\frac1B\sum_b V_b\Big) = \frac{1}{B^2}\Big(B\tau^2 + B(B - 1)\rho\tau^2\Big) = \frac{\tau^2}{B} + \Big(1 - \frac1B\Big)\rho\tau^2 = \rho\tau^2 + \frac{(1 - \rho)\tau^2}{B}. \qquad \blacksquare
@@ -109,7 +124,15 @@ The training loss of fitted values $\mathbf f = (f_1, \ldots, f_5)$ is $L(\mathb
 (b), (c) A leaf predicts the mean of the residuals in it. The step is $f_i \leftarrow f_i + \gamma\,t(x_i)$, with $t$ the tree.
 :::
 
-::: {.callout-tip .answer collapse="true" title="Reveal solution"}
+::: {.content-hidden .answer .brief title="Reveal solution"}
+(a) $\bar y = 7.82$. The negative gradient is the residual vector $(0.98, 0.98, 0.28, -1.42, -0.82)$.
+
+(b) The residual sums of squares are 3.49, 1.49, 0.51 and 3.85 for the cutoffs 1978.5, 1981.5, 1991 and 2000.5. The cutoff at 1991 wins: the tree predicts $0.747$ before it and $-1.12$ after.
+
+(c) The fitted values become 8.19 for the first three films and 7.26 for the last two; the loss falls from 2.344 to 0.776.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal solution"}
 (a) $\bar y = 39.1/5 = 7.82$. The negative gradient is the residual vector $\mathbf y - \mathbf f = (0.98, 0.98, 0.28, -1.42, -0.82)$.
 
 (b) The cutoffs and the residual sum of squares of the two leaves:
@@ -130,118 +153,126 @@ Common errors: fitting the tree to the ratings instead of the residuals (it then
 
 ## Problems
 
-<!-- About 27 min: problems 1 to 3 (10, 8, 9), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
+<!-- About 20 min: problems 1 and 2 (10 each), pen and paper; problem 1(f) is optional and not done in the room. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the one before it; citing an earlier result that has been proved is also fine. -->
 
-**Problem 1 (Andor).** The lecture grew a tree on the five *Star Wars* films in the data (exercise 2's table), splitting on year:
-
-- before 1991: 8.8 if the year is before 1981.5, 8.1 otherwise;
-- from 1991 on: 6.4 if the year is before 2000.5, 7.0 otherwise.
-
-Cost-complexity pruning, with penalty $\alpha$ per leaf, gives a sequence of trees: the four leaves above for $\alpha < 0.18$; three leaves for $0.18 < \alpha < 0.33$, the two films from 1991 on merged into one leaf predicting 6.7; two leaves for $0.33 < \alpha < 4.18$, predicting 8.57 before 1991 and 6.7 from 1991 on; and one leaf, 7.82, for $\alpha > 4.18$. Later titles, with their IMDb ratings in November 2026:
-
-| Title | Year | Rating |
-|---|---:|---:|
-| Revenge of the Sith | 2005 | 7.6 |
-| The Force Awakens | 2015 | 7.8 |
-| Rogue One | 2016 | 7.8 |
-| The Last Jedi | 2017 | 6.9 |
-| The Rise of Skywalker | 2019 | 6.4 |
-| Andor, season 1 | 2022 | 8.3 |
-| Andor, season 2 | 2025 | 8.7 |
-
-(a) What does each tree in the sequence predict for *Andor*, season 1? For a title made in 2050?
-
-(b) Use the five films (not *Andor*) as held-out data: compute each tree's sum of squared errors on them. Which values of $\alpha$ do they choose?
-
-(c) Now add the two seasons of *Andor*. Which values of $\alpha$ do the seven titles choose?
-
-(d) Two titles changed the choice. Explain why with one formula, and say whether these seven titles should be used to choose $\alpha$ for predicting films like the training films.
-
-::: {.callout-note .answer collapse="true" title="Hint 1"}
-(a), (b) Every later title is from after 2000.5. Which leaf does it fall in, in each tree?
-:::
-
-::: {.callout-note .answer collapse="true" title="Hint 2"}
-(d) If a tree predicts the same number $c$ for all $n$ held-out titles, its sum of squared errors is $\sum_i (y_i - \bar y)^2 + n(\bar y - c)^2$, with $\bar y$ the titles' mean.
-:::
-
-::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-(a) Every title from after 2000.5 falls in the leaf of the latest films: the grown tree predicts 7.0, the three- and two-leaf trees 6.7, the one-leaf tree 7.82. A title from 2050 gets the same predictions: a tree predicts a constant beyond its last split, whatever the year.
-
-(b) Each tree predicts one number for all five films (ratings 7.6, 7.8, 7.8, 6.9, 6.4), so its sum of squared errors is $\sum_i(y_i - c)^2$: 2.01 for $c = 7.0$ (four leaves), 3.36 for $c = 6.7$ (three or two leaves), 2.91 for $c = 7.82$ (one leaf). The five films choose the grown tree: any $\alpha < 0.18$.
-
-(c) With 8.3 and 8.7 added: 6.59 for $c = 7.0$, 9.92 for $c = 6.7$, 3.92 for $c = 7.82$. The seven titles choose the tree with no split: any $\alpha > 4.18$.
-
-(d) All the titles fall in one leaf of every tree, so each tree predicts one constant $c$ for all of them, and its error is $\sum_i(y_i - \bar y)^2 + n(\bar y - c)^2$. The first term is the same for every tree; the choice is the constant nearest the titles' mean. That mean is 7.30 for the five films, nearest 7.0, and 7.64 with *Andor*, nearest 7.82. Two titles with high ratings moved the mean past the midpoint between 7.0 and 7.82, which is 7.41. These seven titles are a poor tuning set for films like the training films: they are all later than the five training films, all on the far side of the last split, two are seasons of a television series rated by episode, and the ratings were read in 2026, not in 2005.
-
-Common errors: sending a title down the tree by its rating instead of its year; giving *Revenge of the Sith* (2005) the leaf 6.4, which is for 1991 to 2000.5; computing the error of the two-leaf tree with 8.57 (no later title falls in that leaf).
-:::
-
-**Problem 2 (the size of a boosting step).** A boosting fit has fitted values $\mathbf f = (f_1, \ldots, f_n)$ and residuals $r_i = y_i - f_i$, with training loss $L(\mathbf f) = \sum_i \frac12(y_i - f_i)^2$. A tree $t$ is fitted to the residuals: in leaf $l$, which holds $n_l$ of the units, it predicts the mean $\bar r_l$ of their residuals. Write $t_i$ for its prediction for unit $i$.
-
-(a) Show that $L(\mathbf f + \gamma\,\mathbf t) = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)\sum_l n_l\,\bar r_l^{\,2}$, the sum over the tree's leaves.
-
-(b) For which $\gamma \ge 0$ does a step not raise the training loss? Which $\gamma$ lowers it most?
-
-(c) The five residuals $0.98, 0.98, 0.28, -1.42, -0.82$, with a tree whose leaves hold the first three and the last two. Compute $\sum_l n_l\bar r_l^{\,2}$ and the loss after a step of $\gamma = 0.5$, $1$ and $2$.
-
-(d) Part (b) gives the $\gamma$ that lowers the training loss most at every step. Why do boosting libraries use a much smaller $\gamma$ by default?
-
-::: {.callout-note .answer collapse="true" title="Hint 1"}
-(a) $y_i - f_i - \gamma t_i = r_i - \gamma t_i$. Expand the square, then compute $\sum_i r_i t_i$ and $\sum_i t_i^2$ one leaf at a time: within leaf $l$, $t_i = \bar r_l$.
-:::
-
-::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-(a) $L(\mathbf f + \gamma\mathbf t) = \frac12\sum_i (r_i - \gamma t_i)^2 = \frac12\sum_i r_i^2 - \gamma\sum_i r_i t_i + \frac{\gamma^2}{2}\sum_i t_i^2$. Within leaf $l$, $t_i = \bar r_l$, so $\sum_{i \in l} r_i t_i = \bar r_l \sum_{i \in l} r_i = n_l\bar r_l^{\,2}$ and $\sum_{i \in l} t_i^2 = n_l\bar r_l^{\,2}$. Writing $S = \sum_l n_l\bar r_l^{\,2}$, $L(\mathbf f + \gamma\mathbf t) = L(\mathbf f) - \gamma S + \frac{\gamma^2}{2}S = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)S$. $\blacksquare$
-
-(b) $S \ge 0$, so the loss does not rise when $\gamma(1 - \gamma/2) \ge 0$, that is, for $0 \le \gamma \le 2$ (when $S > 0$ it falls strictly for $0 < \gamma < 2$). The decrease $\gamma - \gamma^2/2$ is largest at $\gamma = 1$, where each leaf's residuals are moved by their full mean.
-
-(c) The leaf means are $0.747$ and $-1.12$, so $S = 3(0.747)^2 + 2(1.12)^2 = 4.181$. The loss before the step is $\frac12\sum_i r_i^2 = 2.344$, and after it $2.344 - 4.181\,\gamma(1 - \gamma/2)$: $0.776$ at $\gamma = 0.5$, $0.253$ at $\gamma = 1$, and $2.344$ again at $\gamma = 2$, which overshoots by as much as $\gamma = 0$ undershoots.
-
-(d) The training loss is not what we want to make small. With $\gamma = 1$ each step removes the leaf means of the residuals in full, so a few iterations already fit the noise. With small steps, many trees each move the fit a little, and the number of iterations becomes the knob that stops the fit; the learning rate and the number of iterations are then chosen together, on held-out data. The coding below does that.
-
-Common errors: forgetting that $\sum_i r_i t_i$ is a sum over units, not over leaves; concluding from (b) that $\gamma = 1$ is best for prediction.
-:::
-
-**Problem 3 (the size of a search).** A model's risk is its expected loss on a new unit, $R = \mathbb E[\ell]$, for a loss with $0 \le \ell \le 1$ (for example, the 0--1 loss of a classifier). Before the tuning data are seen, $K$ candidate models are fixed, fitted on the training data, with risks $R_1, \ldots, R_K$; treat the fitted models as fixed, so that everything below is conditional on the training data. On $m$ tuning units, drawn independently of each other and of the training data, candidate $k$ scores $\hat R_k$, the mean of its $m$ losses. You may use Hoeffding's inequality (Hoeffding 1963): if $Z_1, \ldots, Z_m$ are independent with $0 \le Z_i \le 1$ and $\bar Z$ is their mean, then for every $t > 0$,
+Both problems use two inequalities. Markov's inequality: if $W \ge 0$ and $a > 0$, then $P(W \ge a) \le \mathbb E[W]/a$. Hoeffding's inequality (Hoeffding 1963): if $Z_1, \ldots, Z_m$ are independent with $0 \le Z_i \le 1$ and $\bar Z$ is their mean, then for every $t > 0$,
 $$
 P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 $$
 
-(a) $K = 1$. Find the smallest $t$ that Hoeffding's inequality gives for which $|\hat R_1 - R_1| < t$ with probability at least $1 - \delta$.
+**Problem 1 (how far a score can be from the risk).** A classifier predicts a track's playlist genre, one of six, from its audio features ([data note](https://ml4ds.com/data/spotify.html)). It was fitted on training tracks and is now fixed; its risk $R$ is its error rate on new tracks. On $m = 2000$ tuning tracks, drawn independently of each other and of the training tracks, it errs on 1,062, so its score is $\hat R = 0.531$, the mean of $m$ losses $\ell_i \in \{0, 1\}$ with mean $R$. Write $D = \hat R - R$. We want an interval $\hat R \pm t$ that contains $R$ with probability at least $1 - \delta$, for $\delta = 0.001$: a $t$ with $P(|D| \ge t) \le \delta$.
 
-(b) Find $t_K$ such that, with probability at least $1 - \delta$, $|\hat R_k - R_k| < t_K$ for every $k$ at once. Did you need the $K$ scores to be independent of each other?
+(a) Show that $\mathrm{Var}(\ell_i) \le \frac14$, so that $\mathrm{Var}(D) \le \frac{1}{4m}$.
 
-(c) Let $\hat k$ be the candidate with the lowest tuning score and $k^\star$ the candidate with the lowest risk. On the event of (b), show that $R_{\hat k} < \hat R_{\hat k} + t_K$ and $R_{\hat k} < R_{k^\star} + 2t_K$.
+(b) Apply Markov's inequality to $W = |D|$, using $\mathbb E|D| \le \sqrt{\mathbb E[D^2]}$, and find $t$.
 
-(d) Take $m = 2000$ and $\delta = 0.05$. Compute $t_K$ for $K = 1$, $10$, $100$ and $1{,}000{,}000$. How many candidates double $t_1$? How many tuning units halve $t_K$? What does this say about searching a larger grid?
+(c) Apply it to $W = D^2$ instead (this is Chebyshev's inequality), and find $t$.
 
-(e) The argument needs the $K$ candidates to be fixed before any tuning score is seen. Give an example of a search that breaks this, and one that chooses adaptively but does not.
+(d) Find $t$ from Hoeffding's inequality.
+
+(e) Compute the three intervals. Guessing a genre at random errs with probability $\frac56$: which interval rules that out for this classifier? How does each $t$ grow as $\delta$ shrinks?
+
+(f) *Optional.* Hoeffding's lemma says that if $0 \le Z \le 1$ with mean $\mu$, then $\mathbb E\big[e^{\lambda(Z - \mu)}\big] \le e^{\lambda^2/8}$ for every $\lambda$. Apply Markov's inequality to $W = e^{\lambda D}$ with $\lambda > 0$, and use independence and the lemma to show that $P(D \ge t) \le e^{-\lambda t + \lambda^2/(8m)}$. Then choose $\lambda$ to get $P(D \ge t) \le e^{-2mt^2}$.
 
 ::: {.callout-note .answer collapse="true" title="Hint 1"}
-(a), (b) Set $2e^{-2mt^2} = \delta$ and solve for $t$. For $K$ candidates, the probability that at least one of $K$ events happens is at most the sum of their probabilities.
+(a) A loss of 0 or 1 equals its square. The $\ell_i$ are independent, and $D$ is their mean minus a constant.
 :::
 
 ::: {.callout-note .answer collapse="true" title="Hint 2"}
-(c) $\hat k$ has the lowest score, so $\hat R_{\hat k} \le \hat R_{k^\star}$. Use the event of (b) once for $\hat k$ and once for $k^\star$.
+(b) to (d) Each inequality bounds $P(|D| \ge t)$ by an expression in $t$: set it equal to $\delta$ and solve for $t$. In (c), $|D| \ge t$ exactly when $D^2 \ge t^2$.
 :::
 
-::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-(a) Given the fitted model, its $m$ tuning losses are independent, between 0 and 1, with mean $R_1$, so $P(|\hat R_1 - R_1| \ge t) \le 2e^{-2mt^2}$. This equals $\delta$ at $t = \sqrt{\log(2/\delta)/(2m)}$.
+::: {.callout-note .answer collapse="true" title="Hint 3"}
+(f) $D \ge t$ exactly when $e^{\lambda D} \ge e^{\lambda t}$. Write $e^{\lambda D}$ as a product of $m$ independent factors, one for each tuning track.
+:::
 
-(b) $P\big(\text{some } k \text{ has } |\hat R_k - R_k| \ge t\big) \le \sum_{k=1}^K P\big(|\hat R_k - R_k| \ge t\big) \le 2Ke^{-2mt^2}$, which equals $\delta$ at
+::: {.content-hidden .answer .brief}
+(a) $\ell_i^2 = \ell_i$, so $\mathrm{Var}(\ell_i) = R(1 - R) \le \frac14$; $D$ is a mean of $m$ independent terms.
+
+(b) $\mathbb E|D| \le \frac{1}{2\sqrt m}$, so $P(|D| \ge t) \le \frac{1}{2t\sqrt m}$, which is $\delta$ at $t = \frac{1}{2\delta\sqrt m} = 11.2$.
+
+(c) $P(|D| \ge t) \le \frac{1}{4mt^2}$, which is $\delta$ at $t = \frac{1}{2\sqrt{\delta m}} = 0.354$.
+
+(d) $2e^{-2mt^2} = \delta$ at $t = \sqrt{\log(2/\delta)/(2m)} = 0.044$.
+
+(e) Markov's interval says nothing. Chebyshev's, $[0.177, 0.885]$, contains $\frac56 = 0.833$. Hoeffding's, $[0.487, 0.575]$, rules it out. As $\delta$ shrinks, $t$ grows like $1/\delta$, $1/\sqrt\delta$ and $\sqrt{\log(2/\delta)}$.
+
+(f) Markov's inequality and independence give $P(D \ge t) \le e^{-\lambda t}\prod_i \mathbb E\big[e^{(\lambda/m)(\ell_i - R)}\big] \le e^{-\lambda t + \lambda^2/(8m)}$, and $\lambda = 4mt$ gives $e^{-2mt^2}$.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
+(a) A loss of 0 or 1 equals its square, so $\mathbb E[\ell_i^2] = R$ and $\mathrm{Var}(\ell_i) = R - R^2 = R(1 - R)$, which is at most $\frac14$, its value at $R = \frac12$. (For any loss between 0 and 1, $\ell_i^2 \le \ell_i$ gives the same bound.) $D = \frac1m\sum_i (\ell_i - R)$ is a mean of $m$ independent terms, so $\mathrm{Var}(D) = \mathrm{Var}(\ell_i)/m \le \frac{1}{4m}$.
+
+(b) $\mathbb E[D] = 0$, so $\mathbb E[D^2] = \mathrm{Var}(D) \le \frac{1}{4m}$ and $\mathbb E|D| \le \frac{1}{2\sqrt m}$. Markov's inequality gives $P(|D| \ge t) \le \mathbb E|D|/t \le \frac{1}{2t\sqrt m}$, which equals $\delta$ at
+$$
+t = \frac{1}{2\delta\sqrt m} = \frac{1}{2 \times 0.001 \times \sqrt{2000}} = 11.2.
+$$
+
+(c) $P(|D| \ge t) = P(D^2 \ge t^2) \le \mathbb E[D^2]/t^2 \le \frac{1}{4mt^2}$, which equals $\delta$ at $t = \frac{1}{2\sqrt{\delta m}} = \frac{1}{2\sqrt 2} = 0.354$.
+
+(d) The $\ell_i$ are independent and between 0 and 1, so $P(|D| \ge t) \le 2e^{-2mt^2}$, which equals $\delta$ at $t = \sqrt{\log(2/\delta)/(2m)} = \sqrt{\log(2000)/4000} = 0.044$.
+
+(e) Markov's interval, $0.531 \pm 11.2$, says less than we knew before: $R$ is between 0 and 1 anyway. Chebyshev's is $[0.177, 0.885]$, which contains $\frac56 = 0.833$, so it cannot tell this classifier from guessing. Hoeffding's is $[0.487, 0.575]$, which rules guessing out. As $\delta$ shrinks, $t$ grows like $1/\delta$ for Markov, $1/\sqrt\delta$ for Chebyshev and $\sqrt{\log(2/\delta)}$ for Hoeffding. All three shrink like $1/\sqrt m$; what differs is the price of a small $\delta$. Each is Markov's inequality applied to a different function of $D$: $|D|$, $D^2$ and, for Hoeffding, $e^{\lambda D}$ (part (f)). Each uses more about $D$: one moment, then two, then, through the bounds on the losses, all of them. At $\delta = 0.05$ the three are 0.22, 0.050 and 0.030, and Chebyshev's would be usable; problem 2 shows why a search needs a small $\delta$. Hoeffding's interval is the best of the three, not the best possible: it uses only independence and the bounds on the losses, and a normal approximation gives about $\pm 0.037$ here.
+
+(f) By Markov's inequality, $P(D \ge t) = P(e^{\lambda D} \ge e^{\lambda t}) \le e^{-\lambda t}\,\mathbb E[e^{\lambda D}]$. Since $e^{\lambda D} = \prod_i e^{(\lambda/m)(\ell_i - R)}$ and the $\ell_i$ are independent, the lemma with $\lambda/m$ in place of $\lambda$ gives
+$$
+\mathbb E[e^{\lambda D}] = \prod_{i=1}^m \mathbb E\big[e^{(\lambda/m)(\ell_i - R)}\big] \le e^{m\lambda^2/(8m^2)} = e^{\lambda^2/(8m)}.
+$$
+So $P(D \ge t) \le e^{-\lambda t + \lambda^2/(8m)}$. The exponent is smallest at $\lambda = 4mt$, where it equals $-4mt^2 + 2mt^2 = -2mt^2$. The same argument for the losses $1 - \ell_i$ bounds $P(D \le -t)$ by $e^{-2mt^2}$, and the two together give Hoeffding's inequality. $\blacksquare$
+
+Common errors: in (b), forgetting that $\mathbb E[D^2]$ is the variance only because $\mathbb E[D] = 0$; in (c), $t = \frac{1}{4m\delta}$ (the square root forgotten), or the plug-in variance $\hat R(1 - \hat R)$ in place of $\frac14$, which is close here but no longer a guarantee; in (d), $\log(1/\delta)$ in place of $\log(2/\delta)$ (the bound covers both tails).
+:::
+
+**Problem 2 (the size of a search).** A model's risk is its expected loss on a new unit, $R = \mathbb E[\ell]$, for a loss with $0 \le \ell \le 1$ (for example, the 0--1 loss of a classifier). Before the tuning data are seen, $K$ candidate models are fixed, fitted on the training data, with risks $R_1, \ldots, R_K$; treat the fitted models as fixed, so that everything below is conditional on the training data. On $m$ tuning units, drawn independently of each other and of the training data, candidate $k$ scores $\hat R_k$, the mean of its $m$ losses.
+
+(a) Find $t_K$ such that, with probability at least $1 - \delta$, $|\hat R_k - R_k| < t_K$ for every $k$ at once. Did you need the $K$ scores to be independent of each other?
+
+(b) Let $\hat k$ be the candidate with the lowest tuning score and $k^\star$ the candidate with the lowest risk. On the event of (a), show that $R_{\hat k} < \hat R_{\hat k} + t_K$ and $R_{\hat k} < R_{k^\star} + 2t_K$.
+
+(c) Take $m = 2000$ and $\delta = 0.05$. Compute $t_K$ for $K = 1$, $10$, $100$ and $1{,}000{,}000$. How many candidates double $t_1$? How many tuning units halve $t_K$? What would Chebyshev's inequality give in place of Hoeffding's, for $K = 100$? What does this say about searching a larger grid?
+
+(d) The argument needs the $K$ candidates to be fixed before any tuning score is seen. Give an example of a search that breaks this, and one that chooses adaptively but does not.
+
+::: {.callout-note .answer collapse="true" title="Hint 1"}
+(a) Use the union bound: for any events $A_1, \ldots, A_K$, $P(A_1 \cup \cdots \cup A_K) \le \sum_k P(A_k)$. Take $A_k$ to be the event $|\hat R_k - R_k| \ge t$, bound each $P(A_k)$ with Hoeffding's inequality, and set the sum equal to $\delta$.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 2"}
+(b) $\hat k$ has the lowest score, so $\hat R_{\hat k} \le \hat R_{k^\star}$. Use the event of (a) once for $\hat k$ and once for $k^\star$.
+:::
+
+::: {.callout-note .answer collapse="true" title="Hint 3"}
+(c) Chebyshev's inequality bounds each $P(A_k)$ by $\mathrm{Var}(\hat R_k)/t^2 \le \frac{1}{4mt^2}$.
+:::
+
+::: {.content-hidden .answer .brief}
+(a) By the union bound and Hoeffding's inequality, $P(\text{some } |\hat R_k - R_k| \ge t) \le 2Ke^{-2mt^2}$, which is $\delta$ at $t_K = \sqrt{\log(2K/\delta)/(2m)}$. No independence between the scores is needed.
+
+(b) $R_{\hat k} < \hat R_{\hat k} + t_K \le \hat R_{k^\star} + t_K < R_{k^\star} + 2t_K$.
+
+(c) $t_K$ is 0.030, 0.039, 0.046 and 0.066. 64,000 candidates double $t_1$; four times the tuning units halve any $t_K$. Chebyshev with the union bound needs $\frac{K}{4mt^2} = \delta$: $t = 0.50$ for $K = 100$. A larger grid costs only $\sqrt{\log K}$ in the bound, but the reported minimum is still biased low, so the chosen model's error is estimated on data the search never used.
+
+(d) Breaks it: candidates created after seeing scores, such as new values of a knob around the current best. Does not: choosing adaptively within a list fixed in advance, such as one knob at a time within a fixed grid.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
+(a) Given the fitted models, each candidate's $m$ tuning losses are independent, between 0 and 1, with mean $R_k$, so Hoeffding's inequality gives $P(|\hat R_k - R_k| \ge t) \le 2e^{-2mt^2}$ for each $k$. By the union bound,
+$$
+P\big(\text{some } k \text{ has } |\hat R_k - R_k| \ge t\big) \le \sum_{k=1}^K P\big(|\hat R_k - R_k| \ge t\big) \le 2Ke^{-2mt^2},
+$$
+which equals $\delta$ at
 $$
 t_K = \sqrt{\frac{\log(2K/\delta)}{2m}}.
 $$
-The union bound needs no independence between the events: the $K$ scores use the same tuning units and are usually strongly dependent, and the bound still holds.
+For $K = 1$ this is problem 1's $t$. The union bound needs no independence between the events: the $K$ scores use the same tuning units and are usually strongly dependent, and the bound still holds.
 
-(c) On the event of (b), $R_{\hat k} < \hat R_{\hat k} + t_K$: the winner's risk is less than its reported score plus $t_K$, so the reported score may understate its risk by up to $t_K$. Then $\hat R_{\hat k} \le \hat R_{k^\star}$, because $\hat k$ has the lowest score, and $\hat R_{k^\star} < R_{k^\star} + t_K$. Together, $R_{\hat k} < R_{k^\star} + 2t_K$. $\blacksquare$
+(b) On the event of (a), $R_{\hat k} < \hat R_{\hat k} + t_K$: the winner's risk is less than its reported score plus $t_K$, so the reported score may understate its risk by up to $t_K$. Then $\hat R_{\hat k} \le \hat R_{k^\star}$, because $\hat k$ has the lowest score, and $\hat R_{k^\star} < R_{k^\star} + t_K$. Together, $R_{\hat k} < R_{k^\star} + 2t_K$. $\blacksquare$
 
-(d) $t_K = \sqrt{\log(40K)/4000}$: 0.030 for $K = 1$, 0.039 for $K = 10$, 0.046 for $K = 100$ and 0.066 for $K = 1{,}000{,}000$. Doubling $t_1$ needs $\log(40K) = 4\log 40$, that is, $K = 40^3 = 64{,}000$ candidates. Halving $t_K$ needs four times the tuning units, whatever $K$ is. The grid's size enters the bound only through $\sqrt{\log K}$: a much larger grid adds little to the bound, while it can only lower $R_{k^\star}$, the best risk among the candidates. So with a large tuning set a wide search is a good trade, and the tuning set's size counts for far more than the grid's. The bound limits the optimism of the reported minimum; it does not say how large the optimism is. Searching more candidates can increase it. When the candidates are equally good, adding one never lowers it, since the chosen one's risk is the same whichever is chosen and the minimum of more scores can only be lower. In general its size depends on the candidates' risks and on how their scores are correlated, and adding one much better candidate can even remove it. Either way the reported minimum is biased low, so the error of the chosen model should be estimated on data that the search never used. These numbers are for a loss between 0 and 1: squared errors on film ratings, from 1 to 10, can reach 81, so the same bound for them is at least 81 times larger.
+(c) $t_K = \sqrt{\log(40K)/4000}$: 0.030 for $K = 1$, 0.039 for $K = 10$, 0.046 for $K = 100$ and 0.066 for $K = 1{,}000{,}000$. Doubling $t_1$ needs $\log(40K) = 4\log 40$, that is, $K = 40^3 = 64{,}000$ candidates. Halving $t_K$ needs four times the tuning units, whatever $K$ is. Chebyshev's inequality bounds each $P(|\hat R_k - R_k| \ge t)$ by $\frac{1}{4mt^2}$, so the union bound needs $\frac{K}{4mt^2} = \delta$, that is, $t = \sqrt{K/(4m\delta)}$: 0.50 for $K = 100$, against Hoeffding's 0.046. Asking each candidate's guarantee to hold with probability $1 - \delta/K$ multiplies Chebyshev's $t$ by $\sqrt K$, but adds only $\log K$ under Hoeffding's square root: the price of a small $\delta$, from problem 1, is what decides the cost of a search. With Hoeffding's inequality the grid's size enters the bound only through $\sqrt{\log K}$: a much larger grid adds little to the bound, while it can only lower $R_{k^\star}$, the best risk among the candidates. So with a large tuning set a wide search is a good trade, and the tuning set's size counts for far more than the grid's. The bound limits the optimism of the reported minimum; it does not say how large the optimism is. Searching more candidates can increase it. When the candidates are equally good, adding one never lowers it, since the chosen one's risk is the same whichever is chosen and the minimum of more scores can only be lower. In general its size depends on the candidates' risks and on how their scores are correlated, and adding one much better candidate can even remove it. Either way the reported minimum is biased low, so the error of the chosen model should be estimated on data that the search never used. These numbers are for a loss between 0 and 1: squared errors on film ratings, from 1 to 10, can reach 81, so the same bound for them is at least 81 times larger.
 
-(e) A search that creates candidates after seeing tuning scores: new values of a knob around the current best, or new models tried until one scores well. Such candidates were not on a list fixed in advance, and the union bound over a fixed list of $K$ does not cover them; reusing the tuning set after changing a model in response to its tuning errors is the same thing. A rule that only chooses which of a fixed list of $K$ candidates to look at, adaptively or not (one knob at a time, say, within a grid fixed in advance), still picks one of the $K$, so the bound for $K$ still covers its choice.
+(d) A search that creates candidates after seeing tuning scores: new values of a knob around the current best, or new models tried until one scores well. Such candidates were not on a list fixed in advance, and the union bound over a fixed list of $K$ does not cover them; reusing the tuning set after changing a model in response to its tuning errors is the same thing. A rule that only chooses which of a fixed list of $K$ candidates to look at, adaptively or not (one knob at a time, say, within a grid fixed in advance), still picks one of the $K$, so the bound for $K$ still covers its choice.
 
-Common errors: dividing $\delta$ among the candidates in (a); requiring independent scores in (b); in (c), using $R_{\hat k} \le R_{k^\star}$ (false: $k^\star$ has the lowest risk); reading (d) as "the optimism of a search grows like $\sqrt{\log K}$" (the bound limits the optimism; it does not measure it).
+Common errors: requiring independent scores in (a); in (b), using $R_{\hat k} \le R_{k^\star}$ (false: $k^\star$ has the lowest risk); reading (c) as "the optimism of a search grows like $\sqrt{\log K}$" (the bound limits the optimism; it does not measure it).
 :::
 
 ## Coding
@@ -296,7 +327,13 @@ q1 <- c(training = mse(mv_train$rating, predict(fit_default, mv_train)),
         tuning = mse(mv_tune$rating, predict(fit_default, mv_tune)))
 round(q1, 3)
 ```
+:::
 
+::: {.content-hidden .answer .brief}
+Out of bag (`r sprintf("%.2f", q1[["out_of_bag"]])`) and on the tuning films (`r sprintf("%.2f", q1[["tuning"]])`) the forest scores about the same; on the training films (`r sprintf("%.2f", q1[["training"]])`) it scores lower, because each training film is predicted partly by trees fitted on it. More trees only shrink $(1 - \rho)\tau^2/B$, so their number is not tuned.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
 The out-of-bag MSE (`r sprintf("%.2f", q1[["out_of_bag"]])`) and the tuning MSE (`r sprintf("%.2f", q1[["tuning"]])`) agree; the training MSE (`r sprintf("%.2f", q1[["training"]])`) is lower, because each training film is predicted partly by the trees that were fitted on it. Out of bag, each film is predicted only by the trees that never saw it, so the out-of-bag error is an estimate on held-out data that costs no extra films. The number of trees is not tuned because more trees only shrink the $(1 - \rho)\tau^2/B$ term of the variance of an average: past a few hundred, more trees cost time and change little.
 
 Common errors: `predict(fit_default, mv_train)` for the out-of-bag line, which is the training error again.
@@ -323,7 +360,13 @@ mse_node <- sapply(nodesizes, function(s) rf_score(3, s))
 rbind(mtry = mtrys, tune_mse = round(mse_mtry, 3))
 rbind(nodesize = nodesizes, tune_mse = round(mse_node, 3))
 ```
+:::
 
+::: {.content-hidden .answer .brief}
+`mtry = `r mtrys[which.min(mse_mtry)]`` wins, and both ends are worse. `nodesize = `r nodesizes[which.min(mse_node)]`` wins, but the three values are within `r sprintf("%.3f", diff(range(mse_node)))` of each other, small beside the standard error of a tuning MSE (about 0.05): with `mtry = 3` this knob matters little.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
 `mtry = `r mtrys[which.min(mse_mtry)]`` wins, and both ends are worse: with 1 input tried the trees are weak, and with all 9 (`mtry = 9` is bagging) they are alike. `nodesize = `r nodesizes[which.min(mse_node)]`` wins, and the three values are within `r sprintf("%.3f", diff(range(mse_node)))` of each other: small beside the standard error of a tuning MSE (about 0.05), though larger than the change between two forests with the same knobs (about 0.003; each forest draws its own bootstrap samples). With `mtry = 3` this knob matters little.
 
 Common errors: `rf_score(5, m)`, which swaps the knobs; tuning `nodesize` at the winning `mtry` instead of the default (question 6 does that, for boosting).
@@ -346,7 +389,17 @@ rf_grid |> mutate(tune_mse = round(tune_mse, 3)) |>
   pivot_wider(names_from = nodesize, values_from = tune_mse, names_prefix = "nodesize ")
 ```
 
-::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+::: {.content-hidden .answer .brief}
+```{r}
+#| include: false
+rf_wide <- rf_grid |> pivot_wider(names_from = nodesize, values_from = tune_mse)
+rf_best <- rf_grid |> slice_min(tune_mse)
+```
+
+Yes: with `mtry = 9` (bagging) the larger nodes are much better (`r sprintf("%.2f", rf_wide[["5"]][5])`, `r sprintf("%.2f", rf_wide[["50"]][5])`, `r sprintf("%.2f", rf_wide[["200"]][5])` for nodes of 5, 50 and 200); with `mtry = 3` the row is nearly flat. The grid's best, `mtry = `r rf_best$mtry``, `nodesize = `r rf_best$nodesize`` (`r sprintf("%.3f", rf_best$tune_mse)`), has the values question 2 chose one knob at a time.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
 ```{r}
 rf_wide <- rf_grid |> pivot_wider(names_from = nodesize, values_from = tune_mse)
 rf_best <- rf_grid |> slice_min(tune_mse)
@@ -393,7 +446,17 @@ fit_default_boost <- boost_fit(depth = 6, rate = 0.3)
 mse(mv_train$rating, predict(fit_default_boost, X_train, iteration_range = c(1, 100)))   # training MSE
 ```
 
-::: {.callout-tip .answer collapse="true" title="Reveal answer"}
+::: {.content-hidden .answer .brief}
+```{r}
+#| include: false
+boost_default <- models |> filter(depth == 6, rate == 0.3, iters == 100)
+boost_default_train <- mse(mv_train$rating, predict(fit_default_boost, X_train, iteration_range = c(1, 100)))
+```
+
+The defaults score `r sprintf("%.2f", boost_default$tune_mse)` on the tuning films, worse than the default forest (`r sprintf("%.2f", q1[["tuning"]])`) and over a third of the way back to the training mean (`r sprintf("%.2f", mse(mv_tune$rating, mean(mv_train$rating)))`); on the training films they score `r sprintf("%.2f", boost_default_train)`. They overfit.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
 ```{r}
 boost_default <- models |> filter(depth == 6, rate == 0.3, iters == 100)
 boost_default_train <- mse(mv_train$rating, predict(fit_default_boost, X_train, iteration_range = c(1, 100)))
@@ -434,7 +497,13 @@ models |> filter(depth %in% c(2, 6)) |>
   facet_wrap(~ depth, labeller = label_both) +
   labs(x = "iterations (log scale)", y = "tuning MSE", color = "learning rate")
 ```
+:::
 
+::: {.content-hidden .answer .brief}
+No. Each knob alone fixes the defaults' overfitting: `r alone_iters$iters` iterations (`r sprintf("%.3f", alone_iters$tune_mse)`), depth `r alone_depth$depth` (`r sprintf("%.3f", alone_depth$tune_mse)`) or rate `r alone_rate$rate` (`r sprintf("%.3f", alone_rate$tune_mse)`). Together they score `r sprintf("%.3f", together$tune_mse)`, worse than the defaults: once one knob has stopped the overfitting, the others should move the other way. In the figure, each learning rate reaches a similar minimum, later the smaller the rate.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
 No. Each knob alone fixes the defaults' overfitting: `r alone_iters$iters` iterations (`r sprintf("%.3f", alone_iters$tune_mse)`), depth `r alone_depth$depth` (`r sprintf("%.3f", alone_depth$tune_mse)`) or rate `r alone_rate$rate` (`r sprintf("%.3f", alone_rate$tune_mse)`). Together they score `r sprintf("%.3f", together$tune_mse)`, worse than the defaults: `r together$iters` small steps with trees of depth `r together$depth` have hardly moved from the training mean. Each winner was the best answer to "how do we stop overfitting?" with the other two knobs at the defaults; once one knob has stopped it, the others should move the other way. The rate and the number of iterations trade off against each other, and the depth with both: in the figure, each learning rate reaches a similar minimum, later the smaller the rate, and the dashed line is the training mean.
 
 Common errors: filtering on the knob being tuned (`filter(iters == 100)` when tuning the iterations); combining the three winning tuning MSEs instead of finding the model that has all three winning knobs.
@@ -460,8 +529,14 @@ bind_rows(sequence = step3, grid = boost_best, .id = "search")
 d_seq <- loss[, step3$col] - loss[, boost_best$col]
 c(difference = mean(d_seq), se = se_loss(d_seq))
 ```
+:::
 
-In sequence: `r step3$iters` iterations, depth `r step3$depth`, rate `r step3$rate`, scoring `r sprintf("%.3f", step3$tune_mse)`. The whole grid: depth `r boost_best$depth`, rate `r boost_best$rate`, `r boost_best$iters` iterations, scoring `r sprintf("%.3f", boost_best$tune_mse)`. The difference is `r sprintf("%.3f", mean(d_seq))` with a standard error of `r sprintf("%.3f", se_loss(d_seq))` (paired: the two models are scored on the same films), so here the sequence came close to the full grid, with 6 fits (one for the iterations, since one fit gives every number of iterations, then 3 more depths and 2 more rates) against the grid's 12. Each step builds on the choices already made, which question 5's searches from the defaults did not; but a single pass can miss better combinations, and its result can depend on the order of the knobs. The sequence only looked among the 96 models fixed in advance, so an argument like problem 3's, with $K = 96$, covers its choice even though it chose adaptively.
+::: {.content-hidden .answer .brief}
+In sequence: `r step3$iters` iterations, depth `r step3$depth`, rate `r step3$rate` (`r sprintf("%.3f", step3$tune_mse)`), with 6 fits. The whole grid: depth `r boost_best$depth`, rate `r boost_best$rate`, `r boost_best$iters` iterations (`r sprintf("%.3f", boost_best$tune_mse)`), with 12. The paired difference is `r sprintf("%.3f", mean(d_seq))` (standard error `r sprintf("%.3f", se_loss(d_seq))`): here the sequence came close, though a single pass can miss better combinations.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
+In sequence: `r step3$iters` iterations, depth `r step3$depth`, rate `r step3$rate`, scoring `r sprintf("%.3f", step3$tune_mse)`. The whole grid: depth `r boost_best$depth`, rate `r boost_best$rate`, `r boost_best$iters` iterations, scoring `r sprintf("%.3f", boost_best$tune_mse)`. The difference is `r sprintf("%.3f", mean(d_seq))` with a standard error of `r sprintf("%.3f", se_loss(d_seq))` (paired: the two models are scored on the same films), so here the sequence came close to the full grid, with 6 fits (one for the iterations, since one fit gives every number of iterations, then 3 more depths and 2 more rates) against the grid's 12. Each step builds on the choices already made, which question 5's searches from the defaults did not; but a single pass can miss better combinations, and its result can depend on the order of the knobs. The sequence only looked among the 96 models fixed in advance, so an argument like problem 2's, with $K = 96$, covers its choice even though it chose adaptively.
 
 Common errors: tuning the depth at 100 iterations in step 2 (the defaults again, as in question 5).
 :::
@@ -488,7 +563,13 @@ j_best <- models |> slice_min(tune_mse) |> pull(col)
 d_add <- loss[, j_additive] - loss[, j_best]
 c(difference = mean(d_add), se = se_loss(d_add))
 ```
+:::
 
+::: {.content-hidden .answer .brief}
+The best additive model is worse by `r sprintf("%.3f", mean(d_add))` (standard error `r sprintf("%.3f", se_loss(d_add))`). Deeper trees help a little: compatible with interactions between the inputs, but not evidence for them.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
 The best additive model is worse by `r sprintf("%.3f", mean(d_add))`, with a standard error of `r sprintf("%.3f", se_loss(d_add))`: about `r sprintf("%.1f", mean(d_add) / se_loss(d_add))` standard errors. Allowing deeper trees helps a little. That is compatible with useful interactions (length and year, say), but does not establish them: the difference is under two standard errors, and it favors the grid's best, which was chosen as the minimum of all 96 of these tuning scores, against 24 at depth 1. The gain is small beside the `r sprintf("%.2f", mse(mv_tune$rating, mean(mv_train$rating)) - boost_best$tune_mse)` that the grid's best gains over the training mean.
 
 Common errors: `sd(d_add)` without dividing by $\sqrt{2000}$; comparing the two tuning MSEs without pairing (the two models are scored on the same films, so their losses are correlated, and the unpaired standard error is much larger).
@@ -538,6 +619,15 @@ halves <- replicate(2000, {
 q8 <- apply(halves, 1:2, mean)
 q8 <- cbind(q8, gap = q8[, "other_half"] - q8[, "chosen_on"])
 round(q8, 4)
+```
+:::
+
+::: {.content-hidden .answer .brief}
+The 96-model search reports the lowest MSE on the half that chose its model (`r sprintf("%.3f", q8["all_models", "chosen_on"])`, against `r sprintf("%.3f", q8["one_knob", "chosen_on"])` for 13 models), but on the other half its winner scores `r sprintf("%.3f", q8["all_models", "other_half"])` against `r sprintf("%.3f", q8["one_knob", "other_half"])`. The optimism of the reported minimum is `r sprintf("%.3f", q8["fixed", "gap"])`, `r sprintf("%.3f", q8["one_knob", "gap"])` and `r sprintf("%.3f", q8["all_models", "gap"])` for 1, 13 and 96 models. The error to report is the one on films the search never used.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
+```{r}
 # The 96-model gap minus the 13-model gap, with its Monte Carlo standard error (same halves for both):
 gap_diff <- (halves["all_models", "other_half", ] - halves["all_models", "chosen_on", ]) -
   (halves["one_knob", "other_half", ] - halves["one_knob", "chosen_on", ])
@@ -590,6 +680,15 @@ loss_test <- tibble(
 round(sapply(loss_test, function(l) c(mse = mean(l), se = se_loss(l))), 3)
 d_test <- loss_test$forest - loss_test$boosting
 c(difference = mean(d_test), se = se_loss(d_test))
+```
+:::
+
+::: {.content-hidden .answer .brief}
+On the test films the forest scores `r sprintf("%.2f", mean(loss_test$forest))` and the boosting model `r sprintf("%.2f", mean(loss_test$boosting))`; their paired difference, `r sprintf("%.3f", mean(d_test))` (standard error `r sprintf("%.3f", se_loss(d_test))`), does not separate them. The training mean, never tuned, also scores worse on the test films than on the tuning films (`r sprintf("%.2f", mean(loss_test$training_mean))` against `r sprintf("%.2f", mse(mv_tune$rating, mean(mv_train$rating)))`), so a rise from tuning to test is not all optimism of the search.
+:::
+
+::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
+```{r}
 # The training mean's rise from tuning to test, with its standard error (two independent sets of films):
 loss_tune_mean <- (mv_tune$rating - mean(mv_train$rating))^2
 c(rise = mean(loss_test$training_mean) - mean(loss_tune_mean),
@@ -600,6 +699,8 @@ The forest scores `r sprintf("%.2f", mean(loss_test$forest))` and the boosting m
 
 Common errors: choosing the pair after seeing test scores; an unpaired standard error for the difference; reading every rise from tuning to test as the optimism of the search.
 :::
+
+<!-- not in the instructor notebook: from here -->
 
 ### Optional, can be done at home: a truth with an interaction
 
@@ -682,8 +783,9 @@ The fitted values stop changing (by less than $10^{-6}$) after `r t` iterations.
 Common errors: the full residual `y - b0 - f_len - f_yr` in place of the partial residual, which leaves out the curve being refitted; forgetting to center.
 :::
 
+<!-- not in the instructor notebook: to here -->
+
 ## References
 
 - Hoeffding, W. (1963). Probability inequalities for sums of bounded random variables. *Journal of the American Statistical Association*, 58(301), 13--30. [doi:10.1080/01621459.1963.10500830](https://doi.org/10.1080/01621459.1963.10500830)
-- IMDb user ratings of the later films in problem 1, read on 17 November 2026: [Revenge of the Sith](https://www.imdb.com/title/tt0121766/), [The Force Awakens](https://www.imdb.com/title/tt2488496/), [Rogue One](https://www.imdb.com/title/tt3748528/), [The Last Jedi](https://www.imdb.com/title/tt2527336/), [The Rise of Skywalker](https://www.imdb.com/title/tt2527338/). The two seasons of *Andor* are the averages of their episodes' IMDb ratings (8.32 and 8.65, rounded), as summarized by [episodes.cool](https://episodes.cool/title/tt9253284/andor/).
-- The films: [data note](https://ml4ds.com/data/movies.html).
+- The films: [data note](https://ml4ds.com/data/movies.html). The Spotify tracks in problem 1: [data note](https://ml4ds.com/data/spotify.html).

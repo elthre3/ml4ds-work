@@ -2406,7 +2406,7 @@ window.Quarto = {
 <section id="before-the-seminar" class="level2">
 <h2 class="anchored" data-anchor-id="before-the-seminar">Before the seminar</h2>
 <!-- At home, before the seminar. -->
-<p>The lecture proved the variance of an average of correlated variables; exercise 1 is that proof again, with the slides closed. It derived boosting as approximate gradient descent; exercise 2 takes one boosting step by hand. Do both on paper before the seminar; the seminar’s problems are variations on them. You may use, without proof: <span class="math inline">\(\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b&#39;}\mathrm{Cov}(V_b, V_{b&#39;})\)</span>, and <span class="math inline">\(\mathrm{Cov}(V, V) = \mathrm{Var}(V)\)</span>.</p>
+<p>The lecture proved the variance of an average of correlated variables; exercise 1 is that proof again, with the slides closed. It derived boosting as approximate gradient descent; exercise 2 takes one boosting step by hand. Do both on paper before the seminar. You may use, without proof: <span class="math inline">\(\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b&#39;}\mathrm{Cov}(V_b, V_{b&#39;})\)</span>, and <span class="math inline">\(\mathrm{Cov}(V, V) = \mathrm{Var}(V)\)</span>.</p>
 <div class="callout callout-style-default callout-warning callout-titled" title="Hints">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2462,7 +2462,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -2562,7 +2562,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -2625,64 +2625,18 @@ window.Quarto = {
 </section>
 <section id="problems" class="level2">
 <h2 class="anchored" data-anchor-id="problems">Problems</h2>
-<!-- About 27 min: problems 1 to 3 (10, 8, 9), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
-<p><strong>Problem 1 (Andor).</strong> The lecture grew a tree on the five <em>Star Wars</em> films in the data (exercise 2’s table), splitting on year:</p>
-<ul>
-<li>before 1991: 8.8 if the year is before 1981.5, 8.1 otherwise;</li>
-<li>from 1991 on: 6.4 if the year is before 2000.5, 7.0 otherwise.</li>
-</ul>
-<p>Cost-complexity pruning, with penalty <span class="math inline">\(\alpha\)</span> per leaf, gives a sequence of trees: the four leaves above for <span class="math inline">\(\alpha &lt; 0.18\)</span>; three leaves for <span class="math inline">\(0.18 &lt; \alpha &lt; 0.33\)</span>, the two films from 1991 on merged into one leaf predicting 6.7; two leaves for <span class="math inline">\(0.33 &lt; \alpha &lt; 4.18\)</span>, predicting 8.57 before 1991 and 6.7 from 1991 on; and one leaf, 7.82, for <span class="math inline">\(\alpha &gt; 4.18\)</span>. Later titles, with their IMDb ratings in November 2026:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Title</th>
-<th style="text-align: right;">Year</th>
-<th style="text-align: right;">Rating</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Revenge of the Sith</td>
-<td style="text-align: right;">2005</td>
-<td style="text-align: right;">7.6</td>
-</tr>
-<tr class="even">
-<td>The Force Awakens</td>
-<td style="text-align: right;">2015</td>
-<td style="text-align: right;">7.8</td>
-</tr>
-<tr class="odd">
-<td>Rogue One</td>
-<td style="text-align: right;">2016</td>
-<td style="text-align: right;">7.8</td>
-</tr>
-<tr class="even">
-<td>The Last Jedi</td>
-<td style="text-align: right;">2017</td>
-<td style="text-align: right;">6.9</td>
-</tr>
-<tr class="odd">
-<td>The Rise of Skywalker</td>
-<td style="text-align: right;">2019</td>
-<td style="text-align: right;">6.4</td>
-</tr>
-<tr class="even">
-<td>Andor, season 1</td>
-<td style="text-align: right;">2022</td>
-<td style="text-align: right;">8.3</td>
-</tr>
-<tr class="odd">
-<td>Andor, season 2</td>
-<td style="text-align: right;">2025</td>
-<td style="text-align: right;">8.7</td>
-</tr>
-</tbody>
-</table>
+<!-- About 20 min: problems 1 and 2 (10 each), pen and paper; problem 1(f) is optional and not done in the room. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the one before it; citing an earlier result that has been proved is also fine. -->
+<p>Both problems use two inequalities. Markov’s inequality: if <span class="math inline">\(W \ge 0\)</span> and <span class="math inline">\(a &gt; 0\)</span>, then <span class="math inline">\(P(W \ge a) \le \mathbb E[W]/a\)</span>. Hoeffding’s inequality (Hoeffding 1963): if <span class="math inline">\(Z_1, \ldots, Z_m\)</span> are independent with <span class="math inline">\(0 \le Z_i \le 1\)</span> and <span class="math inline">\(\bar Z\)</span> is their mean, then for every <span class="math inline">\(t &gt; 0\)</span>, <span class="math display">\[
+P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
+\]</span></p>
+<p><strong>Problem 1 (how far a score can be from the risk).</strong> A classifier predicts a track’s playlist genre, one of six, from its audio features (<a href="https://ml4ds.com/data/spotify.html">data note</a>). It was fitted on training tracks and is now fixed; its risk <span class="math inline">\(R\)</span> is its error rate on new tracks. On <span class="math inline">\(m = 2000\)</span> tuning tracks, drawn independently of each other and of the training tracks, it errs on 1,062, so its score is <span class="math inline">\(\hat R = 0.531\)</span>, the mean of <span class="math inline">\(m\)</span> losses <span class="math inline">\(\ell_i \in \{0, 1\}\)</span> with mean <span class="math inline">\(R\)</span>. Write <span class="math inline">\(D = \hat R - R\)</span>. We want an interval <span class="math inline">\(\hat R \pm t\)</span> that contains <span class="math inline">\(R\)</span> with probability at least <span class="math inline">\(1 - \delta\)</span>, for <span class="math inline">\(\delta = 0.001\)</span>: a <span class="math inline">\(t\)</span> with <span class="math inline">\(P(|D| \ge t) \le \delta\)</span>.</p>
 <ol type="a">
-<li><p>What does each tree in the sequence predict for <em>Andor</em>, season 1? For a title made in 2050?</p></li>
-<li><p>Use the five films (not <em>Andor</em>) as held-out data: compute each tree’s sum of squared errors on them. Which values of <span class="math inline">\(\alpha\)</span> do they choose?</p></li>
-<li><p>Now add the two seasons of <em>Andor</em>. Which values of <span class="math inline">\(\alpha\)</span> do the seven titles choose?</p></li>
-<li><p>Two titles changed the choice. Explain why with one formula, and say whether these seven titles should be used to choose <span class="math inline">\(\alpha\)</span> for predicting films like the training films.</p></li>
+<li><p>Show that <span class="math inline">\(\mathrm{Var}(\ell_i) \le \frac14\)</span>, so that <span class="math inline">\(\mathrm{Var}(D) \le \frac{1}{4m}\)</span>.</p></li>
+<li><p>Apply Markov’s inequality to <span class="math inline">\(W = |D|\)</span>, using <span class="math inline">\(\mathbb E|D| \le \sqrt{\mathbb E[D^2]}\)</span>, and find <span class="math inline">\(t\)</span>.</p></li>
+<li><p>Apply it to <span class="math inline">\(W = D^2\)</span> instead (this is Chebyshev’s inequality), and find <span class="math inline">\(t\)</span>.</p></li>
+<li><p>Find <span class="math inline">\(t\)</span> from Hoeffding’s inequality.</p></li>
+<li><p>Compute the three intervals. Guessing a genre at random errs with probability <span class="math inline">\(\frac56\)</span>: which interval rules that out for this classifier? How does each <span class="math inline">\(t\)</span> grow as <span class="math inline">\(\delta\)</span> shrinks?</p></li>
+<li><p><em>Optional.</em> Hoeffding’s lemma says that if <span class="math inline">\(0 \le Z \le 1\)</span> with mean <span class="math inline">\(\mu\)</span>, then <span class="math inline">\(\mathbb E\big[e^{\lambda(Z - \mu)}\big] \le e^{\lambda^2/8}\)</span> for every <span class="math inline">\(\lambda\)</span>. Apply Markov’s inequality to <span class="math inline">\(W = e^{\lambda D}\)</span> with <span class="math inline">\(\lambda &gt; 0\)</span>, and use independence and the lemma to show that <span class="math inline">\(P(D \ge t) \le e^{-\lambda t + \lambda^2/(8m)}\)</span>. Then choose <span class="math inline">\(\lambda\)</span> to get <span class="math inline">\(P(D \ge t) \le e^{-2mt^2}\)</span>.</p></li>
 </ol>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
@@ -2696,7 +2650,9 @@ window.Quarto = {
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>(a), (b) Every later title is from after 2000.5. Which leaf does it fall in, in each tree?</p>
+<ol type="a">
+<li>A loss of 0 or 1 equals its square. The <span class="math inline">\(\ell_i\)</span> are independent, and <span class="math inline">\(D\)</span> is their mean minus a constant.</li>
+</ol>
 </div>
 </div>
 </div>
@@ -2712,93 +2668,67 @@ window.Quarto = {
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol start="4" type="a">
-<li>If a tree predicts the same number <span class="math inline">\(c\)</span> for all <span class="math inline">\(n\)</span> held-out titles, its sum of squared errors is <span class="math inline">\(\sum_i (y_i - \bar y)^2 + n(\bar y - c)^2\)</span>, with <span class="math inline">\(\bar y\)</span> the titles’ mean.</li>
+<ol start="2" type="a">
+<li>to (d) Each inequality bounds <span class="math inline">\(P(|D| \ge t)\)</span> by an expression in <span class="math inline">\(t\)</span>: set it equal to <span class="math inline">\(\delta\)</span> and solve for <span class="math inline">\(t\)</span>. In (c), <span class="math inline">\(|D| \ge t\)</span> exactly when <span class="math inline">\(D^2 \ge t^2\)</span>.</li>
 </ol>
 </div>
 </div>
 </div>
-<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 3">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Reveal answer
+<span class="screen-reader-only">Note</span>Hint 3
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol type="a">
-<li><p>Every title from after 2000.5 falls in the leaf of the latest films: the grown tree predicts 7.0, the three- and two-leaf trees 6.7, the one-leaf tree 7.82. A title from 2050 gets the same predictions: a tree predicts a constant beyond its last split, whatever the year.</p></li>
-<li><p>Each tree predicts one number for all five films (ratings 7.6, 7.8, 7.8, 6.9, 6.4), so its sum of squared errors is <span class="math inline">\(\sum_i(y_i - c)^2\)</span>: 2.01 for <span class="math inline">\(c = 7.0\)</span> (four leaves), 3.36 for <span class="math inline">\(c = 6.7\)</span> (three or two leaves), 2.91 for <span class="math inline">\(c = 7.82\)</span> (one leaf). The five films choose the grown tree: any <span class="math inline">\(\alpha &lt; 0.18\)</span>.</p></li>
-<li><p>With 8.3 and 8.7 added: 6.59 for <span class="math inline">\(c = 7.0\)</span>, 9.92 for <span class="math inline">\(c = 6.7\)</span>, 3.92 for <span class="math inline">\(c = 7.82\)</span>. The seven titles choose the tree with no split: any <span class="math inline">\(\alpha &gt; 4.18\)</span>.</p></li>
-<li><p>All the titles fall in one leaf of every tree, so each tree predicts one constant <span class="math inline">\(c\)</span> for all of them, and its error is <span class="math inline">\(\sum_i(y_i - \bar y)^2 + n(\bar y - c)^2\)</span>. The first term is the same for every tree; the choice is the constant nearest the titles’ mean. That mean is 7.30 for the five films, nearest 7.0, and 7.64 with <em>Andor</em>, nearest 7.82. Two titles with high ratings moved the mean past the midpoint between 7.0 and 7.82, which is 7.41. These seven titles are a poor tuning set for films like the training films: they are all later than the five training films, all on the far side of the last split, two are seasons of a television series rated by episode, and the ratings were read in 2026, not in 2005.</p></li>
+<ol start="6" type="a">
+<li><span class="math inline">\(D \ge t\)</span> exactly when <span class="math inline">\(e^{\lambda D} \ge e^{\lambda t}\)</span>. Write <span class="math inline">\(e^{\lambda D}\)</span> as a product of <span class="math inline">\(m\)</span> independent factors, one for each tuning track.</li>
 </ol>
-<p>Common errors: sending a title down the tree by its rating instead of its year; giving <em>Revenge of the Sith</em> (2005) the leaf 6.4, which is for 1991 to 2000.5; computing the error of the two-leaf tree with 8.57 (no later title falls in that leaf).</p>
 </div>
 </div>
 </div>
-<p><strong>Problem 2 (the size of a boosting step).</strong> A boosting fit has fitted values <span class="math inline">\(\mathbf f = (f_1, \ldots, f_n)\)</span> and residuals <span class="math inline">\(r_i = y_i - f_i\)</span>, with training loss <span class="math inline">\(L(\mathbf f) = \sum_i \frac12(y_i - f_i)^2\)</span>. A tree <span class="math inline">\(t\)</span> is fitted to the residuals: in leaf <span class="math inline">\(l\)</span>, which holds <span class="math inline">\(n_l\)</span> of the units, it predicts the mean <span class="math inline">\(\bar r_l\)</span> of their residuals. Write <span class="math inline">\(t_i\)</span> for its prediction for unit <span class="math inline">\(i\)</span>.</p>
-<ol type="a">
-<li><p>Show that <span class="math inline">\(L(\mathbf f + \gamma\,\mathbf t) = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)\sum_l n_l\,\bar r_l^{\,2}\)</span>, the sum over the tree’s leaves.</p></li>
-<li><p>For which <span class="math inline">\(\gamma \ge 0\)</span> does a step not raise the training loss? Which <span class="math inline">\(\gamma\)</span> lowers it most?</p></li>
-<li><p>The five residuals <span class="math inline">\(0.98, 0.98, 0.28, -1.42, -0.82\)</span>, with a tree whose leaves hold the first three and the last two. Compute <span class="math inline">\(\sum_l n_l\bar r_l^{\,2}\)</span> and the loss after a step of <span class="math inline">\(\gamma = 0.5\)</span>, <span class="math inline">\(1\)</span> and <span class="math inline">\(2\)</span>.</p></li>
-<li><p>Part (b) gives the <span class="math inline">\(\gamma\)</span> that lowers the training loss most at every step. Why do boosting libraries use a much smaller <span class="math inline">\(\gamma\)</span> by default?</p></li>
-</ol>
-<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Hint 1
+<span class="screen-reader-only">Tip</span>Reveal answer
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
-<li><span class="math inline">\(y_i - f_i - \gamma t_i = r_i - \gamma t_i\)</span>. Expand the square, then compute <span class="math inline">\(\sum_i r_i t_i\)</span> and <span class="math inline">\(\sum_i t_i^2\)</span> one leaf at a time: within leaf <span class="math inline">\(l\)</span>, <span class="math inline">\(t_i = \bar r_l\)</span>.</li>
+<li><p>A loss of 0 or 1 equals its square, so <span class="math inline">\(\mathbb E[\ell_i^2] = R\)</span> and <span class="math inline">\(\mathrm{Var}(\ell_i) = R - R^2 = R(1 - R)\)</span>, which is at most <span class="math inline">\(\frac14\)</span>, its value at <span class="math inline">\(R = \frac12\)</span>. (For any loss between 0 and 1, <span class="math inline">\(\ell_i^2 \le \ell_i\)</span> gives the same bound.) <span class="math inline">\(D = \frac1m\sum_i (\ell_i - R)\)</span> is a mean of <span class="math inline">\(m\)</span> independent terms, so <span class="math inline">\(\mathrm{Var}(D) = \mathrm{Var}(\ell_i)/m \le \frac{1}{4m}\)</span>.</p></li>
+<li><p><span class="math inline">\(\mathbb E[D] = 0\)</span>, so <span class="math inline">\(\mathbb E[D^2] = \mathrm{Var}(D) \le \frac{1}{4m}\)</span> and <span class="math inline">\(\mathbb E|D| \le \frac{1}{2\sqrt m}\)</span>. Markov’s inequality gives <span class="math inline">\(P(|D| \ge t) \le \mathbb E|D|/t \le \frac{1}{2t\sqrt m}\)</span>, which equals <span class="math inline">\(\delta\)</span> at <span class="math display">\[
+t = \frac{1}{2\delta\sqrt m} = \frac{1}{2 \times 0.001 \times \sqrt{2000}} = 11.2.
+\]</span></p></li>
+<li><p><span class="math inline">\(P(|D| \ge t) = P(D^2 \ge t^2) \le \mathbb E[D^2]/t^2 \le \frac{1}{4mt^2}\)</span>, which equals <span class="math inline">\(\delta\)</span> at <span class="math inline">\(t = \frac{1}{2\sqrt{\delta m}} = \frac{1}{2\sqrt 2} = 0.354\)</span>.</p></li>
+<li><p>The <span class="math inline">\(\ell_i\)</span> are independent and between 0 and 1, so <span class="math inline">\(P(|D| \ge t) \le 2e^{-2mt^2}\)</span>, which equals <span class="math inline">\(\delta\)</span> at <span class="math inline">\(t = \sqrt{\log(2/\delta)/(2m)} = \sqrt{\log(2000)/4000} = 0.044\)</span>.</p></li>
+<li><p>Markov’s interval, <span class="math inline">\(0.531 \pm 11.2\)</span>, says less than we knew before: <span class="math inline">\(R\)</span> is between 0 and 1 anyway. Chebyshev’s is <span class="math inline">\([0.177, 0.885]\)</span>, which contains <span class="math inline">\(\frac56 = 0.833\)</span>, so it cannot tell this classifier from guessing. Hoeffding’s is <span class="math inline">\([0.487, 0.575]\)</span>, which rules guessing out. As <span class="math inline">\(\delta\)</span> shrinks, <span class="math inline">\(t\)</span> grows like <span class="math inline">\(1/\delta\)</span> for Markov, <span class="math inline">\(1/\sqrt\delta\)</span> for Chebyshev and <span class="math inline">\(\sqrt{\log(2/\delta)}\)</span> for Hoeffding. All three shrink like <span class="math inline">\(1/\sqrt m\)</span>; what differs is the price of a small <span class="math inline">\(\delta\)</span>. Each is Markov’s inequality applied to a different function of <span class="math inline">\(D\)</span>: <span class="math inline">\(|D|\)</span>, <span class="math inline">\(D^2\)</span> and, for Hoeffding, <span class="math inline">\(e^{\lambda D}\)</span> (part (f)). Each uses more about <span class="math inline">\(D\)</span>: one moment, then two, then, through the bounds on the losses, all of them. At <span class="math inline">\(\delta = 0.05\)</span> the three are 0.22, 0.050 and 0.030, and Chebyshev’s would be usable; problem 2 shows why a search needs a small <span class="math inline">\(\delta\)</span>. Hoeffding’s interval is the best of the three, not the best possible: it uses only independence and the bounds on the losses, and a normal approximation gives about <span class="math inline">\(\pm 0.037\)</span> here.</p></li>
+<li><p>By Markov’s inequality, <span class="math inline">\(P(D \ge t) = P(e^{\lambda D} \ge e^{\lambda t}) \le e^{-\lambda t}\,\mathbb E[e^{\lambda D}]\)</span>. Since <span class="math inline">\(e^{\lambda D} = \prod_i e^{(\lambda/m)(\ell_i - R)}\)</span> and the <span class="math inline">\(\ell_i\)</span> are independent, the lemma with <span class="math inline">\(\lambda/m\)</span> in place of <span class="math inline">\(\lambda\)</span> gives <span class="math display">\[
+\mathbb E[e^{\lambda D}] = \prod_{i=1}^m \mathbb E\big[e^{(\lambda/m)(\ell_i - R)}\big] \le e^{m\lambda^2/(8m^2)} = e^{\lambda^2/(8m)}.
+\]</span> So <span class="math inline">\(P(D \ge t) \le e^{-\lambda t + \lambda^2/(8m)}\)</span>. The exponent is smallest at <span class="math inline">\(\lambda = 4mt\)</span>, where it equals <span class="math inline">\(-4mt^2 + 2mt^2 = -2mt^2\)</span>. The same argument for the losses <span class="math inline">\(1 - \ell_i\)</span> bounds <span class="math inline">\(P(D \le -t)\)</span> by <span class="math inline">\(e^{-2mt^2}\)</span>, and the two together give Hoeffding’s inequality. <span class="math inline">\(\blacksquare\)</span></p></li>
 </ol>
+<p>Common errors: in (b), forgetting that <span class="math inline">\(\mathbb E[D^2]\)</span> is the variance only because <span class="math inline">\(\mathbb E[D] = 0\)</span>; in (c), <span class="math inline">\(t = \frac{1}{4m\delta}\)</span> (the square root forgotten), or the plug-in variance <span class="math inline">\(\hat R(1 - \hat R)\)</span> in place of <span class="math inline">\(\frac14\)</span>, which is close here but no longer a guarantee; in (d), <span class="math inline">\(\log(1/\delta)\)</span> in place of <span class="math inline">\(\log(2/\delta)\)</span> (the bound covers both tails).</p>
 </div>
 </div>
 </div>
-<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Reveal answer
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-12" class="callout-12-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
+<p><strong>Problem 2 (the size of a search).</strong> A model’s risk is its expected loss on a new unit, <span class="math inline">\(R = \mathbb E[\ell]\)</span>, for a loss with <span class="math inline">\(0 \le \ell \le 1\)</span> (for example, the 0–1 loss of a classifier). Before the tuning data are seen, <span class="math inline">\(K\)</span> candidate models are fixed, fitted on the training data, with risks <span class="math inline">\(R_1, \ldots, R_K\)</span>; treat the fitted models as fixed, so that everything below is conditional on the training data. On <span class="math inline">\(m\)</span> tuning units, drawn independently of each other and of the training data, candidate <span class="math inline">\(k\)</span> scores <span class="math inline">\(\hat R_k\)</span>, the mean of its <span class="math inline">\(m\)</span> losses.</p>
 <ol type="a">
-<li><p><span class="math inline">\(L(\mathbf f + \gamma\mathbf t) = \frac12\sum_i (r_i - \gamma t_i)^2 = \frac12\sum_i r_i^2 - \gamma\sum_i r_i t_i + \frac{\gamma^2}{2}\sum_i t_i^2\)</span>. Within leaf <span class="math inline">\(l\)</span>, <span class="math inline">\(t_i = \bar r_l\)</span>, so <span class="math inline">\(\sum_{i \in l} r_i t_i = \bar r_l \sum_{i \in l} r_i = n_l\bar r_l^{\,2}\)</span> and <span class="math inline">\(\sum_{i \in l} t_i^2 = n_l\bar r_l^{\,2}\)</span>. Writing <span class="math inline">\(S = \sum_l n_l\bar r_l^{\,2}\)</span>, <span class="math inline">\(L(\mathbf f + \gamma\mathbf t) = L(\mathbf f) - \gamma S + \frac{\gamma^2}{2}S = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)S\)</span>. <span class="math inline">\(\blacksquare\)</span></p></li>
-<li><p><span class="math inline">\(S \ge 0\)</span>, so the loss does not rise when <span class="math inline">\(\gamma(1 - \gamma/2) \ge 0\)</span>, that is, for <span class="math inline">\(0 \le \gamma \le 2\)</span> (when <span class="math inline">\(S &gt; 0\)</span> it falls strictly for <span class="math inline">\(0 &lt; \gamma &lt; 2\)</span>). The decrease <span class="math inline">\(\gamma - \gamma^2/2\)</span> is largest at <span class="math inline">\(\gamma = 1\)</span>, where each leaf’s residuals are moved by their full mean.</p></li>
-<li><p>The leaf means are <span class="math inline">\(0.747\)</span> and <span class="math inline">\(-1.12\)</span>, so <span class="math inline">\(S = 3(0.747)^2 + 2(1.12)^2 = 4.181\)</span>. The loss before the step is <span class="math inline">\(\frac12\sum_i r_i^2 = 2.344\)</span>, and after it <span class="math inline">\(2.344 - 4.181\,\gamma(1 - \gamma/2)\)</span>: <span class="math inline">\(0.776\)</span> at <span class="math inline">\(\gamma = 0.5\)</span>, <span class="math inline">\(0.253\)</span> at <span class="math inline">\(\gamma = 1\)</span>, and <span class="math inline">\(2.344\)</span> again at <span class="math inline">\(\gamma = 2\)</span>, which overshoots by as much as <span class="math inline">\(\gamma = 0\)</span> undershoots.</p></li>
-<li><p>The training loss is not what we want to make small. With <span class="math inline">\(\gamma = 1\)</span> each step removes the leaf means of the residuals in full, so a few iterations already fit the noise. With small steps, many trees each move the fit a little, and the number of iterations becomes the knob that stops the fit; the learning rate and the number of iterations are then chosen together, on held-out data. The coding below does that.</p></li>
-</ol>
-<p>Common errors: forgetting that <span class="math inline">\(\sum_i r_i t_i\)</span> is a sum over units, not over leaves; concluding from (b) that <span class="math inline">\(\gamma = 1\)</span> is best for prediction.</p>
-</div>
-</div>
-</div>
-<p><strong>Problem 3 (the size of a search).</strong> A model’s risk is its expected loss on a new unit, <span class="math inline">\(R = \mathbb E[\ell]\)</span>, for a loss with <span class="math inline">\(0 \le \ell \le 1\)</span> (for example, the 0–1 loss of a classifier). Before the tuning data are seen, <span class="math inline">\(K\)</span> candidate models are fixed, fitted on the training data, with risks <span class="math inline">\(R_1, \ldots, R_K\)</span>; treat the fitted models as fixed, so that everything below is conditional on the training data. On <span class="math inline">\(m\)</span> tuning units, drawn independently of each other and of the training data, candidate <span class="math inline">\(k\)</span> scores <span class="math inline">\(\hat R_k\)</span>, the mean of its <span class="math inline">\(m\)</span> losses. You may use Hoeffding’s inequality (Hoeffding 1963): if <span class="math inline">\(Z_1, \ldots, Z_m\)</span> are independent with <span class="math inline">\(0 \le Z_i \le 1\)</span> and <span class="math inline">\(\bar Z\)</span> is their mean, then for every <span class="math inline">\(t &gt; 0\)</span>, <span class="math display">\[
-P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
-\]</span></p>
-<ol type="a">
-<li><p><span class="math inline">\(K = 1\)</span>. Find the smallest <span class="math inline">\(t\)</span> that Hoeffding’s inequality gives for which <span class="math inline">\(|\hat R_1 - R_1| &lt; t\)</span> with probability at least <span class="math inline">\(1 - \delta\)</span>.</p></li>
 <li><p>Find <span class="math inline">\(t_K\)</span> such that, with probability at least <span class="math inline">\(1 - \delta\)</span>, <span class="math inline">\(|\hat R_k - R_k| &lt; t_K\)</span> for every <span class="math inline">\(k\)</span> at once. Did you need the <span class="math inline">\(K\)</span> scores to be independent of each other?</p></li>
-<li><p>Let <span class="math inline">\(\hat k\)</span> be the candidate with the lowest tuning score and <span class="math inline">\(k^\star\)</span> the candidate with the lowest risk. On the event of (b), show that <span class="math inline">\(R_{\hat k} &lt; \hat R_{\hat k} + t_K\)</span> and <span class="math inline">\(R_{\hat k} &lt; R_{k^\star} + 2t_K\)</span>.</p></li>
-<li><p>Take <span class="math inline">\(m = 2000\)</span> and <span class="math inline">\(\delta = 0.05\)</span>. Compute <span class="math inline">\(t_K\)</span> for <span class="math inline">\(K = 1\)</span>, <span class="math inline">\(10\)</span>, <span class="math inline">\(100\)</span> and <span class="math inline">\(1{,}000{,}000\)</span>. How many candidates double <span class="math inline">\(t_1\)</span>? How many tuning units halve <span class="math inline">\(t_K\)</span>? What does this say about searching a larger grid?</p></li>
+<li><p>Let <span class="math inline">\(\hat k\)</span> be the candidate with the lowest tuning score and <span class="math inline">\(k^\star\)</span> the candidate with the lowest risk. On the event of (a), show that <span class="math inline">\(R_{\hat k} &lt; \hat R_{\hat k} + t_K\)</span> and <span class="math inline">\(R_{\hat k} &lt; R_{k^\star} + 2t_K\)</span>.</p></li>
+<li><p>Take <span class="math inline">\(m = 2000\)</span> and <span class="math inline">\(\delta = 0.05\)</span>. Compute <span class="math inline">\(t_K\)</span> for <span class="math inline">\(K = 1\)</span>, <span class="math inline">\(10\)</span>, <span class="math inline">\(100\)</span> and <span class="math inline">\(1{,}000{,}000\)</span>. How many candidates double <span class="math inline">\(t_1\)</span>? How many tuning units halve <span class="math inline">\(t_K\)</span>? What would Chebyshev’s inequality give in place of Hoeffding’s, for <span class="math inline">\(K = 100\)</span>? What does this say about searching a larger grid?</p></li>
 <li><p>The argument needs the <span class="math inline">\(K\)</span> candidates to be fixed before any tuning score is seen. Give an example of a search that breaks this, and one that chooses adaptively but does not.</p></li>
 </ol>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2807,14 +2737,16 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>(a), (b) Set <span class="math inline">\(2e^{-2mt^2} = \delta\)</span> and solve for <span class="math inline">\(t\)</span>. For <span class="math inline">\(K\)</span> candidates, the probability that at least one of <span class="math inline">\(K\)</span> events happens is at most the sum of their probabilities.</p>
+<ol type="a">
+<li>Use the union bound: for any events <span class="math inline">\(A_1, \ldots, A_K\)</span>, <span class="math inline">\(P(A_1 \cup \cdots \cup A_K) \le \sum_k P(A_k)\)</span>. Take <span class="math inline">\(A_k\)</span> to be the event <span class="math inline">\(|\hat R_k - R_k| \ge t\)</span>, bound each <span class="math inline">\(P(A_k)\)</span> with Hoeffding’s inequality, and set the sum equal to <span class="math inline">\(\delta\)</span>.</li>
+</ol>
 </div>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 2">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2823,15 +2755,33 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<ol start="3" type="a">
-<li><span class="math inline">\(\hat k\)</span> has the lowest score, so <span class="math inline">\(\hat R_{\hat k} \le \hat R_{k^\star}\)</span>. Use the event of (b) once for <span class="math inline">\(\hat k\)</span> and once for <span class="math inline">\(k^\star\)</span>.</li>
+<ol start="2" type="a">
+<li><span class="math inline">\(\hat k\)</span> has the lowest score, so <span class="math inline">\(\hat R_{\hat k} \le \hat R_{k^\star}\)</span>. Use the event of (a) once for <span class="math inline">\(\hat k\)</span> and once for <span class="math inline">\(k^\star\)</span>.</li>
 </ol>
 </div>
 </div>
 </div>
-<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 3">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Hint 3
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol start="3" type="a">
+<li>Chebyshev’s inequality bounds each <span class="math inline">\(P(A_k)\)</span> by <span class="math inline">\(\mathrm{Var}(\hat R_k)/t^2 \le \frac{1}{4mt^2}\)</span>.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -2844,15 +2794,16 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 <div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
-<li><p>Given the fitted model, its <span class="math inline">\(m\)</span> tuning losses are independent, between 0 and 1, with mean <span class="math inline">\(R_1\)</span>, so <span class="math inline">\(P(|\hat R_1 - R_1| \ge t) \le 2e^{-2mt^2}\)</span>. This equals <span class="math inline">\(\delta\)</span> at <span class="math inline">\(t = \sqrt{\log(2/\delta)/(2m)}\)</span>.</p></li>
-<li><p><span class="math inline">\(P\big(\text{some } k \text{ has } |\hat R_k - R_k| \ge t\big) \le \sum_{k=1}^K P\big(|\hat R_k - R_k| \ge t\big) \le 2Ke^{-2mt^2}\)</span>, which equals <span class="math inline">\(\delta\)</span> at <span class="math display">\[
+<li><p>Given the fitted models, each candidate’s <span class="math inline">\(m\)</span> tuning losses are independent, between 0 and 1, with mean <span class="math inline">\(R_k\)</span>, so Hoeffding’s inequality gives <span class="math inline">\(P(|\hat R_k - R_k| \ge t) \le 2e^{-2mt^2}\)</span> for each <span class="math inline">\(k\)</span>. By the union bound, <span class="math display">\[
+P\big(\text{some } k \text{ has } |\hat R_k - R_k| \ge t\big) \le \sum_{k=1}^K P\big(|\hat R_k - R_k| \ge t\big) \le 2Ke^{-2mt^2},
+\]</span> which equals <span class="math inline">\(\delta\)</span> at <span class="math display">\[
 t_K = \sqrt{\frac{\log(2K/\delta)}{2m}}.
-\]</span> The union bound needs no independence between the events: the <span class="math inline">\(K\)</span> scores use the same tuning units and are usually strongly dependent, and the bound still holds.</p></li>
-<li><p>On the event of (b), <span class="math inline">\(R_{\hat k} &lt; \hat R_{\hat k} + t_K\)</span>: the winner’s risk is less than its reported score plus <span class="math inline">\(t_K\)</span>, so the reported score may understate its risk by up to <span class="math inline">\(t_K\)</span>. Then <span class="math inline">\(\hat R_{\hat k} \le \hat R_{k^\star}\)</span>, because <span class="math inline">\(\hat k\)</span> has the lowest score, and <span class="math inline">\(\hat R_{k^\star} &lt; R_{k^\star} + t_K\)</span>. Together, <span class="math inline">\(R_{\hat k} &lt; R_{k^\star} + 2t_K\)</span>. <span class="math inline">\(\blacksquare\)</span></p></li>
-<li><p><span class="math inline">\(t_K = \sqrt{\log(40K)/4000}\)</span>: 0.030 for <span class="math inline">\(K = 1\)</span>, 0.039 for <span class="math inline">\(K = 10\)</span>, 0.046 for <span class="math inline">\(K = 100\)</span> and 0.066 for <span class="math inline">\(K = 1{,}000{,}000\)</span>. Doubling <span class="math inline">\(t_1\)</span> needs <span class="math inline">\(\log(40K) = 4\log 40\)</span>, that is, <span class="math inline">\(K = 40^3 = 64{,}000\)</span> candidates. Halving <span class="math inline">\(t_K\)</span> needs four times the tuning units, whatever <span class="math inline">\(K\)</span> is. The grid’s size enters the bound only through <span class="math inline">\(\sqrt{\log K}\)</span>: a much larger grid adds little to the bound, while it can only lower <span class="math inline">\(R_{k^\star}\)</span>, the best risk among the candidates. So with a large tuning set a wide search is a good trade, and the tuning set’s size counts for far more than the grid’s. The bound limits the optimism of the reported minimum; it does not say how large the optimism is. Searching more candidates can increase it. When the candidates are equally good, adding one never lowers it, since the chosen one’s risk is the same whichever is chosen and the minimum of more scores can only be lower. In general its size depends on the candidates’ risks and on how their scores are correlated, and adding one much better candidate can even remove it. Either way the reported minimum is biased low, so the error of the chosen model should be estimated on data that the search never used. These numbers are for a loss between 0 and 1: squared errors on film ratings, from 1 to 10, can reach 81, so the same bound for them is at least 81 times larger.</p></li>
+\]</span> For <span class="math inline">\(K = 1\)</span> this is problem 1’s <span class="math inline">\(t\)</span>. The union bound needs no independence between the events: the <span class="math inline">\(K\)</span> scores use the same tuning units and are usually strongly dependent, and the bound still holds.</p></li>
+<li><p>On the event of (a), <span class="math inline">\(R_{\hat k} &lt; \hat R_{\hat k} + t_K\)</span>: the winner’s risk is less than its reported score plus <span class="math inline">\(t_K\)</span>, so the reported score may understate its risk by up to <span class="math inline">\(t_K\)</span>. Then <span class="math inline">\(\hat R_{\hat k} \le \hat R_{k^\star}\)</span>, because <span class="math inline">\(\hat k\)</span> has the lowest score, and <span class="math inline">\(\hat R_{k^\star} &lt; R_{k^\star} + t_K\)</span>. Together, <span class="math inline">\(R_{\hat k} &lt; R_{k^\star} + 2t_K\)</span>. <span class="math inline">\(\blacksquare\)</span></p></li>
+<li><p><span class="math inline">\(t_K = \sqrt{\log(40K)/4000}\)</span>: 0.030 for <span class="math inline">\(K = 1\)</span>, 0.039 for <span class="math inline">\(K = 10\)</span>, 0.046 for <span class="math inline">\(K = 100\)</span> and 0.066 for <span class="math inline">\(K = 1{,}000{,}000\)</span>. Doubling <span class="math inline">\(t_1\)</span> needs <span class="math inline">\(\log(40K) = 4\log 40\)</span>, that is, <span class="math inline">\(K = 40^3 = 64{,}000\)</span> candidates. Halving <span class="math inline">\(t_K\)</span> needs four times the tuning units, whatever <span class="math inline">\(K\)</span> is. Chebyshev’s inequality bounds each <span class="math inline">\(P(|\hat R_k - R_k| \ge t)\)</span> by <span class="math inline">\(\frac{1}{4mt^2}\)</span>, so the union bound needs <span class="math inline">\(\frac{K}{4mt^2} = \delta\)</span>, that is, <span class="math inline">\(t = \sqrt{K/(4m\delta)}\)</span>: 0.50 for <span class="math inline">\(K = 100\)</span>, against Hoeffding’s 0.046. Asking each candidate’s guarantee to hold with probability <span class="math inline">\(1 - \delta/K\)</span> multiplies Chebyshev’s <span class="math inline">\(t\)</span> by <span class="math inline">\(\sqrt K\)</span>, but adds only <span class="math inline">\(\log K\)</span> under Hoeffding’s square root: the price of a small <span class="math inline">\(\delta\)</span>, from problem 1, is what decides the cost of a search. With Hoeffding’s inequality the grid’s size enters the bound only through <span class="math inline">\(\sqrt{\log K}\)</span>: a much larger grid adds little to the bound, while it can only lower <span class="math inline">\(R_{k^\star}\)</span>, the best risk among the candidates. So with a large tuning set a wide search is a good trade, and the tuning set’s size counts for far more than the grid’s. The bound limits the optimism of the reported minimum; it does not say how large the optimism is. Searching more candidates can increase it. When the candidates are equally good, adding one never lowers it, since the chosen one’s risk is the same whichever is chosen and the minimum of more scores can only be lower. In general its size depends on the candidates’ risks and on how their scores are correlated, and adding one much better candidate can even remove it. Either way the reported minimum is biased low, so the error of the chosen model should be estimated on data that the search never used. These numbers are for a loss between 0 and 1: squared errors on film ratings, from 1 to 10, can reach 81, so the same bound for them is at least 81 times larger.</p></li>
 <li><p>A search that creates candidates after seeing tuning scores: new values of a knob around the current best, or new models tried until one scores well. Such candidates were not on a list fixed in advance, and the union bound over a fixed list of <span class="math inline">\(K\)</span> does not cover them; reusing the tuning set after changing a model in response to its tuning errors is the same thing. A rule that only chooses which of a fixed list of <span class="math inline">\(K\)</span> candidates to look at, adaptively or not (one knob at a time, say, within a grid fixed in advance), still picks one of the <span class="math inline">\(K\)</span>, so the bound for <span class="math inline">\(K\)</span> still covers its choice.</p></li>
 </ol>
-<p>Common errors: dividing <span class="math inline">\(\delta\)</span> among the candidates in (a); requiring independent scores in (b); in (c), using <span class="math inline">\(R_{\hat k} \le R_{k^\star}\)</span> (false: <span class="math inline">\(k^\star\)</span> has the lowest risk); reading (d) as “the optimism of a search grows like <span class="math inline">\(\sqrt{\log K}\)</span>” (the bound limits the optimism; it does not measure it).</p>
+<p>Common errors: requiring independent scores in (a); in (b), using <span class="math inline">\(R_{\hat k} \le R_{k^\star}\)</span> (false: <span class="math inline">\(k^\star\)</span> has the lowest risk); reading (c) as “the optimism of a search grows like <span class="math inline">\(\sqrt{\log K}\)</span>” (the bound limits the optimism; it does not measure it).</p>
 </div>
 </div>
 </div>
@@ -2916,6 +2867,21 @@ t_K = \sqrt{\frac{\log(2K/\delta)}{2m}}.
      1.192      1.504      1.489 </code></pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Reveal answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p>The out-of-bag MSE (1.50) and the tuning MSE (1.49) agree; the training MSE (1.19) is lower, because each training film is predicted partly by the trees that were fitted on it. Out of bag, each film is predicted only by the trees that never saw it, so the out-of-bag error is an estimate on held-out data that costs no extra films. The number of trees is not tuned because more trees only shrink the <span class="math inline">\((1 - \rho)\tau^2/B\)</span> term of the variance of an average: past a few hundred, more trees cost time and change little.</p>
 <p>Common errors: <code>predict(fit_default, mv_train)</code> for the out-of-bag line, which is the training error again.</p>
 </div>
@@ -2931,7 +2897,7 @@ t_K = \sqrt{\frac{\log(2K/\delta)}{2m}}.
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># rbind(nodesize = nodesizes, tune_mse = round(mse_node, 3))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2940,7 +2906,7 @@ t_K = \sqrt{\frac{\log(2K/\delta)}{2m}}.
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mtrys <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">9</span>)</span>
@@ -2960,6 +2926,21 @@ nodesize 5.000 50.00 200.000
 tune_mse 1.487  1.48   1.489</code></pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Reveal answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p><code>mtry = 3</code> wins, and both ends are worse: with 1 input tried the trees are weak, and with all 9 (<code>mtry = 9</code> is bagging) they are alike. <code>nodesize = 50</code> wins, and the three values are within 0.009 of each other: small beside the standard error of a tuning MSE (about 0.05), though larger than the change between two forests with the same knobs (about 0.003; each forest draws its own bootstrap samples). With <code>mtry = 3</code> this knob matters little.</p>
 <p>Common errors: <code>rf_score(5, m)</code>, which swaps the knobs; tuning <code>nodesize</code> at the winning <code>mtry</code> instead of the default (question 6 does that, for boosting).</p>
 </div>
@@ -2986,8 +2967,8 @@ tune_mse 1.487  1.48   1.489</code></pre>
 5     9        1.717         1.505          1.494</code></pre>
 </div>
 </div>
-<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -2996,7 +2977,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rf_wide <span class="ot">&lt;-</span> rf_grid <span class="sc">|&gt;</span> <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> nodesize, <span class="at">values_from =</span> tune_mse)</span>
@@ -3047,8 +3028,8 @@ tune_mse 1.487  1.48   1.489</code></pre>
 <pre><code>[1] 0.8182678</code></pre>
 </div>
 </div>
-<div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3057,7 +3038,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-19" class="callout-19-contents callout-collapse collapse">
+<div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>boost_default <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">filter</span>(depth <span class="sc">==</span> <span class="dv">6</span>, rate <span class="sc">==</span> <span class="fl">0.3</span>, iters <span class="sc">==</span> <span class="dv">100</span>)</span>
@@ -3076,7 +3057,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># models |&gt; filter(depth == ____, rate == ____, iters == ____)   # the three winners together</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3085,7 +3066,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-20" class="callout-20-contents callout-collapse collapse">
+<div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>alone_iters <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">filter</span>(depth <span class="sc">==</span> <span class="dv">6</span>, rate <span class="sc">==</span> <span class="fl">0.3</span>) <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse)</span>
@@ -3120,6 +3101,21 @@ tune_mse 1.487  1.48   1.489</code></pre>
 </div>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Reveal answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-23" class="callout-23-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p>No. Each knob alone fixes the defaults’ overfitting: 10 iterations (1.497), depth 2 (1.505) or rate 0.03 (1.492). Together they score 1.898, worse than the defaults: 10 small steps with trees of depth 2 have hardly moved from the training mean. Each winner was the best answer to “how do we stop overfitting?” with the other two knobs at the defaults; once one knob has stopped it, the others should move the other way. The rate and the number of iterations trade off against each other, and the depth with both: in the figure, each learning rate reaches a similar minimum, later the smaller the rate, and the dashed line is the training mean.</p>
 <p>Common errors: filtering on the knob being tuned (<code>filter(iters == 100)</code> when tuning the iterations); combining the three winning tuning MSEs instead of finding the model that has all three winning knobs.</p>
 </div>
@@ -3133,7 +3129,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># models |&gt; slice_min(tune_mse)                                  # the whole grid</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3142,7 +3138,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-21" class="callout-21-contents callout-collapse collapse">
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>step1 <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">filter</span>(depth <span class="sc">==</span> <span class="dv">6</span>, rate <span class="sc">==</span> <span class="fl">0.3</span>) <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse)</span>
@@ -3164,7 +3160,22 @@ tune_mse 1.487  1.48   1.489</code></pre>
 0.007565859 0.010334038 </code></pre>
 </div>
 </div>
-<p>In sequence: 10 iterations, depth 6, rate 0.3, scoring 1.497. The whole grid: depth 4, rate 0.1, 100 iterations, scoring 1.490. The difference is 0.008 with a standard error of 0.010 (paired: the two models are scored on the same films), so here the sequence came close to the full grid, with 6 fits (one for the iterations, since one fit gives every number of iterations, then 3 more depths and 2 more rates) against the grid’s 12. Each step builds on the choices already made, which question 5’s searches from the defaults did not; but a single pass can miss better combinations, and its result can depend on the order of the knobs. The sequence only looked among the 96 models fixed in advance, so an argument like problem 3’s, with <span class="math inline">\(K = 96\)</span>, covers its choice even though it chose adaptively.</p>
+</div>
+</div>
+</div>
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Reveal answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-25" class="callout-25-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In sequence: 10 iterations, depth 6, rate 0.3, scoring 1.497. The whole grid: depth 4, rate 0.1, 100 iterations, scoring 1.490. The difference is 0.008 with a standard error of 0.010 (paired: the two models are scored on the same films), so here the sequence came close to the full grid, with 6 fits (one for the iterations, since one fit gives every number of iterations, then 3 more depths and 2 more rates) against the grid’s 12. Each step builds on the choices already made, which question 5’s searches from the defaults did not; but a single pass can miss better combinations, and its result can depend on the order of the knobs. The sequence only looked among the 96 models fixed in advance, so an argument like problem 2’s, with <span class="math inline">\(K = 96\)</span>, covers its choice even though it chose adaptively.</p>
 <p>Common errors: tuning the depth at 100 iterations in step 2 (the defaults again, as in question 5).</p>
 </div>
 </div>
@@ -3189,7 +3200,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co"># c(difference = ____, se = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3198,7 +3209,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-22" class="callout-22-contents callout-collapse collapse">
+<div id="callout-26" class="callout-26-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>j_additive <span class="ot">&lt;-</span> models <span class="sc">|&gt;</span> <span class="fu">filter</span>(depth <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse) <span class="sc">|&gt;</span> <span class="fu">pull</span>(col)</span>
@@ -3210,6 +3221,21 @@ tune_mse 1.487  1.48   1.489</code></pre>
 0.02522631 0.01406809 </code></pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Reveal answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-27" class="callout-27-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p>The best additive model is worse by 0.025, with a standard error of 0.014: about 1.8 standard errors. Allowing deeper trees helps a little. That is compatible with useful interactions (length and year, say), but does not establish them: the difference is under two standard errors, and it favors the grid’s best, which was chosen as the minimum of all 96 of these tuning scores, against 24 at depth 1. The gain is small beside the 0.51 that the grid’s best gains over the training mean.</p>
 <p>Common errors: <code>sd(d_add)</code> without dividing by <span class="math inline">\(\sqrt{2000}\)</span>; comparing the two tuning MSEs without pairing (the two models are scored on the same films, so their losses are correlated, and the unpaired standard error is much larger).</p>
 </div>
@@ -3240,7 +3266,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 <span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(q8, <span class="at">gap =</span> q8[, <span class="st">&quot;other_half&quot;</span>] <span class="sc">-</span> q8[, <span class="st">&quot;chosen_on&quot;</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-28-contents" aria-controls="callout-28" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3249,7 +3275,7 @@ tune_mse 1.487  1.48   1.489</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-23" class="callout-23-contents callout-collapse collapse">
+<div id="callout-28" class="callout-28-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>half_gap <span class="ot">&lt;-</span> <span class="cf">function</span>(cols, A) {</span>
@@ -3270,6 +3296,23 @@ fixed         1.6826     1.6827 0.0000
 one_knob      1.4900     1.5001 0.0101
 all_models    1.4832     1.5014 0.0182</code></pre>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-29-contents" aria-controls="callout-29" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Reveal answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-29" class="callout-29-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The 96-model gap minus the 13-model gap, with its Monte Carlo standard error (same halves for both):</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>gap_diff <span class="ot">&lt;-</span> (halves[<span class="st">&quot;all_models&quot;</span>, <span class="st">&quot;other_half&quot;</span>, ] <span class="sc">-</span> halves[<span class="st">&quot;all_models&quot;</span>, <span class="st">&quot;chosen_on&quot;</span>, ]) <span class="sc">-</span></span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  (halves[<span class="st">&quot;one_knob&quot;</span>, <span class="st">&quot;other_half&quot;</span>, ] <span class="sc">-</span> halves[<span class="st">&quot;one_knob&quot;</span>, <span class="st">&quot;chosen_on&quot;</span>, ])</span>
@@ -3307,7 +3350,7 @@ all_models    1.4832     1.5014 0.0182</code></pre>
 <span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a><span class="co"># c(difference = ____, se = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-30-contents" aria-controls="callout-30" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3316,7 +3359,7 @@ all_models    1.4832     1.5014 0.0182</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-24" class="callout-24-contents callout-collapse collapse">
+<div id="callout-30" class="callout-30-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>rf_best <span class="ot">&lt;-</span> rf_grid <span class="sc">|&gt;</span> <span class="fu">slice_min</span>(tune_mse)</span>
@@ -3339,6 +3382,23 @@ se   0.045    0.047         0.053</code></pre>
 <pre><code>  difference           se 
 -0.006217656  0.011909871 </code></pre>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-31-contents" aria-controls="callout-31" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Reveal answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-31" class="callout-31-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The training mean&#39;s rise from tuning to test, with its standard error (two independent sets of films):</span></span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>loss_tune_mean <span class="ot">&lt;-</span> (mv_tune<span class="sc">$</span>rating <span class="sc">-</span> <span class="fu">mean</span>(mv_train<span class="sc">$</span>rating))<span class="sc">^</span><span class="dv">2</span></span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">rise =</span> <span class="fu">mean</span>(loss_test<span class="sc">$</span>training_mean) <span class="sc">-</span> <span class="fu">mean</span>(loss_tune_mean),</span>
@@ -3365,7 +3425,7 @@ se   0.045    0.047         0.053</code></pre>
 <span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-32-contents" aria-controls="callout-32" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3374,7 +3434,7 @@ se   0.045    0.047         0.053</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-25" class="callout-25-contents callout-collapse collapse">
+<div id="callout-32" class="callout-32-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>f_true <span class="ot">&lt;-</span> <span class="cf">function</span>(x1, x2) x1<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="fu">cos</span>(pi <span class="sc">*</span> x2 <span class="sc">/</span> <span class="dv">2</span>)</span>
@@ -3427,7 +3487,7 @@ se   0.045    0.047         0.053</code></pre>
 <span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-33-contents" aria-controls="callout-33" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3436,7 +3496,7 @@ se   0.045    0.047         0.053</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-26" class="callout-26-contents callout-collapse collapse">
+<div id="callout-33" class="callout-33-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> mv_train<span class="sc">$</span>rating</span>
@@ -3473,8 +3533,7 @@ se   0.045    0.047         0.053</code></pre>
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <ul>
 <li>Hoeffding, W. (1963). Probability inequalities for sums of bounded random variables. <em>Journal of the American Statistical Association</em>, 58(301), 13–30. <a href="https://doi.org/10.1080/01621459.1963.10500830">doi:10.1080/01621459.1963.10500830</a></li>
-<li>IMDb user ratings of the later films in problem 1, read on 17 November 2026: <a href="https://www.imdb.com/title/tt0121766/">Revenge of the Sith</a>, <a href="https://www.imdb.com/title/tt2488496/">The Force Awakens</a>, <a href="https://www.imdb.com/title/tt3748528/">Rogue One</a>, <a href="https://www.imdb.com/title/tt2527336/">The Last Jedi</a>, <a href="https://www.imdb.com/title/tt2527338/">The Rise of Skywalker</a>. The two seasons of <em>Andor</em> are the averages of their episodes’ IMDb ratings (8.32 and 8.65, rounded), as summarized by <a href="https://episodes.cool/title/tt9253284/andor/">episodes.cool</a>.</li>
-<li>The films: <a href="https://ml4ds.com/data/movies.html">data note</a>.</li>
+<li>The films: <a href="https://ml4ds.com/data/movies.html">data note</a>. The Spotify tracks in problem 1: <a href="https://ml4ds.com/data/spotify.html">data note</a>.</li>
 </ul>
 </section>
 

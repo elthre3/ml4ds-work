@@ -8,12 +8,13 @@
 #   _build_env/build.sh build                         student, instructor, solutions, site, check (WEEK=<folder> limits the instructor and solutions renders)
 #   _build_env/build.sh import <delivery-folder>      copy sources in (rsync; skips root-level *.md such as CHANGES.md)
 #   _build_env/build.sh student                       regenerate every weeks/*/notebooks/notebookN.qmd from instructor/.../notebookN_complete.qmd
-#   _build_env/build.sh instructor                    render instructor material -> instructor/_rendered/ (decks with notes, teacher notes, complete notebooks)
+#   _build_env/build.sh instructor                    render instructor material -> instructor/_rendered/ (decks with notes, teacher notes, complete notebooks,
+#                                                     and an instructor notebook for a complete notebook with short-answer twins)
 #   _build_env/build.sh solutions                     generate each week's notebook with solutions from its complete notebook and render it
 #                                                     -> _solutions/ (tracked, not published); a notebook whose source has not changed is
 #                                                     skipped (FORCE=1 renders it again)
 #   _build_env/build.sh site                          public render -> docs/ (unchanged pages come from _freeze/), teacher pages kept
-#                                                     (decks with notes, complete notebooks and teacher notes -> docs/teachers/;
+#                                                     (decks with notes, complete and instructor notebooks, teacher notes -> docs/teachers/;
 #                                                     for a released week, its stored notebook with solutions -> docs/solutions/)
 #   _build_env/build.sh check                         gates; non-zero exit on any failure
 #   _build_env/build.sh push "<commit message>"       check, then git add/commit/push the current branch
@@ -44,7 +45,7 @@ student() {
 }
 
 instructor() {
-  local d f out dest
+  local d f out dest c s
   # Start empty: site copies every teacher page it finds here, and a render left over from
   # another branch or an earlier source would be published as if it were current.
   rm -rf instructor/_rendered
@@ -63,6 +64,17 @@ instructor() {
   for f in instructor/weeks/${WEEK:-*}/*.qmd instructor/weeks/${WEEK:-*}/notebooks/*_complete.qmd; do
     [ -e "$f" ] || continue
     quarto render "$f" --embed-resources
+  done
+  # The instructor notebook, what the seminar teacher shows (convenor, 18 November 2026): made only
+  # from a complete notebook with short-answer twins (class .brief; see make_incomplete.py). Its
+  # generated source is not kept.
+  for c in instructor/weeks/${WEEK:-*}/notebooks/*_complete.qmd; do
+    [ -e "$c" ] || continue
+    grep -qE '^:::+ *\{[^}]*\.brief' "$c" || continue
+    s="${c%_complete.qmd}_instructor.qmd"
+    python3 _build_env/make_incomplete.py --instructor "$c" "$s"
+    quarto render "$s" --embed-resources
+    rm -rf "$s" "${s%.qmd}_cache" "${s%.qmd}_files"
   done
   # Their output lands under docs/instructor/ (project output-dir) or, if Quarto
   # treats them as outside the project, beside the source. Move either out.
@@ -161,6 +173,7 @@ site() {
   if [ -d instructor/_rendered ]; then
     find instructor/_rendered -name "*-instructor.html" -exec cp {} docs/teachers/ \;
     find instructor/_rendered -name "*_complete.html" -exec cp {} docs/teachers/ \;
+    find instructor/_rendered -name "*_instructor.html" -exec cp {} docs/teachers/ \;
     find instructor/_rendered -name "teacher_note*.html" -exec cp {} docs/teachers/ \;
   fi
   # A notebook with solutions is published exactly while its week's block links to it: the stored
@@ -189,18 +202,20 @@ check() {
   local fail=0 n s c w base st
   n=$(find docs -name '*_complete*' -not -path 'docs/teachers/*' | wc -l | tr -d ' ')
   [ "$n" -eq 0 ] || { echo "FAIL: _complete files under docs/ outside teachers/"; fail=1; }
+  n=$(find docs -name '*_instructor*' -not -path 'docs/teachers/*' | wc -l | tr -d ' ')
+  [ "$n" -eq 0 ] || { echo "FAIL: _instructor files under docs/ outside teachers/"; fail=1; }
   [ ! -e docs/instructor ] || { echo "FAIL: docs/instructor/ exists"; fail=1; }
   # Teacher pages are published under docs/teachers/ only (12 October 2026), and nothing else is there.
   for d in decks-notes seminar-teachers; do
     [ ! -e "docs/$d" ] || { echo "FAIL: docs/$d/ exists; teacher pages go under docs/teachers/ (run _build_env/build.sh site)"; fail=1; }
   done
   if [ -d docs/teachers ]; then
-    n=$(find docs/teachers -mindepth 1 -not \( -type f \( -name '*-instructor.html' -o -name '*_complete.html' -o -name 'teacher_note*.html' \) \) | tr '\n' ' ')
-    [ -z "$n" ] || { echo "FAIL: something other than decks with notes, complete notebooks and teacher notes under docs/teachers/: $n"; fail=1; }
+    n=$(find docs/teachers -mindepth 1 -not \( -type f \( -name '*-instructor.html' -o -name '*_complete.html' -o -name '*_instructor.html' -o -name 'teacher_note*.html' \) \) | tr '\n' ' ')
+    [ -z "$n" ] || { echo "FAIL: something other than decks with notes, complete and instructor notebooks and teacher notes under docs/teachers/: $n"; fail=1; }
   fi
-  # Answer boxes only in the complete notebooks and teacher notes under teachers/, and in solutions/.
-  n=$(grep -rlE 'Reveal answer|Reveal solution' docs | grep -vE '^docs/(teachers/[^/]*(_complete|teacher_note[^/]*)\.html|solutions/)' | tr '\n' ' ' || true)
-  [ -z "$n" ] || { echo "FAIL: answer boxes in docs/ outside the complete notebooks and teacher notes in teachers/, and solutions/: $n"; fail=1; }
+  # Answer boxes only in the complete and instructor notebooks and teacher notes under teachers/, and in solutions/.
+  n=$(grep -rlE 'Reveal answer|Reveal solution' docs | grep -vE '^docs/(teachers/[^/]*(_complete|_instructor|teacher_note[^/]*)\.html|solutions/)' | tr '\n' ' ' || true)
+  [ -z "$n" ] || { echo "FAIL: answer boxes in docs/ outside the complete and instructor notebooks and teacher notes in teachers/, and solutions/: $n"; fail=1; }
   # A notebook with solutions is published exactly when its week's block on the course page links to it,
   # and what is published is the stored page, made from the complete notebook as it is now. For a week
   # not yet released a missing or old stored page is a WARN, for the week's own agent: it must not stop

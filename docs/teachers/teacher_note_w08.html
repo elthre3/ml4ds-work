@@ -2334,7 +2334,7 @@ window.Quarto = {
 
 <section id="keep-or-rush" class="level2">
 <h2 class="anchored" data-anchor-id="keep-or-rush">Keep or rush</h2>
-<p>In seminar order. Planned total 60 minutes, with no slack: a room that runs slow cuts in the order marked, and the minimum seminar is below the table. Question 3’s chunk fits 15 forests (about 40 seconds in the build container, longer on a laptop): start it while the room discusses question 2. Question 9 uses its grid, so it must run even when question 3 is cut. The numbers below are for a run in order.</p>
+<p>In seminar order. Planned total 53 minutes, leaving about 7 for a slow room; past that, cut in the order marked, and the minimum seminar is below the table. Question 3’s chunk fits 15 forests (about 40 seconds in the build container, longer on a laptop): start it while the room discusses question 2. Question 9 uses its grid, so it must run even when question 3 is cut. The numbers below are for a run in order.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 52%">
@@ -2352,90 +2352,84 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>Problem 1(a, b, c): every later title is after the last split, so each tree predicts one constant for all of them (7.0, 6.7, 6.7, 7.82, and the same for 2050); the five films choose the grown tree (2.01, against 3.36 and 2.91), and with <em>Andor</em> the tree with no split (3.92, against 6.59 and 9.92)</td>
-<td style="text-align: right;">8</td>
+<td>Problem 1(a to d): <span class="math inline">\(\mathrm{Var}(D) \le \frac{1}{4m}\)</span>; at <span class="math inline">\(m = 2000\)</span> and <span class="math inline">\(\delta = 0.001\)</span>, Markov on <span class="math inline">\(|D|\)</span> gives <span class="math inline">\(t = 1/(2\delta\sqrt m) = 11.2\)</span>, Chebyshev <span class="math inline">\(1/(2\sqrt{\delta m}) = 0.354\)</span>, Hoeffding <span class="math inline">\(\sqrt{\log(2/\delta)/(2m)} = 0.044\)</span></td>
+<td style="text-align: right;">7</td>
 <td>Keep</td>
-<td>Ask which leaf 2022 is in; then the three sums</td>
+<td>The variance bound, then set each bound equal to <span class="math inline">\(\delta\)</span></td>
 </tr>
 <tr class="even">
-<td>Problem 1(d): the error is <span class="math inline">\(\sum_i(y_i - \bar y)^2 + n(\bar y - c)^2\)</span>; the titles’ mean moves from 7.30 to 7.64, past 7.41, the midpoint of 7.0 and 7.82; later titles, a series and 2026 ratings are a poor tuning set for films up to 2005</td>
-<td style="text-align: right;">2</td>
-<td>Rush</td>
-<td>The formula and the two means</td>
-</tr>
-<tr class="odd">
-<td>Problem 2(a, b): expand the square; <span class="math inline">\(\sum_i r_i t_i = \sum_i t_i^2 = \sum_l n_l\bar r_l^{\,2}\)</span>; the loss does not rise for <span class="math inline">\(0 \le \gamma \le 2\)</span> and falls most at <span class="math inline">\(\gamma = 1\)</span></td>
-<td style="text-align: right;">5</td>
-<td>Keep</td>
-<td>Write the expansion and the leaf-by-leaf sum</td>
-</tr>
-<tr class="even">
-<td>Problem 2(c, d): <span class="math inline">\(\sum_l n_l\bar r_l^{\,2} = 4.181\)</span>; loss 0.776, 0.253 and 2.344 at <span class="math inline">\(\gamma = 0.5, 1, 2\)</span>; small steps make the number of iterations the knob, and held-out data choose both</td>
+<td>Problem 1(e): Markov’s interval says nothing; Chebyshev’s, <span class="math inline">\([0.177, 0.885]\)</span>, contains <span class="math inline">\(\frac56\)</span> (guessing); Hoeffding’s, <span class="math inline">\([0.487, 0.575]\)</span>, rules guessing out; <span class="math inline">\(t\)</span> grows like <span class="math inline">\(1/\delta\)</span>, <span class="math inline">\(1/\sqrt\delta\)</span>, <span class="math inline">\(\sqrt{\log(2/\delta)}\)</span></td>
 <td style="text-align: right;">3</td>
-<td>Rush; cut second</td>
-<td>Read the three losses; (d) is what coding part 2 shows</td>
+<td>Keep</td>
+<td>The three intervals against <span class="math inline">\(\frac56\)</span></td>
 </tr>
 <tr class="odd">
-<td>Problem 3(a, b, c): <span class="math inline">\(t_K = \sqrt{\log(2K/\delta)/(2m)}\)</span> by the union bound, with no independence between the scores; the winner’s risk is below its score plus <span class="math inline">\(t_K\)</span>, and below the best candidate’s risk plus <span class="math inline">\(2t_K\)</span></td>
+<td>Problem 1(f), optional: Markov on <span class="math inline">\(e^{\lambda D}\)</span> with Hoeffding’s lemma; <span class="math inline">\(\lambda = 4mt\)</span> gives <span class="math inline">\(e^{-2mt^2}\)</span></td>
+<td style="text-align: right;">0</td>
+<td>Not in the room</td>
+<td>Point to it for home</td>
+</tr>
+<tr class="even">
+<td>Problem 2(a, b): <span class="math inline">\(t_K = \sqrt{\log(2K/\delta)/(2m)}\)</span> by the union bound, with no independence between the scores; the winner’s risk is below its score plus <span class="math inline">\(t_K\)</span>, and below the best candidate’s risk plus <span class="math inline">\(2t_K\)</span></td>
 <td style="text-align: right;">6</td>
 <td>Keep</td>
-<td>The union bound, then the two inequalities</td>
-</tr>
-<tr class="even">
-<td>Problem 3(d, e): <span class="math inline">\(t_K\)</span> = 0.030, 0.039, 0.046, 0.066 for <span class="math inline">\(K = 1, 10, 100, 10^6\)</span> (<span class="math inline">\(m = 2000\)</span>, <span class="math inline">\(\delta = 0.05\)</span>); 64,000 candidates double <span class="math inline">\(t_1\)</span>; four times the tuning units halve any <span class="math inline">\(t_K\)</span>; the grid enters through <span class="math inline">\(\sqrt{\log K}\)</span>; the bound limits the optimism, it does not measure it; candidates added after seeing scores break the argument, while choosing adaptively within a fixed list does not</td>
-<td style="text-align: right;">3</td>
-<td>Keep (d); cut (e) third</td>
-<td>The four numbers, then the sentence on <span class="math inline">\(\sqrt{\log K}\)</span> against <span class="math inline">\(1/\sqrt m\)</span></td>
+<td>The union bound (hint 1), then the two inequalities</td>
 </tr>
 <tr class="odd">
+<td>Problem 2(c, d): <span class="math inline">\(t_K\)</span> = 0.030, 0.039, 0.046, 0.066 for <span class="math inline">\(K = 1, 10, 100, 10^6\)</span> (<span class="math inline">\(m = 2000\)</span>, <span class="math inline">\(\delta = 0.05\)</span>); 64,000 candidates double <span class="math inline">\(t_1\)</span>; four times the tuning units halve any <span class="math inline">\(t_K\)</span>; Chebyshev with the union bound gives 0.50 for <span class="math inline">\(K = 100\)</span>; the grid enters Hoeffding’s bound through <span class="math inline">\(\sqrt{\log K}\)</span>; the bound limits the optimism, it does not measure it; candidates added after seeing scores break the argument, while choosing adaptively within a fixed list does not</td>
+<td style="text-align: right;">4</td>
+<td>Keep (c); cut (d) second</td>
+<td>The four numbers and Chebyshev’s 0.50, then <span class="math inline">\(\sqrt{\log K}\)</span> against <span class="math inline">\(1/\sqrt m\)</span></td>
+</tr>
+<tr class="even">
 <td>Coding 1, question 1: the default forest’s MSE is 1.19 on the training films, 1.50 out of bag and 1.49 on the tuning films; more trees only shrink <span class="math inline">\((1 - \rho)\tau^2/B\)</span></td>
 <td style="text-align: right;">2</td>
 <td>Rush</td>
 <td>The three <code>predict()</code> calls</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Coding 1, question 2: <code>mtry</code> 1, 2, 3, 5, 9 give 1.70, 1.51, 1.49, 1.56, 1.71; <code>nodesize</code> 5, 50, 200 give 1.487, 1.480, 1.489: small beside a tuning MSE’s standard error (about 0.05), though larger than the run-to-run change (about 0.003)</td>
 <td style="text-align: right;">4</td>
 <td>Keep</td>
 <td><code>rf_score(m, 5)</code> and <code>rf_score(3, s)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Coding 1, question 3: with <code>mtry = 9</code> (bagging) the node size matters (1.72, 1.50, 1.49); with <code>mtry = 3</code> it hardly does; the grid’s best is (3, 50) at 1.481, the cell question 2 found, within 0.009 of the default</td>
 <td style="text-align: right;">5</td>
-<td>Rush; cut fourth</td>
+<td>Rush; cut third</td>
 <td>Run it during question 2; read the <code>mtry = 9</code> row and the best cell</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Coding 2, question 4: xgboost’s defaults (depth 6, rate 0.3, 100 iterations) score 1.68 on the tuning films and 0.82 on the training films: overfitted</td>
 <td style="text-align: right;">2</td>
 <td>Keep</td>
 <td>Read the two numbers</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Coding 2, question 5: each knob alone from the defaults: 10 iterations 1.497, depth 2 1.505, rate 0.03 1.492; the three winners together 1.898, worse than the defaults; the figure shows why</td>
 <td style="text-align: right;">4</td>
 <td>Keep</td>
 <td>Ask for the prediction first; then the four <code>filter()</code> lines and the figure. This is the seminar’s main point about tuning</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Coding 2, question 6: in sequence, 10 iterations, depth 6, rate 0.3, 1.497; the whole grid, depth 4, rate 0.1, 100 iterations, 1.490; paired difference 0.008 (standard error 0.010); 6 fits against 12; a single pass can miss better combinations, but here it did not</td>
 <td style="text-align: right;">3</td>
 <td>Keep</td>
 <td><code>iters == step1$iters</code>, then <code>depth == step2$depth</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Coding 2, question 7: best by depth 1.515, 1.502, 1.490, 1.492; the best additive model (depth 1) is worse by 0.025, standard error 0.014</td>
 <td style="text-align: right;">2</td>
 <td>Cut first</td>
 <td>Say the conclusion: deeper trees help a little, which is compatible with interactions but does not establish them</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Coding 3, question 8: over 2,000 random halves of the tuning films, the reported minimum’s optimism is 0.000, 0.010 and 0.018 for 1, 13 and 96 models (each with a Monte Carlo standard error of about 0.0025; the 96-minus-13 difference, 0.008, has 0.0003, since all three searches use the same halves), while the winner’s MSE on the other half is 1.683, 1.500 and 1.501; one tuning MSE on 1,000 films has a standard error of about 0.078</td>
 <td style="text-align: right;">6</td>
 <td>Keep</td>
 <td><code>w &lt;- which.min(mse_A)</code>, then <code>mean(loss[-A, cols[w]])</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Coding 4, question 9: on the test films, forest 1.56 (standard error 0.045), boosting 1.57 (0.047), training mean 2.06; forest minus boosting −0.006 (0.012); the untuned training mean also rose from tuning to test, by 0.06 with a standard error of 0.08, so these results do not separate that variation from the search’s optimism</td>
 <td style="text-align: right;">5</td>
 <td>Keep</td>
@@ -2443,32 +2437,32 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>Minimum seminar, about 45 minutes: problem 1(a, b, c), problem 2(a, b), problem 3(a to d), coding questions 2, 4, 5, 6, 8 and 9. Still run question 3’s chunk, without discussion: question 9 needs its grid. With more time, add question 3’s discussion back first, then problem 2(c, d).</p>
+<p>Minimum seminar, about 45 minutes: problem 1(a to e), problem 2(a to c), coding questions 2, 4, 5, 6, 8 and 9. Still run question 3’s chunk, without discussion: question 9 needs its grid. With more time, add question 3’s discussion back first, then question 7, then problem 2(d).</p>
 </section>
 <section id="if-you-read-on" class="level2">
 <h2 class="anchored" data-anchor-id="if-you-read-on">If you read on</h2>
 <p>How it runs</p>
 <ul>
-<li>Students did exercises 1 and 2 at home (the correlated-average variance with the slides closed, and one boosting step by hand on the five <em>Star Wars</em> films). Open the <a href="https://ml4ds.com/teachers/notebook8_complete.html">complete notebook</a> on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are answers. Show an exercise’s solution only if asked. Each problem’s solution stands on its own, so a skipped problem costs nothing later.</li>
+<li>Students did exercises 1 and 2 at home (the correlated-average variance with the slides closed, and one boosting step by hand on the five <em>Star Wars</em> films). Open the <a href="https://ml4ds.com/teachers/notebook8_instructor.html">instructor notebook</a> on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are solution code and short answers. Show an exercise’s solution only if asked. The <a href="https://ml4ds.com/teachers/notebook8_complete.html">complete notebook</a> has the full answers, with common errors, for preparing. Each problem’s solution stands on its own, so a skipped problem costs nothing later.</li>
 <li>Everything headed “Optional, can be done at home” is outside the seminar: the lecture’s interaction with less noise, and backfitting by hand.</li>
 <li>One seed, <code>set.seed(310)</code> at the split, the same split as the lecture. Forests draw from the same random stream, so a student who skips question 2 or runs question 3 twice gets slightly different forest numbers from then on (by a few thousandths), and question 8’s gaps by a few thousandths too (their Monte Carlo standard error is about 0.0025), though the 96-model gap stays about 0.008 above the 13-model gap. Boosting with these settings is deterministic. No lesson depends on the third decimal.</li>
 </ul>
 <p>What students should see</p>
 <ul>
 <li>Exercise 1: <span class="math inline">\(B\)</span> variances and <span class="math inline">\(B(B - 1)\)</span> covariances, divided by <span class="math inline">\(B^2\)</span>; <span class="math inline">\(\rho\tau^2\)</span> is left as <span class="math inline">\(B \to \infty\)</span>. Exercise 2: <span class="math inline">\(\bar y = 7.82\)</span>, residuals <span class="math inline">\(0.98, 0.98, 0.28, -1.42, -0.82\)</span>; RSS 3.49, 1.49, 0.51, 3.85 for the cutoffs 1978.5, 1981.5, 1991, 2000.5; after the step 8.19 and 7.26, loss 2.344 to 0.776.</li>
-<li>Problem 1 uses IMDb’s ratings read on 17 November 2026 (references in the notebook); <em>The Rise of Skywalker</em> is 6.4. Problem 3’s numbers are <span class="math inline">\(\sqrt{\log(40K)/4000}\)</span>.</li>
+<li>Problem 1’s counts come from a multinomial logistic regression of the playlist genre on the ten audio features, fitted on 5,000 Spotify tracks and scored on 2,000 others (<code>set.seed(310)</code>); guessing the commonest genre would err on 80% of them. A normal approximation gives <span class="math inline">\(\pm 0.037\)</span> where Hoeffding gives <span class="math inline">\(\pm 0.044\)</span>. Problem 2’s numbers are <span class="math inline">\(\sqrt{\log(40K)/4000}\)</span>.</li>
 <li>Coding: the training mean scores 2.00 on the tuning films. Everything else is in the table.</li>
 <li>Run times in the build container (R 4.3, randomForest 4.7-1.2, xgboost 3.2.1.1): the whole notebook in about two minutes; question 2 about 20 seconds, question 3 about 40, the boosting grid about 5, question 8 about 2. A laptop may take two or three times as long.</li>
 </ul>
 <p>Where they get stuck</p>
 <ul>
-<li>Problem 1: sending a title down the tree by its rating, or giving <em>Revenge of the Sith</em> (2005) the leaf 6.4, which covers 1991 to 2000.5.</li>
-<li>Problem 3: dividing <span class="math inline">\(\delta\)</span> among the candidates in (a); thinking the union bound needs independent scores; reading (d) as “the optimism grows like <span class="math inline">\(\sqrt{\log K}\)</span>”. The bound limits the optimism; it does not measure it. More candidates can increase it (when they are equally good, it never falls), but one much better candidate can remove it.</li>
+<li>Problem 1: not using <span class="math inline">\(\mathbb E[D] = 0\)</span> in (b), so not seeing that <span class="math inline">\(\mathbb E[D^2]\)</span> is the variance; losing the square root in (c); reading Markov’s <span class="math inline">\(t = 11.2\)</span> as an interval rather than as no information.</li>
+<li>Problem 2: thinking the union bound needs independent scores; reading (c) as “the optimism grows like <span class="math inline">\(\sqrt{\log K}\)</span>”. The bound limits the optimism; it does not measure it. More candidates can increase it (when they are equally good, it never falls), but one much better candidate can remove it.</li>
 <li>Question 5: filtering on the knob being tuned, so each line returns one model; or adding up the three winning MSEs.</li>
 <li>Question 8: computing the minimum over the other half too, which hides the optimism; or reading the <code>chosen_on</code> column alone and concluding that the largest search found the best model.</li>
 <li>Setup: <code>xgboost(x = ..., y = ...)</code> and <code>learning_rate</code> need xgboost 3 or later; an unused-argument error means an older version, so <code>install.packages(&quot;xgboost&quot;)</code>. In the student file, a chunk with a blank starts with <code>#| eval: false</code>: students uncomment the <code># x &lt;- ____</code> lines, fill the blanks and delete the <code>#| eval: false</code> line.</li>
 </ul>
-<p>Sources: the data note at <a href="https://ml4ds.com/data/movies.html">ml4ds.com/data/movies.html</a>; problem 3 uses Hoeffding, W. (1963), Probability inequalities for sums of bounded random variables, <em>Journal of the American Statistical Association</em> 58(301), 13–30, <a href="https://doi.org/10.1080/01621459.1963.10500830">doi:10.1080/01621459.1963.10500830</a>; problem 1’s ratings: see the notebook’s references.</p>
+<p>Sources: the data notes at <a href="https://ml4ds.com/data/movies.html">ml4ds.com/data/movies.html</a> and <a href="https://ml4ds.com/data/spotify.html">ml4ds.com/data/spotify.html</a>; the problems use Hoeffding, W. (1963), Probability inequalities for sums of bounded random variables, <em>Journal of the American Statistical Association</em> 58(301), 13–30, <a href="https://doi.org/10.1080/01621459.1963.10500830">doi:10.1080/01621459.1963.10500830</a>.</p>
 </section>
 
 </main>

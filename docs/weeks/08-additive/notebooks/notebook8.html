@@ -268,7 +268,7 @@ Note
 <section id="before-the-seminar" class="level2">
 <h2 class="anchored" data-anchor-id="before-the-seminar">Before the seminar</h2>
 <!-- At home, before the seminar. -->
-<p>The lecture proved the variance of an average of correlated variables; exercise 1 is that proof again, with the slides closed. It derived boosting as approximate gradient descent; exercise 2 takes one boosting step by hand. Do both on paper before the seminar; the seminar’s problems are variations on them. You may use, without proof: <span class="math inline">\(\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b'}\mathrm{Cov}(V_b, V_{b'})\)</span>, and <span class="math inline">\(\mathrm{Cov}(V, V) = \mathrm{Var}(V)\)</span>.</p>
+<p>The lecture proved the variance of an average of correlated variables; exercise 1 is that proof again, with the slides closed. It derived boosting as approximate gradient descent; exercise 2 takes one boosting step by hand. Do both on paper before the seminar. You may use, without proof: <span class="math inline">\(\mathrm{Var}\big(\sum_b V_b\big) = \sum_b\sum_{b'}\mathrm{Cov}(V_b, V_{b'})\)</span>, and <span class="math inline">\(\mathrm{Cov}(V, V) = \mathrm{Var}(V)\)</span>.</p>
 <div class="callout callout-style-default callout-warning callout-titled" title="Hints">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -404,80 +404,24 @@ Note
 </section>
 <section id="problems" class="level2">
 <h2 class="anchored" data-anchor-id="problems">Problems</h2>
-<!-- About 27 min: problems 1 to 3 (10, 8, 9), pen and paper. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the ones before it; citing an earlier result that has been proved is also fine. -->
-<p><strong>Problem 1 (Andor).</strong> The lecture grew a tree on the five <em>Star Wars</em> films in the data (exercise 2’s table), splitting on year:</p>
-<ul>
-<li>before 1991: 8.8 if the year is before 1981.5, 8.1 otherwise;</li>
-<li>from 1991 on: 6.4 if the year is before 2000.5, 7.0 otherwise.</li>
-</ul>
-<p>Cost-complexity pruning, with penalty <span class="math inline">\(\alpha\)</span> per leaf, gives a sequence of trees: the four leaves above for <span class="math inline">\(\alpha &lt; 0.18\)</span>; three leaves for <span class="math inline">\(0.18 &lt; \alpha &lt; 0.33\)</span>, the two films from 1991 on merged into one leaf predicting 6.7; two leaves for <span class="math inline">\(0.33 &lt; \alpha &lt; 4.18\)</span>, predicting 8.57 before 1991 and 6.7 from 1991 on; and one leaf, 7.82, for <span class="math inline">\(\alpha &gt; 4.18\)</span>. Later titles, with their IMDb ratings in November 2026:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Title</th>
-<th style="text-align: right;">Year</th>
-<th style="text-align: right;">Rating</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Revenge of the Sith</td>
-<td style="text-align: right;">2005</td>
-<td style="text-align: right;">7.6</td>
-</tr>
-<tr class="even">
-<td>The Force Awakens</td>
-<td style="text-align: right;">2015</td>
-<td style="text-align: right;">7.8</td>
-</tr>
-<tr class="odd">
-<td>Rogue One</td>
-<td style="text-align: right;">2016</td>
-<td style="text-align: right;">7.8</td>
-</tr>
-<tr class="even">
-<td>The Last Jedi</td>
-<td style="text-align: right;">2017</td>
-<td style="text-align: right;">6.9</td>
-</tr>
-<tr class="odd">
-<td>The Rise of Skywalker</td>
-<td style="text-align: right;">2019</td>
-<td style="text-align: right;">6.4</td>
-</tr>
-<tr class="even">
-<td>Andor, season 1</td>
-<td style="text-align: right;">2022</td>
-<td style="text-align: right;">8.3</td>
-</tr>
-<tr class="odd">
-<td>Andor, season 2</td>
-<td style="text-align: right;">2025</td>
-<td style="text-align: right;">8.7</td>
-</tr>
-</tbody>
-</table>
-<ol type="a">
-<li><p>What does each tree in the sequence predict for <em>Andor</em>, season 1? For a title made in 2050?</p></li>
-<li><p>Use the five films (not <em>Andor</em>) as held-out data: compute each tree’s sum of squared errors on them. Which values of <span class="math inline">\(\alpha\)</span> do they choose?</p></li>
-<li><p>Now add the two seasons of <em>Andor</em>. Which values of <span class="math inline">\(\alpha\)</span> do the seven titles choose?</p></li>
-<li><p>Two titles changed the choice. Explain why with one formula, and say whether these seven titles should be used to choose <span class="math inline">\(\alpha\)</span> for predicting films like the training films.</p></li>
-</ol>
-<p><strong>Problem 2 (the size of a boosting step).</strong> A boosting fit has fitted values <span class="math inline">\(\mathbf f = (f_1, \ldots, f_n)\)</span> and residuals <span class="math inline">\(r_i = y_i - f_i\)</span>, with training loss <span class="math inline">\(L(\mathbf f) = \sum_i \frac12(y_i - f_i)^2\)</span>. A tree <span class="math inline">\(t\)</span> is fitted to the residuals: in leaf <span class="math inline">\(l\)</span>, which holds <span class="math inline">\(n_l\)</span> of the units, it predicts the mean <span class="math inline">\(\bar r_l\)</span> of their residuals. Write <span class="math inline">\(t_i\)</span> for its prediction for unit <span class="math inline">\(i\)</span>.</p>
-<ol type="a">
-<li><p>Show that <span class="math inline">\(L(\mathbf f + \gamma\,\mathbf t) = L(\mathbf f) - \gamma\big(1 - \frac\gamma2\big)\sum_l n_l\,\bar r_l^{\,2}\)</span>, the sum over the tree’s leaves.</p></li>
-<li><p>For which <span class="math inline">\(\gamma \ge 0\)</span> does a step not raise the training loss? Which <span class="math inline">\(\gamma\)</span> lowers it most?</p></li>
-<li><p>The five residuals <span class="math inline">\(0.98, 0.98, 0.28, -1.42, -0.82\)</span>, with a tree whose leaves hold the first three and the last two. Compute <span class="math inline">\(\sum_l n_l\bar r_l^{\,2}\)</span> and the loss after a step of <span class="math inline">\(\gamma = 0.5\)</span>, <span class="math inline">\(1\)</span> and <span class="math inline">\(2\)</span>.</p></li>
-<li><p>Part (b) gives the <span class="math inline">\(\gamma\)</span> that lowers the training loss most at every step. Why do boosting libraries use a much smaller <span class="math inline">\(\gamma\)</span> by default?</p></li>
-</ol>
-<p><strong>Problem 3 (the size of a search).</strong> A model’s risk is its expected loss on a new unit, <span class="math inline">\(R = \mathbb E[\ell]\)</span>, for a loss with <span class="math inline">\(0 \le \ell \le 1\)</span> (for example, the 0–1 loss of a classifier). Before the tuning data are seen, <span class="math inline">\(K\)</span> candidate models are fixed, fitted on the training data, with risks <span class="math inline">\(R_1, \ldots, R_K\)</span>; treat the fitted models as fixed, so that everything below is conditional on the training data. On <span class="math inline">\(m\)</span> tuning units, drawn independently of each other and of the training data, candidate <span class="math inline">\(k\)</span> scores <span class="math inline">\(\hat R_k\)</span>, the mean of its <span class="math inline">\(m\)</span> losses. You may use Hoeffding’s inequality (Hoeffding 1963): if <span class="math inline">\(Z_1, \ldots, Z_m\)</span> are independent with <span class="math inline">\(0 \le Z_i \le 1\)</span> and <span class="math inline">\(\bar Z\)</span> is their mean, then for every <span class="math inline">\(t &gt; 0\)</span>, <span class="math display">\[
+<!-- About 20 min: problems 1 and 2 (10 each), pen and paper; problem 1(f) is optional and not done in the room. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the one before it; citing an earlier result that has been proved is also fine. -->
+<p>Both problems use two inequalities. Markov’s inequality: if <span class="math inline">\(W \ge 0\)</span> and <span class="math inline">\(a &gt; 0\)</span>, then <span class="math inline">\(P(W \ge a) \le \mathbb E[W]/a\)</span>. Hoeffding’s inequality (Hoeffding 1963): if <span class="math inline">\(Z_1, \ldots, Z_m\)</span> are independent with <span class="math inline">\(0 \le Z_i \le 1\)</span> and <span class="math inline">\(\bar Z\)</span> is their mean, then for every <span class="math inline">\(t &gt; 0\)</span>, <span class="math display">\[
 P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 \]</span></p>
+<p><strong>Problem 1 (how far a score can be from the risk).</strong> A classifier predicts a track’s playlist genre, one of six, from its audio features (<a href="https://ml4ds.com/data/spotify.html">data note</a>). It was fitted on training tracks and is now fixed; its risk <span class="math inline">\(R\)</span> is its error rate on new tracks. On <span class="math inline">\(m = 2000\)</span> tuning tracks, drawn independently of each other and of the training tracks, it errs on 1,062, so its score is <span class="math inline">\(\hat R = 0.531\)</span>, the mean of <span class="math inline">\(m\)</span> losses <span class="math inline">\(\ell_i \in \{0, 1\}\)</span> with mean <span class="math inline">\(R\)</span>. Write <span class="math inline">\(D = \hat R - R\)</span>. We want an interval <span class="math inline">\(\hat R \pm t\)</span> that contains <span class="math inline">\(R\)</span> with probability at least <span class="math inline">\(1 - \delta\)</span>, for <span class="math inline">\(\delta = 0.001\)</span>: a <span class="math inline">\(t\)</span> with <span class="math inline">\(P(|D| \ge t) \le \delta\)</span>.</p>
 <ol type="a">
-<li><p><span class="math inline">\(K = 1\)</span>. Find the smallest <span class="math inline">\(t\)</span> that Hoeffding’s inequality gives for which <span class="math inline">\(|\hat R_1 - R_1| &lt; t\)</span> with probability at least <span class="math inline">\(1 - \delta\)</span>.</p></li>
+<li><p>Show that <span class="math inline">\(\mathrm{Var}(\ell_i) \le \frac14\)</span>, so that <span class="math inline">\(\mathrm{Var}(D) \le \frac{1}{4m}\)</span>.</p></li>
+<li><p>Apply Markov’s inequality to <span class="math inline">\(W = |D|\)</span>, using <span class="math inline">\(\mathbb E|D| \le \sqrt{\mathbb E[D^2]}\)</span>, and find <span class="math inline">\(t\)</span>.</p></li>
+<li><p>Apply it to <span class="math inline">\(W = D^2\)</span> instead (this is Chebyshev’s inequality), and find <span class="math inline">\(t\)</span>.</p></li>
+<li><p>Find <span class="math inline">\(t\)</span> from Hoeffding’s inequality.</p></li>
+<li><p>Compute the three intervals. Guessing a genre at random errs with probability <span class="math inline">\(\frac56\)</span>: which interval rules that out for this classifier? How does each <span class="math inline">\(t\)</span> grow as <span class="math inline">\(\delta\)</span> shrinks?</p></li>
+<li><p><em>Optional.</em> Hoeffding’s lemma says that if <span class="math inline">\(0 \le Z \le 1\)</span> with mean <span class="math inline">\(\mu\)</span>, then <span class="math inline">\(\mathbb E\big[e^{\lambda(Z - \mu)}\big] \le e^{\lambda^2/8}\)</span> for every <span class="math inline">\(\lambda\)</span>. Apply Markov’s inequality to <span class="math inline">\(W = e^{\lambda D}\)</span> with <span class="math inline">\(\lambda &gt; 0\)</span>, and use independence and the lemma to show that <span class="math inline">\(P(D \ge t) \le e^{-\lambda t + \lambda^2/(8m)}\)</span>. Then choose <span class="math inline">\(\lambda\)</span> to get <span class="math inline">\(P(D \ge t) \le e^{-2mt^2}\)</span>.</p></li>
+</ol>
+<p><strong>Problem 2 (the size of a search).</strong> A model’s risk is its expected loss on a new unit, <span class="math inline">\(R = \mathbb E[\ell]\)</span>, for a loss with <span class="math inline">\(0 \le \ell \le 1\)</span> (for example, the 0–1 loss of a classifier). Before the tuning data are seen, <span class="math inline">\(K\)</span> candidate models are fixed, fitted on the training data, with risks <span class="math inline">\(R_1, \ldots, R_K\)</span>; treat the fitted models as fixed, so that everything below is conditional on the training data. On <span class="math inline">\(m\)</span> tuning units, drawn independently of each other and of the training data, candidate <span class="math inline">\(k\)</span> scores <span class="math inline">\(\hat R_k\)</span>, the mean of its <span class="math inline">\(m\)</span> losses.</p>
+<ol type="a">
 <li><p>Find <span class="math inline">\(t_K\)</span> such that, with probability at least <span class="math inline">\(1 - \delta\)</span>, <span class="math inline">\(|\hat R_k - R_k| &lt; t_K\)</span> for every <span class="math inline">\(k\)</span> at once. Did you need the <span class="math inline">\(K\)</span> scores to be independent of each other?</p></li>
-<li><p>Let <span class="math inline">\(\hat k\)</span> be the candidate with the lowest tuning score and <span class="math inline">\(k^\star\)</span> the candidate with the lowest risk. On the event of (b), show that <span class="math inline">\(R_{\hat k} &lt; \hat R_{\hat k} + t_K\)</span> and <span class="math inline">\(R_{\hat k} &lt; R_{k^\star} + 2t_K\)</span>.</p></li>
-<li><p>Take <span class="math inline">\(m = 2000\)</span> and <span class="math inline">\(\delta = 0.05\)</span>. Compute <span class="math inline">\(t_K\)</span> for <span class="math inline">\(K = 1\)</span>, <span class="math inline">\(10\)</span>, <span class="math inline">\(100\)</span> and <span class="math inline">\(1{,}000{,}000\)</span>. How many candidates double <span class="math inline">\(t_1\)</span>? How many tuning units halve <span class="math inline">\(t_K\)</span>? What does this say about searching a larger grid?</p></li>
+<li><p>Let <span class="math inline">\(\hat k\)</span> be the candidate with the lowest tuning score and <span class="math inline">\(k^\star\)</span> the candidate with the lowest risk. On the event of (a), show that <span class="math inline">\(R_{\hat k} &lt; \hat R_{\hat k} + t_K\)</span> and <span class="math inline">\(R_{\hat k} &lt; R_{k^\star} + 2t_K\)</span>.</p></li>
+<li><p>Take <span class="math inline">\(m = 2000\)</span> and <span class="math inline">\(\delta = 0.05\)</span>. Compute <span class="math inline">\(t_K\)</span> for <span class="math inline">\(K = 1\)</span>, <span class="math inline">\(10\)</span>, <span class="math inline">\(100\)</span> and <span class="math inline">\(1{,}000{,}000\)</span>. How many candidates double <span class="math inline">\(t_1\)</span>? How many tuning units halve <span class="math inline">\(t_K\)</span>? What would Chebyshev’s inequality give in place of Hoeffding’s, for <span class="math inline">\(K = 100\)</span>? What does this say about searching a larger grid?</p></li>
 <li><p>The argument needs the <span class="math inline">\(K\)</span> candidates to be fixed before any tuning score is seen. Give an example of a search that breaks this, and one that chooses adaptively but does not.</p></li>
 </ol>
 </section>
@@ -699,8 +643,7 @@ P\big(|\bar Z - \mathbb E\bar Z| \ge t\big) \le 2e^{-2mt^2}.
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <ul>
 <li>Hoeffding, W. (1963). Probability inequalities for sums of bounded random variables. <em>Journal of the American Statistical Association</em>, 58(301), 13–30. <a href="https://doi.org/10.1080/01621459.1963.10500830">doi:10.1080/01621459.1963.10500830</a></li>
-<li>IMDb user ratings of the later films in problem 1, read on 17 November 2026: <a href="https://www.imdb.com/title/tt0121766/">Revenge of the Sith</a>, <a href="https://www.imdb.com/title/tt2488496/">The Force Awakens</a>, <a href="https://www.imdb.com/title/tt3748528/">Rogue One</a>, <a href="https://www.imdb.com/title/tt2527336/">The Last Jedi</a>, <a href="https://www.imdb.com/title/tt2527338/">The Rise of Skywalker</a>. The two seasons of <em>Andor</em> are the averages of their episodes’ IMDb ratings (8.32 and 8.65, rounded), as summarized by <a href="https://episodes.cool/title/tt9253284/andor/">episodes.cool</a>.</li>
-<li>The films: <a href="https://ml4ds.com/data/movies.html">data note</a>.</li>
+<li>The films: <a href="https://ml4ds.com/data/movies.html">data note</a>. The Spotify tracks in problem 1: <a href="https://ml4ds.com/data/spotify.html">data note</a>.</li>
 </ul>
 
 
