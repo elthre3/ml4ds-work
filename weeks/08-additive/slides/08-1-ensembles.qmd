@@ -108,7 +108,7 @@ Questions before big ideas (QUESTION in the note): fitting several curves; a dow
 
 Cut order: (1) "Iterations and learning rate" to its first sentence on "Boosting in practice", (2) the decade figure on "Interactions in the movies data" to its first sentence, (3) "Tree depth and interactions" to its first sentence. The questions, the causal example, the proof and boosting as approximate gradient descent do not move; the dark Star Wars tables, pruning and choosing alpha can be rushed.
 
-In the notebook (to be agreed): exercise 1 redoes the correlated-average variance with the slides closed; exercise 2 is one boosting step by hand.
+In the notebook: exercise 1 redoes the correlated-average variance with the slides closed; exercise 2 is one boosting step by hand on the Star Wars films.
 :::
 
 ### Week 8: additivity vs interactions, and ensembles
