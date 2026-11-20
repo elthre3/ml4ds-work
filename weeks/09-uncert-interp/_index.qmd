@@ -1,0 +1,12 @@
+## Week 9: uncertainty and interpretation
+
+What a fitted prediction leaves out, and what it can tell us. The loss decides which number is the best prediction: the mean, the median, a cost threshold, or a quantile. Two quantiles make a prediction interval: how to check one on fresh data, overall and across the range of the inputs, why no method can guarantee coverage at every input without assumptions, and how conformalized quantile regression guarantees coverage on average over the inputs. Calibration: when a stated probability matches a frequency, what that does and does not say about a score, how to repair one, and calibration within groups. Then interpretation: partial dependence and individual curves for any model, Shapley values, and permutation and leave-one-covariate-out importance. Last, the model and the world: a causal model for the inputs, the difference between what a partial dependence plot holds fixed and the total dependence of a prediction on an input, and when a model's curve is an effect.
+
+**Reading**
+
+- [Prediction intervals and calibration](weeks/09-uncert-interp/intervals-calibration.html) ([PDF](weeks/09-uncert-interp/intervals-calibration.pdf)), a note for this lecture: what an interval or a probability claims, and how to check it on fresh data.
+- IML, the chapters "Partial Dependence Plot (PDP)", "Individual Conditional Expectation (ICE)" and "Permutation Feature Importance": the definitions, the examples and the limitations.
+
+Optional: Loftus, J. R., Bynum, L. E. J. and Hansen, S. (2024), "Causal dependence plots", *Advances in Neural Information Processing Systems* 37, [doi:10.52202/079017-3579](https://doi.org/10.52202/079017-3579), section 1 with its Figure 1; Zhao, Q. and Hastie, T. (2021), "Causal interpretations of black-box models", *Journal of Business and Economic Statistics* 39(1), 272--281, [doi:10.1080/07350015.2019.1624293](https://doi.org/10.1080/07350015.2019.1624293).
+
+**Lecture:** [slides](weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html)

@@ -29,7 +29,7 @@ A week's delivery edits only its own block; nothing here changes. -->
 
 {{< include weeks/08-additive/_index.qmd >}}
 
-{{< include weeks/09-trees/_index.qmd >}}
+{{< include weeks/09-uncert-interp/_index.qmd >}}
 
 {{< include weeks/10-explaining-intervening/_index.qmd >}}
 

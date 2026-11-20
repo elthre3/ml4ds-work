@@ -50,7 +50,7 @@ install.packages(c("tidyverse", "gapminder", "broom", "palmerpenguins", "GGally"
                    "yardstick", "ggdag", "dagitty", "patchwork", "glmnet", "ISLR2",
                    "mgcv", "ggplot2movies", "randomForest", "pdp", "rpart", "partykit",
                    "xgboost", "kernelshap", "shapviz", "fivethirtyeight",
-                   "AppliedPredictiveModeling"))
+                   "AppliedPredictiveModeling", "NHANES"))
 ```
 
 This is every package the seminar notebooks load, for the whole term (`MASS`, `splines` and `nnet`, also used, ship with R). Week 1 needs only the first three. The seminar notebooks are Quarto (`.qmd`) files: open them in RStudio and either press *Render* or run the chunks one at a time.
