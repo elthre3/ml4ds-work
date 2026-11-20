@@ -297,7 +297,7 @@
 </div>
 </div></div>
 <div class="leave">
-<p><strong>Quantile optimality theorem.</strong> If <span class="math inline">\(Y \mid X = x\)</span> has a continuous distribution and <span class="math inline">\(0 &lt; \tau &lt; 1\)</span>, then <span class="math inline">\(\arg\min_{\hat y} \mathbb E[\rho_\tau(Y - \hat y) \mid X = x]\)</span> is the conditional <span class="math inline">\(\tau\)</span>-quantile <span class="math inline">\(q_\tau(x)\)</span></p>
+<p><strong>Quantile optimality theorem.</strong> If <span class="math inline">\(Y \mid X = x\)</span> has a continuous distribution with a finite mean and <span class="math inline">\(0 &lt; \tau &lt; 1\)</span>, then the conditional <span class="math inline">\(\tau\)</span>-quantile <span class="math inline">\(q_\tau(x)\)</span> minimizes <span class="math inline">\(\mathbb E[\rho_\tau(Y - \hat y) \mid X = x]\)</span> over <span class="math inline">\(\hat y\)</span> (uniquely, unless the distribution function is flat at <span class="math inline">\(\tau\)</span>)</p>
 </div>
 <p>Squared loss gave the mean; half the absolute error, <span class="math inline">\(\tau = \frac12\)</span>, gives the median</p>
 </section>
@@ -319,7 +319,7 @@
 </section>
 <section id="the-same-loss-a-flexible-model" class="slide level2">
 <h2>The same loss, a flexible model</h2>
-<p>Boosted trees with the pinball loss: each tree fits the negative gradient <span class="math inline">\(\tau - \mathbf 1\{y_i &lt; \hat f(x_i)\}\)</span>, which pushes the fit up where points lie above it</p>
+<p>Boosted trees with the pinball loss: each tree is built from the negative gradient <span class="math inline">\(\tau - \mathbf 1\{y_i &lt; \hat f(x_i)\}\)</span>, which pushes the fit up where points lie above it</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="fu">xgboost</span>(x, y, <span class="at">objective =</span> <span class="st">"reg:quantileerror"</span>, <span class="at">quantile_alpha =</span> <span class="fl">0.95</span>, <span class="at">max_depth =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -388,11 +388,12 @@
 </div>
 </div>
 </div>
-<p>Overall: 88%, 89% and 87%; a wider interval always covers more</p>
+<p>Overall: 88%, 89% and 87%. Widening never lowers coverage: check width too</p>
 </div>
 </section>
 <section id="coverage-at-every-x" class="slide level2">
 <h2>Coverage at every <span class="math inline">\(x\)</span></h2>
+<p>For a <span class="math inline">\(1 - \alpha\)</span> interval (<span class="math inline">\(\alpha = 0.1\)</span> so far):</p>
 <ul>
 <li><strong>Marginal coverage</strong>: <span class="math inline">\(P\big(Y \in \hat C(X)\big) \ge 1 - \alpha\)</span>, averaged over <span class="math inline">\(X\)</span></li>
 <li><strong>Conditional coverage</strong>: <span class="math inline">\(P\big(Y \in \hat C(X) \mid X = x\big) \ge 1 - \alpha\)</span> for every <span class="math inline">\(x\)</span></li>
@@ -426,13 +427,12 @@
 </div>
 </div></div>
 <div class="leave">
-<p><strong>Conformal coverage theorem</strong> (Romano et al.&nbsp;2019). If the calibration rows and a new row are exchangeable, <span class="math inline">\(P(Y \in \hat C(X)) \ge 0.9\)</span> for any quantile fits, and <span class="math inline">\(\le 0.9 + 1/(m + 1)\)</span> if the scores have no ties</p>
+<p><strong>Conformal coverage theorem</strong> (Romano et al.&nbsp;2019). If the rows are exchangeable, <span class="math inline">\(P(Y \in \hat C(X)) \ge 0.9\)</span> for any quantile fits (<span class="math inline">\(\le 0.9 + 1/(m + 1)\)</span> without ties), averaging over calibration sets: one set of 500 can miss by about 1.3 points</p>
 </div>
-<p><span class="math inline">\(m = 500\)</span>, <span class="math inline">\(Q = 0.25\)</span>: coverage 87% to 90%; for <span class="math inline">\(x\)</span> in 6–8, 80% to 82%. One <span class="math inline">\(Q\)</span> for all <span class="math inline">\(x\)</span></p>
+<p><span class="math inline">\(m = 500\)</span>, <span class="math inline">\(Q = 0.25\)</span>: 87% to 90%; for <span class="math inline">\(x\)</span> in 6–8, 80% to 82%</p>
 </section>
 <section id="ways-to-make-an-interval" class="slide level2 inverse">
 <h2>Ways to make an interval</h2>
-<div style="font-size: 0.72em">
 <table class="caption-top">
 <colgroup>
 <col style="width: 33%">
@@ -448,41 +448,40 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>Linear model, normal noise (<code>predict(lm, interval = "prediction")</code>)</td>
-<td>linear mean, constant variance, normal noise</td>
-<td>90% at every <span class="math inline">\(x\)</span>, if the model is right</td>
+<td>Linear model, normal noise</td>
+<td>linear mean, constant variance</td>
+<td>90% at every <span class="math inline">\(x\)</span>, if right</td>
 </tr>
 <tr class="even">
-<td>A model for the mean and one for the variance</td>
-<td>both models right, normal noise</td>
+<td>Mean and variance models</td>
+<td>both right, normal noise</td>
 <td>about 90% at every <span class="math inline">\(x\)</span>, if right</td>
 </tr>
 <tr class="odd">
-<td>Quantile regression, linear or flexible</td>
+<td>Quantile regression</td>
 <td>the quantile model right</td>
 <td>90% at every <span class="math inline">\(x\)</span> as <span class="math inline">\(n\)</span> grows, if right</td>
 </tr>
 <tr class="even">
-<td>Split conformal prediction (Lei et al.&nbsp;2018)</td>
-<td>rows exchangeable, e.g.&nbsp;independent and from one distribution</td>
-<td>at least 90% marginally, in finite samples; the same width at every <span class="math inline">\(x\)</span></td>
+<td>Split conformal (Lei et al.&nbsp;2018)</td>
+<td>exchangeable rows</td>
+<td>at least 90% marginally; one width</td>
 </tr>
 <tr class="odd">
-<td>Conformalized quantile regression (Romano et al.&nbsp;2019)</td>
-<td>rows exchangeable</td>
-<td>at least 90% marginally, in finite samples; widths from the quantile fits</td>
+<td>CQR (Romano et al.&nbsp;2019)</td>
+<td>exchangeable rows</td>
+<td>at least 90% marginally; widths from the fits</td>
 </tr>
 </tbody>
 </table>
-</div>
 <p>More in the note on the course page, “Prediction intervals and calibration”</p>
 </section>
 <section id="section-3" class="slide level2 inverse center">
 <h2></h2>
 <h3 id="part-3-classification-uncertainty-and-calibration">Part 3: classification uncertainty and calibration</h3>
 </section>
-<section id="a-probability-should-match-a-frequency" class="slide level2" data-minutes="3">
-<h2>A probability should match a frequency</h2>
+<section id="calibration" class="slide level2" data-minutes="3">
+<h2>Calibration</h2>
 <div class="ask">
 <p>A model gives <span class="math inline">\(\hat p = 0.2\)</span> to 500 adults: their probability of having diabetes. What should be true of them?</p>
 </div>
@@ -510,8 +509,8 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 <h2>Calibration and the threshold</h2>
 <ul>
 <li>The base rate, <span class="math inline">\(\hat p(x) = 0.14\)</span> for every adult, is calibrated, and useless: calibration says nothing about how well a score separates those with diabetes from the rest</li>
-<li>If <span class="math inline">\(\hat p\)</span> is calibrated, predicting <span class="math inline">\(1\)</span> when <span class="math inline">\(\hat p(x) &gt; c^\star\)</span> is the best rule <strong>based on that score</strong>: the optimal threshold theorem, with <span class="math inline">\(\hat p(X)\)</span> as the input. It is the Bayes rule only if <span class="math inline">\(\hat p = p\)</span></li>
-<li>If <span class="math inline">\(\hat p\)</span> is not calibrated, <span class="math inline">\(c^\star\)</span> is the wrong cut on it</li>
+<li>If <span class="math inline">\(\hat p\)</span> is calibrated, predicting <span class="math inline">\(1\)</span> when <span class="math inline">\(\hat p(x) &gt; c^\star\)</span> is optimal among rules based on that score: the optimal threshold theorem, with <span class="math inline">\(\hat p(X)\)</span> as the input. It need not be optimal using all of <span class="math inline">\(x\)</span></li>
+<li>Without calibration, <span class="math inline">\(c^\star\)</span> need not be the optimal threshold on <span class="math inline">\(\hat p\)</span></li>
 </ul>
 <div class="retrieval">
 <p>Optimal threshold theorem: with costs <span class="math inline">\(c_{FP}\)</span> and <span class="math inline">\(c_{FN}\)</span>, the rule that minimizes expected cost at <span class="math inline">\(x\)</span> predicts <span class="math inline">\(1\)</span> exactly when <span class="math inline">\(p(x) &gt; c^\star = c_{FP}/(c_{FP} + c_{FN})\)</span></p>
@@ -532,14 +531,14 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p>Fitted <span class="math inline">\(b = 0.39\)</span>: the boosted logits shrunk by about half</p>
+<p>Fitted <span class="math inline">\(b = 0.39\)</span>: the boosted log-odds shrunk to about 0.4 of their size</p>
 <p><span class="math inline">\(\tilde p\)</span> is increasing in <span class="math inline">\(\hat p\)</span> (for <span class="math inline">\(b &gt; 0\)</span>): the same ranking, new probabilities</p>
 <p>Log loss on the checking adults: 0.375 before, 0.329 after</p>
 </div></div>
 </section>
 <section id="calibrated-within-groups" class="slide level2">
 <h2>Calibrated within groups</h2>
-<p>Calibrated overall, wrong within groups. <strong>Multicalibration</strong> (Hébert-Johnson et al.&nbsp;2018): calibrated within every group of a collection named in advance</p>
+<p><strong>Multicalibration</strong> (Hébert-Johnson et al.&nbsp;2018): calibrated within every group of a collection named in advance, at every range of scores</p>
 <div class="columns">
 <div class="column" style="width:58%;">
 <div class="cell">
@@ -552,8 +551,8 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 </div>
 </div>
 </div><div class="column" style="width:42%;">
-<p>The logistic score above (race and ethnicity left out), 3,000 tuning adults, the survey’s groups</p>
-<p>The fix: where a group’s share of 1s in a range of scores is off by more than a tolerance, shift those scores; repeat. Small cells fit noise; a group not named gets no guarantee</p>
+<p>Group averages of the logistic score above (race and ethnicity left out), 3,000 tuning adults. A gap shows miscalibration; matching averages would not show calibration</p>
+<p>The fix: where a group’s share of 1s in a range of scores is off by more than a tolerance, shift those scores; repeat. Small cells fit noise</p>
 </div></div>
 </section>
 <section id="section-4" class="slide level2 inverse center">
@@ -563,11 +562,11 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 <section id="partial-dependence-for-any-model" class="slide level2">
 <h2>Partial dependence for any model</h2>
 <p>Options for the other inputs: hold them fixed (at medians, say: <code>plotmo</code>’s default); average over them (partial dependence, <code>pdp</code>); one curve for each unit (individual conditional expectation, ICE)</p>
-<p>Unit <span class="math inline">\(i\)</span>’s inputs with input <span class="math inline">\(j\)</span> set to a value <span class="math inline">\(\tilde x_j\)</span>: <span class="math inline">\(\;\tilde{\mathbf x}_{ij} = (x_{i1}, \ldots, \tilde x_j, \ldots, x_{ip})\)</span> <span class="math display">\[
-\mathrm{ICE}_i:\ \tilde x_j \mapsto \hat f(\tilde{\mathbf x}_{ij}), \qquad
-\mathrm{PDP}_j:\ \tilde x_j \mapsto \frac1n \sum_{i=1}^n \hat f(\tilde{\mathbf x}_{ij})
+<p>Unit <span class="math inline">\(i\)</span>’s inputs with input <span class="math inline">\(j\)</span> set to a value <span class="math inline">\(t\)</span>, the others left as they are: <span class="math display">\[
+\mathrm{ICE}_i(t) = \hat f(x_{i1}, \ldots, t, \ldots, x_{ip}), \qquad
+\mathrm{PDP}_j(t) = \frac1n \sum_{i=1}^n \hat f(x_{i1}, \ldots, t, \ldots, x_{ip})
 \]</span></p>
-<p>Compute on a grid of <span class="math inline">\(\tilde x_j\)</span> values and plot the curve(s). Any model that predicts will do</p>
+<p>Compute on a grid of <span class="math inline">\(t\)</span> values and plot the curve(s). Any model that predicts will do</p>
 <p>ICE evaluates <span class="math inline">\(\hat f\)</span> at a modified input, which may correspond to no plausible unit. It is the model’s prediction there, not what would have happened to unit <span class="math inline">\(i\)</span>: recomputing a unit with its own noise, as in the causality seminar, asks a different kind of question, which this course does not develop</p>
 </section>
 <section id="a-forest-fits-interactions-its-partial-dependence-plot" class="slide level2" data-minutes="1">
@@ -609,6 +608,36 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 <p>Split a prediction among the inputs, <span class="math inline">\(\hat f(\mathbf x_i) - v_i(\varnothing) = \phi_{i1} + \dots + \phi_{ip}\)</span>; <span class="math inline">\(v_i(S)\)</span> predicts from the inputs in <span class="math inline">\(S\)</span> only (usually: the others averaged over the data, as in partial dependence). For two inputs, adding <span class="math inline">\(x_1\)</span> in either order (for <span class="math inline">\(p\)</span>, all <span class="math inline">\(p!\)</span> orders): <span class="math display">\[
 \phi_{i1} = \tfrac12\Big[\big(v_i(\{1\}) - v_i(\varnothing)\big) + \big(v_i(\{1, 2\}) - v_i(\{2\})\big)\Big]
 \]</span></p>
+<p>The forest, one unit with <span class="math inline">\(x_1 = -0.99\)</span> and <span class="math inline">\(x_2 = -3.94\)</span>:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><span class="math inline">\(v_i(\varnothing)\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(v_i(\{1\})\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(v_i(\{2\})\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(v_i(\{1, 2\}) = \hat f(\mathbf x_i)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">-0.04</td>
+<td style="text-align: center;">0.28</td>
+<td style="text-align: center;">0.43</td>
+<td style="text-align: center;">1.59</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(\phi_{i1} = \frac12\big[(0.28 - (-0.04)) + (1.59 - 0.43)\big] = 0.74\)</span></p>
+<p><span class="math inline">\(\phi_{i2} = \frac12\big[(0.43 - (-0.04)) + (1.59 - 0.28)\big] = 0.89\)</span>; together 1.62 <span class="math inline">\(= \hat f(\mathbf x_i) - v_i(\varnothing)\)</span></p>
+</section>
+<section id="shapley-values-on-the-forest" class="slide level2">
+<h2>Shapley values on the forest</h2>
 <div class="columns">
 <div class="column" style="width:55%;">
 <div class="cell">
@@ -621,7 +650,8 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 </div>
 </div>
 </div><div class="column" style="width:45%;">
-<p>The forest; 300 units shaded as the ICE curves, a smooth for each sign: the spread shows the interaction. Black: the PDP minus the average prediction, the Shapley values’ average when inputs are independent</p>
+<p><span class="math inline">\(\phi_{i1}\)</span> for 300 units, shaded as the ICE curves, with a smooth for each sign: the spread shows the interaction</p>
+<p>Black: the PDP minus the average prediction. With independent inputs, the Shapley values average to it</p>
 </div></div>
 </section>
 <section id="featurevariable-importance" class="slide level2">
@@ -692,7 +722,7 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 </div><div class="column" style="width:48%;">
 <p>Refit without input <span class="math inline">\(j\)</span>, with the same settings; score on the same held-out adults (Lei et al.&nbsp;2018): <span class="math display">\[\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)\]</span></p>
 <p>No extrapolation from permuting; any method, at the cost of <span class="math inline">\(p\)</span> refits</p>
-<p>Weight, height and BMI together: 16.1, more than the three alone added up (0.9, -0.4, -0.3). Any two give the third</p>
+<p>Weight, height and BMI together: 16.1. Each alone: 0.9, -0.4 and -0.3, within the forests’ run-to-run noise. Any two give the third</p>
 </div></div>
 </section>
 <section id="marginal-or-conditional-shapley-values" class="slide level2">
@@ -762,7 +792,7 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 <div class="columns">
 <div class="column" style="width:70%;">
 <div class="leave">
-<p><strong>Model-intervention corollary.</strong> Let <span class="math inline">\(f^\star(t, z) = \mathbb E[Y \mid T = t, Z = z]\)</span>. If <span class="math inline">\(Z\)</span> holds every common cause of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span> and no consequence of <span class="math inline">\(T\)</span>, and <span class="math inline">\(P(T = t \mid Z) &gt; 0\)</span>, then <span class="math inline">\(\mathbb E_Z\big[f^\star(t, Z)\big] = \mathbb E[Y \mid do(T = t)]\)</span></p>
+<p><strong>Model-intervention corollary.</strong> In the adjustment theorem’s model, <span class="math inline">\(T = h(Z, \varepsilon_T)\)</span> and <span class="math inline">\(Y = g(T, Z, \varepsilon_Y)\)</span> with independent noises, let <span class="math inline">\(f^\star(t, z) = \mathbb E[Y \mid T = t, Z = z]\)</span>. If <span class="math inline">\(T\)</span> takes finitely many values and <span class="math inline">\(P(T = t \mid Z) &gt; 0\)</span> with probability one, then <span class="math inline">\(\mathbb E_Z\big[f^\star(t, Z)\big] = \mathbb E[Y \mid do(T = t)]\)</span></p>
 </div>
 </div><div class="column" style="width:30%;">
 <div class="cell">
@@ -775,13 +805,13 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 </div>
 </div>
 </div></div>
-<p>A population identity: the adjustment theorem, written with <span class="math inline">\(f^\star\)</span>. The PDP <span class="math inline">\(\frac1n\sum_i \hat f(t, z_i)\)</span> estimates it, an estimate even when <span class="math inline">\(\hat f = f^\star\)</span>: <span class="math display">\[
+<p>In words: <span class="math inline">\(Z\)</span> holds every common cause of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span>, and no consequence of <span class="math inline">\(T\)</span>. A population identity; the PDP <span class="math inline">\(\frac1n\sum_i \hat f(t, z_i)\)</span> estimates it, even when <span class="math inline">\(\hat f = f^\star\)</span>: <span class="math display">\[
 \mathrm{PDP}_T(t) = \mathbb E[Y \mid do(T = t)] + \text{model error} + \text{sampling error}
 \]</span></p>
 </section>
 <section id="where-the-condition-fails" class="slide level2" data-minutes="3">
 <h2>Where the condition fails</h2>
-<p>Partial dependence (pink) against the effect of setting the plotted input (dashed), in the simulated world</p>
+<p>Partial dependence (pink) against the effect of setting the plotted input (dashed)</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -792,7 +822,7 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 </div>
 </div>
 <div class="retrieval">
-<p>Adjustment theorem: every common cause of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span>, and <strong>no consequence</strong> of <span class="math inline">\(T\)</span></p>
+<p>Adjustment theorem: <span class="math inline">\(Z\)</span> holds every common cause of <span class="math inline">\(T\)</span> and <span class="math inline">\(Y\)</span>, and no consequence of <span class="math inline">\(T\)</span></p>
 </div>
 </section>
 <section id="history-asthma-and-pneumonia" class="slide level2 inverse">
@@ -808,19 +838,26 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 <section id="conclusion" class="slide level2 inverse">
 <h2>Conclusion</h2>
 <h4 id="uncertainty">Uncertainty</h4>
-<p>The loss decides which number is the best prediction; two quantiles make an interval, and conformalizing them guarantees marginal coverage. Check coverage and calibration on data not used to fit, across the range of the inputs and within groups: no method guarantees coverage at every <span class="math inline">\(x\)</span> without assumptions</p>
+<p>The loss decides which number is the best prediction; two quantiles make an interval, and conformalizing them guarantees marginal coverage for exchangeable rows. Check coverage and calibration on data not used to fit, across the range of the inputs and within groups: no method guarantees coverage at every <span class="math inline">\(x\)</span> without assumptions</p>
 <h4 id="interpretation">Interpretation</h4>
-<p>Partial dependence, ICE, Shapley values and importance describe <span class="math inline">\(\hat f\)</span>. A curve is an effect only when no input is a consequence of the plotted one and every common cause is in the model; with a causal model for the inputs, the total dependence plot answers a different question</p>
+<p>Partial dependence, ICE, Shapley values and importance describe <span class="math inline">\(\hat f\)</span>. Under valid adjustment and accurate estimation, the PDP estimates the interventional mean; with a causal model for the inputs, the total dependence plot answers a different question</p>
 </section>
-<section id="references" class="slide level2 inverse" data-minutes="0">
-<h2>References</h2>
-<div style="font-size: 0.53em">
+<section id="references-1-of-2" class="slide level2 inverse" data-minutes="0">
+<h2>References (1 of 2)</h2>
+<div style="font-size: 0.78em">
 <ul>
 <li>Barber, R. F., Candès, E. J., Ramdas, A. and Tibshirani, R. J. (2021). The limits of distribution-free conditional predictive inference. <em>Information and Inference: A Journal of the IMA</em> 10(2), 455–482. <a href="https://doi.org/10.1093/imaiai/iaaa017">doi:10.1093/imaiai/iaaa017</a>. The result stated is Proposition 2.2, p.&nbsp;459.</li>
 <li>Caruana, R., Lou, Y., Gehrke, J., Koch, P., Sturm, M. and Elhadad, N. (2015). Intelligible models for healthcare: predicting pneumonia risk and hospital 30-day readmission. <em>Proceedings of the 21st ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 1721–1730. <a href="https://doi.org/10.1145/2783258.2788613">doi:10.1145/2783258.2788613</a></li>
 <li>Chen, H., Janizek, J. D., Lundberg, S. and Lee, S.-I. (2020). True to the model or true to the data? arXiv:2006.16234. <a href="https://arxiv.org/abs/2006.16234">arxiv.org/abs/2006.16234</a></li>
-<li>Hébert-Johnson, Ú., Kim, M. P., Reingold, O. and Rothblum, G. N. (2018). Multicalibration: calibration for the (computationally-identifiable) masses. <em>Proceedings of the 35th International Conference on Machine Learning</em>, PMLR 80, 1939–1948. <a href="https://proceedings.mlr.press/v80/hebert-johnson18a.html">proceedings.mlr.press/v80/hebert-johnson18a.html</a></li>
+<li>Hébert-Johnson, Ú., Kim, M. P., Reingold, O. and Rothblum, G. N. (2018). Multicalibration: calibration for the (computationally-identifiable) masses. <em>Proceedings of the 35th International Conference on Machine Learning</em>, PMLR 80, 1939–1948. <a href="https://proceedings.mlr.press/v80/hebert-johnson18a.html">proceedings.mlr.press/v80/hebert-johnson18a.html</a>. Definition 2.6 and section 3.2 as numbered in the arXiv version, 1711.08513</li>
 <li>Heskes, T., Sijben, E., Bucur, I. G. and Claassen, T. (2020). Causal Shapley values: exploiting causal knowledge to explain individual predictions of complex models. <em>Advances in Neural Information Processing Systems</em> 33. <a href="https://papers.nips.cc/paper/2020/hash/32e54441e6382a7fbacbbbaf3c450059-Abstract.html">NeurIPS proceedings</a></li>
+</ul>
+</div>
+</section>
+<section id="references-2-of-2" class="slide level2 inverse" data-minutes="0">
+<h2>References (2 of 2)</h2>
+<div style="font-size: 0.78em">
+<ul>
 <li>Hooker, G., Mentch, L. and Zhou, S. (2021). Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance. <em>Statistics and Computing</em> 31(6), article 82. <a href="https://doi.org/10.1007/s11222-021-10057-z">doi:10.1007/s11222-021-10057-z</a></li>
 <li>Lei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. <em>Journal of the American Statistical Association</em> 113(523), 1094–1111. Section 2.2 (split conformal) and section 6 (LOCO). <a href="https://doi.org/10.1080/01621459.2017.1307116">doi:10.1080/01621459.2017.1307116</a></li>
 <li>Loftus, J. R., Bynum, L. E. J. and Hansen, S. (2024). Causal dependence plots. <em>Advances in Neural Information Processing Systems</em> 37. Definitions 2.5, 2.7 and 2.9, Theorem 2.10. <a href="https://doi.org/10.52202/079017-3579">doi:10.52202/079017-3579</a></li>
