@@ -261,7 +261,7 @@
 <p>You are that person. What should a “90% interval” for your outcome promise you?</p>
 </div>
 <div class="fragment">
-<p>That it covers outcomes of people with your inputs 90% of the time: <span class="math inline">\(P\big(Y \in \hat C(X) \mid X = x_0\big) \ge 0.9\)</span>, <strong>conditional coverage</strong>. Coverage averaged over everyone’s inputs can be 90% while coverage at your <span class="math inline">\(x_0\)</span> is far lower</p>
+<p>That the interval, call it <span class="math inline">\(\hat C(x_0)\)</span>, covers outcomes of people with your inputs 90% of the time: <span class="math inline">\(P\big(Y \in \hat C(X) \mid X = x_0\big) \ge 0.9\)</span>, <strong>conditional coverage</strong></p>
 </div>
 </section>
 <section id="finding-the-quantile" class="slide level2 inverse" data-minutes="2">
@@ -368,7 +368,7 @@
 </div>
 </div>
 <div class="retrieval">
-<p>Bias–variance at <span class="math inline">\(x_0\)</span>: <span class="math inline">\(\sigma^2 + \text{bias}^2 + \text{variance}\)</span>; more data shrink only the variance</p>
+<p>Bias–variance at <span class="math inline">\(x_0\)</span>: <span class="math inline">\(\sigma^2 + \text{bias}^2 + \text{variance}\)</span>; no amount of data shrinks <span class="math inline">\(\sigma^2\)</span></p>
 </div>
 </section>
 <section id="an-interval-from-two-quantiles" class="slide level2">
@@ -384,12 +384,14 @@
 </div>
 </div>
 </section>
-<section id="checking-an-interval-on-fresh-data" class="slide level2" data-minutes="3">
-<h2>Checking an interval on fresh data</h2>
+<section id="checking-an-interval" class="slide level2" data-minutes="1">
+<h2>Checking an interval</h2>
 <div class="ask">
 <p>We claim 90 percent intervals. With fresh data in hand, how do you check the claim, and what could the check miss?</p>
 </div>
-<div class="fragment">
+</section>
+<section id="checking-an-interval-on-fresh-data" class="slide level2">
+<h2>Checking an interval on fresh data</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -399,8 +401,7 @@
 </div>
 </div>
 </div>
-<p>Top: coverage in each range of <span class="math inline">\(x\)</span>, pink if more than 2 standard errors (3 points) from 90%. Overall: 88%, 89%, 87%. Widening never lowers coverage: check width too</p>
-</div>
+<p>Top: coverage in each range of <span class="math inline">\(x\)</span>, pink if more than 3 points from 90% (two standard errors). Overall: 88%, 89%, 87%. Widening never lowers coverage: check width too</p>
 </section>
 <section id="coverage-at-every-x" class="slide level2">
 <h2>Coverage at every <span class="math inline">\(x\)</span></h2>
@@ -418,7 +419,7 @@
 </section>
 <section id="bias-variance-and-intervals" class="slide level2" data-minutes="3">
 <h2>Bias, variance and intervals</h2>
-<p><span class="math inline">\(\hat f(x) \pm d\)</span>, <span class="math inline">\(d\)</span> the 90th percentile of the absolute residuals; noise of constant size, 500 rows to fit</p>
+<p><span class="math inline">\(\hat f(x) \pm d\)</span>, <span class="math inline">\(d\)</span> the 90th percentile of absolute residuals; constant noise, 500 rows to fit</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -437,17 +438,23 @@
 <section id="held-out-rows-and-tuning" class="slide level2" data-minutes="2">
 <h2>Held-out rows and tuning</h2>
 <ul>
-<li>Calibration rows must play no part in fitting, so a new row’s score is like one more of theirs</li>
+<li>Held-out rows play no part in fitting, so a new row’s residual is like one of theirs</li>
 <li>Rows used for <strong>tuning</strong> have played a part: the setting chosen did best on them, so their residuals are a little too small</li>
-<li><span class="math inline">\(k\)</span>-NN, <span class="math inline">\(k\)</span> from 1 to 50, tuned on other rows, on the calibration rows, or chosen for the narrowest interval; average coverage of fresh rows:</li>
+<li><span class="math inline">\(k\)</span>-NN, <span class="math inline">\(k\)</span> from 1 to 50; average coverage of fresh rows, by how <span class="math inline">\(k\)</span> was chosen:</li>
 </ul>
 <table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: center;">Calibration rows</th>
-<th style="text-align: center;">Other rows</th>
-<th style="text-align: center;">The same rows</th>
-<th style="text-align: center;">Narrowest</th>
+<th style="text-align: center;">Held-out rows</th>
+<th style="text-align: center;">on other rows</th>
+<th style="text-align: center;">on the held-out rows</th>
+<th style="text-align: center;">narrowest interval</th>
 </tr>
 </thead>
 <tbody>
@@ -465,7 +472,7 @@
 </tr>
 </tbody>
 </table>
-<p>Separate rows to fit, tune and calibrate; or tune by cross-validation within the fitting rows</p>
+<p>Separate rows to fit, to tune and to hold out; or tune by cross-validation within the fitting rows</p>
 <div class="retrieval">
 <p>Optimism theorem: training error underestimates the risk</p>
 </div>
@@ -671,8 +678,8 @@ P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
 </div>
 </div>
 </div><div class="column" style="width:44%;">
-<p>The logistic score, 3,000 tuning adults. White adults: average score 14.8%, 10.6% with diabetes</p>
-<p>One fairness criterion of several: when base rates differ, only a perfect score also gives the groups equal error rates (Kleinberg et al.&nbsp;2017; Chouldechova 2017)</p>
+<p>White adults: average score 14.8%, 10.6% with diabetes</p>
+<p>Fairness criteria conflict: with different base rates, no imperfect score is calibrated within groups and averages the same in each group among adults with diabetes, and among those without (Kleinberg et al.&nbsp;2017)</p>
 </div></div>
 </section>
 <section id="multicalibration" class="slide level2">

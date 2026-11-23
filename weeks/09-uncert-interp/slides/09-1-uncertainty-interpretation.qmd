@@ -154,7 +154,8 @@ bg3 <- mutate(bg3, wrong = (x > bg3_cut) != (y == 1), y_jit = y + runif(300, -0.
 bg_save(ggplot(bg3, aes(x, y_jit)) + geom_hline(yintercept = 0.5, linetype = "dashed", colour = "white", linewidth = 0.8) +
   geom_vline(xintercept = bg3_cut, linetype = "dashed", colour = "white", linewidth = 0.8) +
   geom_function(fun = function(x) plogis(coef(bg3_fit)[[1]] + coef(bg3_fit)[[2]] * x), colour = "#fde725", linewidth = 1.6) +
-  geom_point(aes(colour = wrong, size = wrong), alpha = 0.9) + bg_pt() + xlim(-3, 3) + ylim(-0.75, 1.08) + bg_void, "part3-logistic.png")
+  geom_point(aes(colour = wrong, size = wrong), alpha = 0.9) + bg_pt() + xlim(-4, 2.4) + ylim(-0.75, 1.08) + bg_void +
+  theme(plot.margin = ggplot2::margin(20, 30, 20, 430)), "part3-logistic.png")   # drawn on the right, clear of the title
 # Part 4: GGally::ggcoef() for a linear model of systolic blood pressure, numerical inputs standardized.
 bg4_fit <- lm(BPSysAve ~ Age + Gender + Race1 + Weight + Height + BMI + Pulse + TotChol + Poverty,
               data = mutate(nh_train, across(c(Age, Weight, Height, BMI, Pulse, TotChol, Poverty), \(v) as.numeric(scale(v)))))
@@ -201,7 +202,7 @@ p5 <- p5 +
   annotate("text", x = 3.5, y = 0.6, label = 'widehat("p44/42")', parse = TRUE, colour = "white", size = 7, family = "serif") +
   annotate("rect", xmin = 3.05, xmax = 3.95, ymin = 0.33, ymax = 0.9, fill = NA, colour = "white", linetype = "dashed", linewidth = 0.6) +
   scale_colour_manual(values = sachs_cols, guide = "none") +
-  coord_fixed(ratio = 1, xlim = c(-3.6, 3.95), ylim = c(0.1, 4.35), expand = FALSE) + bg_void
+  coord_fixed(ratio = 1, xlim = c(-3.4, 4.15), ylim = c(0.1, 4.35), expand = FALSE) + bg_void
 bg_save(p5, "part5-sachs-ecm.png")
 ```
 
@@ -277,7 +278,7 @@ You are that person. What should a "90% interval" for your outcome promise you?
 
 . . .
 
-That it covers outcomes of people with your inputs 90% of the time: $P\big(Y \in \hat C(X) \mid X = x_0\big) \ge 0.9$, **conditional coverage**. Coverage averaged over everyone's inputs can be 90% while coverage at your $x_0$ is far lower
+That the interval, call it $\hat C(x_0)$, covers outcomes of people with your inputs 90% of the time: $P\big(Y \in \hat C(X) \mid X = x_0\big) \ge 0.9$, **conditional coverage**
 
 ## Finding the quantile {.inverse minutes="2"}
 
@@ -464,7 +465,7 @@ ggplot(cp_g, aes(x)) + geom_ribbon(aes(ymin = pl, ymax = pu), fill = v_teal, alp
 ```
 
 ::: {.retrieval}
-Bias--variance at $x_0$: $\sigma^2 + \text{bias}^2 + \text{variance}$; more data shrink only the variance
+Bias--variance at $x_0$: $\sigma^2 + \text{bias}^2 + \text{variance}$; no amount of data shrinks $\sigma^2$
 :::
 
 ## An interval from two quantiles
@@ -504,7 +505,17 @@ ggplot(filter(bands, method != "linear quantiles"), aes(x)) +
   facet_wrap(~ method) + labs(x = "x", y = "y") + theme(strip.text = element_text(size = 16))
 ```
 
-## Checking an interval on fresh data {minutes="3"}
+## Checking an interval {minutes="1"}
+
+::: {.notes}
+QUESTION: we claim 90 percent intervals; how do you check, and what could the check miss?
+:::
+
+::: {.ask}
+We claim 90 percent intervals. With fresh data in hand, how do you check the claim, and what could the check miss?
+:::
+
+## Checking an interval on fresh data
 
 ```{r}
 #| label: coverage
@@ -516,19 +527,25 @@ cov_pts <- imap_dfr(interval_fns[cov_methods], function(fn, nm) {
          inside = het_fresh$y >= b[, 1] & het_fresh$y <= b[, 2], width = b[, 2] - b[, 1])
 }) |> mutate(method = factor(method, levels = cov_methods))
 cov_all <- cov_pts |> group_by(method) |> summarise(all = mean(inside), width = mean(width))
-# Five ranges of x, about 400 fresh points each; a range's coverage is outside the band if it is more than
-# two binomial standard errors from 90%.
+# Five ranges of x, about 400 fresh points each; a range is flagged when its coverage, as shown (a whole
+# percent), is more than 3 points from 90: two binomial standard errors with 400 points are 3.0 points.
 cov_rng <- cov_pts |> mutate(mid = 2 * floor(pmin(x, 9.999) / 2) + 1) |>
   group_by(method, mid) |> summarise(cov = mean(inside), n = n(), .groups = "drop")
-se2 <- 2 * sqrt(0.9 * 0.1 / mean(cov_rng$n))
-cov_rng <- cov_rng |> mutate(off = abs(cov - 0.9) > se2)
+flag_off <- function(cov) abs(round(100 * cov) - 90) > 3
+cov_rng <- cov_rng |> mutate(off = flag_off(cov))
 pct <- function(v) sprintf("%.0f%%", 100 * v)
 # Fresh points inside (grey) and outside (pink) each interval, with the coverage of each range of x on top.
-coverage_plot <- function(pts, rng, curve = NULL) {
+# Every third point is drawn and the interval is tinted over the points (and outlined, where its edges are
+# smooth), so that it shows; the coverage rates are those of all the points.
+coverage_plot <- function(pts, rng, curve = NULL, outline = TRUE) {
   y_lab <- max(pts$y) + 2
-  ggplot(pts, aes(x, y)) +
-    geom_ribbon(data = arrange(pts, method, x), aes(ymin = lo, ymax = hi), fill = "grey85") +
-    geom_point(aes(colour = inside), size = 0.8, alpha = 0.7) +
+  band <- arrange(pts, method, x)
+  ggplot(pts |> group_by(method) |> filter(row_number() %% 3 == 1) |> ungroup(), aes(x, y)) +
+    geom_ribbon(data = band, aes(ymin = lo, ymax = hi), fill = "grey85") +
+    geom_point(aes(colour = inside), size = 0.9, alpha = 0.75) +
+    geom_ribbon(data = band, aes(ymin = lo, ymax = hi), fill = v_dark, alpha = 0.12) +
+    { if (outline) geom_line(data = band, aes(y = lo), colour = v_dark, linewidth = 0.4) } +
+    { if (outline) geom_line(data = band, aes(y = hi), colour = v_dark, linewidth = 0.4) } +
     { if (!is.null(curve)) geom_line(data = curve, aes(x, y), linetype = "dashed", inherit.aes = FALSE) } +
     geom_vline(xintercept = c(2, 4, 6, 8), colour = "grey70", linetype = "dotted") +
     geom_text(data = rng, aes(x = mid, y = y_lab, label = pct(cov), fontface = if_else(off, "bold", "plain")),
@@ -542,27 +559,19 @@ coverage_plot <- function(pts, rng, curve = NULL) {
 ```
 
 ::: {.notes}
-QUESTION: we claim 90 percent intervals; how do you check, and what could the check miss?
-
-2,000 fresh points. Above each panel: coverage by range (about 400 points); pink when more than two binomial standard errors (3 points) from 90.
+2,000 fresh points, every third drawn. Above each panel: coverage by range (about 400 points); pink when more than 3 points from 90, two binomial standard errors.
 Mean widths `r sprintf("%.1f", cov_all$width[1])`, `r sprintf("%.1f", cov_all$width[2])`, `r sprintf("%.1f", cov_all$width[3])`; true quantiles `r sprintf("%.1f", mean(2 * z90 * s_sim(het_fresh$x)))`.
 :::
 
-::: {.ask}
-We claim 90 percent intervals. With fresh data in hand, how do you check the claim, and what could the check miss?
-:::
-
-::: {.fragment}
 ```{r}
 #| label: coverage-plot
 #| fig-width: 11.5
-#| fig-height: 2.6
+#| fig-height: 4.2
 #| fig-align: center
 coverage_plot(cov_pts, cov_rng)
 ```
 
-Top: coverage in each range of $x$, pink if more than 2 standard errors (3 points) from 90%. Overall: `r pct(cov_all$all[1])`, `r pct(cov_all$all[2])`, `r pct(cov_all$all[3])`. Widening never lowers coverage: check width too
-:::
+Top: coverage in each range of $x$, pink if more than 3 points from 90% (two standard errors). Overall: `r pct(cov_all$all[1])`, `r pct(cov_all$all[2])`, `r pct(cov_all$all[3])`. Widening never lowers coverage: check width too
 
 ## Coverage at every $x$
 
@@ -606,7 +615,7 @@ bv_pts <- imap_dfr(bv, function(m, nm) {
 }) |> mutate(method = fct_inorder(method))
 bv_all <- bv_pts |> group_by(method) |> summarise(all = mean(inside), width = mean(hi - lo))
 bv_rng <- bv_pts |> mutate(mid = 2 * floor(pmin(x, 9.999) / 2) + 1) |> group_by(method, mid) |>
-  summarise(cov = mean(inside), n = n(), .groups = "drop") |> mutate(off = abs(cov - 0.9) > 2 * sqrt(0.09 / n))
+  summarise(cov = mean(inside), n = n(), .groups = "drop") |> mutate(off = flag_off(cov))
 ```
 
 ::: {.notes}
@@ -614,14 +623,14 @@ Dashed: the curve. Widths: line `r sprintf("%.1f", bv_all$width[1])`, forest on 
 Line overall `r pct(bv_all$all[1])`: its residuals include the bias, so it is wide everywhere and still misses where it bends.
 :::
 
-$\hat f(x) \pm d$, $d$ the 90th percentile of the absolute residuals; noise of constant size, 500 rows to fit
+$\hat f(x) \pm d$, $d$ the 90th percentile of absolute residuals; constant noise, 500 rows to fit
 
 ```{r}
 #| label: bias-variance-plot
 #| fig-width: 11.5
-#| fig-height: 2.45
+#| fig-height: 2.8
 #| fig-align: center
-coverage_plot(bv_pts, bv_rng, curve = mutate(x_grid, y = f_sim(x)))
+coverage_plot(bv_pts, bv_rng, curve = mutate(x_grid, y = f_sim(x)), outline = FALSE)
 ```
 
 - **Bias**: the line misses the curve where it bends; coverage varies with $x$
@@ -652,20 +661,20 @@ pct1 <- function(v) sprintf("%.1f%%", 100 * v)
 ```
 
 ::: {.notes}
-QUESTION (if time): could the rows used to choose k also be the calibration rows?
+QUESTION (if time): could the rows used to choose k also be the held-out rows?
 Each cell: 300 repeats, 1,000 fresh rows each; standard errors about 0.1 (500 rows) and 0.2 (100 rows).
 :::
 
-- Calibration rows must play no part in fitting, so a new row's score is like one more of theirs
+- Held-out rows play no part in fitting, so a new row's residual is like one of theirs
 - Rows used for **tuning** have played a part: the setting chosen did best on them, so their residuals are a little too small
-- $k$-NN, $k$ from 1 to 50, tuned on other rows, on the calibration rows, or chosen for the narrowest interval; average coverage of fresh rows:
+- $k$-NN, $k$ from 1 to 50; average coverage of fresh rows, by how $k$ was chosen:
 
-| Calibration rows | Other rows | The same rows | Narrowest |
+| Held-out rows | on other rows | on the held-out rows | narrowest interval |
 |:---:|:---:|:---:|:---:|
 | 500 | `r pct1(tune_cov[[1]][["other"]])` | `r pct1(tune_cov[[1]][["same"]])` | `r pct1(tune_cov[[1]][["narrowest"]])` |
 | 100 | `r pct1(tune_cov[[2]][["other"]])` | `r pct1(tune_cov[[2]][["same"]])` | `r pct1(tune_cov[[2]][["narrowest"]])` |
 
-Separate rows to fit, tune and calibrate; or tune by cross-validation within the fitting rows
+Separate rows to fit, to tune and to hold out; or tune by cross-validation within the fitting rows
 
 ::: {.retrieval}
 Optimism theorem: training error underestimates the risk
@@ -945,7 +954,7 @@ gap_se <- function(g) with(grp[grp$group == g, ], abs(predicted - observed) / se
 
 ::: {.notes}
 Bars: two standard errors. Clear gap only for White adults (`r sprintf("%.1f", gap_se("White"))` SE); Black `r sprintf("%.1f", gap_se("Black"))`, the rest under 2.
-Kleinberg et al.: calibration within groups and balance for the positive and the negative class; Chouldechova: equal positive predictive values and equal false positive and false negative rates.
+Kleinberg et al.: calibration within groups, balance for the positive class and for the negative class hold together only with perfect prediction or equal base rates. For a threshold rule, Chouldechova (2017): with different base rates, equal positive predictive value rules out equal false positive and false negative rates.
 :::
 
 One score for everyone. If it is too high for one group and too low for another, a shared threshold refers the first group for tests more often, and the second less often, than their risk warrants: the score discriminates, even with race and ethnicity left out of its inputs
@@ -962,13 +971,13 @@ ggplot(grp, aes(y = fct_rev(group))) +
   geom_point(aes(x = predicted, colour = "average score"), shape = 17, size = 3.6) +
   scale_colour_manual(values = c(`share with diabetes` = "black", `average score` = m_pink), name = NULL) +
   scale_x_continuous(labels = scales::percent) +
-  labs(x = "share with diabetes, average score", y = NULL) + theme(legend.position = "top")
+  labs(x = "the logistic score, 3,000 tuning adults", y = NULL) + theme(legend.position = "top")
 ```
 :::
 ::: {.column width="44%"}
-The logistic score, 3,000 tuning adults. White adults: average score `r pct1(grp$predicted[grp$group == "White"])`, `r pct1(grp$observed[grp$group == "White"])` with diabetes
+White adults: average score `r pct1(grp$predicted[grp$group == "White"])`, `r pct1(grp$observed[grp$group == "White"])` with diabetes
 
-One fairness criterion of several: when base rates differ, only a perfect score also gives the groups equal error rates (Kleinberg et al. 2017; Chouldechova 2017)
+Fairness criteria conflict: with different base rates, no imperfect score is calibrated within groups and averages the same in each group among adults with diabetes, and among those without (Kleinberg et al. 2017)
 :::
 :::
 
