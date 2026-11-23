@@ -1,0 +1,1712 @@
+---
+title: "Machine learning"
+subtitle: "Week 9: uncertainty and interpretation"
+title-question: "What is the best prediction of an outcome if the loss is squared error? If it is absolute error? If a miss costs ten times a false alarm?"
+format:
+  revealjs:
+    theme: [default, ../../../theme/st310.scss]
+    # The title slide with the question above (theme/title-slide.html).
+    template-partials:
+      - ../../../theme/title-slide.html
+    slide-number: c/t
+    width: 1280
+    height: 720
+    margin: 0.06
+    code-line-numbers: false
+    fig-width: 7
+    fig-height: 4.2
+    fig-dpi: 150
+    progress: true
+    history: false
+    footer: "ST310 Machine Learning"
+    # Figures render at their fig-width/fig-height; an overfull slide then shows
+    # as overfull instead of auto-stretch shrinking the figure to fit.
+    auto-stretch: false
+    # Speaker notes are stripped from the public render unless the environment
+    # variable ST310_KEEP_NOTES is set (see _build_env/strip_notes.lua).
+    filters:
+      - ../../../_build_env/strip_notes.lua
+execute:
+  echo: false
+  warning: false
+  message: false
+  freeze: auto
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(knitr)
+library(patchwork)
+library(quantreg)       # rq(), linear quantile regression; this deck only, not on the course's package list
+library(randomForest)
+library(xgboost)
+library(pdp)
+library(ggdag)
+library(NHANES)
+library(GGally)         # ggcoef(), for the background of part 4
+library(kernelshap)     # permshap(): exact Shapley values with a background sample
+library(shapviz)        # sv_waterfall()
+theme_set(theme_minimal(base_size = 18))
+# Figures on dark slides (chunk option dark: true): a transparent background and light ink.
+theme_dark_slide <- theme_minimal(base_size = 18) +
+  theme(text = element_text(colour = "white"), axis.text = element_text(colour = "grey85"),
+        panel.grid = element_line(colour = "#FFFFFF2E"),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        panel.background = element_rect(fill = "transparent", colour = NA),
+        legend.background = element_rect(fill = "transparent", colour = NA),
+        legend.key = element_rect(fill = "transparent", colour = NA))
+knitr::opts_hooks$set(dark = function(options) { if (isTRUE(options$dark)) options$dev.args <- list(bg = "transparent"); options })
+knitr::knit_hooks$set(dark = function(before, options) {
+  if (isTRUE(options$dark)) theme_set(if (before) theme_dark_slide else theme_minimal(base_size = 18))
+  NULL
+})
+options(knitr.table.format = "html")
+# Palette: viridis for the primary scale, magma for the second one.
+v_dark <- "#440154"; v_blue <- "#31688e"; v_teal <- "#21918c"; v_green <- "#5ec962"
+m_pink <- "#b73779"; m_purple <- "#8c2981"; m_orange <- "#fc8961"
+mse <- function(y, pred) mean((y - pred)^2)
+pin <- function(u, tau) u * (tau - (u < 0))   # the pinball loss
+# NHANES (data note: data/nhanes.md): adults with every column used here recorded, split at random
+# 4,000 training, 3,000 tuning; the rest is the test set, used once, to check multicalibration.
+nh <- NHANESraw |>
+  filter(Age >= 20) |>
+  select(Diabetes, Gender, Age, Race1, Poverty, Weight, Height, BMI, Pulse, BPSysAve, TotChol, DirectChol, PhysActive) |>
+  drop_na() |>
+  mutate(diabetes = as.numeric(Diabetes == "Yes"), male = as.numeric(Gender == "male"),
+         active = as.numeric(PhysActive == "Yes"))
+set.seed(310)   # the deck's one seed: the split, then every random step below, in order
+nh_id <- sample(nrow(nh))
+nh_train <- nh[nh_id[1:4000], ]
+nh_tune  <- nh[nh_id[4001:7000], ]
+nh_test  <- nh[nh_id[7001:nrow(nh)], ]
+# Simulated data for parts 1 and 2, the same as the note's: noise that grows with x.
+f_sim <- function(x) 3 + x + 2 * sin(x)
+s_sim <- function(x) 0.5 + 0.35 * x
+sim <- function(n) tibble(x = runif(n, 0, 10)) |> mutate(y = f_sim(x) + s_sim(x) * rnorm(n))
+het_train <- sim(1000)
+het_fresh <- sim(2000)
+x_grid <- tibble(x = seq(0, 10, length.out = 201))
+# The causality lecture's diagram of the adjustment theorem.
+dag_adjust <- function(intervened = FALSE, title = NULL) {
+  s <- if (intervened) '{ Z [pos="1,1"] T [pos="0,0"] Y [pos="2,0"] Z -> Y T -> Y }' else
+                       '{ Z [pos="1,1"] T [pos="0,0"] Y [pos="2,0"] Z -> T Z -> Y T -> Y }'
+  dag(s) %>% tidy_dagitty() %>%
+    ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_dag_point(size = 15, colour = "#e5ecf6") +
+    geom_dag_text(size = 8, colour = v_dark) +
+    geom_dag_edges(edge_width = 1.3) +
+    expand_limits(x = c(-0.35, 2.35), y = c(-0.4, 1.45)) +
+    coord_cartesian(clip = "off") +
+    labs(title = title) +
+    theme_dag_blank() +
+    theme(plot.title = element_text(size = 15, hjust = 0.5, colour = v_dark))
+}
+# The explanatory causal model of part 5, drawn by hand in the convention of Loftus, Bynum and Hansen (2024),
+# Figure 5: one graph with the outcome y and the prediction y-hat (boxed); solid arrows for relations in the
+# world, dashed arrows from the model's inputs to the prediction, curved so that they cross no node.
+ecm_plot <- function() {
+  arw <- arrow(length = unit(0.13, "inches"), type = "closed")
+  solid <- tribble(~x, ~y, ~xend, ~yend,          # x1 -> x2, x1 -> y, x2 -> y, x1 -> x3, y -> x3
+    0.29, 1.15, 1.71, 1.95,   0.33, 1, 3.67, 1,   2.29, 1.95, 3.71, 1.15,   0.29, 0.85, 1.71, 0.05,   3.71, 0.85, 2.29, 0.05)
+  ggplot() +
+    geom_segment(data = solid, aes(x, y, xend = xend, yend = yend), colour = v_dark, linewidth = 1.1, arrow = arw) +
+    annotate("curve", x = 2.32, y = -0.2, xend = 5.05, yend = -0.85, colour = m_pink, linewidth = 1.1, linetype = "dashed",
+             curvature = 0.12, arrow = arw) +
+    annotate("curve", x = 0, y = 0.64, xend = 5.0, yend = -1.05, colour = m_pink, linewidth = 1.1, linetype = "dashed",
+             curvature = 0.42, angle = 90, arrow = arw) +
+    annotate("curve", x = 2.34, y = 2.15, xend = 5.4, yend = -0.55, colour = m_pink, linewidth = 1.1, linetype = "dashed",
+             curvature = -0.55, angle = 90, arrow = arw) +
+    geom_label(data = tibble(x = c(0, 2, 4, 2), y = c(1, 2.1, 1, -0.1), lab = c("x[1]", "x[2]", "y", "x[3]")),
+               aes(x, y, label = lab), parse = TRUE, size = 7, linewidth = 0.3, label.padding = unit(0.35, "lines")) +
+    annotate("rect", xmin = 5.1, xmax = 5.7, ymin = -1.2, ymax = -0.6, fill = "white", colour = "black", linetype = "dashed", linewidth = 0.6) +
+    annotate("text", x = 5.4, y = -0.9, label = "hat(y)", parse = TRUE, size = 7) +
+    coord_equal(xlim = c(-0.4, 5.9), ylim = c(-1.75, 2.5), clip = "off") + theme_void()
+}
+```
+
+```{r}
+#| label: backgrounds
+#| include: false
+# Backgrounds of the part slides (img/part*.png): light ink on a transparent background, shown at reduced
+# opacity over the dark slide color.
+dir.create("img", showWarnings = FALSE)
+bg_save <- function(p, file) ggsave(file.path("img", file), p, width = 12.8, height = 7.2, dpi = 100, bg = "transparent")
+bg_void <- theme_void() + theme(plot.background = element_rect(fill = "transparent", colour = NA))
+bg_pt <- function() list(scale_colour_manual(values = c(`FALSE` = "#d9d9d9", `TRUE` = m_orange), guide = "none"),
+                             scale_size_manual(values = c(`FALSE` = 1.8, `TRUE` = 3.2), guide = "none"))
+# Part 2: a line with constant noise, lm's 90% prediction interval, the points outside it highlighted.
+bg2 <- tibble(x = runif(400, 0, 10)) |> mutate(y = 1 + 0.5 * x + rnorm(400))
+bg2_fit <- lm(y ~ x, bg2)
+bg2_band <- tibble(x = seq(0, 10, length.out = 101)) |>
+  bind_cols(as_tibble(predict(bg2_fit, tibble(x = seq(0, 10, length.out = 101)), interval = "prediction", level = 0.9)))
+bg2_pi <- predict(bg2_fit, bg2, interval = "prediction", level = 0.9)
+bg2$out <- bg2$y < bg2_pi[, "lwr"] | bg2$y > bg2_pi[, "upr"]
+bg_save(ggplot(bg2, aes(x, y)) + geom_ribbon(data = bg2_band, aes(x, ymin = lwr, ymax = upr), inherit.aes = FALSE, fill = "#fde725", alpha = 0.3) +
+  geom_line(data = bg2_band, aes(x, fit), colour = "white", linewidth = 1.2) +
+  geom_point(aes(colour = out, size = out), alpha = 0.9) + bg_pt() + bg_void, "part2-interval.png")
+# Part 3: a logistic classifier, its threshold at 0.5, the misclassified points highlighted.
+bg3 <- tibble(x = rnorm(300)) |> mutate(y = rbinom(300, 1, plogis(-0.3 + 2.2 * x)))
+bg3_fit <- glm(y ~ x, binomial, bg3)
+bg3_cut <- -coef(bg3_fit)[[1]] / coef(bg3_fit)[[2]]
+bg3 <- mutate(bg3, wrong = (x > bg3_cut) != (y == 1), y_jit = y + runif(300, -0.04, 0.04))
+bg_save(ggplot(bg3, aes(x, y_jit)) + geom_hline(yintercept = 0.5, linetype = "dashed", colour = "white", linewidth = 0.8) +
+  geom_vline(xintercept = bg3_cut, linetype = "dashed", colour = "white", linewidth = 0.8) +
+  geom_function(fun = function(x) plogis(coef(bg3_fit)[[1]] + coef(bg3_fit)[[2]] * x), colour = "#fde725", linewidth = 1.6) +
+  geom_point(aes(colour = wrong, size = wrong), alpha = 0.9) + bg_pt() + xlim(-4, 2.4) + ylim(-0.75, 1.08) + bg_void +
+  theme(plot.margin = ggplot2::margin(20, 30, 20, 430)), "part3-logistic.png")   # drawn on the right, clear of the title
+# Part 4: GGally::ggcoef() for a linear model of systolic blood pressure, numerical inputs standardized.
+bg4_fit <- lm(BPSysAve ~ Age + Gender + Race1 + Weight + Height + BMI + Pulse + TotChol + Poverty,
+              data = mutate(nh_train, across(c(Age, Weight, Height, BMI, Pulse, TotChol, Poverty), \(v) as.numeric(scale(v)))))
+bg_save(ggcoef(bg4_fit, exclude_intercept = TRUE, color = "#fde725", size = 4, errorbar_color = "white", errorbar_height = 0.25,
+               vline_color = "white", vline_linetype = "dashed") +
+  labs(x = NULL, y = NULL) + theme_minimal(base_size = 22) +
+  theme(text = element_text(colour = "white"), axis.text = element_text(colour = "white"),
+        panel.grid = element_line(colour = "#FFFFFF33"), plot.background = element_rect(fill = "transparent", colour = NA),
+        plot.margin = ggplot2::margin(20, 30, 20, 420)),
+  "part4-ggcoef.png")
+# Part 5: the ECM for the protein-signalling data of Sachs et al. (2005), as drawn by Loftus, Bynum and Hansen
+# (2024), Figure 5 (left): PKA and its descendants in bold; blue, the paths from PKA; dashed, the model's inputs.
+sachs_nodes <- tribble(~name, ~x, ~y, ~bold,
+  "PKC", 2, 4, FALSE, "pjnk", 3.5, 4, FALSE, "P38", 0.5, 3, TRUE, "praf", 2, 3, TRUE, "pmek", 3.5, 3, TRUE,
+  "plcg", 0.5, 2, FALSE, "PKA", 2, 2, TRUE, "p44/42", 3.5, 2, FALSE, "pakts473", 2, 1.3, TRUE,
+  "PIP2", 0.5, 0.6, FALSE, "PIP3", 2, 0.6, FALSE, "hat", 3.5, 0.6, FALSE)
+sachs_edge <- function(from, to, kind, a = 0.22, b = 0.26) {
+  f <- sachs_nodes[sachs_nodes$name == from, ]; t <- sachs_nodes[sachs_nodes$name == to, ]
+  len <- sqrt((t$x - f$x)^2 + (t$y - f$y)^2)
+  tibble(x = f$x + a * (t$x - f$x) / len, y = f$y + a * (t$y - f$y) / len,
+         xend = t$x - b * (t$x - f$x) / len, yend = t$y - b * (t$y - f$y) / len, kind = kind)
+}
+sachs_solid <- bind_rows(
+  sachs_edge("PKC", "pjnk", "world", 0.45, 0.4), sachs_edge("PKC", "P38", "world"), sachs_edge("PKC", "praf", "world"),
+  sachs_edge("PKC", "pmek", "world"), sachs_edge("plcg", "PKC", "world"), sachs_edge("PIP2", "PKC", "world"),
+  sachs_edge("PKA", "pjnk", "world"), sachs_edge("PKA", "p44/42", "world", 0.45, 0.5), sachs_edge("pmek", "p44/42", "world"),
+  sachs_edge("plcg", "PIP2", "world"), sachs_edge("PIP3", "PIP2", "world", 0.4, 0.4), sachs_edge("PIP3", "pakts473", "world", 0.2, 0.2),
+  sachs_edge("PKA", "P38", "pka"), sachs_edge("PKA", "praf", "pka"), sachs_edge("PKA", "pmek", "pka"),
+  sachs_edge("PKA", "pakts473", "pka", 0.2, 0.2), sachs_edge("praf", "pmek", "pka", 0.45, 0.5))
+sachs_dashed <- bind_rows(sachs_edge("P38", "hat", "pka", 0.35, 0.35) |> mutate(curv = 0.12),
+  sachs_edge("praf", "hat", "pka", 0.3, 0.35) |> mutate(curv = 0.1), sachs_edge("pmek", "hat", "pka", 0.3, 0.35) |> mutate(curv = -0.35),
+  sachs_edge("pakts473", "hat", "pka", 0.35, 0.45) |> mutate(curv = 0.05), sachs_edge("PKA", "hat", "direct", 0.35, 0.35) |> mutate(curv = 0.2))
+sachs_arw <- arrow(length = unit(0.09, "inches"), type = "closed")
+sachs_cols <- c(world = "white", pka = "#8fd3ff", direct = m_orange)
+p5 <- ggplot() +
+  geom_segment(data = sachs_solid, aes(x, y, xend = xend, yend = yend, colour = kind), linewidth = 0.7, arrow = sachs_arw) +
+  annotate("curve", x = 2.25, y = 0.72, xend = 0.62, yend = 1.78, colour = "white", linewidth = 0.7, curvature = -0.3, arrow = sachs_arw)
+for (i in seq_len(nrow(sachs_dashed))) p5 <- p5 +
+  geom_curve(data = sachs_dashed[i, ], aes(x, y, xend = xend, yend = yend, colour = kind), linewidth = 0.8,
+             linetype = "dashed", curvature = sachs_dashed$curv[i], arrow = sachs_arw)
+p5 <- p5 +
+  geom_text(data = filter(sachs_nodes, name != "hat"), aes(x, y, label = name, fontface = if_else(bold, "bold", "plain")),
+            colour = "white", size = 7, family = "serif") +
+  annotate("text", x = 3.5, y = 0.6, label = 'widehat("p44/42")', parse = TRUE, colour = "white", size = 7, family = "serif") +
+  annotate("rect", xmin = 3.05, xmax = 3.95, ymin = 0.33, ymax = 0.9, fill = NA, colour = "white", linetype = "dashed", linewidth = 0.6) +
+  scale_colour_manual(values = sachs_cols, guide = "none") +
+  coord_fixed(ratio = 1, xlim = c(-3.4, 4.15), ylim = c(0.1, 4.35), expand = FALSE) + bg_void
+bg_save(p5, "part5-sachs-ecm.png")
+```
+
+## Where we left off {minutes="3"}
+
+::: {.notes}
+QUESTION: which loss makes the best prediction the 90th percentile?
+
+The title slide's question first (its minutes are counted here), then this table, then the box.
+:::
+
+| Loss | Best prediction at $x$ | |
+|---|---|---|
+| Squared error, $(y - \hat y)^2$ | the conditional mean, $\mathbb E[Y \mid X = x]$ | optimal model theorem |
+| Absolute error, $\lvert y - \hat y \rvert$ | the conditional median | stated |
+| A miss costs $c_{FN}$, a false alarm $c_{FP}$ | predict $1$ when $p(x) > c^\star = \frac{c_{FP}}{c_{FP} + c_{FN}}$ | optimal threshold theorem |
+
+**Decision principle**: choose the prediction $\hat y$ that minimizes the expected loss given the inputs, $\mathbb E[\ell(Y, \hat y) \mid X = x]$
+
+::: {.ask}
+Squared loss gives the mean, absolute loss the median. Which loss makes the best prediction the 90th percentile?
+:::
+
+## {.inverse}
+
+::: {.notes}
+Compress: the outline of the five parts.
+
+90 minutes on the scale, against about 76; dark = rush or skip. No proof in the lecture. Data: simulations; NHANES adults (calibration, importance).
+
+Questions: the loss for the 90th percentile; what a 90 percent interval should promise you; checking a 90 percent interval; what p-hat = 0.2 should mean; two curves that average to a flat PDP; what lets x_2 and x_3 respond to x_1.
+
+Cut order: dark content slides; "Held-out rows and tuning" and "Coverage at every x in many dimensions" to their tables; "Recalibration" to its first sentence; "The same loss, a flexible model" to its figure; "Multicalibration" to its figure; "Where the condition fails" to its retrieval box.
+
+Exercises (stage 3): quantile optimality (the proof); partial dependence by hand; the model-intervention corollary.
+:::
+
+### Week 9: uncertainty and interpretation
+
+Part 1: decisions and quantiles
+
+Part 2: regression uncertainty and intervals
+
+Part 3: classification uncertainty and calibration
+
+Part 4: interpreting the model
+
+Part 5: the model and the world
+
+## {.inverse .center}
+
+::: {.notes}
+Compress: the loss decides which number is the best prediction; the pinball loss gives a quantile.
+:::
+
+### Part 1: decisions and quantiles
+
+## A prediction for one person {minutes="2"}
+
+::: {.notes}
+QUESTION: if you are that person, what should a 90 percent interval promise you?
+
+The competition scored averages; a deployed model answers one person at a time.
+:::
+
+So far, competitors submit models that predict, and the winning model is chosen by best score on the evaluation dataset: an average over many people
+
+Now the winning model is deployed. A new person arrives with inputs $x_0$ and is told $\hat f(x_0)$. How far off might that be?
+
+::: {.ask}
+You are that person. What should a "90% interval" for your outcome promise you?
+:::
+
+. . .
+
+That the interval, call it $\hat C(x_0)$, covers outcomes of people with your inputs 90% of the time: $P\big(Y \in \hat C(X) \mid X = x_0\big) \ge 0.9$, **conditional coverage**
+
+## Finding the quantile {.inverse minutes="2"}
+
+::: {.notes}
+Rush: the heuristic for the quantile; the theorem is next. Count who gains and who loses as the prediction moves up a little.
+:::
+
+Charge $\tau$ for each unit of underprediction ($y > \hat y$) and $1 - \tau$ for each unit of overprediction ($y < \hat y$). Move the prediction up from $\hat y$ to $\hat y + \delta$:
+
+::: {.columns}
+::: {.column width="55%"}
+- an outcome above $\hat y$: its loss falls by $\tau\delta$
+- an outcome below $\hat y$: its loss rises by $(1 - \tau)\delta$
+:::
+::: {.column width="45%"}
+```{r}
+#| label: heuristic-density
+#| fig-width: 5.2
+#| fig-height: 2.0
+#| dark: true
+# A right-skewed density with a prediction y-hat marked: below it, the share F(y-hat); above it, 1 - F(y-hat).
+a0 <- 4.2
+dens <- tibble(y = seq(0, 14, length.out = 400)) |> mutate(d = dgamma(y, shape = 3, rate = 0.6))
+ggplot(dens, aes(y, d)) +
+  geom_area(data = filter(dens, y <= a0), fill = m_pink, alpha = 0.6) +
+  geom_area(data = filter(dens, y >= a0), fill = v_teal, alpha = 0.6) +
+  geom_line(linewidth = 1.1, colour = "white") + geom_vline(xintercept = a0, linewidth = 1, colour = "white") +
+  annotate("text", x = a0, y = 0.255, label = "hat(y)", parse = TRUE, size = 6, hjust = -0.4, colour = "white") +
+  annotate("text", x = 2.3, y = 0.05, label = "F(hat(y))", parse = TRUE, colour = "white", size = 5.5) +
+  annotate("text", x = 8.6, y = 0.10, label = "1 - F(hat(y))", parse = TRUE, colour = "white", size = 5.5) +
+  scale_y_continuous(expand = expansion(mult = c(0.02, 0.15))) +
+  labs(x = "y", y = NULL) + theme(axis.text.y = element_blank(), panel.grid = element_blank())
+```
+:::
+:::
+
+With $F$ the distribution function of $Y$ given $X = x$, the expected change is about
+$$
+\delta\,\big[(1 - \tau)F(\hat y) - \tau\,(1 - F(\hat y))\big] = \delta\,\big[F(\hat y) - \tau\big]
+$$
+
+Keep moving up while $F(\hat y) < \tau$; stop where $F(\hat y) = \tau$: the **$\tau$-quantile**. For the 90th percentile, $\tau = 0.9$
+
+## Quantile optimality
+
+::: {.notes}
+Stated; the proof is a pre-seminar exercise. The finite mean keeps the expected loss finite.
+:::
+
+::: {.columns}
+::: {.column width="62%"}
+**Pinball loss**:
+$$
+\rho_\tau(y - \hat y) = (y - \hat y)\,\big(\tau - \mathbf 1\{y < \hat y\}\big)
+$$
+$\tau\,(y - \hat y)$ for an underprediction, $(1 - \tau)(\hat y - y)$ for an overprediction. With $\tau = \frac12$, half the absolute error
+:::
+::: {.column width="38%"}
+```{r}
+#| label: pinball-plot
+#| fig-width: 4.4
+#| fig-height: 2.7
+expand_grid(u = seq(-2, 2, length.out = 201), tau = c(0.5, 0.9)) |>
+  mutate(loss = pin(u, tau)) |>
+  ggplot(aes(u, loss, colour = factor(tau))) + geom_line(linewidth = 1.4) +
+  scale_colour_manual(values = c(`0.5` = v_dark, `0.9` = v_teal), name = expression(tau)) +
+  labs(x = expression(y - hat(y)), y = "loss")
+```
+:::
+:::
+
+::: {.leave}
+**Quantile optimality theorem.** If $Y \mid X = x$ has a continuous distribution with a finite mean and $0 < \tau < 1$, then the conditional $\tau$-quantile $q_\tau(x)$ minimizes $\mathbb E[\rho_\tau(Y - \hat y) \mid X = x]$ over $\hat y$ (uniquely, unless the distribution function is flat at $\tau$)
+:::
+
+Squared loss gave the mean; half the absolute error, $\tau = \frac12$, gives the median
+
+## Quantile regression
+
+::: {.notes}
+rq() solves it as a linear program. Dashed: the true quantiles. The lines fan out with the noise and miss the curvature.
+:::
+
+Minimize the average pinball loss over a class: $\hat q_\tau = \arg\min_{f \in \mathcal F} \frac1n \sum_i \rho_\tau\big(y_i - f(x_i)\big)$. Here $\mathcal F$ is linear; 1,000 simulated points whose noise grows with $x$
+
+```{r}
+#| label: qr-linear-show
+#| echo: true
+fit_qr <- rq(y ~ x, tau = c(0.05, 0.5, 0.95), data = het_train)
+```
+
+```{r}
+#| label: qr-linear-plot
+#| fig-width: 11
+#| fig-height: 3.2
+#| fig-align: center
+taus <- c(0.05, 0.5, 0.95)
+true_q <- map_dfr(taus, function(t) mutate(x_grid, tau = t, q = f_sim(x) + s_sim(x) * qnorm(t)))
+lin_q <- map_dfr(seq_along(taus), function(k) mutate(x_grid, tau = taus[k], q = predict(fit_qr, x_grid)[, k]))
+q_cols <- c(`0.05` = m_pink, `0.5` = v_dark, `0.95` = v_teal)
+ggplot(het_train, aes(x, y)) + geom_point(alpha = 0.25, size = 1) +
+  geom_line(data = true_q, aes(y = q, colour = factor(tau)), linetype = "dashed", linewidth = 1) +
+  geom_line(data = lin_q, aes(y = q, colour = factor(tau)), linewidth = 1.4) +
+  scale_colour_manual(values = q_cols, name = expression(tau)) + labs(x = "x", y = "y")
+```
+
+## The same loss, a flexible model
+
+::: {.notes}
+xgboost's reg:quantileerror optimizes a smooth approximation to the pinball loss. Depth 2, rate 0.05, 300 iterations, leaves of at least 30; not tuned.
+:::
+
+Boosted trees with the pinball loss: each tree is built from the negative gradient $\tau - \mathbf 1\{y_i < \hat f(x_i)\}$, which pushes the fit up where points lie above it
+
+```{r}
+#| label: qr-boost-show
+#| echo: true
+#| eval: false
+xgboost(x, y, objective = "reg:quantileerror", quantile_alpha = 0.95, max_depth = 2)
+```
+
+```{r}
+#| label: qr-boost-plot
+#| fig-width: 11
+#| fig-height: 2.75
+#| fig-align: center
+# The code shown above, for each tau, with the rest of the settings.
+boost_q <- function(tau) xgboost(x = as.matrix(het_train["x"]), y = het_train$y,
+  objective = "reg:quantileerror", quantile_alpha = tau,
+  max_depth = 2, learning_rate = 0.05, nrounds = 300, min_child_weight = 30, nthread = 1)
+fit_bq <- map(taus, boost_q)
+boost_curve <- map_dfr(seq_along(taus), function(k) mutate(x_grid, tau = taus[k], q = predict(fit_bq[[k]], as.matrix(x_grid))))
+ggplot(het_train, aes(x, y)) + geom_point(alpha = 0.25, size = 1) +
+  geom_line(data = true_q, aes(y = q, colour = factor(tau)), linetype = "dashed", linewidth = 1) +
+  geom_line(data = boost_curve, aes(y = q, colour = factor(tau)), linewidth = 1.4) +
+  scale_colour_manual(values = q_cols, name = expression(tau)) + labs(x = "x", y = "y")
+```
+
+::: {.retrieval}
+Boosting: each small tree approximates the negative gradient of the training loss
+:::
+
+## {.inverse .center background-image="img/part2-interval.png" background-size="cover" background-opacity="0.5" background-color="#440154"}
+
+::: {.notes}
+Compress: an interval for an outcome, from two quantiles; check it on fresh data, across the range of the inputs; conformal prediction fixes the level, not the shape.
+:::
+
+### Part 2: regression uncertainty and intervals
+
+## Two kinds of interval
+
+::: {.notes}
+lm's 90 percent confidence and prediction intervals. The confidence band shrinks with n; the prediction band does not.
+:::
+
+At a new $x_0$, $Y_0 = f^\star(x_0) + \varepsilon_0$
+
+- **Confidence interval** for $f^\star(x_0)$ (dark): uncertainty about the fit; it narrows as $n$ grows
+- **Prediction interval** for $Y_0$ (light): must also cover $\varepsilon_0$; it does not narrow below the noise
+
+```{r}
+#| label: ci-pi
+#| fig-width: 11
+#| fig-height: 2.3
+#| fig-align: center
+# A straight line with constant noise; lm's 90% confidence and prediction intervals at two sample sizes.
+ci_pi <- function(n) {
+  d <- tibble(x = runif(n, 0, 10)) |> mutate(y = 1 + 0.5 * x + rnorm(n))
+  fit <- lm(y ~ x, d)
+  g <- tibble(x = seq(0, 10, length.out = 101))
+  ci <- predict(fit, g, interval = "confidence", level = 0.9)
+  pr <- predict(fit, g, interval = "prediction", level = 0.9)
+  panel <- factor(paste0("n = ", format(n, big.mark = ",")), levels = c("n = 30", "n = 1,000"))
+  list(d = mutate(d, panel = panel),
+       g = mutate(g, fit = ci[, "fit"], cl = ci[, "lwr"], cu = ci[, "upr"], pl = pr[, "lwr"], pu = pr[, "upr"], panel = panel))
+}
+cp <- list(ci_pi(30), ci_pi(1000))
+cp_g <- bind_rows(cp[[1]]$g, cp[[2]]$g); cp_d <- bind_rows(cp[[1]]$d, slice_sample(cp[[2]]$d, n = 300))
+ggplot(cp_g, aes(x)) + geom_ribbon(aes(ymin = pl, ymax = pu), fill = v_teal, alpha = 0.25) +
+  geom_ribbon(aes(ymin = cl, ymax = cu), fill = v_dark, alpha = 0.55) + geom_line(aes(y = fit), colour = v_dark) +
+  geom_point(data = cp_d, aes(y = y), size = 0.8, alpha = 0.4) + facet_wrap(~ panel) +
+  labs(x = NULL, y = "y") + theme(strip.text = element_text(size = 16))
+```
+
+::: {.retrieval}
+Bias--variance at $x_0$: $\sigma^2 + \text{bias}^2 + \text{variance}$; no amount of data shrinks $\sigma^2$
+:::
+
+## An interval from two quantiles
+
+::: {.notes}
+Linear model, constant noise: lm's prediction interval (widens slightly at the ends: the fitted mean's uncertainty). Mean and variance: |residuals| regressed on x, times sqrt(pi/2) and 1.645. Dashed: the true 5 and 95 percent quantiles.
+:::
+
+A 90% interval from two quantile fits: $\hat C(x) = [\hat q_{0.05}(x), \hat q_{0.95}(x)]$. The true quantiles would cover $Y$ with probability $0.9$ at every $x$; estimated ones aim at that
+
+```{r}
+#| label: three-intervals
+#| include: false
+z90 <- qnorm(0.95)
+fit_lm <- lm(y ~ x, het_train)
+fit_abs <- lm(abs(resid(fit_lm)) ~ x, het_train)
+interval_fns <- list(
+  `linear model, constant noise` = function(d) { p <- predict(fit_lm, d, interval = "prediction", level = 0.9); cbind(p[, "lwr"], p[, "upr"]) },
+  `mean and variance` = function(d) { m <- predict(fit_lm, d); s <- predict(fit_abs, d) * sqrt(pi / 2); cbind(m - z90 * s, m + z90 * s) },
+  `linear quantiles` = function(d) predict(fit_qr, d)[, c(1, 3)],
+  `boosted quantiles` = function(d) cbind(predict(fit_bq[[1]], as.matrix(d["x"])), predict(fit_bq[[3]], as.matrix(d["x"])))
+)
+bands <- imap_dfr(interval_fns, function(fn, nm) { b <- fn(x_grid); tibble(x = x_grid$x, lo = b[, 1], hi = b[, 2], method = nm) }) |>
+  mutate(method = fct_inorder(method))
+true_band <- x_grid |> mutate(lo = f_sim(x) - z90 * s_sim(x), hi = f_sim(x) + z90 * s_sim(x))
+```
+
+```{r}
+#| label: three-intervals-plot
+#| fig-width: 11.5
+#| fig-height: 3.6
+#| fig-align: center
+ggplot(filter(bands, method != "linear quantiles"), aes(x)) +
+  geom_point(data = het_train, aes(y = y), alpha = 0.2, size = 0.8) +
+  geom_ribbon(aes(ymin = lo, ymax = hi), fill = v_teal, alpha = 0.35) +
+  geom_line(data = true_band, aes(y = lo), linetype = "dashed") + geom_line(data = true_band, aes(y = hi), linetype = "dashed") +
+  facet_wrap(~ method) + labs(x = "x", y = "y") + theme(strip.text = element_text(size = 16))
+```
+
+## Checking an interval {minutes="1"}
+
+::: {.notes}
+QUESTION: we claim 90 percent intervals; how do you check, and what could the check miss?
+:::
+
+::: {.ask}
+We claim 90 percent intervals. With fresh data in hand, how do you check the claim, and what could the check miss?
+:::
+
+## Checking an interval on fresh data
+
+```{r}
+#| label: coverage
+#| include: false
+cov_methods <- c("linear model, constant noise", "mean and variance", "boosted quantiles")
+cov_pts <- imap_dfr(interval_fns[cov_methods], function(fn, nm) {
+  b <- fn(het_fresh)
+  tibble(method = nm, x = het_fresh$x, y = het_fresh$y, lo = b[, 1], hi = b[, 2],
+         inside = het_fresh$y >= b[, 1] & het_fresh$y <= b[, 2], width = b[, 2] - b[, 1])
+}) |> mutate(method = factor(method, levels = cov_methods))
+cov_all <- cov_pts |> group_by(method) |> summarise(all = mean(inside), width = mean(width))
+# Five ranges of x, about 400 fresh points each; a range is flagged when its coverage, as shown (a whole
+# percent), is more than 3 points from 90: two binomial standard errors with 400 points are 3.0 points.
+cov_rng <- cov_pts |> mutate(mid = 2 * floor(pmin(x, 9.999) / 2) + 1) |>
+  group_by(method, mid) |> summarise(cov = mean(inside), n = n(), .groups = "drop")
+flag_off <- function(cov) abs(round(100 * cov) - 90) > 3
+cov_rng <- cov_rng |> mutate(off = flag_off(cov))
+pct <- function(v) sprintf("%.0f%%", 100 * v)
+# Fresh points inside (grey) and outside (pink) each interval, with the coverage of each range of x on top.
+# Every third point is drawn and the interval is tinted over the points (and outlined, where its edges are
+# smooth), so that it shows; the coverage rates are those of all the points.
+coverage_plot <- function(pts, rng, curve = NULL, outline = TRUE) {
+  y_lab <- max(pts$y) + 2
+  band <- arrange(pts, method, x)
+  ggplot(pts |> group_by(method) |> filter(row_number() %% 3 == 1) |> ungroup(), aes(x, y)) +
+    geom_ribbon(data = band, aes(ymin = lo, ymax = hi), fill = "grey85") +
+    geom_point(aes(colour = inside), size = 0.9, alpha = 0.75) +
+    geom_ribbon(data = band, aes(ymin = lo, ymax = hi), fill = v_dark, alpha = 0.12) +
+    { if (outline) geom_line(data = band, aes(y = lo), colour = v_dark, linewidth = 0.4) } +
+    { if (outline) geom_line(data = band, aes(y = hi), colour = v_dark, linewidth = 0.4) } +
+    { if (!is.null(curve)) geom_line(data = curve, aes(x, y), linetype = "dashed", inherit.aes = FALSE) } +
+    geom_vline(xintercept = c(2, 4, 6, 8), colour = "grey70", linetype = "dotted") +
+    geom_text(data = rng, aes(x = mid, y = y_lab, label = pct(cov), fontface = if_else(off, "bold", "plain")),
+              colour = if_else(rng$off, m_pink, "grey30"), size = 4.6, inherit.aes = FALSE) +
+    facet_wrap(~ method) +
+    scale_colour_manual(values = c(`TRUE` = "grey45", `FALSE` = m_pink), labels = c(`TRUE` = "inside", `FALSE` = "outside"), name = NULL) +
+    scale_x_continuous(breaks = seq(0, 10, 2)) + coord_cartesian(clip = "off") +
+    labs(x = "x", y = "fresh y") +
+    theme(legend.position = "right", strip.text = element_text(size = 15), panel.grid.minor = element_blank())
+}
+```
+
+::: {.notes}
+2,000 fresh points, every third drawn. Above each panel: coverage by range (about 400 points); pink when more than 3 points from 90, two binomial standard errors.
+Mean widths `r sprintf("%.1f", cov_all$width[1])`, `r sprintf("%.1f", cov_all$width[2])`, `r sprintf("%.1f", cov_all$width[3])`; true quantiles `r sprintf("%.1f", mean(2 * z90 * s_sim(het_fresh$x)))`.
+:::
+
+```{r}
+#| label: coverage-plot
+#| fig-width: 11.5
+#| fig-height: 4.2
+#| fig-align: center
+coverage_plot(cov_pts, cov_rng)
+```
+
+Top: coverage in each range of $x$, pink if more than 3 points from 90% (two standard errors). Overall: `r pct(cov_all$all[1])`, `r pct(cov_all$all[2])`, `r pct(cov_all$all[3])`. Widening never lowers coverage: check width too
+
+## Coverage at every $x$
+
+::: {.notes}
+Stated (Barber et al., Proposition 2.2). Their wording: at every x that is not an atom of the inputs' distribution; "continuous inputs" is the slide's simplification (last slide before the references).
+:::
+
+For a $1 - \alpha$ interval ($\alpha = 0.1$ so far):
+
+- **Marginal coverage**: $P\big(Y \in \hat C(X)\big) \ge 1 - \alpha$, averaged over $X$
+- **Conditional coverage**: $P\big(Y \in \hat C(X) \mid X = x\big) \ge 1 - \alpha$ for every $x$
+
+::: {.leave}
+**Impossibility of distribution-free conditional coverage.** If a procedure covers with probability at least $1 - \alpha$ given $X = x$, in finite samples, for every distribution and almost every $x$, then wherever the inputs are continuous its intervals have infinite expected length (Barber et al. 2021). Guarantees for groups (each range of $x$, say), and results under assumptions or as $n$ grows, remain possible
+:::
+
+::: {.retrieval}
+No free lunch theorem: no method does best on every distribution; a guarantee at every $x$ needs an assumption about the distribution
+:::
+
+## Bias, variance and intervals {minutes="3"}
+
+```{r}
+#| label: bias-variance
+#| include: false
+# The same curve with noise of constant size (sd 1): fit on 500 rows, hold out 500, check on 2,000 fresh rows.
+# The interval: f-hat(x) plus or minus d, d the 90th percentile of the absolute residuals on the fitting rows,
+# or (split conformal) the ceiling(0.9 * 501)-th smallest on the held-out rows.
+hom <- function(n) tibble(x = runif(n, 0, 10)) |> mutate(y = f_sim(x) + rnorm(n))
+hom_fit <- hom(500); hom_hold <- hom(500); hom_fresh <- hom(2000)
+fit_line <- lm(y ~ x, hom_fit)
+fit_rf1 <- randomForest(y ~ x, data = hom_fit, ntree = 300)
+d_train <- function(fit) quantile(abs(hom_fit$y - predict(fit, hom_fit)), 0.9)
+d_hold <- function(fit) sort(abs(hom_hold$y - predict(fit, hom_hold)))[ceiling(0.9 * 501)]
+bv <- list(`line: training residuals` = list(fit_line, d_train(fit_line)),
+           `forest: training residuals` = list(fit_rf1, d_train(fit_rf1)),
+           `forest: held-out residuals` = list(fit_rf1, d_hold(fit_rf1)))
+bv_pts <- imap_dfr(bv, function(m, nm) {
+  p <- predict(m[[1]], hom_fresh)
+  tibble(method = nm, x = hom_fresh$x, y = hom_fresh$y, lo = p - m[[2]], hi = p + m[[2]], inside = abs(hom_fresh$y - p) <= m[[2]])
+}) |> mutate(method = fct_inorder(method))
+bv_all <- bv_pts |> group_by(method) |> summarise(all = mean(inside), width = mean(hi - lo))
+bv_rng <- bv_pts |> mutate(mid = 2 * floor(pmin(x, 9.999) / 2) + 1) |> group_by(method, mid) |>
+  summarise(cov = mean(inside), n = n(), .groups = "drop") |> mutate(off = flag_off(cov))
+```
+
+::: {.notes}
+Dashed: the curve. Widths: line `r sprintf("%.1f", bv_all$width[1])`, forest on its own rows `r sprintf("%.1f", bv_all$width[2])`, held out `r sprintf("%.1f", bv_all$width[3])`; the true quantiles 3.3.
+Line overall `r pct(bv_all$all[1])`: its residuals include the bias, so it is wide everywhere and still misses where it bends.
+:::
+
+$\hat f(x) \pm d$, $d$ the 90th percentile of absolute residuals; constant noise, 500 rows to fit
+
+```{r}
+#| label: bias-variance-plot
+#| fig-width: 11.5
+#| fig-height: 2.8
+#| fig-align: center
+coverage_plot(bv_pts, bv_rng, curve = mutate(x_grid, y = f_sim(x)), outline = FALSE)
+```
+
+- **Bias**: the line misses the curve where it bends; coverage varies with $x$
+- **Variance**: the forest follows the noise in its own rows; residuals there are too small: `r pct(bv_all$all[2])`
+- Residuals on 500 held-out rows include both: `r pct(bv_all$all[3])`, `r sprintf("%.1f", bv_all$width[3])` wide (true quantiles: 3.3)
+
+## Held-out rows and tuning {minutes="2"}
+
+```{r}
+#| label: tuning-sim
+#| include: false
+# k-NN regression on the curve above, fitted on 500 rows; k from 1 to 50, tuned on other rows, on the calibration
+# rows themselves, or chosen to make the calibrated interval narrowest. Coverage of 1,000 fresh rows, 300 repeats.
+knn_preds <- function(x_fit, y_fit, x_new, K = 50) {        # column k: the k-NN prediction at each new x
+  idx <- t(apply(abs(outer(x_new, x_fit, "-")), 1, order))[, 1:K]
+  t(apply(matrix(y_fit[idx], nrow = length(x_new)), 1, cumsum)) / matrix(1:K, length(x_new), K, byrow = TRUE)
+}
+tune_once <- function(m) {
+  fit <- hom(500); tun <- hom(m); cal <- hom(m); new <- hom(1000)
+  P_tun <- knn_preds(fit$x, fit$y, tun$x); P_cal <- knn_preds(fit$x, fit$y, cal$x); P_new <- knn_preds(fit$x, fit$y, new$x)
+  d_k <- apply(abs(cal$y - P_cal), 2, function(r) sort(r)[ceiling(0.9 * (m + 1))])
+  cover <- function(k) mean(abs(new$y - P_new[, k]) <= d_k[k])
+  c(other = cover(which.min(colMeans((tun$y - P_tun)^2))), same = cover(which.min(colMeans((cal$y - P_cal)^2))),
+    narrowest = cover(which.min(d_k)))
+}
+tune_cov <- map(c(500, 100), function(m) rowMeans(replicate(300, tune_once(m))))
+pct1 <- function(v) sprintf("%.1f%%", 100 * v)
+```
+
+::: {.notes}
+QUESTION (if time): could the rows used to choose k also be the held-out rows?
+Each cell: 300 repeats, 1,000 fresh rows each; standard errors about 0.1 (500 rows) and 0.2 (100 rows).
+:::
+
+- Held-out rows play no part in fitting, so a new row's residual is like one of theirs
+- Rows used for **tuning** have played a part: the setting chosen did best on them, so their residuals are a little too small
+- $k$-NN, $k$ from 1 to 50; average coverage of fresh rows, by how $k$ was chosen:
+
+| Held-out rows | on other rows | on the held-out rows | narrowest interval |
+|:---:|:---:|:---:|:---:|
+| 500 | `r pct1(tune_cov[[1]][["other"]])` | `r pct1(tune_cov[[1]][["same"]])` | `r pct1(tune_cov[[1]][["narrowest"]])` |
+| 100 | `r pct1(tune_cov[[2]][["other"]])` | `r pct1(tune_cov[[2]][["same"]])` | `r pct1(tune_cov[[2]][["narrowest"]])` |
+
+Separate rows to fit, to tune and to hold out; or tune by cross-validation within the fitting rows
+
+::: {.retrieval}
+Optimism theorem: training error underestimates the risk
+:::
+
+## Conformalized quantile regression {minutes="3"}
+
+```{r}
+#| label: cqr
+#| include: false
+# Boosted 5% and 95% fits on the first 500 training points; scores on the other 500 (m = 500).
+fit_part <- 1:500; cal_part <- 501:1000
+m_cal <- length(cal_part); k90 <- ceiling(0.9 * (m_cal + 1))
+boost_half <- function(tau) xgboost(x = as.matrix(het_train[fit_part, "x"]), y = het_train$y[fit_part],
+  objective = "reg:quantileerror", quantile_alpha = tau,
+  max_depth = 2, learning_rate = 0.05, nrounds = 300, min_child_weight = 30, nthread = 1)
+b05_half <- boost_half(0.05); b95_half <- boost_half(0.95)
+plug_in <- function(d) cbind(predict(b05_half, as.matrix(d["x"])), predict(b95_half, as.matrix(d["x"])))
+cal <- het_train[cal_part, ]
+b_cal <- plug_in(cal)
+cal$score <- pmax(b_cal[, 1] - cal$y, cal$y - b_cal[, 2])
+Q_cqr <- sort(cal$score)[k90]
+b_fresh <- plug_in(het_fresh)
+in_plug <- het_fresh$y >= b_fresh[, 1] & het_fresh$y <= b_fresh[, 2]
+in_cqr <- het_fresh$y >= b_fresh[, 1] - Q_cqr & het_fresh$y <= b_fresh[, 2] + Q_cqr
+in_68 <- het_fresh$x > 6 & het_fresh$x <= 8
+b_own <- plug_in(het_train[fit_part, ])
+cover_own <- mean(het_train$y[fit_part] >= b_own[, 1] & het_train$y[fit_part] <= b_own[, 2])
+```
+
+::: {.notes}
+Romano, Patterson and Candès (2019), section 4, equations 6 to 8. The fits cover `r pct(cover_own)` of their own points, `r pct(mean(cal$score <= 0))` of the calibration rows: Q > 0.
+Why, if asked: the new row's score has a uniform rank among the m + 1.
+:::
+
+::: {.columns}
+::: {.column width="64%"}
+1. Fit $\hat q_{0.05}$, $\hat q_{0.95}$ on some training rows; keep $m$ others, the **calibration set**
+2. Score how far each $y_i$ is outside (negative inside): $E_i = \max\{\hat q_{0.05}(x_i) - y_i,\ y_i - \hat q_{0.95}(x_i)\}$
+3. $Q$: the $\lceil 0.9\,(m + 1) \rceil$-th smallest score
+4. $\hat C(x) = \big[\hat q_{0.05}(x) - Q,\ \hat q_{0.95}(x) + Q\big]$
+:::
+::: {.column width="36%"}
+```{r}
+#| label: cqr-plot
+#| fig-width: 4.3
+#| fig-height: 2.6
+ggplot(cal, aes(x, score)) +
+  geom_hline(yintercept = 0, colour = "grey60") +
+  geom_point(aes(colour = score > Q_cqr), size = 1.3, alpha = 0.8, show.legend = FALSE) +
+  geom_hline(yintercept = Q_cqr, linetype = "dashed", linewidth = 0.9) +
+  annotate("label", x = 10, y = Q_cqr, label = "Q", size = 5.5, hjust = -0.4, linewidth = 0) +
+  scale_colour_manual(values = c(`FALSE` = "grey50", `TRUE` = m_pink)) +
+  coord_cartesian(clip = "off") +
+  labs(x = "x", y = "score") + theme(plot.margin = ggplot2::margin(5, 30, 5, 5))
+```
+
+$m = `r m_cal`$, $Q = `r sprintf("%.2f", Q_cqr)`$: `r pct(mean(in_plug))` to `r pct(mean(in_cqr))`; for $x$ in 6–8, `r pct(mean(in_plug[in_68]))` to `r pct(mean(in_cqr[in_68]))`
+:::
+:::
+
+::: {.leave}
+**Conformal coverage theorem** (Romano et al. 2019). If the rows are independent draws from one distribution, $P(Y \in \hat C(X)) \ge 0.9$ for any quantile fits ($\le 0.9 + 1/(m + 1)$ for continuous scores), averaging over calibration sets; across sets of 500, coverage has a standard deviation of about 1.3 points
+:::
+
+## Coverage at every $x$, as $n$ grows {minutes="2"}
+
+::: {.notes}
+Sesia and Candès (2020), Theorem 1 and its corollary (arXiv version 1909.05433, section 2): the bands converge to the oracle band; asymptotic conditional coverage in the sense of their Definition 1.
+Their consistency assumption: each quantile fit's mean squared error at a new X is at most eta_n with probability at least 1 - rho_n, both tending to zero.
+:::
+
+::: {.leave}
+**Asymptotic conditional coverage** (Sesia and Candès 2020). If the rows are independent draws from one distribution, the scores have a density bounded away from zero near zero, and the quantile fits are **consistent** (their mean squared error at a new $X$ tends to zero as the fitting and calibration sets grow), then $\hat C(x)$ approaches $[q_{0.05}(x), q_{0.95}(x)]$, and its coverage given $X = x$ tends to 90%, except on a set of $x$ whose probability tends to zero
+:::
+
+- Consistency is an assumption about the distribution and the fits, so there is no conflict with the impossibility theorem
+- Here, for $x$ in 6–8: `r pct(mean(in_cqr[in_68]))` with 500 fitting rows. The boosted fits are still far from the true quantiles there
+- How fast the fits approach the true quantiles depends on how smooth they are, and on the number of inputs
+
+## Coverage at every $x$ in many dimensions {minutes="2"}
+
+::: {.notes}
+Five bins per input, 2,000 rows spread evenly. Standard error at 90 percent: sqrt(0.09 / rows).
+A smoother instead of bins: a neighborhood holding enough rows is wide.
+:::
+
+To check coverage near $x$, or to estimate a quantile there, we use the rows near $x$: a bin or a smoother. 2,000 fresh rows, 5 bins for each input:
+
+| Inputs | 1 | 2 | 3 | 5 |
+|---|:---:|:---:|:---:|:---:|
+| Bins | 5 | 25 | 125 | 3,125 |
+| Rows per bin | 400 | 80 | 16 | 0.6 |
+| Standard error at 90%, points | 1.5 | 3.4 | 7.5 | -- |
+
+- Wider bins average over $x$ values whose coverage differs (bias); narrower ones hold few rows (variance)
+- In practice: check a few ranges or groups that matter, as part 3 does for probabilities
+
+::: {.retrieval}
+Curse of dimensionality: in ten dimensions, a cube holding 10% of the population spans 79% of each axis
+:::
+
+## Ways to make an interval {.inverse}
+
+::: {.notes}
+Compress: each method assumes something and claims a kind of coverage; the note on the course page has this table and how each works.
+:::
+
+| Method | Assumes | Can claim |
+|---|---|---|
+| Linear model, normal noise | linear mean, constant variance | 90% at every $x$, if right |
+| Mean and variance models | both right, normal noise | about 90% at every $x$, if right |
+| Quantile regression | the quantile model right | 90% at every $x$ as $n$ grows, if right |
+| Split conformal (Lei et al. 2018) | independent rows | at least 90% marginally; one width |
+| CQR (Romano et al. 2019) | independent rows | at least 90% marginally; widths from the fits; at every $x$ as $n$ grows, if the fits are consistent |
+
+More in the note on the course page, "Prediction intervals and calibration"
+
+## {.inverse .center background-image="img/part3-logistic.png" background-size="cover" background-opacity="0.5" background-color="#440154"}
+
+::: {.notes}
+Compress: a probability is calibrated when it matches a frequency; check it on fresh data; recalibrate on rows not used to fit; check it within groups.
+:::
+
+### Part 3: classification uncertainty and calibration
+
+## Calibration {minutes="3"}
+
+::: {.notes}
+QUESTION: a model gives p-hat = 0.2 to 500 adults; what should be true of them?
+
+About 100 should have diabetes. Calibration conditions on the score's value, not on x.
+:::
+
+::: {.ask}
+A model gives $\hat p = 0.2$ to 500 adults: their probability of having diabetes. What should be true of them?
+:::
+
+. . .
+
+About 100 of them should have diabetes. A score $\hat p$ is **calibrated** if
+$$
+P\big(Y = 1 \mid \hat p(X)\big) = \hat p(X)
+$$
+
+The same idea as coverage: a stated probability should match a frequency. It conditions on the score, not on $x$
+
+## Calibration and decisions {minutes="3"}
+
+::: {.notes}
+Calibrated: the optimal threshold theorem with the score as the only input.
+If asked: p-hat = 0.25 + 0.5 p is miscalibrated but gives the right decisions at 0.5.
+:::
+
+A probability is acted on: a risk told to a patient, a premium set from an expected cost, a threshold set from the costs of errors
+
+- If $\hat p$ is calibrated, predicting $1$ when $\hat p(x) > c^\star$ is optimal among rules based on that score, though not necessarily among rules using all of $x$
+- If not, $c^\star$ can pick the wrong people. At $c^\star = 0.25$, adults given $\hat p = 0.2$, of whom 40% have diabetes, are not referred for a test, although referring them costs less on average
+- Calibration is not accuracy. The base rate, $`r sprintf("%.2f", mean(nh_train$diabetes))`$ for every adult, is calibrated and separates no one. An increasing transformation keeps a score's ranking (and AUC), not its calibration
+
+::: {.retrieval}
+Optimal threshold theorem: with costs $c_{FP}$ and $c_{FN}$, the rule that minimizes expected cost at $x$ predicts $1$ exactly when $p(x) > c^\star = c_{FP}/(c_{FP} + c_{FN})$
+:::
+
+## Reliability diagram
+
+::: {.notes}
+Diabetes as reported; nine inputs, race and ethnicity left out. xgboost defaults. Ten equal bins.
+Boosted: too cautious at the top on its own adults, too confident on fresh ones. Read one point first: the labeled one.
+:::
+
+```{r}
+#| label: calibration-fits
+#| include: false
+cal_inputs <- c("Age", "male", "BMI", "Pulse", "BPSysAve", "TotChol", "DirectChol", "Poverty", "active")
+fit_lr <- glm(diabetes ~ Age + male + BMI + Pulse + BPSysAve + TotChol + DirectChol + Poverty + active,
+              family = binomial, data = nh_train)
+fit_xg <- xgboost(x = as.matrix(nh_train[cal_inputs]), y = factor(nh_train$diabetes), nthread = 1)   # defaults: depth 6, rate 0.3, 100 iterations
+p_lr <- predict(fit_lr, nh_tune, type = "response")
+p_xg <- predict(fit_xg, as.matrix(nh_tune[cal_inputs]))
+p_xg_train <- predict(fit_xg, as.matrix(nh_train[cal_inputs]))
+y_tune <- nh_tune$diabetes
+# Bins with equal numbers of adults, by the score's value.
+reliability <- function(p, y, bins = 10) tibble(p, y) |>
+  mutate(bin = ntile(p, bins)) |>
+  group_by(bin) |> summarise(n = n(), mean_p = mean(p), freq = mean(y), .groups = "drop")
+base_rate <- mean(nh_train$diabetes)
+```
+
+Diabetes (`r round(100 * base_rate)`% of the training adults). Two scores from nine measurements, fitted on 4,000 adults, checked on 3,000 others
+
+```{r}
+#| label: reliability-plot
+#| fig-width: 11.5
+#| fig-height: 4.2
+#| fig-align: center
+rel <- bind_rows(
+  reliability(p_lr, y_tune) |> mutate(score = "logistic regression", rows = "tuning adults"),
+  reliability(p_xg, y_tune) |> mutate(score = "boosted trees", rows = "tuning adults"),
+  reliability(p_xg_train, nh_train$diabetes) |> mutate(score = "boosted trees", rows = "training adults")) |>
+  mutate(score = fct_inorder(score))
+# The top bin of the boosted score on the tuning adults, labeled.
+rel_top <- filter(rel, score == "boosted trees", rows == "tuning adults") |> slice_max(mean_p) |>
+  mutate(text = sprintf("%d adults: %.0f%% predicted\non average, %.0f%% with diabetes", n, 100 * mean_p, 100 * freq))
+ggplot(rel, aes(mean_p, freq, colour = rows)) + geom_abline(linetype = "dashed", colour = "grey50") +
+  geom_line(linewidth = 0.8) + geom_point(size = 2.6) + facet_wrap(~ score) +
+  geom_segment(data = rel_top, aes(x = mean_p - 0.03, y = freq + 0.03, xend = 0.5, yend = 0.68), colour = "grey30", inherit.aes = FALSE) +
+  geom_label(data = rel_top, aes(x = 0.5, y = 0.75, label = text), size = 4.8, hjust = 0.5, colour = "black", inherit.aes = FALSE) +
+  scale_colour_manual(values = c(`tuning adults` = v_dark, `training adults` = "grey60"), name = NULL) +
+  scale_x_continuous(breaks = c(0, 0.5, 1), labels = c("0", "0.5", "1")) + coord_equal(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "predicted probability (bin average)", y = "share with diabetes") +
+  theme(strip.text = element_text(size = 16), legend.position = "right")
+```
+
+## Recalibration
+
+::: {.notes}
+Fitted on 1,500 tuning adults, checked on the other 1,500; five bins of 300. An increasing map keeps the ranking, so the AUC is unchanged.
+:::
+
+```{r}
+#| label: recalibration
+#| include: false
+half_a <- 1:1500; half_b <- 1501:3000
+logit_p <- function(p) qlogis(pmin(pmax(p, 1e-4), 1 - 1e-4))
+recal <- glm(y ~ s, family = binomial, data = tibble(y = y_tune[half_a], s = logit_p(p_xg[half_a])))
+p_recal <- predict(recal, tibble(s = logit_p(p_xg[half_b])), type = "response")
+b_recal <- coef(recal)[["s"]]
+logloss <- function(p, y) -mean(y * log(p) + (1 - y) * log(1 - p))
+```
+
+A map from the old score to a new one, learned on half the tuning adults, checked on the other half: a logistic regression of the label on $\mathrm{logit}\,\hat p$, giving $\mathrm{logit}\,\tilde p = a + b\,\mathrm{logit}\,\hat p$
+
+::: {.columns}
+::: {.column width="62%"}
+```{r}
+#| label: recalibration-plot
+#| fig-width: 6.0
+#| fig-height: 3.6
+recal_map <- tibble(p = seq(0.005, 0.995, length.out = 200)) |>
+  mutate(p_new = predict(recal, tibble(s = logit_p(p)), type = "response"))
+map_plot <- ggplot(recal_map, aes(p, p_new)) + geom_abline(linetype = "dashed", colour = "grey50") +
+  geom_line(linewidth = 1.3, colour = v_dark) +
+  geom_rug(data = tibble(p = p_xg[half_b]), aes(x = p), inherit.aes = FALSE, alpha = 0.15, length = unit(0.04, "npc")) +
+  scale_x_continuous(breaks = c(0, 0.5, 1)) + scale_y_continuous(breaks = c(0, 0.5, 1)) +
+  coord_equal(xlim = c(0, 1), ylim = c(0, 1)) + labs(x = "boosted score", y = "recalibrated", title = "the map")
+rel_plot <- bind_rows(reliability(p_xg[half_b], y_tune[half_b], 5) |> mutate(score = "boosted"),
+                      reliability(p_recal, y_tune[half_b], 5) |> mutate(score = "recalibrated")) |>
+  ggplot(aes(mean_p, freq, colour = score)) + geom_abline(linetype = "dashed", colour = "grey50") +
+  geom_line(linewidth = 0.8) + geom_point(size = 2.6) +
+  scale_colour_manual(values = c(boosted = "grey55", recalibrated = v_dark), name = NULL) +
+  scale_x_continuous(breaks = c(0, 0.5, 1)) + scale_y_continuous(breaks = c(0, 0.5, 1)) +
+  coord_equal(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "predicted probability", y = "share with diabetes", title = "on the other half") + theme(legend.position = "bottom")
+(map_plot | rel_plot) & theme(plot.title = element_text(size = 16))
+```
+:::
+::: {.column width="38%"}
+For $b > 0$ the map is increasing: the same ranking, new probabilities. $b = `r sprintf("%.2f", b_recal)`$: two adults whose boosted log-odds differ by 1 differ by `r sprintf("%.2f", b_recal)` after. Log loss on the other half: `r sprintf("%.3f", logloss(p_xg[half_b], y_tune[half_b]))` to `r sprintf("%.3f", logloss(p_recal, y_tune[half_b]))`
+:::
+:::
+
+## Calibration within groups
+
+```{r}
+#| label: multicalibration
+#| include: false
+# The logistic score of the reliability diagram (race and ethnicity left out), by the survey's five groups.
+groups_of <- function(d) c(list(everyone = rep(TRUE, nrow(d))),
+                           setNames(lapply(levels(d$Race1), function(l) d$Race1 == l), levels(d$Race1)))
+by_group <- function(d, p) imap_dfr(groups_of(d), function(g, nm) tibble(
+  group = nm, n = sum(g), observed = mean(d$diabetes[g]), predicted = mean(p[g]))) |>
+  mutate(se = sqrt(observed * (1 - observed) / n))
+grp <- by_group(nh_tune, p_lr) |> mutate(group = fct_inorder(group))
+gap_se <- function(g) with(grp[grp$group == g, ], abs(predicted - observed) / se)
+```
+
+::: {.notes}
+Bars: two standard errors. Clear gap only for White adults (`r sprintf("%.1f", gap_se("White"))` SE); Black `r sprintf("%.1f", gap_se("Black"))`, the rest under 2.
+Kleinberg et al.: calibration within groups, balance for the positive class and for the negative class hold together only with perfect prediction or equal base rates. For a threshold rule, Chouldechova (2017): with different base rates, equal positive predictive value rules out equal false positive and false negative rates.
+:::
+
+One score for everyone. If it is too high for one group and too low for another, a shared threshold refers the first group for tests more often, and the second less often, than their risk warrants: the score discriminates, even with race and ethnicity left out of its inputs
+
+::: {.columns}
+::: {.column width="56%"}
+```{r}
+#| label: multicalibration-plot
+#| fig-width: 5.6
+#| fig-height: 2.9
+ggplot(grp, aes(y = fct_rev(group))) +
+  geom_errorbar(aes(xmin = observed - 2 * se, xmax = observed + 2 * se), width = 0.25, orientation = "y", colour = "grey40") +
+  geom_point(aes(x = observed, colour = "share with diabetes"), size = 3.2) +
+  geom_point(aes(x = predicted, colour = "average score"), shape = 17, size = 3.6) +
+  scale_colour_manual(values = c(`share with diabetes` = "black", `average score` = m_pink), name = NULL) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(x = "the logistic score, 3,000 tuning adults", y = NULL) + theme(legend.position = "top")
+```
+:::
+::: {.column width="44%"}
+White adults: average score `r pct1(grp$predicted[grp$group == "White"])`, `r pct1(grp$observed[grp$group == "White"])` with diabetes
+
+Fairness criteria conflict: with different base rates, no imperfect score is calibrated within groups and averages the same in each group among adults with diabetes, and among those without (Kleinberg et al. 2017)
+:::
+:::
+
+## Multicalibration
+
+```{r}
+#| label: multicalibration-fix
+#| include: false
+# Multicalibration, in the spirit of Hebert-Johnson et al. (2018), section 3.2: for each group and each tenth of
+# the score's range with at least 100 adults, if the share with diabetes and the average score differ by more
+# than the tolerance, shift the scores there by the difference; repeat until none does.
+multicalibrate <- function(p, y, groups, tol = 0.02, min_n = 100, max_rounds = 200) {
+  shifts <- list()
+  for (r in seq_len(max_rounds)) {
+    moved <- FALSE
+    for (g in names(groups)) for (v in 0:9) {
+      cell <- groups[[g]] & pmin(floor(10 * p), 9) == v
+      if (sum(cell) < min_n) next
+      gap <- mean(y[cell]) - mean(p[cell])
+      if (abs(gap) > tol) { p[cell] <- pmin(pmax(p[cell] + gap, 0.001), 0.999); moved <- TRUE
+        shifts[[length(shifts) + 1]] <- list(g = g, v = v, gap = gap) }
+    }
+    if (!moved) break
+  }
+  list(p = p, shifts = shifts)
+}
+# The shifts found on the tuning adults, applied in the same order to the test adults.
+apply_shifts <- function(p, groups, shifts) {
+  for (s in shifts) { cell <- groups[[s$g]] & pmin(floor(10 * p), 9) == s$v; p[cell] <- pmin(pmax(p[cell] + s$gap, 0.001), 0.999) }
+  p
+}
+mcal <- multicalibrate(p_lr, nh_tune$diabetes, groups_of(nh_tune))
+p_lr_test <- predict(fit_lr, nh_test, type = "response")
+p_mc_test <- apply_shifts(p_lr_test, groups_of(nh_test), mcal$shifts)
+mc_test <- by_group(nh_test, p_lr_test) |>
+  mutate(after = by_group(nh_test, p_mc_test)$predicted, group = fct_inorder(group),
+         gap_before = abs(predicted - observed) / se, gap_after = abs(after - observed) / se)
+gap_t <- function(g, when) sprintf("%.1f", mc_test[[paste0("gap_", when)]][mc_test$group == g])
+```
+
+::: {.notes}
+Hébert-Johnson et al. (2018), definition 2.6 and section 3.2 of the arXiv version. `r length(mcal$shifts)` shifts, learned on the tuning adults; checked on the `r format(nrow(nh_test), big.mark = ",")` test adults, opened once.
+The White gap before is `r gap_t("White", "before")` SE on the test adults, `r sprintf("%.1f", gap_se("White"))` on the tuning adults: samples of a few hundred are noisy.
+:::
+
+**Multicalibration** (Hébert-Johnson et al. 2018): calibrated within every group of a collection named in advance, at every range of scores. Here: in each group and tenth of the scores (at least 100 adults), if the share with diabetes and the average score differ by more than 0.02, shift the scores by the gap; repeat; apply the shifts to new adults
+
+::: {.columns}
+::: {.column width="40%"}
+Learned on the tuning adults, checked on the test adults. Gaps in standard errors: White `r gap_t("White", "before")` to `r gap_t("White", "after")`, Black `r gap_t("Black", "before")` to `r gap_t("Black", "after")`, Mexican American `r gap_t("Mexican", "before")` to `r gap_t("Mexican", "after")`
+
+Log loss `r sprintf("%.3f", logloss(p_lr_test, nh_test$diabetes))` to `r sprintf("%.3f", logloss(p_mc_test, nh_test$diabetes))`: small cells fit noise. The shifts need each adult's group
+:::
+::: {.column width="60%"}
+```{r}
+#| label: multicalibration-fix-plot
+#| fig-width: 6
+#| fig-height: 3.3
+ggplot(mc_test, aes(y = fct_rev(group))) +
+  geom_errorbar(aes(xmin = observed - 2 * se, xmax = observed + 2 * se), width = 0.25, orientation = "y", colour = "grey40") +
+  geom_point(aes(x = observed, colour = "share with diabetes"), size = 3.2) +
+  geom_point(aes(x = predicted, colour = "average score, before"), shape = 17, size = 3.6) +
+  geom_point(aes(x = after, colour = "average score, after"), shape = 15, size = 3.2) +
+  scale_colour_manual(values = c(`share with diabetes` = "black", `average score, before` = m_pink, `average score, after` = v_teal),
+                      name = NULL, breaks = c("share with diabetes", "average score, before", "average score, after")) +
+  scale_x_continuous(labels = scales::percent) +
+  guides(colour = guide_legend(nrow = 2)) +
+  labs(x = "test adults", y = NULL) + theme(legend.position = "top")
+```
+:::
+:::
+
+## {.inverse .center background-image="img/part4-ggcoef.png" background-size="cover" background-opacity="0.45" background-color="#440154"}
+
+::: {.notes}
+Compress: plots of a fitted model describe the model; partial dependence, ICE and Shapley values for any model; importance by permuting or leaving out.
+Background: GGally::ggcoef(), a linear model's coefficients with intervals; for a forest there is no such table.
+:::
+
+### Part 4: interpreting the model
+
+## Partial dependence for any model
+
+```{r}
+#| label: pd-helpers
+#| include: false
+pd_curve <- function(fit, d, v, grid) map_dbl(grid, function(t) { nd <- d; nd[[v]] <- t; mean(predict(fit, nd)) })
+# The simulated interaction of the ensembles lecture: x1 enters only through its product with a function of x2.
+f1 <- function(x) x^2
+f2 <- function(x) cos(pi * x / 2)
+df_int <- tibble(x1 = runif(2000, -1, 1), x2 = runif(2000, -4, 4)) |>
+  mutate(y = f1(x1) * f2(x2) + rnorm(2000))
+```
+
+::: {.notes}
+PDP_j(t) as in the notation table: set, leave, predict, average. Wording rule: ICE evaluates f-hat at a modified input that may match no plausible unit. The last line closes the causality seminar's note.
+:::
+
+Options for the other inputs: hold them fixed (at medians, say: `plotmo`'s default); average over them (partial dependence, `pdp`); one curve for each unit (individual conditional expectation, ICE)
+
+Unit $i$'s inputs with input $j$ set to a value $t$, the others left as they are:
+$$
+\mathrm{ICE}_i(t) = \hat f(x_{i1}, \ldots, t, \ldots, x_{ip}), \qquad
+\mathrm{PDP}_j(t) = \frac1n \sum_{i=1}^n \hat f(x_{i1}, \ldots, t, \ldots, x_{ip})
+$$
+
+Compute on a grid of $t$ values and plot the curve(s). Any model that predicts will do
+
+ICE evaluates $\hat f$ at a modified input, which may correspond to no plausible unit. It is the model's prediction there, not what would have happened to unit $i$: recomputing a unit with its own noise, as in the causality seminar, asks a different kind of question, which this course does not develop
+
+## Does this forest use $x_1$? {minutes="2"}
+
+::: {.notes}
+QUESTION: sketch two units' curves that average to the black one.
+Every input at every split (bagging); nodes under 50 not split. Flat, like the GAM's curve last time.
+:::
+
+```{r}
+#| label: rf-ice
+#| echo: true
+#| eval: false
+fit_rf <- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)
+ice_x1 <- partial(fit_rf, pred.var = "x1", ice = TRUE, train = df_sub)
+```
+
+```{r}
+#| label: rf-pdp-plot
+#| fig-width: 8
+#| fig-height: 2.7
+#| out-width: 56%
+#| fig-align: center
+# The code shown above, on 100 of the 2,000 units, and the plot.
+fit_rf <- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)
+df_sub <- df_int |> slice_sample(n = 100) |> mutate(yhat.id = row_number(), sign = if_else(f2(x2) > 0, "positive", "negative"), strength = f2(x2)^4)
+ice_x1 <- partial(fit_rf, pred.var = "x1", ice = TRUE, train = as.data.frame(df_sub[, c("x1", "x2")]), grid.resolution = 30) |>
+  as_tibble() |> left_join(df_sub |> select(yhat.id, sign, strength), by = "yhat.id")
+pdp_x1 <- ice_x1 |> group_by(x1) |> summarise(yhat = mean(yhat), .groups = "drop")
+ice_ylim <- range(ice_x1$yhat)
+ggplot(pdp_x1, aes(x1, yhat)) +
+  geom_line(colour = "black", linewidth = 1.8) +
+  coord_cartesian(ylim = ice_ylim) + labs(x = "x1", y = "prediction")
+```
+
+The PDP: $x_1$ set, $x_2$ at each unit's value, predictions averaged over 100 units
+
+::: {.ask}
+Sketch two curves, one for each of two units, that average to the black curve
+:::
+
+## The forest's ICE curves
+
+::: {.notes}
+Teal solid: cos(pi x_2 / 2) > 0; orange dashed: < 0. Only the ICE curves show the interaction.
+:::
+
+```{r}
+#| label: rf-ice-plot
+#| fig-width: 8
+#| fig-height: 3.7
+#| out-width: 66%
+#| fig-align: center
+# The same forest, curves and axes as on the last slide, with the ICE curves added.
+ggplot(ice_x1, aes(x1, yhat)) +
+  geom_line(aes(group = yhat.id, colour = sign, linetype = sign, alpha = strength), linewidth = 0.8, show.legend = FALSE) +
+  geom_line(data = pdp_x1, colour = "black", linewidth = 1.8) +
+  scale_colour_manual(values = c(positive = v_teal, negative = m_orange)) +
+  scale_linetype_manual(values = c(positive = "solid", negative = "dashed")) +
+  scale_alpha_continuous(range = c(0.03, 0.75), limits = c(0, 1)) +
+  coord_cartesian(ylim = ice_ylim) + labs(x = "x1", y = "prediction")
+```
+
+Thin: one curve per unit (ICE), solid where $\cos(\pi x_2/2) > 0$, dashed where it is negative, more opaque the larger $|\cos(\pi x_2/2)|$. The forest fitted the interaction, PDP hides it, and ICE might show it
+
+## Shapley values
+
+```{r}
+#| label: shapley-forest
+#| include: false
+# Exact Shapley values for two inputs, on 300 units that are also the background data. v(S): the inputs in S at
+# the unit's values, the other input at every background unit's value, the forest's predictions averaged.
+sh_units <- df_int |> slice_sample(n = 300)
+cross <- expand_grid(i = 1:300, j = 1:300) |>
+  mutate(x1 = sh_units$x1[i], x2 = sh_units$x2[j]) |>
+  mutate(pred = predict(fit_rf, pick(x1, x2)))
+v1 <- cross |> group_by(i) |> summarise(v = mean(pred)) |> pull(v)          # x1 known: average over x2
+v2 <- cross |> group_by(j) |> summarise(v = mean(pred)) |> pull(v)          # x2 known: average over x1
+v0 <- mean(cross$pred); v12 <- predict(fit_rf, sh_units)
+sh_units <- sh_units |> mutate(phi1 = 0.5 * ((v1 - v0) + (v12 - v2)),
+                               sign = if_else(f2(x2) > 0, "positive", "negative"), strength = f2(x2)^4)
+# The worked example: the unit with the largest true interaction term x1^2 cos(pi x2 / 2).
+ex <- which.max(sh_units$x1^2 * f2(sh_units$x2))
+# Its coalition values are shown to two decimals, and the shares are computed from the values as shown.
+ex_v <- round(c(v0, v1[ex], v2[ex], v12[ex]), 2)
+ex_phi <- c(0.5 * ((ex_v[2] - ex_v[1]) + (ex_v[4] - ex_v[3])), 0.5 * ((ex_v[3] - ex_v[1]) + (ex_v[4] - ex_v[2])))
+f2d <- function(v) sprintf("%.2f", v)
+fx <- function(v) if (abs(100 * v - round(100 * v)) < 1e-8) sprintf("%.2f", v) else sprintf("%.3f", v)   # every digit exact
+f2p <- function(v) if (v < 0) sprintf("(%.2f)", v) else sprintf("%.2f", v)   # negatives in brackets inside a difference
+# The forest's PDP for x1 on the same 300 units, minus the average prediction.
+pd_grid <- tibble(x1 = seq(-1, 1, length.out = 30)) |>
+  mutate(pd1 = pd_curve(fit_rf, as.data.frame(sh_units[c("x1", "x2")]), "x1", x1) - v0)
+```
+
+::: {.notes}
+Shapley's value from cooperative game theory. One unit of the simulated interaction, the same forest.
+Efficiency: the two shares add up to the prediction minus the average prediction.
+:::
+
+Split a prediction among the inputs, $\hat f(\mathbf x_i) - v_i(\varnothing) = \phi_{i1} + \dots + \phi_{ip}$; $v_i(S)$ predicts from the inputs in $S$ only (usually: the others averaged over the data, as in partial dependence). For two inputs, adding $x_1$ in either order (for $p$, all $p!$ orders):
+$$
+\phi_{i1} = \tfrac12\Big[\big(v_i(\{1\}) - v_i(\varnothing)\big) + \big(v_i(\{1, 2\}) - v_i(\{2\})\big)\Big]
+$$
+
+The forest, one unit with $x_1 = `r f2d(sh_units$x1[ex])`$ and $x_2 = `r f2d(sh_units$x2[ex])`$:
+
+| $v_i(\varnothing)$ | $v_i(\{1\})$ | $v_i(\{2\})$ | $v_i(\{1, 2\}) = \hat f(\mathbf x_i)$ |
+|:---:|:---:|:---:|:---:|
+| `r f2d(ex_v[1])` | `r f2d(ex_v[2])` | `r f2d(ex_v[3])` | `r f2d(ex_v[4])` |
+
+$\phi_{i1} = \frac12\big[(`r f2d(ex_v[2])` - `r f2p(ex_v[1])`) + (`r f2d(ex_v[4])` - `r f2p(ex_v[3])`)\big] = `r fx(ex_phi[1])`$
+
+$\phi_{i2} = \frac12\big[(`r f2d(ex_v[3])` - `r f2p(ex_v[1])`) + (`r f2d(ex_v[4])` - `r f2p(ex_v[2])`)\big] = `r fx(ex_phi[2])`$; together `r fx(sum(ex_phi))` $= `r f2d(ex_v[4])` - `r f2p(ex_v[1])` = \hat f(\mathbf x_i) - v_i(\varnothing)$
+
+## Shapley values on the forest
+
+::: {.notes}
+Exact for two inputs, 300 units as the background. Independent inputs: the average share at x_1 is the PDP minus the average prediction.
+:::
+
+::: {.columns}
+::: {.column width="55%"}
+```{r}
+#| label: shapley-forest-plot
+#| fig-width: 6.2
+#| fig-height: 3.9
+ggplot(sh_units, aes(x1, phi1)) +
+  geom_point(aes(colour = sign, shape = sign, alpha = strength), size = 1.8, show.legend = FALSE) +
+  geom_line(data = pd_grid, aes(y = pd1), linewidth = 1.6) +
+  geom_point(data = sh_units[ex, ], shape = 21, size = 6, stroke = 1.3, colour = "black") +
+  annotate("label", x = sh_units$x1[ex] + if (sh_units$x1[ex] > 0) -0.35 else 0.35, y = max(sh_units$phi1) + 0.12, label = "the unit above", size = 5, linewidth = 0) +
+  annotate("segment", x = sh_units$x1[ex] + if (sh_units$x1[ex] > 0) -0.2 else 0.2, y = max(sh_units$phi1) + 0.08,
+           xend = sh_units$x1[ex], yend = sh_units$phi1[ex] + 0.05, colour = "black") +
+  scale_colour_manual(values = c(positive = v_teal, negative = m_orange)) +
+  scale_shape_manual(values = c(positive = 16, negative = 1)) +
+  scale_alpha_continuous(range = c(0.15, 0.9), limits = c(0, 1)) +
+  coord_cartesian(ylim = range(c(-0.6, 0.6, sh_units$phi1, max(sh_units$phi1) + 0.16))) +
+  labs(x = "x1", y = expression(phi[1]))
+```
+:::
+::: {.column width="45%"}
+$\phi_{i1}$ for 300 units, shaded as the ICE curves: the spread at each $x_1$ shows the interaction. Ringed: the unit above
+
+Black: the PDP minus the average prediction. With independent inputs, the Shapley values average to it
+:::
+:::
+
+## Shapley values for one adult {minutes="2"}
+
+```{r}
+#| label: rf-bp
+#| include: false
+# A forest for systolic blood pressure from nine inputs; BMI is weight / height^2, so three inputs are tied.
+imp_inputs <- c("Age", "Gender", "Race1", "Weight", "Height", "BMI", "Pulse", "TotChol", "Poverty")
+rf_bp <- randomForest(BPSysAve ~ Age + Gender + Race1 + Weight + Height + BMI + Pulse + TotChol + Poverty,
+                      data = nh_train, ntree = 300, mtry = 3)
+# Exact marginal Shapley values for 200 tuning adults (kernelshap::permshap, all 512 coalitions), with 50
+# training adults as the background data.
+shap_rows <- sample(nrow(nh_tune), 200)
+shap_bp <- permshap(rf_bp, X = nh_tune[shap_rows, imp_inputs], bg_X = nh_train[sample(nrow(nh_train), 50), imp_inputs],
+                    verbose = FALSE)
+sv_bp <- shapviz(shap_bp)
+shap_one <- which.max(predict(rf_bp, nh_tune[shap_rows, ]))   # the adult with the highest prediction of the 200
+```
+
+::: {.notes}
+Marginal Shapley values (Chen et al.'s "true to the model"), exact: permshap evaluates all 2^9 coalitions, each averaged over 50 background adults. Bars: phi_ij; the sum is the last value minus the first.
+:::
+
+We now use the same NHANES adults to predict **systolic blood pressure** (mm Hg): a forest on nine inputs, fitted on the 4,000 training adults
+
+::: {.columns}
+::: {.column width="60%"}
+```{r}
+#| label: waterfall-plot
+#| fig-width: 7.2
+#| fig-height: 4.3
+sv_waterfall(sv_bp, row_id = shap_one, fill_colors = c(v_teal, m_pink), annotation_size = 5) +
+  theme_minimal(base_size = 16) + labs(x = "prediction (mm Hg)", y = NULL)
+```
+:::
+::: {.column width="40%"}
+A **waterfall plot** (SHAP: Lundberg and Lee 2017). It starts at the average prediction over the background adults, $v_i(\varnothing)$, adds each input's $\phi_{ij}$, largest first, and ends at this adult's prediction $\hat f(\mathbf x_i)$
+
+The adult with the highest prediction of 200 tuning adults
+:::
+:::
+
+## Feature/variable "importance"
+
+::: {.notes}
+Legacy slide, with Shapley importance added; the forest of the last slide (300 trees, mtry = 3). Split: IncNodePurity; permutation: tuning adults, ten shuffles; Shapley: the 200 adults of the last slide. Each as a share of its total.
+:::
+
+- Which predictors are *used most* by the model? The forest for systolic blood pressure
+- Does not necessarily tell us about **causation** (none of these methods do)
+
+::: {.columns}
+::: {.column width="52%"}
+#### Tree-specific importance [■]{style="color: #440154"}
+
+Sum the RSS decrease of every split on $x_j$ within a tree, then average over trees
+
+#### Permutation importance [▲]{style="color: #b73779"}
+
+Permute values of predictor $x_j$. How much does the accuracy of the model decrease?
+$$\mathrm{PI}_j = \widehat{\mathrm{Err}}(\hat f, x_j \text{ permuted}) - \widehat{\mathrm{Err}}(\hat f)$$
+:::
+::: {.column width="48%"}
+```{r}
+#| label: importance
+#| fig-width: 4.8
+#| fig-height: 2.35
+base_tune <- mse(nh_tune$BPSysAve, predict(rf_bp, nh_tune))
+pi_j <- sapply(imp_inputs, function(v) mean(replicate(10, {
+  d <- nh_tune; d[[v]] <- sample(d[[v]]); mse(nh_tune$BPSysAve, predict(rf_bp, d)) })) - base_tune)
+split_j <- importance(rf_bp)[imp_inputs, "IncNodePurity"]
+shap_j <- colMeans(abs(shap_bp$S))[imp_inputs]
+tibble(input = factor(imp_inputs, levels = imp_inputs[order(split_j)]),
+       `split improvement` = split_j / sum(split_j), permutation = pi_j / sum(pi_j), `mean |Shapley value|` = shap_j / sum(shap_j)) |>
+  pivot_longer(-input, names_to = "measure") |>
+  mutate(measure = fct_inorder(measure)) |>
+  ggplot(aes(value, input, colour = measure, shape = measure)) + geom_point(size = 3.5, alpha = 0.85) +
+  scale_colour_manual(values = c(`split improvement` = v_dark, permutation = m_pink, `mean |Shapley value|` = v_teal), name = NULL) +
+  scale_shape_manual(values = c(`split improvement` = 15, permutation = 17, `mean |Shapley value|` = 16), name = NULL) +
+  labs(x = "share of the measure's total", y = NULL) +
+  theme(legend.position = "none", axis.text.y = element_text(size = 12))
+```
+
+[●]{style="color: #21918c"} **Shapley**: mean $|\phi_{ij}|$ over adults
+
+Each has pros/cons, no satisfactory answer for dependence
+:::
+:::
+
+## Permutation and extrapolation
+
+```{r}
+#| label: permute-counts
+#| include: false
+# Height shuffled once among the tuning adults; weight and BMI stay. BMI from weight (kg) and height (cm).
+perm <- nh_tune |> mutate(Height = sample(Height))
+bmi_from <- function(d) d$Weight / (d$Height / 100)^2
+off <- function(d) mean(abs(d$BMI - bmi_from(d)) > 2)
+short_heavy <- function(d) sum(d$Height < 155 & d$Weight > 110)
+```
+
+::: {.notes}
+Height shuffled once. Hooker, Mentch and Zhou (2021): shuffling puts weight where there are few data, in importance and partial dependence alike.
+:::
+
+```{r}
+#| label: permute-height
+#| fig-width: 11.5
+#| fig-height: 2.8
+#| fig-align: center
+bind_rows(nh_tune |> mutate(data = "tuning adults"),
+          perm |> mutate(data = "height permuted")) |>
+  mutate(data = fct_inorder(data), from = bmi_from(pick(everything()))) |>
+  ggplot(aes(from, BMI)) + geom_abline(linetype = "dashed", colour = "grey50") +
+  geom_point(alpha = 0.25, size = 1, colour = v_blue) +
+  facet_wrap(~ data) + coord_cartesian(xlim = c(10, 80), ylim = c(15, 70)) +
+  labs(x = "weight / height squared", y = "recorded BMI") + theme(strip.text = element_text(size = 16))
+```
+
+Shuffling height keeps each adult's weight and BMI: BMI no longer matches weight and height for `r round(100 * off(perm))`% of them (`r round(100 * off(nh_tune))`% before); `r short_heavy(perm)` are under 155 cm and over 110 kg (`r short_heavy(nh_tune)` before)
+
+The forest's predictions there rest on almost no data, and permutation importance averages over them (Hooker, Mentch and Zhou 2021)
+
+## Permutation with correlated inputs {.inverse}
+
+```{r}
+#| label: biv-perm
+#| include: false
+n_biv <- 400; rho_biv <- -0.8
+b1 <- rnorm(n_biv); b2 <- rho_biv * b1 + sqrt(1 - rho_biv^2) * rnorm(n_biv)
+biv <- tibble(x1 = b1, x2 = b2); biv_perm <- tibble(x1 = b1, x2 = sample(b2))
+biv_lims <- c(-3.6, 3.6)
+biv_kde <- MASS::kde2d(biv$x1, biv$x2, n = 120, lims = c(biv_lims, biv_lims))
+biv_grid <- expand_grid(x2 = biv_kde$y, x1 = biv_kde$x) |> mutate(z = as.vector(t(biv_kde$z)))
+biv_breaks <- c(0.002, 0.01, 0.03, 0.06, 0.1, 0.15, 0.3)
+dens_at <- function(x, y) biv_kde$z[cbind(pmax(findInterval(x, biv_kde$x), 1), pmax(findInterval(y, biv_kde$y), 1))]
+low_perm <- mean(dens_at(biv_perm$x1, biv_perm$x2) < 0.01); low_data <- mean(dens_at(biv$x1, biv$x2) < 0.01)
+```
+
+::: {.notes}
+Compress: permuting one of two correlated inputs puts many points where the model has seen almost no data. x_1, x_2 standard normal with correlation -0.8; both panels shade the density estimated from the data on the left.
+:::
+
+```{r}
+#| label: biv-perm-plot
+#| fig-width: 11
+#| fig-height: 4.4
+#| fig-align: center
+#| dark: true
+biv_panel <- function(d, title) ggplot() +
+  geom_contour_filled(data = biv_grid, aes(x1, x2, z = z), breaks = biv_breaks, alpha = 0.85, show.legend = FALSE) +
+  geom_point(data = d, aes(x1, x2), size = 1.2, alpha = 0.8, colour = "white") +
+  scale_fill_viridis_d(option = "mako", direction = -1, begin = 0.15) +
+  coord_equal(xlim = biv_lims, ylim = biv_lims, expand = FALSE) + labs(title = title, x = "x1", y = "x2") +
+  theme(plot.title = element_text(size = 17))
+biv_panel(biv, "the data, and their density") + biv_panel(biv_perm, "x2 permuted, the same density")
+```
+
+Where the data's density is below 0.01: `r round(100 * low_perm)`% of the permuted points, `r round(100 * low_data)`% of the data
+
+## Leave one covariate out
+
+::: {.notes}
+One forest per input left out, one without weight, height and BMI. What f-hat relies on, against what the method loses without it. IML: LOFO.
+:::
+
+::: {.columns}
+::: {.column width="52%"}
+```{r}
+#| label: loco
+#| fig-width: 6.4
+#| fig-height: 4.6
+refit_without <- function(drop) {
+  fit <- randomForest(reformulate(setdiff(imp_inputs, drop), "BPSysAve"), data = nh_train, ntree = 300, mtry = 3)
+  mse(nh_tune$BPSysAve, predict(fit, nh_tune)) - base_tune
+}
+loco_j <- sapply(imp_inputs, refit_without)
+loco_body <- refit_without(c("Weight", "Height", "BMI"))
+# Run-to-run noise: the full forest refitted five times with the same settings.
+refit_sd <- sd(replicate(5, mse(nh_tune$BPSysAve, predict(randomForest(reformulate(imp_inputs, "BPSysAve"), data = nh_train,
+                                                                          ntree = 300, mtry = 3), nh_tune))))
+tibble(input = imp_inputs, permutation = pi_j, LOCO = loco_j) |>
+  pivot_longer(-input, names_to = "importance") |>
+  mutate(input = fct_reorder(input, value, .fun = max)) |>
+  ggplot(aes(value, input, colour = importance, shape = importance)) +
+  geom_point(size = 4) +
+  scale_colour_manual(values = c(LOCO = v_blue, permutation = m_pink), name = NULL) +
+  scale_shape_manual(values = c(LOCO = 16, permutation = 17), name = NULL) +
+  labs(x = "increase in tuning MSE", y = NULL) + theme(legend.position = "top")
+```
+:::
+::: {.column width="48%"}
+Refit without input $j$, with the same settings; score on the same held-out adults (Lei et al. 2018):
+$$\mathrm{LOCO}_j = \widehat{\mathrm{Err}}\big(\hat f^{(-j)}\big) - \widehat{\mathrm{Err}}(\hat f)$$
+
+No extrapolation from permuting; any method, at the cost of $p$ refits
+
+Weight, height and BMI together: `r sprintf("%.1f", loco_body)`. Each alone: `r sprintf("%.1f", loco_j[["Weight"]])`, `r sprintf("%.1f", loco_j[["Height"]])`, `r sprintf("%.1f", loco_j[["BMI"]])`; refitting the same forest moves its MSE by about `r sprintf("%.1f", refit_sd)` (sd, five refits). Any two give the third
+:::
+:::
+
+## Marginal or conditional Shapley values
+
+::: {.notes}
+Chen et al. (2020): marginal = interventional, conditional = observational. If asked: v({2}) = beta_1 rho x_2, then the formula on "Shapley values".
+Neither is a causal effect: part 5.
+:::
+
+$v_i(S)$ must fill in the inputs not in $S$ (Chen et al. 2020):
+
+- **Marginal**: from the data, ignoring $\mathbf x_{iS}$, as in partial dependence. True to the model: an input $\hat f$ ignores gets $0$; but $\hat f$ is evaluated where there may be no data, as in permutation
+- **Conditional**: $v_i(S) = \mathbb E\big[\hat f(X) \mid X_S = \mathbf x_{iS}\big]$. True to the data; but an input $\hat f$ ignores gets a share through the inputs correlated with it, and the conditional distribution must be estimated
+
+::: {.fragment}
+Example: $\hat f(\mathbf x) = \beta_1 x_1$; inputs with mean $0$, variance $1$, correlation $\rho$, and $\mathbb E[X_1 \mid x_2] = \rho x_2$. Marginal: $\phi_{i2} = 0$. Conditional: $\phi_{i2} = \frac12 \rho \beta_1 x_{i2}$, and $\phi_{i1} = \beta_1 x_{i1} - \phi_{i2}$
+:::
+
+## {.inverse .center background-image="img/part5-sachs-ecm.png" background-size="cover" background-opacity="0.5" background-color="#440154"}
+
+::: {.notes}
+Compress: a plot of the model answers a question about the model; a question about the world needs a causal model and a model that is right about the world.
+Background: the ECM of Loftus, Bynum and Hansen (2024), Figure 5, for the protein-signalling data of Sachs et al. (2005).
+:::
+
+### Part 5: the model and the world
+
+[Background: after Loftus, Bynum and Hansen (2024), Figure 5]{style="font-size: 0.5em; color: #e5e5e5"}
+
+## Predictions and outcomes {minutes="3"}
+
+```{r}
+#| label: world
+#| include: false
+# The world of this part (simulated): x1 causes x2; both cause y; x3 is caused by x1 and by y (a collider).
+n_w <- 2000
+x2_eq <- function(x1) x1 + rnorm(length(x1), 0, 0.8)
+y_eq  <- function(x1, x2) 0.5 * x1 + 1.5 * sin(x2) + rnorm(length(x1), 0, 0.5)
+x3_eq <- function(x1, y) y + x1 + rnorm(length(x1), 0, 0.3)
+draw_world <- function(n) tibble(x1 = runif(n, -2, 2)) |> mutate(x2 = x2_eq(x1), y = y_eq(x1, x2), x3 = x3_eq(x1, y))
+world <- draw_world(n_w); world_fresh <- draw_world(n_w)
+# The fitted model: a forest on x1, x2 and x3. Two more forests for "Where the condition fails".
+fit_w <- randomForest(y ~ x1 + x2 + x3, data = world, ntree = 300, mtry = 3, nodesize = 20)
+fit_w12 <- randomForest(y ~ x1 + x2, data = world, ntree = 300, mtry = 2, nodesize = 20)
+fit_w2 <- randomForest(y ~ x2, data = world, ntree = 300, nodesize = 20)
+mse_w <- c(mse(world_fresh$y, predict(fit_w, world_fresh)), mse(world_fresh$y, predict(fit_w12, world_fresh)))
+```
+
+::: {.notes}
+QUESTION: to let x_2 and x_3 respond when we change x_1, what do we need besides the fitted model?
+
+A causal model for the inputs, and here for y as well, since x_3 depends on y. Loftus, Bynum and Hansen (2024), Definition 2.5; drawn as in their Figure 5.
+2,000 simulated units; test MSE `r sprintf("%.2f", mse_w[1])` with x_3, `r sprintf("%.2f", mse_w[2])` without.
+:::
+
+::: {.ask}
+A partial dependence plot for $x_1$ leaves $x_2$ and $x_3$ at each unit's value. In the world, they respond to $x_1$. To let them respond, what do we need besides the fitted model?
+:::
+
+. . .
+
+::: {.columns}
+::: {.column width="56%"}
+A causal model for the inputs. An **explanatory causal model** (ECM; Loftus, Bynum and Hansen 2024) adds the prediction $\hat Y = \hat f(X)$, with dashed arrows from the model's inputs. Here $x_3$ depends on $y$, so $y$ is in it too:
+
+$x_2 = x_1 + \varepsilon_2$, $\ y = \tfrac12 x_1 + \tfrac32 \sin x_2 + \varepsilon$, $\ x_3 = y + x_1 + \varepsilon_3$; $\hat f$, a forest on $x_1, x_2, x_3$
+:::
+::: {.column width="44%"}
+```{r}
+#| label: ecm-plot
+#| fig-width: 5.2
+#| fig-height: 3.5
+ecm_plot()
+```
+:::
+:::
+
+## Natural direct and total dependence {minutes="3"}
+
+```{r}
+#| label: tdp
+#| include: false
+t_grid <- seq(-2, 2, length.out = 41)
+avg_pred <- mean(predict(fit_w, world))
+nddp <- pd_curve(fit_w, world, "x1", t_grid)
+# Total dependence: set x1 to t for every unit, draw x2, y and x3 again from their equations, predict, average.
+tdp <- map_dbl(t_grid, function(t) {
+  d <- tibble(x1 = rep(t, n_w)) |> mutate(x2 = x2_eq(x1), y = y_eq(x1, x2), x3 = x3_eq(x1, y))
+  mean(predict(fit_w, d))
+})
+# The effect of setting x1 on y, from the equations: E[sin(t + e2)] = sin(t) exp(-0.8^2 / 2), and E[Y] = 0.
+eff_x1 <- 0.5 * t_grid + 1.5 * sin(t_grid) * exp(-0.8^2 / 2)
+# Marginal Shapley values for x1 on 300 units, with 200 others as the background (exact for three inputs).
+sh_w <- permshap(fit_w, X = world[1:300, c("x1", "x2", "x3")], bg_X = world[301:500, c("x1", "x2", "x3")], verbose = FALSE)
+```
+
+::: {.notes}
+Their Definitions 2.9 and 2.7; PDP with ICE = NDDP is Theorem 2.10. Curves minus the average prediction; dashed: E[Y | do(x_1 = t)] from the equations.
+TDP on the effect: x_1 has no parents, so do(x_1 = t) is conditioning on x_1 = t, and E[f*(X) | x_1 = t] = E[Y | x_1 = t] (tower property); here f-hat is close to f*.
+:::
+
+In the ECM, set $x_1 = t$ for every unit, predict, average, with $x_2$ and $x_3$
+
+- left at each unit's value: the **natural direct dependence plot** (NDDP), which is the PDP
+- recomputed from their equations: the **total dependence plot** (TDP), $\mathbb E[\hat f(X) \mid do(x_1 = t)]$
+
+::: {.columns}
+::: {.column width="52%"}
+```{r}
+#| label: tdp-plot
+#| fig-width: 6.2
+#| fig-height: 2.6
+dep <- tibble(t = t_grid, NDDP = nddp - avg_pred, TDP = tdp - avg_pred, effect = eff_x1) |>
+  pivot_longer(-t, names_to = "curve") |> mutate(curve = fct_inorder(curve))
+ggplot() +
+  geom_point(data = tibble(x1 = world$x1[1:300], phi = sh_w$S[, "x1"]), aes(x1, phi), colour = "grey45", size = 1.2, alpha = 0.6) +
+  geom_line(data = dep, aes(t, value, colour = curve, linetype = curve), linewidth = 1.4) +
+  scale_colour_manual(values = c(NDDP = m_pink, TDP = v_blue, effect = "black"), name = NULL) +
+  scale_linetype_manual(values = c(NDDP = "solid", TDP = "solid", effect = "dashed"), name = NULL) +
+  labs(x = "x1", y = "centered") + theme(legend.text = element_text(size = 17), legend.key.width = unit(1.6, "lines"))
+```
+:::
+::: {.column width="48%"}
+NDDP falls: with $x_3$ held fixed, a larger $x_1$ means a smaller $y$. TDP follows the effect of setting $x_1$ (dashed). Grey: marginal Shapley values
+
+**Causal Shapley values** (Heskes et al. 2020) put $do(\cdot)$ in place of conditioning
+:::
+:::
+
+## Model-intervention corollary {minutes="3"}
+
+::: {.notes}
+Stated; the derivation is an exercise. Continuous T (the example's inputs): a positive joint density, as in the causality exercise. Larger graphs: the words are not enough (a pre-treatment collider can add bias).
+NDDP = TDP when no input is a consequence of T (Zhao and Hastie 2021).
+:::
+
+::: {.columns}
+::: {.column width="70%"}
+::: {.leave}
+**Model-intervention corollary.** In the adjustment theorem's model, $T = h(Z, \varepsilon_T)$ and $Y = g(T, Z, \varepsilon_Y)$ with independent noises, let $f^\star(t, z) = \mathbb E[Y \mid T = t, Z = z]$. If $T$ takes finitely many values and $P(T = t \mid Z) > 0$ with probability one, then $\mathbb E_Z\big[f^\star(t, Z)\big] = \mathbb E[Y \mid do(T = t)]$
+:::
+:::
+::: {.column width="30%"}
+```{r}
+#| label: corollary-dag
+#| fig-width: 3.6
+#| fig-height: 3.3
+dag_adjust(FALSE, "as observed") / dag_adjust(TRUE, "under do(T = t)")
+```
+:::
+:::
+
+In words: $Z$ holds every common cause of $T$ and $Y$, and no consequence of $T$. A population identity; the PDP $\frac1n\sum_i \hat f(t, z_i)$ estimates it, even when $\hat f = f^\star$:
+$$
+\mathrm{PDP}_T(t) = \mathbb E[Y \mid do(T = t)] + \text{model error} + \text{sampling error}
+$$
+
+## Where the condition fails {minutes="3"}
+
+```{r}
+#| label: fails
+#| include: false
+# The effects, from the simulation's equations: do(x2 = t) leaves x1 alone, so E[Y] = 1.5 sin(t);
+# do(x3 = t) changes nothing else, so E[Y] stays 0.
+t3_grid <- seq(-5, 5, length.out = 41)
+fails <- bind_rows(
+  tibble(x = t_grid, PDP = pd_curve(fit_w12, world, "x2", t_grid), effect = 1.5 * sin(t_grid),
+         case = "x2, model on x1, x2:\nthe condition holds"),
+  tibble(x = t_grid, PDP = pd_curve(fit_w, world, "x2", t_grid), effect = 1.5 * sin(t_grid),
+         case = "x2, model on x1 to x3:\nx3 is a consequence"),
+  tibble(x = t_grid, PDP = pd_curve(fit_w2, world, "x2", t_grid), effect = 1.5 * sin(t_grid),
+         case = "x2, model on x2:\ncommon cause missing"),
+  tibble(x = t3_grid, PDP = pd_curve(fit_w, world, "x3", t3_grid), effect = 0,
+         case = "x3, model on x1 to x3:\nx3 causes nothing")) |>
+  mutate(case = fct_inorder(case))
+```
+
+::: {.notes}
+Effects from the equations. Second panel: x_3 = y + x_1 + noise, so given x_1 and x_3 the forest has little use for x_2. Last panel: an input the model relies on, which causes nothing.
+Each curve is still right about its f-hat.
+:::
+
+Partial dependence (pink) against the effect of setting the plotted input (dashed), for forests on the inputs named
+
+```{r}
+#| label: fails-plot
+#| fig-width: 10
+#| fig-height: 2.6
+#| fig-align: center
+ggplot(fails, aes(x)) + geom_line(aes(y = PDP), colour = m_pink, linewidth = 1.5) +
+  geom_line(aes(y = effect), linetype = "dashed", linewidth = 0.9) +
+  facet_wrap(~ case, nrow = 1, scales = "free_x") +
+  labs(x = "value set for the plotted input", y = "y") +
+  theme(strip.text = element_text(size = 14.5))
+```
+
+::: {.retrieval}
+Adjustment theorem: $Z$ holds every common cause of $T$ and $Y$, and no consequence of $T$. Here the inputs are continuous with overlap; for $x_2$, $Z = \{x_1\}$, without $x_3$
+:::
+
+## History: asthma and pneumonia {.inverse}
+
+::: {.notes}
+Skip if behind. Caruana et al. (2015), section 1, pp. 1721–1722 (checked through a text extraction of the PDF); the study is from the mid 1990s.
+:::
+
+- In the 1990s, models predicted the risk of death from pneumonia, to decide who should be admitted to hospital
+- A rule learned from the data: patients with asthma had a **lower** risk
+- The reason: asthmatic patients with pneumonia were usually admitted straight to intensive care, and the care worked
+- The rule was a correct description of the data. Acting on it would have sent patients with asthma home
+- The most accurate model, a neural network, was not used: nobody could check what else it had learned (Caruana et al. 2015)
+
+## Conclusion {.inverse}
+
+::: {.notes}
+Compress: the loss decides the target; check intervals and probabilities on fresh data and across the range; a plot of the model describes the model, and an effect needs a causal model and a model that is right.
+:::
+
+#### Uncertainty
+
+The loss decides which number is the best prediction; two quantiles make an interval, and conformalizing them guarantees marginal coverage for independent rows, and coverage at every $x$ as $n$ grows if the quantile fits are consistent. Check coverage and calibration on data not used to fit or tune, across the range of the inputs and within groups: no method guarantees coverage at every $x$ in finite samples without assumptions
+
+#### Interpretation
+
+Partial dependence, ICE, Shapley values and importance describe $\hat f$. Under valid adjustment and accurate estimation, the PDP estimates the interventional mean; with a causal model for the inputs, the total dependence plot answers a different question
+
+## Exchangeable rows and atoms {.inverse minutes="0"}
+
+::: {.notes}
+Skip: for students who ask about the assumptions.
+:::
+
+These slides state two conditions more simply than the sources do:
+
+- **Exchangeable rows.** The conformal coverage theorem (Romano et al. 2019, Theorem 1; Lei et al. 2018) needs only rows $(X_1, Y_1), \dots, (X_{m+1}, Y_{m+1})$ whose joint distribution is unchanged when they are reordered: **exchangeable** rows. Independent draws from one distribution are exchangeable; draws without replacement from a finite population are exchangeable but not independent. The 1.3 points for one calibration set of 500 does use independence, and continuous scores
+- **Atoms.** The impossibility theorem (Barber et al. 2021, Proposition 2.2) is about each $x$ that is not an **atom**, a value with positive probability; continuous inputs have no atoms. The upper bound $1 - \alpha + 1/(m + 1)$ needs only scores that are distinct with probability one
+- Sesia and Candès (2020) do assume independent rows from one distribution
+
+## References (1 of 3) {.inverse minutes="0"}
+
+::: {.notes}
+Skip: the works named on the slides, in full.
+:::
+
+::: {style="font-size: 0.78em"}
+- Barber, R. F., Candès, E. J., Ramdas, A. and Tibshirani, R. J. (2021). The limits of distribution-free conditional predictive inference. *Information and Inference: A Journal of the IMA* 10(2), 455--482. [doi:10.1093/imaiai/iaaa017](https://doi.org/10.1093/imaiai/iaaa017). The result stated is Proposition 2.2, p. 459.
+- Caruana, R., Lou, Y., Gehrke, J., Koch, P., Sturm, M. and Elhadad, N. (2015). Intelligible models for healthcare: predicting pneumonia risk and hospital 30-day readmission. *Proceedings of the 21st ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, 1721--1730. [doi:10.1145/2783258.2788613](https://doi.org/10.1145/2783258.2788613)
+- Chen, H., Janizek, J. D., Lundberg, S. and Lee, S.-I. (2020). True to the model or true to the data? arXiv:2006.16234. [arxiv.org/abs/2006.16234](https://arxiv.org/abs/2006.16234)
+- Chouldechova, A. (2017). Fair prediction with disparate impact: a study of bias in recidivism prediction instruments. *Big Data* 5(2), 153--163. [doi:10.1089/big.2016.0047](https://doi.org/10.1089/big.2016.0047)
+- Hébert-Johnson, Ú., Kim, M. P., Reingold, O. and Rothblum, G. N. (2018). Multicalibration: calibration for the (computationally-identifiable) masses. *Proceedings of the 35th International Conference on Machine Learning*, PMLR 80, 1939--1948. [proceedings.mlr.press/v80/hebert-johnson18a.html](https://proceedings.mlr.press/v80/hebert-johnson18a.html). Definition 2.6 and section 3.2 as numbered in the arXiv version, 1711.08513
+:::
+
+## References (2 of 3) {.inverse minutes="0"}
+
+::: {.notes}
+Skip.
+:::
+
+::: {style="font-size: 0.78em"}
+- Heskes, T., Sijben, E., Bucur, I. G. and Claassen, T. (2020). Causal Shapley values: exploiting causal knowledge to explain individual predictions of complex models. *Advances in Neural Information Processing Systems* 33. [NeurIPS proceedings](https://papers.nips.cc/paper/2020/hash/32e54441e6382a7fbacbbbaf3c450059-Abstract.html)
+- Hooker, G., Mentch, L. and Zhou, S. (2021). Unrestricted permutation forces extrapolation: variable importance requires at least one more model, or there is no free variable importance. *Statistics and Computing* 31(6), article 82. [doi:10.1007/s11222-021-10057-z](https://doi.org/10.1007/s11222-021-10057-z)
+- Kleinberg, J., Mullainathan, S. and Raghavan, M. (2017). Inherent trade-offs in the fair determination of risk scores. *8th Innovations in Theoretical Computer Science Conference (ITCS 2017)*, LIPIcs 67, 43:1--43:23. [doi:10.4230/LIPIcs.ITCS.2017.43](https://doi.org/10.4230/LIPIcs.ITCS.2017.43)
+- Lei, J., G'Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. *Journal of the American Statistical Association* 113(523), 1094--1111. Section 2.2 (split conformal) and section 6 (LOCO). [doi:10.1080/01621459.2017.1307116](https://doi.org/10.1080/01621459.2017.1307116)
+- Loftus, J. R., Bynum, L. E. J. and Hansen, S. (2024). Causal dependence plots. *Advances in Neural Information Processing Systems* 37. Definitions 2.5, 2.7 and 2.9, Theorem 2.10, Figure 5. [doi:10.52202/079017-3579](https://doi.org/10.52202/079017-3579)
+:::
+
+## References (3 of 3) {.inverse minutes="0"}
+
+::: {.notes}
+Skip.
+:::
+
+::: {style="font-size: 0.78em"}
+- Lundberg, S. M. and Lee, S.-I. (2017). A unified approach to interpreting model predictions. *Advances in Neural Information Processing Systems* 30, 4765--4774. [NeurIPS proceedings](https://papers.nips.cc/paper/7062-a)
+- Romano, Y., Patterson, E. and Candès, E. J. (2019). Conformalized quantile regression. *Advances in Neural Information Processing Systems* 32, 3543--3553. [NeurIPS proceedings](https://proceedings.neurips.cc/paper_files/paper/2019/hash/5103c3584b063c431bd1268e9b5e76fb-Abstract.html). Section 4, equations 6 to 8 and Theorem 1
+- Sachs, K., Perez, O., Pe'er, D., Lauffenburger, D. A. and Nolan, G. P. (2005). Causal protein-signaling networks derived from multiparameter single-cell data. *Science* 308(5721), 523--529. [doi:10.1126/science.1105809](https://doi.org/10.1126/science.1105809)
+- Sesia, M. and Candès, E. J. (2020). A comparison of some conformal quantile regression methods. *Stat* 9(1), e261. [doi:10.1002/sta4.261](https://doi.org/10.1002/sta4.261). Theorem 1 and its corollary, as numbered in arXiv:1909.05433
+- Zhao, Q. and Hastie, T. (2021). Causal interpretations of black-box models. *Journal of Business and Economic Statistics* 39(1), 272--281. [doi:10.1080/07350015.2019.1624293](https://doi.org/10.1080/07350015.2019.1624293)
+:::
