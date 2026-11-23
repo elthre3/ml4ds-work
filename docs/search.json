@@ -32,21 +32,21 @@
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#where-we-left-off",
     "title": "Machine learning",
     "section": "Where we left off",
-    "text": "Where we left off\n\n\n\n\n\n\n\n\nLoss\nBest prediction at \\(x\\)\n\n\n\n\n\nSquared error, \\((y - \\hat y)^2\\)\nthe conditional mean, \\(\\mathbb E[Y \\mid X = x]\\)\noptimal model theorem\n\n\nAbsolute error, \\(\\lvert y - \\hat y \\rvert\\)\nthe conditional median\nstated\n\n\nA miss costs \\(c_{FN}\\), a false alarm \\(c_{FP}\\)\npredict \\(1\\) when \\(p(x) &gt; c^\\star = \\frac{c_{FP}}{c_{FP} + c_{FN}}\\)\noptimal threshold theorem\n\n\n\nDecision principle: choose the prediction \\(\\hat y\\) that minimizes the expected loss given the inputs, \\(\\mathbb E[\\ell(Y, \\hat y) \\mid X = x]\\)\n\nSquared loss gives the mean, absolute loss the median. Which loss makes the best prediction the 90th percentile?"
+    "text": "Where we left off\n\n\n\n\n\n\n\n\nLoss\nBest prediction at \\(x\\)\n\n\n\n\n\nSquared error, \\((y - \\hat y)^2\\)\nthe conditional mean, \\(\\mathbb E[Y \\mid X = x]\\)\noptimal model theorem\n\n\nAbsolute error, \\(\\lvert y - \\hat y \\rvert\\)\nthe conditional median\nstated\n\n\nA miss costs \\(c_{FN}\\), a false alarm \\(c_{FP}\\)\npredict \\(1\\) when \\(p(x) &gt; c^\\star = \\frac{c_{FP}}{c_{FP} + c_{FN}}\\)\noptimal threshold theorem\n\n\n\nDecision principle: choose the prediction \\(\\hat y\\) that minimizes the expected loss given the inputs, \\(\\mathbb E[\\ell(Y, \\hat y) \\mid X = x]\\)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section",
     "title": "Machine learning",
     "section": "",
-    "text": "Week 9: uncertainty and interpretation\nPart 1: decisions and quantiles\nPart 2: regression uncertainty and intervals\nPart 3: classification uncertainty and calibration\nPart 4: interpreting the model\nPart 5: the model and the world"
+    "text": "Week 9: uncertainty and interpretation\nPart 1: regression uncertainty and intervals\nPart 2: classification uncertainty and calibration\nPart 3: interpreting the model\nPart 4: the model and the world"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-1",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-1",
     "title": "Machine learning",
     "section": "",
-    "text": "Part 1: decisions and quantiles"
+    "text": "Part 1: regression uncertainty and intervals"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#a-prediction-for-one-person",
@@ -54,6 +54,20 @@
     "title": "Machine learning",
     "section": "A prediction for one person",
     "text": "A prediction for one person\nSo far, competitors submit models that predict, and the winning model is chosen by best score on the evaluation dataset: an average over many people\nNow the winning model is deployed. A new person arrives with inputs \\(x_0\\) and is told \\(\\hat f(x_0)\\). How far off might that be?\n\nYou are that person. What should a “90% interval” for your outcome promise you?\n\n\nThat the interval, call it \\(\\hat C(x_0)\\), covers outcomes of people with your inputs 90% of the time: \\(P\\big(Y \\in \\hat C(X) \\mid X = x_0\\big) \\ge 0.9\\), conditional coverage"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#two-kinds-of-interval",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#two-kinds-of-interval",
+    "title": "Machine learning",
+    "section": "Two kinds of interval",
+    "text": "Two kinds of interval\nAt a new \\(x_0\\), \\(Y_0 = f^\\star(x_0) + \\varepsilon_0\\)\n\nConfidence interval for \\(f^\\star(x_0)\\) (dark): uncertainty about the fit; it narrows as \\(n\\) grows\nPrediction interval for \\(Y_0\\) (light): must also cover \\(\\varepsilon_0\\); it does not narrow below the noise\n\n\n\n\n\n\n\n\n\n\n\nBias–variance at \\(x_0\\): \\(\\sigma^2 + \\text{bias}^2 + \\text{variance}\\); no amount of data shrinks \\(\\sigma^2\\)"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#an-interval-hat-fx_0-pm-c",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#an-interval-hat-fx_0-pm-c",
+    "title": "Machine learning",
+    "section": "An interval \\(\\hat f(x_0) \\pm C\\)",
+    "text": "An interval \\(\\hat f(x_0) \\pm C\\)\nThe simplest interval: \\(\\hat C(x_0) = \\big[\\hat f(x_0) - C,\\ \\hat f(x_0) + C\\big]\\), for a number \\(C\\)\n\nHow could we compute \\(C\\) for each kind of interval, for \\(f^\\star(x_0)\\) and for \\(Y_0\\)?\n\n\n\n\\(f^\\star(x_0)\\): how much \\(\\hat f(x_0)\\) varies between samples (a standard error, the bootstrap)\n\\(Y_0\\): how far outcomes fall from predictions, a quantile of the absolute residuals \\(|y_i - \\hat f(x_i)|\\)\n\n\n\n\nSquared loss: the mean. Absolute loss: the median. Which loss: the 90th percentile?"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#finding-the-quantile",
@@ -74,7 +88,7 @@
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#quantile-regression",
     "title": "Machine learning",
     "section": "Quantile regression",
-    "text": "Quantile regression\nMinimize the average pinball loss over a class: \\(\\hat q_\\tau = \\arg\\min_{f \\in \\mathcal F} \\frac1n \\sum_i \\rho_\\tau\\big(y_i - f(x_i)\\big)\\). Here \\(\\mathcal F\\) is linear; 1,000 simulated points whose noise grows with \\(x\\)\n\nfit_qr &lt;- rq(y ~ x, tau = c(0.05, 0.5, 0.95), data = het_train)"
+    "text": "Quantile regression\nMinimize the average pinball loss over a class: \\(\\hat q_\\tau = \\arg\\min_{f \\in \\mathcal F} \\frac1n \\sum_i \\rho_\\tau\\big(y_i - f(x_i)\\big)\\). Here \\(\\mathcal F\\) is linear; 1,000 simulated points: noise that grows with \\(x\\), a bump at 3, few points with \\(x\\) between 4 and 6\n\nfit_qr &lt;- rq(y ~ x, tau = c(0.05, 0.5, 0.95), data = het_train)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#the-same-loss-a-flexible-model",
@@ -84,25 +98,11 @@
     "text": "The same loss, a flexible model\nBoosted trees with the pinball loss: each tree is built from the negative gradient \\(\\tau - \\mathbf 1\\{y_i &lt; \\hat f(x_i)\\}\\), which pushes the fit up where points lie above it\n\nxgboost(x, y, objective = \"reg:quantileerror\", quantile_alpha = 0.95, max_depth = 2)\n\n\n\n\n\n\n\n\n\n\n\nBoosting: each small tree approximates the negative gradient of the training loss"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-2",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-2",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#challenges-with-local-intervals",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#challenges-with-local-intervals",
     "title": "Machine learning",
-    "section": "",
-    "text": "Part 2: regression uncertainty and intervals"
-  },
-  {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#two-kinds-of-interval",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#two-kinds-of-interval",
-    "title": "Machine learning",
-    "section": "Two kinds of interval",
-    "text": "Two kinds of interval\nAt a new \\(x_0\\), \\(Y_0 = f^\\star(x_0) + \\varepsilon_0\\)\n\nConfidence interval for \\(f^\\star(x_0)\\) (dark): uncertainty about the fit; it narrows as \\(n\\) grows\nPrediction interval for \\(Y_0\\) (light): must also cover \\(\\varepsilon_0\\); it does not narrow below the noise\n\n\n\n\n\n\n\n\n\n\n\nBias–variance at \\(x_0\\): \\(\\sigma^2 + \\text{bias}^2 + \\text{variance}\\); no amount of data shrinks \\(\\sigma^2\\)"
-  },
-  {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#an-interval-from-two-quantiles",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#an-interval-from-two-quantiles",
-    "title": "Machine learning",
-    "section": "An interval from two quantiles",
-    "text": "An interval from two quantiles\nA 90% interval from two quantile fits: \\(\\hat C(x) = [\\hat q_{0.05}(x), \\hat q_{0.95}(x)]\\). The true quantiles would cover \\(Y\\) with probability \\(0.9\\) at every \\(x\\); estimated ones aim at that"
+    "section": "Challenges with local intervals",
+    "text": "Challenges with local intervals\nA local interval’s edges change with \\(x\\): \\(\\hat C(x) = [\\hat q_{0.05}(x), \\hat q_{0.95}(x)]\\), two quantile fits\n\n\n\n\n\n\n\n\n\n\nEdges near \\(x\\) come from rows near \\(x\\): few in 4 to 6; at 3 the quantiles change fast\nExtreme quantiles are harder to learn than the mean: 1 row in 20 lies beyond each edge\nRigid models (left, middle) use every row at every \\(x\\): stable, wrong where they misfit"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#checking-an-interval",
@@ -116,63 +116,70 @@
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#checking-an-interval-on-fresh-data",
     "title": "Machine learning",
     "section": "Checking an interval on fresh data",
-    "text": "Checking an interval on fresh data\n\n\n\n\n\n\n\n\n\nTop: coverage in each range of \\(x\\), pink if more than 3 points from 90% (two standard errors). Overall: 88%, 89%, 87%. Widening never lowers coverage: check width too"
-  },
-  {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#coverage-at-every-x",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#coverage-at-every-x",
-    "title": "Machine learning",
-    "section": "Coverage at every \\(x\\)",
-    "text": "Coverage at every \\(x\\)\nFor a \\(1 - \\alpha\\) interval (\\(\\alpha = 0.1\\) so far):\n\nMarginal coverage: \\(P\\big(Y \\in \\hat C(X)\\big) \\ge 1 - \\alpha\\), averaged over \\(X\\)\nConditional coverage: \\(P\\big(Y \\in \\hat C(X) \\mid X = x\\big) \\ge 1 - \\alpha\\) for every \\(x\\)\n\n\nImpossibility of distribution-free conditional coverage. If a procedure covers with probability at least \\(1 - \\alpha\\) given \\(X = x\\), in finite samples, for every distribution and almost every \\(x\\), then wherever the inputs are continuous its intervals have infinite expected length (Barber et al. 2021). Guarantees for groups (each range of \\(x\\), say), and results under assumptions or as \\(n\\) grows, remain possible\n\n\nNo free lunch theorem: no method does best on every distribution; a guarantee at every \\(x\\) needs an assumption about the distribution"
+    "text": "Checking an interval on fresh data\n\n\n\n\n\n\n\n\n\nTop: coverage in each range of \\(x\\), pink if more than 3 points from 90%. Overall: 89%, 90%, 87%. Widening never lowers coverage: check width too"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#bias-variance-and-intervals",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#bias-variance-and-intervals",
     "title": "Machine learning",
     "section": "Bias, variance and intervals",
-    "text": "Bias, variance and intervals\n\\(\\hat f(x) \\pm d\\), \\(d\\) the 90th percentile of absolute residuals; constant noise, 500 rows to fit\n\n\n\n\n\n\n\n\n\n\nBias: the line misses the curve where it bends; coverage varies with \\(x\\)\nVariance: the forest follows the noise in its own rows; residuals there are too small: 61%\nResiduals on 500 held-out rows include both: 92%, 4.0 wide (true quantiles: 3.3)"
+    "text": "Bias, variance and intervals\n\\(\\hat f(x) \\pm C\\), with \\(C\\) the 90th percentile of the absolute residuals on the training rows\n\n\n\n\n\n\n\n\n\n\n\n\n\nBias: the line misses the bends\nVariance: the forest follows the noise in its own rows; residuals there are too small\nOne \\(C\\) for every \\(x\\), though the noise grows\n\n\n\nHow could we choose \\(C\\) so that the forest’s interval covers 90% of new outcomes?"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#held-out-rows-and-tuning",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#held-out-rows-and-tuning",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#residuals-from-held-out-rows",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#residuals-from-held-out-rows",
     "title": "Machine learning",
-    "section": "Held-out rows and tuning",
-    "text": "Held-out rows and tuning\n\nHeld-out rows play no part in fitting, so a new row’s residual is like one of theirs\nRows used for tuning have played a part: the setting chosen did best on them, so their residuals are a little too small\n\\(k\\)-NN, \\(k\\) from 1 to 50; average coverage of fresh rows, by how \\(k\\) was chosen:\n\n\n\n\n\n\n\n\n\n\nHeld-out rows\non other rows\non the held-out rows\nnarrowest interval\n\n\n\n\n500\n90.1%\n89.9%\n89.1%\n\n\n100\n90.0%\n89.3%\n87.5%\n\n\n\nSeparate rows to fit, to tune and to hold out; or tune by cross-validation within the fitting rows\n\nOptimism theorem: training error underestimates the risk"
+    "section": "Residuals from held-out rows",
+    "text": "Residuals from held-out rows\nThe forest again, its node size now tuned on 1,000 tuning rows\n\n\n\n\n\n\n\n\n\n\n\n\nSplit conformal (Lei et al. 2018): \\(C\\) from 1,000 rows not used to fit, their 901st smallest absolute residual, \\(\\lceil 0.9 \\times 1001 \\rceil\\)\nOverall 90% and 91%, but not in every range\n\nThe tuning rows chose the node size, so residuals on them may be slightly optimistic\n\nOptimism theorem: training error underestimates the risk"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#conformalized-quantile-regression",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#conformalized-quantile-regression",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#coverage-on-average-and-at-every-x",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#coverage-on-average-and-at-every-x",
     "title": "Machine learning",
-    "section": "Conformalized quantile regression",
-    "text": "Conformalized quantile regression\n\n\n\nFit \\(\\hat q_{0.05}\\), \\(\\hat q_{0.95}\\) on some training rows; keep \\(m\\) others, the calibration set\nScore how far each \\(y_i\\) is outside (negative inside): \\(E_i = \\max\\{\\hat q_{0.05}(x_i) - y_i,\\ y_i - \\hat q_{0.95}(x_i)\\}\\)\n\\(Q\\): the \\(\\lceil 0.9\\,(m + 1) \\rceil\\)-th smallest score\n\\(\\hat C(x) = \\big[\\hat q_{0.05}(x) - Q,\\ \\hat q_{0.95}(x) + Q\\big]\\)\n\n\n\n\n\n\n\n\n\n\n\n\\(m = 500\\), \\(Q = 0.25\\): 87% to 90%; for \\(x\\) in 6–8, 80% to 82%\n\n\nConformal coverage theorem (Romano et al. 2019). If the rows are independent draws from one distribution, \\(P(Y \\in \\hat C(X)) \\ge 0.9\\) for any quantile fits (\\(\\le 0.9 + 1/(m + 1)\\) for continuous scores), averaging over calibration sets; across sets of 500, coverage has a standard deviation of about 1.3 points"
+    "section": "Coverage on average, and at every \\(x\\)",
+    "text": "Coverage on average, and at every \\(x\\)\n\nConformal coverage theorem (split conformal: Lei et al. 2018). If the rows are independent draws from one distribution, then for any model \\(P\\big(Y \\in \\hat C(X)\\big) \\ge 0.9\\), on average over \\(X\\): marginal coverage\n\n\n\nConditional coverage: \\(P\\big(Y \\in \\hat C(X) \\mid X = x\\big) \\ge 0.9\\) at every \\(x\\), what the one person wanted\nOne \\(C\\) for every \\(x\\), and noise that grows with \\(x\\): too wide where the noise is small, too narrow where it is large, whatever \\(n\\)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#coverage-at-every-x-as-n-grows",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#coverage-at-every-x-as-n-grows",
     "title": "Machine learning",
     "section": "Coverage at every \\(x\\), as \\(n\\) grows",
-    "text": "Coverage at every \\(x\\), as \\(n\\) grows\n\nAsymptotic conditional coverage (Sesia and Candès 2020). If the rows are independent draws from one distribution, the scores have a density bounded away from zero near zero, and the quantile fits are consistent (their mean squared error at a new \\(X\\) tends to zero as the fitting and calibration sets grow), then \\(\\hat C(x)\\) approaches \\([q_{0.05}(x), q_{0.95}(x)]\\), and its coverage given \\(X = x\\) tends to 90%, except on a set of \\(x\\) whose probability tends to zero\n\n\nConsistency is an assumption about the distribution and the fits, so there is no conflict with the impossibility theorem\nHere, for \\(x\\) in 6–8: 82% with 500 fitting rows. The boosted fits are still far from the true quantiles there\nHow fast the fits approach the true quantiles depends on how smooth they are, and on the number of inputs"
+    "text": "Coverage at every \\(x\\), as \\(n\\) grows\n\n\n\n\n\n\n\n\n\n\n\n\nEdges fitted near each \\(x\\): two quantile fits on \\(n\\) rows. The noise is known, so coverage at each \\(x\\) can be computed exactly; here averaged over 30 fits\n\nAt \\(n\\) = 1,000 it dips where the quantiles change fast relative to the noise (near 0, at the bump) and where the rows are few (4 to 6)\nThe dips fill in as \\(n\\) grows, if the fits approach the true quantiles (consistency)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#coverage-at-every-x-in-many-dimensions",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#coverage-at-every-x-in-many-dimensions",
     "title": "Machine learning",
     "section": "Coverage at every \\(x\\) in many dimensions",
-    "text": "Coverage at every \\(x\\) in many dimensions\nTo check coverage near \\(x\\), or to estimate a quantile there, we use the rows near \\(x\\): a bin or a smoother. 2,000 fresh rows, 5 bins for each input:\n\n\n\nInputs\n1\n2\n3\n5\n\n\n\n\nBins\n5\n25\n125\n3,125\n\n\nRows per bin\n400\n80\n16\n0.6\n\n\nStandard error at 90%, points\n1.5\n3.4\n7.5\n–\n\n\n\n\nWider bins average over \\(x\\) values whose coverage differs (bias); narrower ones hold few rows (variance)\nIn practice: check a few ranges or groups that matter, as part 3 does for probabilities\n\n\nCurse of dimensionality: in ten dimensions, a cube holding 10% of the population spans 79% of each axis"
+    "text": "Coverage at every \\(x\\) in many dimensions\nAn interval at \\(x\\) is learned from the \\(n_x\\) rows near \\(x\\). Its coverage there misses 90% by\n\nVariance: about \\(\\sqrt{0.9 \\times 0.1 / n_x}\\), as for a share of 0.9 among \\(n_x\\) rows: 4 points with 50 rows, 1.3 with 500\nBias: rows farther from \\(x\\) have different quantiles. Edges off by half a noise standard deviation: 86%, not 90%\n\nMore inputs, fewer rows near \\(x\\). 2,000 rows, 5 bins for each input:\n\n\n\nInputs\n1\n2\n3\n5\n\n\n\n\nRows per bin, \\(n_x\\)\n400\n80\n16\n0.6\n\n\n\\(\\sqrt{0.9 \\times 0.1 / n_x}\\), points\n1.5\n3.4\n7.5\n–\n\n\n\n\nCurse of dimensionality: in ten dimensions, a cube holding 10% of the population spans 79% of each axis"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#conditional-coverage-without-assumptions",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#conditional-coverage-without-assumptions",
+    "title": "Machine learning",
+    "section": "Conditional coverage without assumptions",
+    "text": "Conditional coverage without assumptions\nFits that approach the true quantiles, enough rows near \\(x\\), quantiles that change slowly: each is an assumption about the distribution. With none:\n\nImpossibility of distribution-free conditional coverage. If a procedure covers with probability at least \\(1 - \\alpha\\) given \\(X = x\\), in finite samples, for every distribution and almost every \\(x\\), then wherever the inputs are continuous its intervals have infinite expected length (Barber et al. 2021). Guarantees for groups (each range of \\(x\\), say), and results under assumptions or as \\(n\\) grows, remain possible\n\n\nNo free lunch theorem: no method does best on every distribution; a guarantee at every \\(x\\) needs an assumption about the distribution"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#ways-to-make-an-interval",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#ways-to-make-an-interval",
     "title": "Machine learning",
     "section": "Ways to make an interval",
-    "text": "Ways to make an interval\n\n\n\n\n\n\n\n\nMethod\nAssumes\nCan claim\n\n\n\n\nLinear model, normal noise\nlinear mean, constant variance\n90% at every \\(x\\), if right\n\n\nMean and variance models\nboth right, normal noise\nabout 90% at every \\(x\\), if right\n\n\nQuantile regression\nthe quantile model right\n90% at every \\(x\\) as \\(n\\) grows, if right\n\n\nSplit conformal (Lei et al. 2018)\nindependent rows\nat least 90% marginally; one width\n\n\nCQR (Romano et al. 2019)\nindependent rows\nat least 90% marginally; widths from the fits; at every \\(x\\) as \\(n\\) grows, if the fits are consistent\n\n\n\nMore in the note on the course page, “Prediction intervals and calibration”"
+    "text": "Ways to make an interval\n\n\n\n\n\n\n\n\nMethod\nAssumes\nCan claim\n\n\n\n\nLinear model, normal noise\nlinear mean, constant variance\n90% at every \\(x\\), if right\n\n\nMean and variance models\nboth right, normal noise\nabout 90% at every \\(x\\), if right\n\n\nQuantile regression\nthe quantile model right\n90% at every \\(x\\) as \\(n\\) grows, if right\n\n\nSplit conformal (Lei et al. 2018)\nexchangeable rows\nat least 90% marginally; one width\n\n\nCQR (Romano et al. 2019)\nexchangeable rows\nat least 90% marginally; widths from the fits; at every \\(x\\) as \\(n\\) grows, if the fits are consistent\n\n\n\nMore in the note on the course page, “Prediction intervals and calibration”; CQR is also on the slide after the conclusion"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-3",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-3",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-2",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-2",
     "title": "Machine learning",
     "section": "",
-    "text": "Part 3: classification uncertainty and calibration"
+    "text": "Part 2: classification uncertainty and calibration"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#data-nhanes",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#data-nhanes",
+    "title": "Machine learning",
+    "section": "Data: NHANES",
+    "text": "Data: NHANES\nThe US National Health and Nutrition Examination Survey, 2009 to 2012 (R package NHANES): interviews and physical examinations. We use 9,212 adults aged 20 and over\n\n\n\n\n\n\n\nOutcomes\ndiabetes, as told by a doctor (14% yes); later, systolic blood pressure (mm Hg)\n\n\nMeasurements\nage, gender, weight, height, BMI, pulse, total and HDL cholesterol, family income relative to the poverty line, physically active or not\n\n\nGroups\nrace and ethnicity, in the survey’s five groups\n\n\nSplit\nat random: 4,000 training adults; 3,000 tuning adults; 2,212 test adults, used once\n\n\n\n\nNot a sample of the US population: the survey samples some groups at higher rates, and we do not use its weights"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#calibration",
@@ -186,14 +193,21 @@
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#calibration-and-decisions",
     "title": "Machine learning",
     "section": "Calibration and decisions",
-    "text": "Calibration and decisions\nA probability is acted on: a risk told to a patient, a premium set from an expected cost, a threshold set from the costs of errors\n\nIf \\(\\hat p\\) is calibrated, predicting \\(1\\) when \\(\\hat p(x) &gt; c^\\star\\) is optimal among rules based on that score, though not necessarily among rules using all of \\(x\\)\nIf not, \\(c^\\star\\) can pick the wrong people. At \\(c^\\star = 0.25\\), adults given \\(\\hat p = 0.2\\), of whom 40% have diabetes, are not referred for a test, although referring them costs less on average\nCalibration is not accuracy. The base rate, \\(0.14\\) for every adult, is calibrated and separates no one. An increasing transformation keeps a score’s ranking (and AUC), not its calibration\n\n\nOptimal threshold theorem: with costs \\(c_{FP}\\) and \\(c_{FN}\\), the rule that minimizes expected cost at \\(x\\) predicts \\(1\\) exactly when \\(p(x) &gt; c^\\star = c_{FP}/(c_{FP} + c_{FN})\\)"
+    "text": "Calibration and decisions\nA probability is acted on: a risk told to a patient, a premium set from an expected cost, a threshold set from the costs of errors\n\nThe optimal threshold theorem cuts the true \\(p(x)\\) at \\(c^\\star\\); we have only \\(\\hat p\\). If \\(\\hat p\\) is calibrated, cutting it at \\(c^\\star\\) is optimal among rules based on that score\nIf not, \\(c^\\star\\) can pick the wrong people. At \\(c^\\star = 0.25\\), adults given \\(\\hat p = 0.2\\), of whom 40% have diabetes, are not referred for a test, although referring them costs less on average\nCalibration is not accuracy. The base rate, \\(0.14\\) for every adult, is calibrated and separates no one. An increasing transformation keeps a score’s ranking (and AUC), not its calibration\n\n\nOptimal threshold theorem: with costs \\(c_{FP}\\) and \\(c_{FN}\\), the rule that minimizes expected cost at \\(x\\) predicts \\(1\\) exactly when \\(p(x) &gt; c^\\star = c_{FP}/(c_{FP} + c_{FN})\\)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#reliability-diagram",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#reliability-diagram",
     "title": "Machine learning",
     "section": "Reliability diagram",
-    "text": "Reliability diagram\nDiabetes (14% of the training adults). Two scores from nine measurements, fitted on 4,000 adults, checked on 3,000 others"
+    "text": "Reliability diagram\nAdults in ten bins by score: each bin’s share with diabetes against its average score. Two scores from nine measurements, on the 4,000 training adults used to fit them\n\n\n\n\n\n\n\n\n\nOn the diagonal: calibrated. On their own adults, logistic regression is; the boosted trees look too cautious at the top"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#reliability-on-fresh-adults",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#reliability-on-fresh-adults",
+    "title": "Machine learning",
+    "section": "Reliability on fresh adults",
+    "text": "Reliability on fresh adults\nThe same two scores on 3,000 tuning adults, who played no part in fitting them\n\n\n\n\n\n\n\n\n\nLogistic regression (10 coefficients) hardly moves. Boosted trees (100 trees): too confident at the top, the opposite of what their training adults said"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#recalibration",
@@ -207,56 +221,70 @@
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#calibration-within-groups",
     "title": "Machine learning",
     "section": "Calibration within groups",
-    "text": "Calibration within groups\nOne score for everyone. If it is too high for one group and too low for another, a shared threshold refers the first group for tests more often, and the second less often, than their risk warrants: the score discriminates, even with race and ethnicity left out of its inputs\n\n\n\n\n\n\n\n\n\n\n\n\nWhite adults: average score 14.8%, 10.6% with diabetes\nFairness criteria conflict: with different base rates, no imperfect score is calibrated within groups and averages the same in each group among adults with diabetes, and among those without (Kleinberg et al. 2017)"
+    "text": "Calibration within groups\nOne score for everyone: the logistic score, with race and ethnicity left out of its inputs. Is it calibrated within each group?\n\n\n\n\n\n\n\n\n\nWhite adults: average score 14.8%, 10.6% with diabetes, a gap of 5.1 standard errors; the other gaps are about 2 standard errors or less"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#calibration-and-fairness",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#calibration-and-fairness",
+    "title": "Machine learning",
+    "section": "Calibration and fairness",
+    "text": "Calibration and fairness\n\nA score that is too high for one group and too low for another, cut at one threshold, refers the first group for tests more often, and the second less often, than their risk warrants\nThe score discriminates, even with race and ethnicity left out of its inputs\nCalibration within groups is one fairness criterion among several, and they conflict: with different base rates, no imperfect score is calibrated within groups and also averages the same in each group among adults with diabetes, and among those without (Kleinberg et al. 2017)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#multicalibration",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#multicalibration",
     "title": "Machine learning",
     "section": "Multicalibration",
-    "text": "Multicalibration\nMulticalibration (Hébert-Johnson et al. 2018): calibrated within every group of a collection named in advance, at every range of scores. Here: in each group and tenth of the scores (at least 100 adults), if the share with diabetes and the average score differ by more than 0.02, shift the scores by the gap; repeat; apply the shifts to new adults\n\n\nLearned on the tuning adults, checked on the test adults. Gaps in standard errors: White 2.0 to 0.6, Black 1.8 to 0.2, Mexican American 0.7 to 2.4\nLog loss 0.324 to 0.327: small cells fit noise. The shifts need each adult’s group"
+    "text": "Multicalibration\nMulticalibration (Hébert-Johnson et al. 2018): calibrated in every group named in advance, at every range of scores. In each group and tenth of the scores, shift the scores by the gap; repeat\n\n\nLearned on the tuning adults, checked on the test adults. Gap in standard errors:\n\nWhite (1,001 adults): 2.0 to 0.6\nMexican American (317): 0.7 to 2.4\n\n\n\n\n\n\n\n\n\n\n\n\nIt fixes the gap the data can establish. A gap of 2 or 3 points in a group of a few hundred is within noise, and a shift fitted to it does not carry over"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-4",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-4",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-3",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-3",
     "title": "Machine learning",
     "section": "",
-    "text": "Part 4: interpreting the model"
+    "text": "Part 3: interpreting the model"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#partial-dependence-for-any-model",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#partial-dependence-for-any-model",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#one-predictor-at-a-time",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#one-predictor-at-a-time",
     "title": "Machine learning",
-    "section": "Partial dependence for any model",
-    "text": "Partial dependence for any model\nOptions for the other inputs: hold them fixed (at medians, say: plotmo’s default); average over them (partial dependence, pdp); one curve for each unit (individual conditional expectation, ICE)\nUnit \\(i\\)’s inputs with input \\(j\\) set to a value \\(t\\), the others left as they are: \\[\n\\mathrm{ICE}_i(t) = \\hat f(x_{i1}, \\ldots, t, \\ldots, x_{ip}), \\qquad\n\\mathrm{PDP}_j(t) = \\frac1n \\sum_{i=1}^n \\hat f(x_{i1}, \\ldots, t, \\ldots, x_{ip})\n\\]\nCompute on a grid of \\(t\\) values and plot the curve(s). Any model that predicts will do\nICE evaluates \\(\\hat f\\) at a modified input, which may correspond to no plausible unit. It is the model’s prediction there, not what would have happened to unit \\(i\\): recomputing a unit with its own noise, as in the causality seminar, asks a different kind of question, which this course does not develop"
+    "section": "One predictor at a time",
+    "text": "One predictor at a time\nHow does the model use one specific predictor, \\(x_2\\), say? For linear regression this is simple: its coefficient. With flexible models the answer changes depending on where you look in the input space\n\n\n\n\n\n\n\n\n\n\nWe can change \\(x_2\\) to see how the predictions vary, but what do we do with the other predictors?"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#partial-dependence-for-any-model-not-just-gam",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#partial-dependence-for-any-model-not-just-gam",
+    "title": "Machine learning",
+    "section": "Partial dependence for any model (not just GAM)",
+    "text": "Partial dependence for any model (not just GAM)\nOptions for the other inputs: hold them fixed (at medians, say: plotmo’s default); average over them (partial dependence, pdp); one curve for each unit (individual conditional expectation, ICE)\nUnit \\(i\\)’s inputs with input \\(j\\) set to a value \\(t\\), the others left as they are: \\[\n\\mathrm{ICE}_i(t) = \\hat f(x_{i1}, \\ldots, t, \\ldots, x_{ip}), \\qquad\n\\mathrm{PDP}_j(t) = \\frac1n \\sum_{i=1}^n \\hat f(x_{i1}, \\ldots, t, \\ldots, x_{ip})\n\\]\nCompute on a grid of \\(t\\) values and plot the curve(s)\nICE evaluates \\(\\hat f\\) at a modified input, which may correspond to no plausible unit"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#does-this-forest-use-x_1",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#does-this-forest-use-x_1",
     "title": "Machine learning",
     "section": "Does this forest use \\(x_1\\)?",
-    "text": "Does this forest use \\(x_1\\)?\n\nfit_rf &lt;- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)\nice_x1 &lt;- partial(fit_rf, pred.var = \"x1\", ice = TRUE, train = df_sub)\n\n\n\n\n\n\n\n\n\n\nThe PDP: \\(x_1\\) set, \\(x_2\\) at each unit’s value, predictions averaged over 100 units\n\nSketch two curves, one for each of two units, that average to the black curve"
+    "text": "Does this forest use \\(x_1\\)?\n\nfit_rf &lt;- randomForest(y ~ x1 + x2, data = df_int, ntree = 300, mtry = 2, nodesize = 50)\nice_x1 &lt;- partial(fit_rf, pred.var = \"x1\", ice = TRUE, train = df_sub)\n\n\n\n\n\n\n\n\n\n\nThe PDP: \\(x_1\\) set, \\(x_2\\) at each unit’s value, predictions averaged over 100 units"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#the-forests-ice-curves",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#the-forests-ice-curves",
     "title": "Machine learning",
     "section": "The forest’s ICE curves",
-    "text": "The forest’s ICE curves\n\n\n\n\n\n\n\n\n\nThin: one curve per unit (ICE), solid where \\(\\cos(\\pi x_2/2) &gt; 0\\), dashed where it is negative, more opaque the larger \\(|\\cos(\\pi x_2/2)|\\). The forest fitted the interaction, PDP hides it, and ICE might show it"
+    "text": "The forest’s ICE curves\n\n\n\n\n\n\n\n\n\nThin: one curve per unit (ICE). Right: solid where \\(\\cos(\\pi x_2/2) &gt; 0\\), dashed where it is negative, more opaque the larger \\(|\\cos(\\pi x_2/2)|\\). The forest fitted the interaction, PDP hides it, and ICE might show it"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#every-predictor-at-once",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#every-predictor-at-once",
+    "title": "Machine learning",
+    "section": "Every predictor at once",
+    "text": "Every predictor at once\n\nWhat if we don’t have one specific predictor of interest, but want to know how the model uses all the predictors?\n\n\n\nFor one prediction: split it among the inputs (Shapley values)\nFor the whole model: one number for each input (importance)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#shapley-values",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#shapley-values",
     "title": "Machine learning",
     "section": "Shapley values",
-    "text": "Shapley values\nSplit a prediction among the inputs, \\(\\hat f(\\mathbf x_i) - v_i(\\varnothing) = \\phi_{i1} + \\dots + \\phi_{ip}\\); \\(v_i(S)\\) predicts from the inputs in \\(S\\) only (usually: the others averaged over the data, as in partial dependence). For two inputs, adding \\(x_1\\) in either order (for \\(p\\), all \\(p!\\) orders): \\[\n\\phi_{i1} = \\tfrac12\\Big[\\big(v_i(\\{1\\}) - v_i(\\varnothing)\\big) + \\big(v_i(\\{1, 2\\}) - v_i(\\{2\\})\\big)\\Big]\n\\]\nThe forest, one unit with \\(x_1 = -0.95\\) and \\(x_2 = -3.78\\):\n\n\n\n\n\n\n\n\n\n\\(v_i(\\varnothing)\\)\n\\(v_i(\\{1\\})\\)\n\\(v_i(\\{2\\})\\)\n\\(v_i(\\{1, 2\\}) = \\hat f(\\mathbf x_i)\\)\n\n\n\n\n0.05\n-0.07\n0.52\n0.92\n\n\n\n\\(\\phi_{i1} = \\frac12\\big[(-0.07 - 0.05) + (0.92 - 0.52)\\big] = 0.14\\)\n\\(\\phi_{i2} = \\frac12\\big[(0.52 - 0.05) + (0.92 - (-0.07))\\big] = 0.73\\); together 0.87 \\(= 0.92 - 0.05 = \\hat f(\\mathbf x_i) - v_i(\\varnothing)\\)"
-  },
-  {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#shapley-values-on-the-forest",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#shapley-values-on-the-forest",
-    "title": "Machine learning",
-    "section": "Shapley values on the forest",
-    "text": "Shapley values on the forest\n\n\n\n\n\n\n\n\n\n\n\n\n\\(\\phi_{i1}\\) for 300 units, shaded as the ICE curves: the spread at each \\(x_1\\) shows the interaction. Ringed: the unit above\nBlack: the PDP minus the average prediction. With independent inputs, the Shapley values average to it"
+    "text": "Shapley values\nSplit a prediction among the inputs, \\(\\hat f(\\mathbf x_i) - v_i(\\varnothing) = \\phi_{i1} + \\dots + \\phi_{ip}\\); \\(v_i(S)\\) predicts from the inputs in \\(S\\) only (usually: the others averaged over the data, as in partial dependence). For two inputs, adding \\(x_1\\) in either order (for \\(p\\), all \\(p!\\) orders): \\[\n\\phi_{i1} = \\tfrac12\\Big[\\big(v_i(\\{1\\}) - v_i(\\varnothing)\\big) + \\big(v_i(\\{1, 2\\}) - v_i(\\{2\\})\\big)\\Big]\n\\]\nThe forest, one unit with \\(x_1 = 1.00\\) and \\(x_2 = 0.06\\):\n\n\n\n\n\n\n\n\n\n\\(v_i(\\varnothing)\\)\n\\(v_i(\\{1\\})\\)\n\\(v_i(\\{2\\})\\)\n\\(v_i(\\{1, 2\\}) = \\hat f(\\mathbf x_i)\\)\n\n\n\n\n-0.00\n-0.08\n0.19\n0.92\n\n\n\n\\(\\phi_{i1} = \\frac12\\big[(-0.08 - -0.00) + (0.92 - 0.19)\\big] = 0.325\\)\n\\(\\phi_{i2} = \\frac12\\big[(0.19 - -0.00) + (0.92 - (-0.08))\\big] = 0.595\\); together 0.92 \\(= 0.92 - -0.00 = \\hat f(\\mathbf x_i) - v_i(\\varnothing)\\)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#shapley-values-for-one-adult",
@@ -270,42 +298,35 @@
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#featurevariable-importance",
     "title": "Machine learning",
     "section": "Feature/variable “importance”",
-    "text": "Feature/variable “importance”\n\nWhich predictors are used most by the model? The forest for systolic blood pressure\nDoes not necessarily tell us about causation (none of these methods do)\n\n\n\nTree-specific importance ■\nSum the RSS decrease of every split on \\(x_j\\) within a tree, then average over trees\nPermutation importance ▲\nPermute values of predictor \\(x_j\\). How much does the accuracy of the model decrease? \\[\\mathrm{PI}_j = \\widehat{\\mathrm{Err}}(\\hat f, x_j \\text{ permuted}) - \\widehat{\\mathrm{Err}}(\\hat f)\\]\n\n\n\n\n\n\n\n\n\n\n● Shapley: mean \\(|\\phi_{ij}|\\) over adults\nEach has pros/cons, no satisfactory answer for dependence"
+    "text": "Feature/variable “importance”\n\nWhich predictors are used most by the model? The forest for systolic blood pressure\n\n\n\nTree-specific importance ■\nSum the RSS decrease of every split on \\(x_j\\) within a tree, then average over trees\nPermutation importance ▲\nPermute values of predictor \\(x_j\\). How much does the accuracy of the model decrease? \\[\\mathrm{PI}_j = \\widehat{\\mathrm{Err}}(\\hat f, x_j \\text{ permuted}) - \\widehat{\\mathrm{Err}}(\\hat f)\\]\n\nLeave one covariate out ◆\nRefit without input \\(j\\), with the same settings; score on the same held-out adults (Lei et al. 2018): \\[\\mathrm{LOCO}_j = \\widehat{\\mathrm{Err}}\\big(\\hat f^{(-j)}\\big) - \\widehat{\\mathrm{Err}}(\\hat f)\\]\nNo extrapolation from permuting; any method, at the cost of \\(p\\) refits"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#permutation-and-extrapolation",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#permutation-and-extrapolation",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#importance-on-the-forest",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#importance-on-the-forest",
     "title": "Machine learning",
-    "section": "Permutation and extrapolation",
-    "text": "Permutation and extrapolation\n\n\n\n\n\n\n\n\n\nShuffling height keeps each adult’s weight and BMI: BMI no longer matches weight and height for 68% of them (0% before); 34 are under 155 cm and over 110 kg (4 before)\nThe forest’s predictions there rest on almost no data, and permutation importance averages over them (Hooker, Mentch and Zhou 2021)"
+    "section": "Importance on the forest",
+    "text": "Importance on the forest\n\n\n\n\n\n\n\n\n\n\nDoes not necessarily tell us about causation (none of these methods do)\nEach has pros/cons, no satisfactory answer for dependence"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#permutation-with-correlated-inputs",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#permutation-with-correlated-inputs",
     "title": "Machine learning",
     "section": "Permutation with correlated inputs",
-    "text": "Permutation with correlated inputs\n\n\n\n\n\n\n\n\n\nWhere the data’s density is below 0.01: 17% of the permuted points, 2% of the data"
+    "text": "Permutation with correlated inputs\n\n\n\n\n\n\n\n\n\nWhere the data’s density is below 0.01: 21% of the permuted points, 2% of the data"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#leave-one-covariate-out",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#leave-one-covariate-out",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#permutation-and-extrapolation",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#permutation-and-extrapolation",
     "title": "Machine learning",
-    "section": "Leave one covariate out",
-    "text": "Leave one covariate out\n\n\n\n\n\n\n\n\n\n\n\n\nRefit without input \\(j\\), with the same settings; score on the same held-out adults (Lei et al. 2018): \\[\\mathrm{LOCO}_j = \\widehat{\\mathrm{Err}}\\big(\\hat f^{(-j)}\\big) - \\widehat{\\mathrm{Err}}(\\hat f)\\]\nNo extrapolation from permuting; any method, at the cost of \\(p\\) refits\nWeight, height and BMI together: 17.1. Each alone: -0.4, -0.5, -0.1; refitting the same forest moves its MSE by about 0.4 (sd, five refits). Any two give the third"
+    "section": "Permutation and extrapolation",
+    "text": "Permutation and extrapolation\n\n\n\n\n\n\n\n\n\nShuffling height keeps each adult’s weight and BMI: BMI no longer matches weight and height for 69% of them (0% before); 38 are under 155 cm and over 110 kg (4 before)\nThe forest’s predictions there rest on almost no data, and permutation importance averages over them (Hooker, Mentch and Zhou 2021)"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#marginal-or-conditional-shapley-values",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#marginal-or-conditional-shapley-values",
-    "title": "Machine learning",
-    "section": "Marginal or conditional Shapley values",
-    "text": "Marginal or conditional Shapley values\n\\(v_i(S)\\) must fill in the inputs not in \\(S\\) (Chen et al. 2020):\n\nMarginal: from the data, ignoring \\(\\mathbf x_{iS}\\), as in partial dependence. True to the model: an input \\(\\hat f\\) ignores gets \\(0\\); but \\(\\hat f\\) is evaluated where there may be no data, as in permutation\nConditional: \\(v_i(S) = \\mathbb E\\big[\\hat f(X) \\mid X_S = \\mathbf x_{iS}\\big]\\). True to the data; but an input \\(\\hat f\\) ignores gets a share through the inputs correlated with it, and the conditional distribution must be estimated\n\n\nExample: \\(\\hat f(\\mathbf x) = \\beta_1 x_1\\); inputs with mean \\(0\\), variance \\(1\\), correlation \\(\\rho\\), and \\(\\mathbb E[X_1 \\mid x_2] = \\rho x_2\\). Marginal: \\(\\phi_{i2} = 0\\). Conditional: \\(\\phi_{i2} = \\frac12 \\rho \\beta_1 x_{i2}\\), and \\(\\phi_{i1} = \\beta_1 x_{i1} - \\phi_{i2}\\)"
-  },
-  {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-5",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-5",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-4",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#section-4",
     "title": "Machine learning",
     "section": "",
-    "text": "Part 5: the model and the world\nBackground: after Loftus, Bynum and Hansen (2024), Figure 5"
+    "text": "Part 4: the model and the world\nBackground: after Loftus, Bynum and Hansen (2024), Figure 5"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#predictions-and-outcomes",
@@ -319,49 +340,42 @@
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#natural-direct-and-total-dependence",
     "title": "Machine learning",
     "section": "Natural direct and total dependence",
-    "text": "Natural direct and total dependence\nIn the ECM, set \\(x_1 = t\\) for every unit, predict, average, with \\(x_2\\) and \\(x_3\\)\n\nleft at each unit’s value: the natural direct dependence plot (NDDP), which is the PDP\nrecomputed from their equations: the total dependence plot (TDP), \\(\\mathbb E[\\hat f(X) \\mid do(x_1 = t)]\\)\n\n\n\n\n\n\n\n\n\n\n\n\n\nNDDP falls: with \\(x_3\\) held fixed, a larger \\(x_1\\) means a smaller \\(y\\). TDP follows the effect of setting \\(x_1\\) (dashed). Grey: marginal Shapley values\nCausal Shapley values (Heskes et al. 2020) put \\(do(\\cdot)\\) in place of conditioning"
+    "text": "Natural direct and total dependence\nIn the ECM, set \\(x_1 = t\\) for every unit, predict, average, with \\(x_2\\) and \\(x_3\\)\n\nleft at each unit’s value: the natural direct dependence plot (NDDP), which is the PDP\nrecomputed from their equations: the total dependence plot (TDP), \\(\\mathbb E[\\hat f(X) \\mid do(x_1 = t)]\\)\n\n\n\n\n\n\n\n\n\n\n\n\n\nNDDP falls: with \\(x_3\\) held fixed, a larger \\(x_1\\) means a smaller \\(y\\). TDP follows the effect of setting \\(x_1\\) (dashed). Grey: Shapley values for \\(x_1\\)\nCausal Shapley values (Heskes et al. 2020) put \\(do(\\cdot)\\) in place of conditioning"
   },
   {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#model-intervention-corollary",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#model-intervention-corollary",
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#partial-dependence-and-causal-effects",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#partial-dependence-and-causal-effects",
     "title": "Machine learning",
-    "section": "Model-intervention corollary",
-    "text": "Model-intervention corollary\n\n\n\nModel-intervention corollary. In the adjustment theorem’s model, \\(T = h(Z, \\varepsilon_T)\\) and \\(Y = g(T, Z, \\varepsilon_Y)\\) with independent noises, let \\(f^\\star(t, z) = \\mathbb E[Y \\mid T = t, Z = z]\\). If \\(T\\) takes finitely many values and \\(P(T = t \\mid Z) &gt; 0\\) with probability one, then \\(\\mathbb E_Z\\big[f^\\star(t, Z)\\big] = \\mathbb E[Y \\mid do(T = t)]\\)\n\n\n\n\n\n\n\n\n\n\n\n\nIn words: \\(Z\\) holds every common cause of \\(T\\) and \\(Y\\), and no consequence of \\(T\\). A population identity; the PDP \\(\\frac1n\\sum_i \\hat f(t, z_i)\\) estimates it, even when \\(\\hat f = f^\\star\\): \\[\n\\mathrm{PDP}_T(t) = \\mathbb E[Y \\mid do(T = t)] + \\text{model error} + \\text{sampling error}\n\\]"
-  },
-  {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#where-the-condition-fails",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#where-the-condition-fails",
-    "title": "Machine learning",
-    "section": "Where the condition fails",
-    "text": "Where the condition fails\nPartial dependence (pink) against the effect of setting the plotted input (dashed), for forests on the inputs named\n\n\n\n\n\n\n\n\n\n\nAdjustment theorem: \\(Z\\) holds every common cause of \\(T\\) and \\(Y\\), and no consequence of \\(T\\). Here the inputs are continuous with overlap; for \\(x_2\\), \\(Z = \\{x_1\\}\\), without \\(x_3\\)"
-  },
-  {
-    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#history-asthma-and-pneumonia",
-    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#history-asthma-and-pneumonia",
-    "title": "Machine learning",
-    "section": "History: asthma and pneumonia",
-    "text": "History: asthma and pneumonia\n\nIn the 1990s, models predicted the risk of death from pneumonia, to decide who should be admitted to hospital\nA rule learned from the data: patients with asthma had a lower risk\nThe reason: asthmatic patients with pneumonia were usually admitted straight to intensive care, and the care worked\nThe rule was a correct description of the data. Acting on it would have sent patients with asthma home\nThe most accurate model, a neural network, was not used: nobody could check what else it had learned (Caruana et al. 2015)"
+    "section": "Partial dependence and causal effects",
+    "text": "Partial dependence and causal effects\n\n\n\nIf the adjustment theorem’s assumptions hold, with the plotted input as \\(T\\) and the model’s other inputs as \\(Z\\), and the model fits the true regression function well, then the PDP can show the causal effect of \\(T\\) on the outcome (Zhao and Hastie 2021)\nWhatever the causal structure, the PDP shows the natural direct effect of the plotted input on the predicted outcome \\(\\hat Y\\) (Loftus, Bynum and Hansen 2024)\n\n\n\n\n\n\n\n\n\n\n\n\n\nAdjustment theorem: \\(Z\\) holds every common cause of \\(T\\) and \\(Y\\), and no consequence of \\(T\\)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#conclusion",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#conclusion",
     "title": "Machine learning",
     "section": "Conclusion",
-    "text": "Conclusion\nUncertainty\nThe loss decides which number is the best prediction; two quantiles make an interval, and conformalizing them guarantees marginal coverage for independent rows, and coverage at every \\(x\\) as \\(n\\) grows if the quantile fits are consistent. Check coverage and calibration on data not used to fit or tune, across the range of the inputs and within groups: no method guarantees coverage at every \\(x\\) in finite samples without assumptions\nInterpretation\nPartial dependence, ICE, Shapley values and importance describe \\(\\hat f\\). Under valid adjustment and accurate estimation, the PDP estimates the interventional mean; with a causal model for the inputs, the total dependence plot answers a different question"
+    "text": "Conclusion\nUncertainty\nThe loss decides which number is the best prediction; the pinball loss gives a quantile. Residuals from held-out rows give an interval that covers 90% on average, for any model. Coverage at every \\(x\\) needs edges fitted near \\(x\\), enough rows there, and assumptions: no method guarantees it in finite samples without them. Check coverage and calibration on data not used to fit or tune, across the range of the inputs and within groups\nInterpretation\nPartial dependence, ICE, Shapley values and importance describe \\(\\hat f\\). If the adjustment theorem’s assumptions hold and the model fits well, the PDP can show a causal effect; with a causal model for the inputs, the total dependence plot answers a different question"
+  },
+  {
+    "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#conformalized-quantile-regression",
+    "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#conformalized-quantile-regression",
+    "title": "Machine learning",
+    "section": "Conformalized quantile regression",
+    "text": "Conformalized quantile regression\n\n\n\nFit \\(\\hat q_{0.05}\\), \\(\\hat q_{0.95}\\) on some training rows; keep \\(m\\) others, the calibration set\nScore how far each \\(y_i\\) is outside (negative inside): \\(E_i = \\max\\{\\hat q_{0.05}(x_i) - y_i,\\ y_i - \\hat q_{0.95}(x_i)\\}\\)\n\\(Q\\): the \\(\\lceil 0.9\\,(m + 1) \\rceil\\)-th smallest score\n\\(\\hat C(x) = \\big[\\hat q_{0.05}(x) - Q,\\ \\hat q_{0.95}(x) + Q\\big]\\)\n\n\n\n\n\n\n\n\n\n\n\n\\(m = 500\\), \\(Q = 0.21\\): 87% to 89%; for \\(x\\) in 4–6, 92% to 93%\n\n\nThe conformal coverage theorem holds for any quantile fits (Romano et al. 2019): \\(P(Y \\in \\hat C(X)) \\ge 0.9\\), and \\(\\le 0.9 + 1/(m + 1)\\) for continuous scores. If the fits are consistent, \\(Q \\to 0\\) and coverage at every \\(x\\) approaches 90% (Sesia and Candès 2020)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#exchangeable-rows-and-atoms",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#exchangeable-rows-and-atoms",
     "title": "Machine learning",
     "section": "Exchangeable rows and atoms",
-    "text": "Exchangeable rows and atoms\nThese slides state two conditions more simply than the sources do:\n\nExchangeable rows. The conformal coverage theorem (Romano et al. 2019, Theorem 1; Lei et al. 2018) needs only rows \\((X_1, Y_1), \\dots, (X_{m+1}, Y_{m+1})\\) whose joint distribution is unchanged when they are reordered: exchangeable rows. Independent draws from one distribution are exchangeable; draws without replacement from a finite population are exchangeable but not independent. The 1.3 points for one calibration set of 500 does use independence, and continuous scores\nAtoms. The impossibility theorem (Barber et al. 2021, Proposition 2.2) is about each \\(x\\) that is not an atom, a value with positive probability; continuous inputs have no atoms. The upper bound \\(1 - \\alpha + 1/(m + 1)\\) needs only scores that are distinct with probability one\nSesia and Candès (2020) do assume independent rows from one distribution"
+    "text": "Exchangeable rows and atoms\nThese slides state two conditions more simply than the sources do:\n\nExchangeable rows. The conformal coverage theorem (Lei et al. 2018; Romano et al. 2019, Theorem 1) needs only rows \\((X_1, Y_1), \\dots, (X_{m+1}, Y_{m+1})\\) whose joint distribution is unchanged when they are reordered: exchangeable rows. Independent draws from one distribution are exchangeable; draws without replacement from a finite population are exchangeable but not independent.\nAtoms. The impossibility theorem (Barber et al. 2021, Proposition 2.2) is about each \\(x\\) that is not an atom, a value with positive probability; continuous inputs have no atoms. The upper bound \\(1 - \\alpha + 1/(m + 1)\\) needs only scores that are distinct with probability one\nSesia and Candès (2020) do assume independent rows from one distribution"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#references-1-of-3",
     "href": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#references-1-of-3",
     "title": "Machine learning",
     "section": "References (1 of 3)",
-    "text": "References (1 of 3)\n\n\nBarber, R. F., Candès, E. J., Ramdas, A. and Tibshirani, R. J. (2021). The limits of distribution-free conditional predictive inference. Information and Inference: A Journal of the IMA 10(2), 455–482. doi:10.1093/imaiai/iaaa017. The result stated is Proposition 2.2, p. 459.\nCaruana, R., Lou, Y., Gehrke, J., Koch, P., Sturm, M. and Elhadad, N. (2015). Intelligible models for healthcare: predicting pneumonia risk and hospital 30-day readmission. Proceedings of the 21st ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 1721–1730. doi:10.1145/2783258.2788613\nChen, H., Janizek, J. D., Lundberg, S. and Lee, S.-I. (2020). True to the model or true to the data? arXiv:2006.16234. arxiv.org/abs/2006.16234\nChouldechova, A. (2017). Fair prediction with disparate impact: a study of bias in recidivism prediction instruments. Big Data 5(2), 153–163. doi:10.1089/big.2016.0047\nHébert-Johnson, Ú., Kim, M. P., Reingold, O. and Rothblum, G. N. (2018). Multicalibration: calibration for the (computationally-identifiable) masses. Proceedings of the 35th International Conference on Machine Learning, PMLR 80, 1939–1948. proceedings.mlr.press/v80/hebert-johnson18a.html. Definition 2.6 and section 3.2 as numbered in the arXiv version, 1711.08513"
+    "text": "References (1 of 3)\n\n\nBarber, R. F., Candès, E. J., Ramdas, A. and Tibshirani, R. J. (2021). The limits of distribution-free conditional predictive inference. Information and Inference: A Journal of the IMA 10(2), 455–482. doi:10.1093/imaiai/iaaa017. The result stated is Proposition 2.2, p. 459.\nChen, H., Janizek, J. D., Lundberg, S. and Lee, S.-I. (2020). True to the model or true to the data? arXiv:2006.16234. arxiv.org/abs/2006.16234\nChouldechova, A. (2017). Fair prediction with disparate impact: a study of bias in recidivism prediction instruments. Big Data 5(2), 153–163. doi:10.1089/big.2016.0047\nHébert-Johnson, Ú., Kim, M. P., Reingold, O. and Rothblum, G. N. (2018). Multicalibration: calibration for the (computationally-identifiable) masses. Proceedings of the 35th International Conference on Machine Learning, PMLR 80, 1939–1948. proceedings.mlr.press/v80/hebert-johnson18a.html. Definition 2.6 and section 3.2 as numbered in the arXiv version, 1711.08513"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#references-2-of-3",
@@ -1243,7 +1257,7 @@
     "href": "index.html#week-9-uncertainty-and-interpretation",
     "title": "ST310 course page",
     "section": "Week 9: uncertainty and interpretation",
-    "text": "Week 9: uncertainty and interpretation\nWhat a fitted prediction leaves out, and what it can tell us. The loss decides which number is the best prediction: the mean, the median, a cost threshold, or a quantile. Two quantiles make a prediction interval: how to check one on fresh data, overall and across the range of the inputs, why no method can guarantee coverage at every input without assumptions, how bias, variance and tuning break intervals computed on the wrong rows, and how conformalized quantile regression guarantees coverage on average over the inputs, and at every input as the sample grows if its quantile fits are consistent. Calibration: when a stated probability matches a frequency, what that means for decisions, what it does not say about a score, how to repair one, and calibration within groups, a fairness criterion. Then interpretation: partial dependence and individual curves for any model, Shapley values, and permutation and leave-one-covariate-out importance. Last, the model and the world: a causal model for the inputs, the difference between what a partial dependence plot holds fixed and the total dependence of a prediction on an input, and when a model’s curve is an effect.\nReading\n\nPrediction intervals and calibration (PDF), a note for this lecture: what an interval or a probability claims, and how to check it on fresh data.\nIML, the chapters “Partial Dependence Plot (PDP)”, “Individual Conditional Expectation (ICE)” and “Permutation Feature Importance”: the definitions, the examples and the limitations.\n\nOptional: Loftus, J. R., Bynum, L. E. J. and Hansen, S. (2024), “Causal dependence plots”, Advances in Neural Information Processing Systems 37, doi:10.52202/079017-3579, section 1 with its Figure 1; Zhao, Q. and Hastie, T. (2021), “Causal interpretations of black-box models”, Journal of Business and Economic Statistics 39(1), 272–281, doi:10.1080/07350015.2019.1624293.\nLecture: slides"
+    "text": "Week 9: uncertainty and interpretation\nWhat a fitted prediction leaves out, and what it can tell us. The loss decides which number is the best prediction: the mean, the median, a cost threshold, or a quantile. A prediction interval for one person’s outcome, from residuals or from two quantiles: how to check one on fresh data, overall and across the range of the inputs, how bias and variance break intervals computed on the wrong rows, how residuals from held-out rows guarantee coverage on average over the inputs, what coverage at every input needs as the sample grows, and why no method can guarantee it without assumptions. Calibration: when a stated probability matches a frequency, what that means for decisions, what it does not say about a score, how to repair one, and calibration within groups, a fairness criterion. Then interpretation: partial dependence and individual curves for any model, Shapley values, and permutation and leave-one-covariate-out importance. Last, the model and the world: a causal model for the inputs, the difference between what a partial dependence plot holds fixed and the total dependence of a prediction on an input, and when a model’s curve is an effect.\nReading\n\nPrediction intervals and calibration (PDF), a note for this lecture: what an interval or a probability claims, and how to check it on fresh data.\nIML, the chapters “Partial Dependence Plot (PDP)”, “Individual Conditional Expectation (ICE)” and “Permutation Feature Importance”: the definitions, the examples and the limitations.\n\nOptional: Loftus, J. R., Bynum, L. E. J. and Hansen, S. (2024), “Causal dependence plots”, Advances in Neural Information Processing Systems 37, doi:10.52202/079017-3579, section 1 with its Figure 1; Zhao, Q. and Hastie, T. (2021), “Causal interpretations of black-box models”, Journal of Business and Economic Statistics 39(1), 272–281, doi:10.1080/07350015.2019.1624293.\nLecture: slides"
   },
   {
     "objectID": "index.html#week-10-how-do-prediction-methods-support-other-statistical-tasks",
@@ -2951,7 +2965,7 @@
     "href": "weeks/09-uncert-interp/intervals-calibration.html#conformalized-quantile-regression",
     "title": "Prediction intervals and calibration",
     "section": "Conformalized quantile regression",
-    "text": "Conformalized quantile regression\nAn interval from two quantile fits covers as well as the fits are right, and the fits do not say how right they are. Checked on the points that fitted them, they look better than they are, just as training error underestimates the risk. Conformalized quantile regression (CQR; Romano, Patterson and Candès 2019, section 4) measures how far the fits miss on rows they did not see, and moves both ends of the interval by that amount. For a \\(1 - \\alpha\\) interval, here \\(\\alpha = 0.1\\):\n\nSplit the training rows in two. On the first part, fit a lower and an upper quantile, \\(\\hat q_{\\mathrm{lo}}\\) and \\(\\hat q_{\\mathrm{hi}}\\) (here the 5% and 95% quantiles), by any method. Keep the other \\(m\\) rows, the calibration set, for the next step.\nOn each calibration row, compute the score \\[\nE_i = \\max\\big\\{\\hat q_{\\mathrm{lo}}(x_i) - y_i,\\ y_i - \\hat q_{\\mathrm{hi}}(x_i)\\big\\}\n\\] (their equation 6). If \\(y_i\\) is above the interval, \\(E_i\\) is how far above the upper end; if below, how far below the lower end; if inside, \\(E_i \\le 0\\), minus the distance to the nearer end.\nLet \\(Q\\) be the \\(k\\)-th smallest of the \\(m\\) scores, with \\(k = \\lceil (1 - \\alpha)(m + 1) \\rceil\\); in their equation 8, the \\((1 - \\alpha)(1 + 1/m)\\)-th empirical quantile. (If \\(k &gt; m\\), take \\(Q = \\infty\\).)\nReport \\[\n\\hat C(x) = \\big[\\hat q_{\\mathrm{lo}}(x) - Q,\\ \\hat q_{\\mathrm{hi}}(x) + Q\\big]\n\\] (their equation 7). If the fits were too narrow, \\(Q &gt; 0\\) and the interval widens; if too wide, \\(Q &lt; 0\\) and it narrows.\n\nProof sketch. A new row \\((X, Y)\\) is inside \\(\\hat C(X)\\) exactly when its own score, \\(E = \\max\\{\\hat q_{\\mathrm{lo}}(X) - Y,\\ Y - \\hat q_{\\mathrm{hi}}(X)\\}\\), is at most \\(Q\\). Suppose all the rows, including the new one, are independent draws from one distribution.2 The fits used neither the calibration rows nor the new row, so given the rows they were fitted on, the \\(m + 1\\) scores of these rows are independent draws from one distribution too. With no ties, the new score’s rank among them is then equally likely to be any of \\(1, \\dots, m + 1\\), and the new score is at most the \\(k\\)-th smallest of the other \\(m\\) exactly when its rank is at most \\(k\\). So \\[\nP\\big(Y \\in \\hat C(X)\\big) = \\frac{k}{m + 1}, \\qquad 1 - \\alpha \\;\\le\\; \\frac{k}{m + 1} \\;&lt;\\; 1 - \\alpha + \\frac{1}{m + 1},\n\\] and with ties the probability is at least \\(k/(m + 1)\\). This is their Theorem 1: coverage at least \\(1 - \\alpha\\), and at most \\(1 - \\alpha + 1/(m + 1)\\) when the scores are almost surely distinct, as they are when continuous. Nothing is assumed about the quantile fits. A poor fit gives a wide or badly shaped interval, not a wrong overall level. The argument needs fits that did not use the calibration rows in any way, and that includes tuning: if the rows that set \\(Q\\) also chose the fits’ settings, the setting chosen is one whose scores there happen to be small, and coverage falls below \\(1 - \\alpha\\). In the lecture’s simulation, choosing among 50 settings on 500 calibration rows cost about a percentage point at most; with fewer rows or more candidates it costs more. Use separate rows to fit, tune and calibrate, or tune by cross-validation within the fitting rows.\nScope of the guarantee. First, the probability is over the calibration rows and the new row together. For one fixed calibration set, the coverage of future rows is the chance that a new score is at most that set’s \\(Q\\). If the rows are independent draws from one distribution and the scores have a continuous distribution, this chance is the \\(k\\)-th smallest of \\(m\\) independent uniform draws, which has the \\(\\mathrm{Beta}(k, m + 1 - k)\\) distribution: mean \\(k/(m + 1)\\), standard deviation about \\(\\sqrt{\\alpha(1 - \\alpha)/m}\\), 1.3 percentage points when \\(m = 500\\). Second, the guarantee is marginal. The same \\(Q\\) is added at every \\(x\\), so CQR corrects the overall level and not the shape: where the fits are too narrow in one range and too wide in another, the conformalized interval is too.\nConditional coverage as \\(n\\) grows. If the quantile fits are consistent, approaching the true conditional quantiles as the fitting and calibration sets grow, then the CQR interval approaches \\([q_{\\alpha/2}(x), q_{1 - \\alpha/2}(x)]\\) and its coverage given \\(X = x\\) tends to \\(1 - \\alpha\\), except on a set of \\(x\\) whose probability tends to zero (Sesia and Candès 2020, Theorem 1 and its corollary, for independent rows and scores with a density bounded away from zero near zero). This does not contradict the impossibility result: consistency is an assumption about the distribution and the method. How fast the fits converge depends on how smooth the quantiles are and on the number of inputs. The same limits apply to checking coverage near \\(x\\), which needs rows near \\(x\\): 2,000 fresh rows in 5 bins for each input give 400 rows a bin with one input, 16 with three, under one with five, and with 16 rows the standard error of a bin’s coverage near 90% is 7.5 percentage points.\nSplit conformal prediction is a special case. If both quantile fits are the same fit of the mean, \\(\\hat q_{\\mathrm{lo}} = \\hat q_{\\mathrm{hi}} = \\hat f\\), the score is \\(\\max\\{\\hat f(x_i) - y_i,\\ y_i - \\hat f(x_i)\\} = \\lvert y_i - \\hat f(x_i) \\rvert\\) and the interval is \\(\\hat f(x) \\pm Q\\), the same width at every \\(x\\) (Lei et al. 2018, section 2.2).\nOn the simulated data: boosted 5% and 95% fits, with the settings above, on the first 500 training points, and scores on the other 500, so \\(m = 500\\) and \\(k = 451\\). The figure shows the scores; the dashed line is \\(Q\\), and the points above it are the outcomes the interval still misses.\n\n\nShow the code\nfit_part &lt;- 1:500; cal_part &lt;- 501:1000\nk90 &lt;- ceiling(0.9 * (500 + 1))\nboost_half &lt;- function(tau) xgboost(x = as.matrix(het_train[fit_part, \"x\"]), y = het_train$y[fit_part],\n  objective = \"reg:quantileerror\", quantile_alpha = tau,\n  max_depth = 2, learning_rate = 0.05, nrounds = 300, min_child_weight = 30, nthread = 1)\nb05_half &lt;- boost_half(0.05); b95_half &lt;- boost_half(0.95)\nplug_in &lt;- function(d) cbind(predict(b05_half, as.matrix(d[\"x\"])), predict(b95_half, as.matrix(d[\"x\"])))\ncal &lt;- het_train[cal_part, ]\nb_cal &lt;- plug_in(cal)\ncal$score &lt;- pmax(b_cal[, 1] - cal$y, cal$y - b_cal[, 2])   # their equation 6\nQ_cqr &lt;- sort(cal$score)[k90]                               # their equation 8\nb_own &lt;- plug_in(het_train[fit_part, ])\ncover_own &lt;- mean(het_train$y[fit_part] &gt;= b_own[, 1] & het_train$y[fit_part] &lt;= b_own[, 2])\nggplot(cal, aes(x, score)) +\n  geom_hline(yintercept = 0, colour = \"grey60\") +\n  geom_point(aes(colour = score &gt; Q_cqr), size = 1.2, alpha = 0.8) +\n  geom_hline(yintercept = Q_cqr, linetype = \"dashed\") +\n  scale_colour_manual(values = c(`FALSE` = \"grey50\", `TRUE` = m_pink), guide = \"none\") +\n  labs(x = \"x\", y = \"score on the calibration rows\") + theme_minimal(base_size = 12)\n\n\n\n\n\n\n\n\n\nHere \\(Q = 0.25\\). The two fits cover 92% of their own 500 training points but only 87% of the calibration rows, so CQR widens each end by \\(Q\\). The scores spread out above zero for \\(x\\) beyond 6, where the fits are too narrow, and one \\(Q\\) cannot fix that. On the fresh points, against split conformal prediction around a least squares line fitted and calibrated on the same halves:\n\n\nShow the code\nlm_half &lt;- lm(y ~ x, data = het_train[fit_part, ])\nd_split &lt;- sort(abs(het_train$y[cal_part] - predict(lm_half, het_train[cal_part, ])))[k90]\nb_fresh &lt;- plug_in(het_fresh)\ncov_cqr &lt;- mean(het_fresh$y &gt;= b_fresh[, 1] - Q_cqr & het_fresh$y &lt;= b_fresh[, 2] + Q_cqr)\ncov_split &lt;- mean(abs(het_fresh$y - predict(lm_half, het_fresh)) &lt;= d_split)\ncoverage_table(list(\n  `boosted quantiles, 500 points` = b_fresh,\n  `conformalized, 500 + 500` = cbind(b_fresh[, 1] - Q_cqr, b_fresh[, 2] + Q_cqr),   # their equation 7\n  `split conformal, least squares, 500 + 500` = cbind(predict(lm_half, het_fresh) - d_split, predict(lm_half, het_fresh) + d_split)))\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nmethod\nall\nx in [0, 2]\n(2, 4]\n(4, 6]\n(6, 8]\n(8, 10]\nmean width\n\n\n\n\nboosted quantiles, 500 points\n87%\n85%\n92%\n93%\n80%\n86%\n7.2\n\n\nconformalized, 500 + 500\n90%\n92%\n94%\n94%\n82%\n87%\n7.7\n\n\nsplit conformal, least squares, 500 + 500\n87%\n100%\n97%\n83%\n81%\n75%\n8.7\n\n\n\n\n\nOverall, CQR covers 90% of the fresh points and split conformal 87%. Theorem 1 is about the average over calibration sets: for one set of 500, the coverage varies with a standard deviation of about 1.3 percentage points (above), and measuring it on 2,000 fresh points adds a standard error of about 0.7. Split conformal has one width everywhere, so it covers too much where the noise is small and too little where it is large; CQR keeps the shape of its quantile fits, including their error beyond \\(x = 6\\)."
+    "text": "Conformalized quantile regression\nAn interval from two quantile fits covers as well as the fits are right, and the fits do not say how right they are. Checked on the points that fitted them, they look better than they are, just as training error underestimates the risk. Conformalized quantile regression (CQR; Romano, Patterson and Candès 2019, section 4) measures how far the fits miss on rows they did not see, and moves both ends of the interval by that amount. For a \\(1 - \\alpha\\) interval, here \\(\\alpha = 0.1\\):\n\nSplit the training rows in two. On the first part, fit a lower and an upper quantile, \\(\\hat q_{\\mathrm{lo}}\\) and \\(\\hat q_{\\mathrm{hi}}\\) (here the 5% and 95% quantiles), by any method. Keep the other \\(m\\) rows, the calibration set, for the next step.\nOn each calibration row, compute the score \\[\nE_i = \\max\\big\\{\\hat q_{\\mathrm{lo}}(x_i) - y_i,\\ y_i - \\hat q_{\\mathrm{hi}}(x_i)\\big\\}\n\\] (their equation 6). If \\(y_i\\) is above the interval, \\(E_i\\) is how far above the upper end; if below, how far below the lower end; if inside, \\(E_i \\le 0\\), minus the distance to the nearer end.\nLet \\(Q\\) be the \\(k\\)-th smallest of the \\(m\\) scores, with \\(k = \\lceil (1 - \\alpha)(m + 1) \\rceil\\); in their equation 8, the \\((1 - \\alpha)(1 + 1/m)\\)-th empirical quantile. (If \\(k &gt; m\\), take \\(Q = \\infty\\).)\nReport \\[\n\\hat C(x) = \\big[\\hat q_{\\mathrm{lo}}(x) - Q,\\ \\hat q_{\\mathrm{hi}}(x) + Q\\big]\n\\] (their equation 7). If the fits were too narrow, \\(Q &gt; 0\\) and the interval widens; if too wide, \\(Q &lt; 0\\) and it narrows.\n\nProof sketch. A new row \\((X, Y)\\) is inside \\(\\hat C(X)\\) exactly when its own score, \\(E = \\max\\{\\hat q_{\\mathrm{lo}}(X) - Y,\\ Y - \\hat q_{\\mathrm{hi}}(X)\\}\\), is at most \\(Q\\). Suppose all the rows, including the new one, are independent draws from one distribution.2 The fits used neither the calibration rows nor the new row, so given the rows they were fitted on, the \\(m + 1\\) scores of these rows are independent draws from one distribution too. With no ties, the new score’s rank among them is then equally likely to be any of \\(1, \\dots, m + 1\\), and the new score is at most the \\(k\\)-th smallest of the other \\(m\\) exactly when its rank is at most \\(k\\). So \\[\nP\\big(Y \\in \\hat C(X)\\big) = \\frac{k}{m + 1}, \\qquad 1 - \\alpha \\;\\le\\; \\frac{k}{m + 1} \\;&lt;\\; 1 - \\alpha + \\frac{1}{m + 1},\n\\] and with ties the probability is at least \\(k/(m + 1)\\). This is their Theorem 1: coverage at least \\(1 - \\alpha\\), and at most \\(1 - \\alpha + 1/(m + 1)\\) when the scores are almost surely distinct, as they are when continuous. Nothing is assumed about the quantile fits. A poor fit gives a wide or badly shaped interval, not a wrong overall level. The argument needs fits that did not use the calibration rows in any way, and that includes tuning: if the rows that set \\(Q\\) also chose the fits’ settings, the setting chosen is one whose scores there happen to be small, and coverage falls below \\(1 - \\alpha\\). In a simulation like the lecture’s, choosing a forest’s node size among six settings on 500 rows, the loss was too small to see in 150 repeats; with fewer rows or more candidates it grows. Use separate rows to fit, tune and calibrate, or tune by cross-validation within the fitting rows.\nScope of the guarantee. First, the probability is over the calibration rows and the new row together. For one fixed calibration set, the coverage of future rows is the chance that a new score is at most that set’s \\(Q\\). If the rows are independent draws from one distribution and the scores have a continuous distribution, this chance is the \\(k\\)-th smallest of \\(m\\) independent uniform draws, which has the \\(\\mathrm{Beta}(k, m + 1 - k)\\) distribution: mean \\(k/(m + 1)\\), standard deviation about \\(\\sqrt{\\alpha(1 - \\alpha)/m}\\), 1.3 percentage points when \\(m = 500\\). Second, the guarantee is marginal. The same \\(Q\\) is added at every \\(x\\), so CQR corrects the overall level and not the shape: where the fits are too narrow in one range and too wide in another, the conformalized interval is too.\nConditional coverage as \\(n\\) grows. If the quantile fits are consistent, approaching the true conditional quantiles as the fitting and calibration sets grow, then the CQR interval approaches \\([q_{\\alpha/2}(x), q_{1 - \\alpha/2}(x)]\\) and its coverage given \\(X = x\\) tends to \\(1 - \\alpha\\), except on a set of \\(x\\) whose probability tends to zero (Sesia and Candès 2020, Theorem 1 and its corollary, for independent rows and scores with a density bounded away from zero near zero). This does not contradict the impossibility result: consistency is an assumption about the distribution and the method. How fast the fits converge depends on how smooth the quantiles are and on the number of inputs. The same limits apply to checking coverage near \\(x\\), which needs rows near \\(x\\): 2,000 fresh rows in 5 bins for each input give 400 rows a bin with one input, 16 with three, under one with five, and with 16 rows the standard error of a bin’s coverage near 90% is 7.5 percentage points.\nSplit conformal prediction is a special case. If both quantile fits are the same fit of the mean, \\(\\hat q_{\\mathrm{lo}} = \\hat q_{\\mathrm{hi}} = \\hat f\\), the score is \\(\\max\\{\\hat f(x_i) - y_i,\\ y_i - \\hat f(x_i)\\} = \\lvert y_i - \\hat f(x_i) \\rvert\\) and the interval is \\(\\hat f(x) \\pm Q\\), the same width at every \\(x\\) (Lei et al. 2018, section 2.2).\nOn the simulated data: boosted 5% and 95% fits, with the settings above, on the first 500 training points, and scores on the other 500, so \\(m = 500\\) and \\(k = 451\\). The figure shows the scores; the dashed line is \\(Q\\), and the points above it are the outcomes the interval still misses.\n\n\nShow the code\nfit_part &lt;- 1:500; cal_part &lt;- 501:1000\nk90 &lt;- ceiling(0.9 * (500 + 1))\nboost_half &lt;- function(tau) xgboost(x = as.matrix(het_train[fit_part, \"x\"]), y = het_train$y[fit_part],\n  objective = \"reg:quantileerror\", quantile_alpha = tau,\n  max_depth = 2, learning_rate = 0.05, nrounds = 300, min_child_weight = 30, nthread = 1)\nb05_half &lt;- boost_half(0.05); b95_half &lt;- boost_half(0.95)\nplug_in &lt;- function(d) cbind(predict(b05_half, as.matrix(d[\"x\"])), predict(b95_half, as.matrix(d[\"x\"])))\ncal &lt;- het_train[cal_part, ]\nb_cal &lt;- plug_in(cal)\ncal$score &lt;- pmax(b_cal[, 1] - cal$y, cal$y - b_cal[, 2])   # their equation 6\nQ_cqr &lt;- sort(cal$score)[k90]                               # their equation 8\nb_own &lt;- plug_in(het_train[fit_part, ])\ncover_own &lt;- mean(het_train$y[fit_part] &gt;= b_own[, 1] & het_train$y[fit_part] &lt;= b_own[, 2])\nggplot(cal, aes(x, score)) +\n  geom_hline(yintercept = 0, colour = \"grey60\") +\n  geom_point(aes(colour = score &gt; Q_cqr), size = 1.2, alpha = 0.8) +\n  geom_hline(yintercept = Q_cqr, linetype = \"dashed\") +\n  scale_colour_manual(values = c(`FALSE` = \"grey50\", `TRUE` = m_pink), guide = \"none\") +\n  labs(x = \"x\", y = \"score on the calibration rows\") + theme_minimal(base_size = 12)\n\n\n\n\n\n\n\n\n\nHere \\(Q = 0.25\\). The two fits cover 92% of their own 500 training points but only 87% of the calibration rows, so CQR widens each end by \\(Q\\). The scores spread out above zero for \\(x\\) beyond 6, where the fits are too narrow, and one \\(Q\\) cannot fix that. On the fresh points, against split conformal prediction around a least squares line fitted and calibrated on the same halves:\n\n\nShow the code\nlm_half &lt;- lm(y ~ x, data = het_train[fit_part, ])\nd_split &lt;- sort(abs(het_train$y[cal_part] - predict(lm_half, het_train[cal_part, ])))[k90]\nb_fresh &lt;- plug_in(het_fresh)\ncov_cqr &lt;- mean(het_fresh$y &gt;= b_fresh[, 1] - Q_cqr & het_fresh$y &lt;= b_fresh[, 2] + Q_cqr)\ncov_split &lt;- mean(abs(het_fresh$y - predict(lm_half, het_fresh)) &lt;= d_split)\ncoverage_table(list(\n  `boosted quantiles, 500 points` = b_fresh,\n  `conformalized, 500 + 500` = cbind(b_fresh[, 1] - Q_cqr, b_fresh[, 2] + Q_cqr),   # their equation 7\n  `split conformal, least squares, 500 + 500` = cbind(predict(lm_half, het_fresh) - d_split, predict(lm_half, het_fresh) + d_split)))\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nmethod\nall\nx in [0, 2]\n(2, 4]\n(4, 6]\n(6, 8]\n(8, 10]\nmean width\n\n\n\n\nboosted quantiles, 500 points\n87%\n85%\n92%\n93%\n80%\n86%\n7.2\n\n\nconformalized, 500 + 500\n90%\n92%\n94%\n94%\n82%\n87%\n7.7\n\n\nsplit conformal, least squares, 500 + 500\n87%\n100%\n97%\n83%\n81%\n75%\n8.7\n\n\n\n\n\nOverall, CQR covers 90% of the fresh points and split conformal 87%. Theorem 1 is about the average over calibration sets: for one set of 500, the coverage varies with a standard deviation of about 1.3 percentage points (above), and measuring it on 2,000 fresh points adds a standard error of about 0.7. Split conformal has one width everywhere, so it covers too much where the noise is small and too little where it is large; CQR keeps the shape of its quantile fits, including their error beyond \\(x = 6\\)."
   },
   {
     "objectID": "weeks/09-uncert-interp/intervals-calibration.html#ways-to-make-an-interval",
