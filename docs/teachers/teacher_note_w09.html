@@ -2334,7 +2334,7 @@ window.Quarto = {
 
 <section id="keep-or-rush" class="level2">
 <h2 class="anchored" data-anchor-id="keep-or-rush">Keep or rush</h2>
-<p>In seminar order. The notebook has eight problems; the hour uses three of them, problems 1, 2 and 4, and the others are spares. Planned total 60 minutes, with no slack: past that, cut in the order marked, and the minimum seminar is below the table. The numbers below are for a run in order.</p>
+<p>In seminar order. Planned total 61 minutes, with no slack: past that, cut in the order marked, and the minimum seminar is below the table. The numbers below are for a run in order.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 52%">
@@ -2370,10 +2370,10 @@ window.Quarto = {
 <td>Say the three results</td>
 </tr>
 <tr class="even">
-<td>Problem 4: one <span class="math inline">\(C = 2.4\)</span> covers 100% and 80% of the two groups; two <span class="math inline">\(C\)</span>s, 0.9 and 2.7, average width 3.6 against 4.8; with a 90/10 split, one <span class="math inline">\(C = 0.964\)</span> covers 32% of the small group</td>
-<td style="text-align: right;">7</td>
-<td>Keep</td>
-<td>(a) and (c): the 80% and the 32%</td>
+<td>Problem 3: a score calibrated in both groups (base rates 0.50 and 0.32) and overall; cut at 0.5, PPV 0.8 in both, true positive rates 0.8 and 0.5, false positive rates 0.2 and 0.06; average scores 0.68 and 0.32 against 0.50 and 0.24; a calibrated score cannot have the same two averages in groups with different base rates unless it is perfect</td>
+<td style="text-align: right;">8</td>
+<td>Keep (a) to (c); cut (d) first</td>
+<td>(a) and (b): calibrated in both groups, and people with the condition missed half the time in one of them</td>
 </tr>
 <tr class="odd">
 <td>Coding 1, question 1: the fits at <span class="math inline">\(x_0\)</span> on one sample, 0.22 (<span class="math inline">\(k = 5\)</span>) to 0.57 (<span class="math inline">\(k = 250\)</span>), against 1; the plot of <span class="math inline">\(k = 10\)</span> and <span class="math inline">\(k = 150\)</span></td>
@@ -2437,7 +2437,7 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>Minimum seminar, about 45 minutes: problems 1 and 4, problem 2(a to c), coding questions 2, 4, 6, 7, 8 and 9. With more time, add question 10 first, then problem 2(d to f).</p>
+<p>Minimum seminar, about 45 minutes: problem 1, problem 2(a to c), problem 3(a to b), coding questions 2, 4, 6, 7, 8 and 9. With more time, add question 10 first, then problem 2(d to f).</p>
 </section>
 <section id="if-you-read-on" class="level2">
 <h2 class="anchored" data-anchor-id="if-you-read-on">If you read on</h2>
@@ -2450,18 +2450,17 @@ window.Quarto = {
 <p>What students should see</p>
 <ul>
 <li>Exercise 1: <span class="math inline">\(G&#39;(\hat y) = F(\hat y) - \tau\)</span>. Exercise 2: the new residual’s rank among <span class="math inline">\(m + 1\)</span> is uniform, so coverage <span class="math inline">\(k/(m+1)\)</span>; for <span class="math inline">\(m = 5\)</span> no finite <span class="math inline">\(C\)</span>. Exercise 3: the ICE curves are <span class="math inline">\(t\,x_{i2}\)</span> and the PDP for <span class="math inline">\(x_1\)</span> is flat; the PDP for <span class="math inline">\(x_2\)</span> is <span class="math inline">\(1.5t\)</span>.</li>
-<li>Spare problems, if a room is fast: 3 (one leaf of a tree: coverage 94% at the center, 81% at the edge), 5 (19 rows: coverage has standard deviation 6.5 points, below 80% with probability 0.083), 6 (permutation importance <span class="math inline">\(2\,\mathrm{Var}\,f_j\)</span> and LOCO <span class="math inline">\(\mathrm{Var}\,f_j\)</span>; with correlation 0.95, 2 against 0.0975), 7 (three worlds: PDP slopes 1, 0, <span class="math inline">\(\frac12\)</span> against effects of 1), 8 (a score calibrated in both groups, with true positive rates 0.8 and 0.5).</li>
 <li>Run times in the build container (R 4.3, randomForest 4.7-1.2, kernelshap): the whole notebook in under a minute; question 2’s 2,000 samples about 3 seconds, the Shapley values about 5, the three LOCO refits about 4. A laptop may take two or three times as long.</li>
 </ul>
 <p>Where they get stuck</p>
 <ul>
 <li>Problem 1: giving a training residual the variance of <span class="math inline">\(\bar y\)</span>, <span class="math inline">\(\sigma^2/k\)</span>.</li>
-<li>Problem 4(a): solving <span class="math inline">\(\frac12 c + \frac12\cdot\frac c3 = 0.9\)</span>, which gives 1.35 and ignores that coverage for <span class="math inline">\(x = 0\)</span> stops at 100% once <span class="math inline">\(c\)</span> passes 1.</li>
+<li>Problem 3(b): dividing the false positives by everyone in the group, not by the people without the condition.</li>
 <li>Question 2: comparing the fits with <code>y0</code> for the confidence interval, which is about <span class="math inline">\(f^\star(x_0)\)</span>.</li>
 <li>Question 7: <code>d[[input]] &lt;- grid</code> instead of <code>t</code>, which sets each row to a different value.</li>
 <li>Question 9: drawing <code>x1</code> at random inside <code>world_do_x1</code>, which gives the observational mean, or leaving out the line for <code>x2</code>, so that the intervention does not reach <span class="math inline">\(y\)</span> through it. In the student file, a chunk with a blank starts with <code>#| eval: false</code>: students uncomment the lines, fill the blanks and delete that line.</li>
 </ul>
-<p>Sources: the data note at <a href="https://ml4ds.com/data/nhanes.html">ml4ds.com/data/nhanes.html</a>; exercise 2 follows Lei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018), Distribution-free predictive inference for regression, <em>Journal of the American Statistical Association</em> 113(523), 1094–1111, <a href="https://doi.org/10.1080/01621459.2017.1307116">doi:10.1080/01621459.2017.1307116</a>; problem 8 cites Chouldechova, A. (2017), Fair prediction with disparate impact, <em>Big Data</em> 5(2), 153–163, <a href="https://doi.org/10.1089/big.2016.0047">doi:10.1089/big.2016.0047</a>, and Kleinberg, J., Mullainathan, S. and Raghavan, M. (2017), Inherent trade-offs in the fair determination of risk scores, <em>ITCS 2017</em>, LIPIcs 67, 43:1–43:23, <a href="https://doi.org/10.4230/LIPIcs.ITCS.2017.43">doi:10.4230/LIPIcs.ITCS.2017.43</a>.</p>
+<p>Sources: the data note at <a href="https://ml4ds.com/data/nhanes.html">ml4ds.com/data/nhanes.html</a>; exercise 2 follows Lei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018), Distribution-free predictive inference for regression, <em>Journal of the American Statistical Association</em> 113(523), 1094–1111, <a href="https://doi.org/10.1080/01621459.2017.1307116">doi:10.1080/01621459.2017.1307116</a>; problem 3 cites Chouldechova, A. (2017), Fair prediction with disparate impact, <em>Big Data</em> 5(2), 153–163, <a href="https://doi.org/10.1089/big.2016.0047">doi:10.1089/big.2016.0047</a>, and Kleinberg, J., Mullainathan, S. and Raghavan, M. (2017), Inherent trade-offs in the fair determination of risk scores, <em>ITCS 2017</em>, LIPIcs 67, 43:1–43:23, <a href="https://doi.org/10.4230/LIPIcs.ITCS.2017.43">doi:10.4230/LIPIcs.ITCS.2017.43</a>.</p>
 </section>
 
 </main>

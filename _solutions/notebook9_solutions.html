@@ -2701,7 +2701,7 @@ P\big(Y \in \hat f(X) \pm C\big) = \frac{k}{m + 1} \ge \frac{0.9(m + 1)}{m + 1} 
 <section id="problems" class="level2">
 <h2 class="anchored" data-anchor-id="problems">Problems</h2>
 <!-- Pen and paper. Minutes for each problem are in its own comment; the teacher note says which are done in the room. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the one before it. -->
-<p>Problems 1 to 5 use the normal distribution function <span class="math inline">\(\Phi\)</span>; for a 90% interval, <span class="math inline">\(\Phi(1.645) = 0.95\)</span>. If <span class="math inline">\(W \sim N(\mu, s^2)\)</span>, then <span class="math inline">\(P(|W| \le c) = \Phi\big((c - \mu)/s\big) - \Phi\big((-c - \mu)/s\big)\)</span>.</p>
+<p>Problems 1 and 2 use the normal distribution function <span class="math inline">\(\Phi\)</span>; for a 90% interval, <span class="math inline">\(\Phi(1.645) = 0.95\)</span>. If <span class="math inline">\(W \sim N(\mu, s^2)\)</span>, then <span class="math inline">\(P(|W| \le c) = \Phi\big((c - \mu)/s\big) - \Phi\big((-c - \mu)/s\big)\)</span>.</p>
 <p><strong>Problem 1 (the residuals of a nearest-neighbor fit).</strong> <!-- About 7 min. --> The inputs come in groups of <span class="math inline">\(k\)</span> rows that share the same <span class="math inline">\(x\)</span>, and <span class="math inline">\(Y = f^\star(x) + \varepsilon\)</span> with <span class="math inline">\(\varepsilon \sim N(0, \sigma^2)\)</span>, independent across rows. The <span class="math inline">\(k\)</span>-nearest-neighbor fit predicts, at the <span class="math inline">\(x\)</span> of a group, the mean <span class="math inline">\(\bar y\)</span> of that group’s <span class="math inline">\(k\)</span> outcomes <span class="math inline">\(y_1, \ldots, y_k\)</span>. A training row’s residual is <span class="math inline">\(y_i - \bar y\)</span>. A new outcome at that <span class="math inline">\(x\)</span> is <span class="math inline">\(Y_0 = f^\star(x) + \varepsilon_0\)</span>, independent of the group’s outcomes.</p>
 <ol type="a">
 <li><p>Find the distribution of a training residual <span class="math inline">\(y_i - \bar y\)</span>, and of the new residual <span class="math inline">\(Y_0 - \bar y\)</span>.</p></li>
@@ -2885,283 +2885,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 </div>
 </div>
-<p><strong>Problem 3 (one leaf of a tree).</strong> <!-- About 7 min. --> A tree’s leaf covers <span class="math inline">\(-1 \le x \le 1\)</span> (after rescaling <span class="math inline">\(x\)</span>), where <span class="math inline">\(x\)</span> is uniform, <span class="math inline">\(f^\star(x) = x\)</span> and the noise is <span class="math inline">\(N(0, 1)\)</span>. The leaf has many training rows, so it predicts 0, the average of <span class="math inline">\(f^\star\)</span> over the leaf. Held-out rows in the leaf give <span class="math inline">\(C\)</span>, the 90th percentile of <span class="math inline">\(|Y - 0|\)</span> over the leaf: <span class="math inline">\(C = 1.90\)</span> (you need not compute it).</p>
-<ol type="a">
-<li><p>Find the coverage of <span class="math inline">\(0 \pm 1.90\)</span> at <span class="math inline">\(x = 0\)</span> and at <span class="math inline">\(x = 1\)</span>.</p></li>
-<li><p>What is the coverage averaged over the leaf?</p></li>
-<li><p>The tree splits the leaf at 0, and each new leaf has many rows. What does each new leaf predict? How far is <span class="math inline">\(f^\star\)</span> from the prediction at the edges now? With the new <span class="math inline">\(C = 1.71\)</span>, find the coverage at the center and at the edges of a new leaf.</p></li>
-<li><p>What stops us from splitting until every leaf is tiny?</p></li>
-</ol>
-<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Hint 1
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-18" class="callout-18-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li>Given <span class="math inline">\(X = x\)</span>, <span class="math inline">\(Y \sim N(x, 1)\)</span>.</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 2">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Hint 2
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-19" class="callout-19-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol start="2" type="a">
-<li>What was <span class="math inline">\(C\)</span> chosen to do?</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Reveal answer
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-20" class="callout-20-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li><p>Given <span class="math inline">\(X = x\)</span>, <span class="math inline">\(Y \sim N(x, 1)\)</span>, so the coverage at <span class="math inline">\(x\)</span> is <span class="math inline">\(\Phi(1.9 - x) - \Phi(-1.9 - x)\)</span>. At <span class="math inline">\(x = 0\)</span>: <span class="math inline">\(0.971 - 0.029 = 94.3\%\)</span>. At <span class="math inline">\(x = 1\)</span>: <span class="math inline">\(\Phi(0.9) - \Phi(-2.9) = 0.816 - 0.002 = 81.4\%\)</span>.</p></li>
-<li><p>90%: <span class="math inline">\(C\)</span> was chosen so that 90% of the outcomes in the leaf are covered, which is the coverage at <span class="math inline">\(x\)</span> averaged over the leaf. Above 90% near the center, below it near the edges.</p></li>
-<li><p>The new leaves cover <span class="math inline">\([-1, 0]\)</span> and <span class="math inline">\([0, 1]\)</span> and predict <span class="math inline">\(-\frac12\)</span> and <span class="math inline">\(\frac12\)</span>, the averages of <span class="math inline">\(f^\star\)</span> over them. At the edges <span class="math inline">\(f^\star\)</span> is <span class="math inline">\(\frac12\)</span> from the prediction, half as far as before. Center: <span class="math inline">\(\Phi(1.71) - \Phi(-1.71) = 91.3\%\)</span>. Edges: <span class="math inline">\(\Phi(1.21) - \Phi(-2.21) = 0.887 - 0.014 = 87.4\%\)</span>. Closer to 90% everywhere.</p></li>
-<li><p>With fewer rows in each leaf, the leaf’s prediction has more variance (as in problem 1), and <span class="math inline">\(C\)</span>, computed from the leaf’s held-out rows, varies more from sample to sample. Smaller leaves trade the bias of (a) for that variance: the same trade-off as choosing <span class="math inline">\(k\)</span> for nearest neighbors.</p></li>
-</ol>
-<p>Common errors: using <span class="math inline">\(N(0, 1)\)</span> at every <span class="math inline">\(x\)</span>; expecting 90% at the edge because <span class="math inline">\(C\)</span> was chosen for 90%.</p>
-</div>
-</div>
-</div>
-<p><strong>Problem 4 (one width, two noise levels).</strong> <!-- About 7 min. --> Half the people have <span class="math inline">\(x = 0\)</span> and half have <span class="math inline">\(x = 1\)</span>. Given <span class="math inline">\(x\)</span>, <span class="math inline">\(Y = f^\star(x) + \varepsilon\)</span>, with <span class="math inline">\(\varepsilon\)</span> uniform on <span class="math inline">\([-1, 1]\)</span> when <span class="math inline">\(x = 0\)</span> and uniform on <span class="math inline">\([-3, 3]\)</span> when <span class="math inline">\(x = 1\)</span>. The model is exact, <span class="math inline">\(\hat f = f^\star\)</span>, and the interval is <span class="math inline">\(f^\star(x) \pm C\)</span>, with one <span class="math inline">\(C\)</span> for everyone.</p>
-<ol type="a">
-<li><p>Find the <span class="math inline">\(C\)</span> that covers 90% of people. What is the coverage among people with <span class="math inline">\(x = 0\)</span>, and among people with <span class="math inline">\(x = 1\)</span>?</p></li>
-<li><p>Find the <span class="math inline">\(C\)</span> for each value of <span class="math inline">\(x\)</span> that covers 90% of the people with that value. Compare the average width with (a).</p></li>
-<li><p>Now 90% of people have <span class="math inline">\(x = 0\)</span> and 10% have <span class="math inline">\(x = 1\)</span>. Find the one <span class="math inline">\(C\)</span> that covers 90% of people, and the coverage among people with <span class="math inline">\(x = 1\)</span>.</p></li>
-<li><p>Which coverage does a split conformal interval with one <span class="math inline">\(C\)</span> guarantee here? How could you guarantee 90% among people with <span class="math inline">\(x = 1\)</span>?</p></li>
-</ol>
-<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Hint 1
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-21" class="callout-21-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li>Write <span class="math inline">\(P(|\varepsilon| \le c)\)</span> for each value of <span class="math inline">\(x\)</span> separately. For <span class="math inline">\(x = 0\)</span>, it cannot exceed 1.</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Reveal answer
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-22" class="callout-22-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li><p><span class="math inline">\(P(|\varepsilon| \le c \mid x = 0) = \min(c, 1)\)</span> and <span class="math inline">\(P(|\varepsilon| \le c \mid x = 1) = c/3\)</span> for <span class="math inline">\(c \le 3\)</span>. Overall coverage is their average; at <span class="math inline">\(c = 1\)</span> it is <span class="math inline">\(\frac12 + \frac16 = 0.67\)</span>, so <span class="math inline">\(C &gt; 1\)</span> and <span class="math inline">\(\frac12 + \frac c6 = 0.9\)</span> gives <span class="math inline">\(C = 2.4\)</span>. Among people with <span class="math inline">\(x = 0\)</span> the coverage is 100%; among people with <span class="math inline">\(x = 1\)</span> it is <span class="math inline">\(2.4/3 = 80\%\)</span>. The interval is too wide for one group and too narrow for the other.</p></li>
-<li><p><span class="math inline">\(C_0 = 0.9\)</span> and <span class="math inline">\(C_1 = 2.7\)</span>: widths 1.8 and 5.4, average 3.6, against <span class="math inline">\(2 \times 2.4 = 4.8\)</span> for the single <span class="math inline">\(C\)</span>. Covering 90% in each group gives narrower intervals on average.</p></li>
-<li><p>At <span class="math inline">\(c = 1\)</span> the overall coverage is <span class="math inline">\(0.9 + 0.1/3 = 0.933 &gt; 0.9\)</span>, so <span class="math inline">\(C &lt; 1\)</span>, and <span class="math inline">\(0.9c + 0.1\cdot\frac c3 = 0.9333c = 0.9\)</span> gives <span class="math inline">\(C = 0.964\)</span>. Among people with <span class="math inline">\(x = 1\)</span> the coverage is <span class="math inline">\(0.964/3 = 32\%\)</span>, while it is 96% among people with <span class="math inline">\(x = 0\)</span>. A 90% guarantee on average over people can coexist with 32% coverage for a group of one person in ten.</p></li>
-<li><p>Marginal coverage: at least 90%, averaged over the held-out sample and the next person, which a <span class="math inline">\(C\)</span> like (c)’s satisfies. Parts (a) to (c) used the population’s 90th percentile, which gives exactly 90%; split conformal, with <span class="math inline">\(C\)</span> from a finite held-out sample, gives at least 90% on average over that sample. To guarantee 90% among people with <span class="math inline">\(x = 1\)</span>, compute <span class="math inline">\(C\)</span> from held-out rows of that group alone (group-conditional coverage). It needs the group to be known when the interval is made, and enough held-out rows in it.</p></li>
-</ol>
-<p>Common errors: solving <span class="math inline">\(\frac12 c + \frac12\cdot\frac c3 = 0.9\)</span>, which gives <span class="math inline">\(c = 1.35\)</span> and ignores that coverage for <span class="math inline">\(x = 0\)</span> stops at 100% once <span class="math inline">\(c\)</span> passes 1; in (c), assuming <span class="math inline">\(C\)</span> is still above 1.</p>
-</div>
-</div>
-</div>
-<p><strong>Problem 5 (an interval from 19 rows).</strong> <!-- About 6 min. --> At one <span class="math inline">\(x\)</span> there are 19 rows with outcomes <span class="math inline">\(Y_1, \ldots, Y_{19}\)</span>, independent draws from the distribution of <span class="math inline">\(Y\)</span> given <span class="math inline">\(X = x\)</span>, which is continuous with distribution function <span class="math inline">\(F\)</span>. The interval is <span class="math inline">\([\min_i Y_i, \max_i Y_i]\)</span>.</p>
-<ol type="a">
-<li><p>Show that a new outcome <span class="math inline">\(Y\)</span> from the same distribution falls in the interval with probability 0.9, averaging over the 19 rows and <span class="math inline">\(Y\)</span>.</p></li>
-<li><p>Given the 19 rows, the coverage is <span class="math inline">\(F(\max_i Y_i) - F(\min_i Y_i)\)</span>. Take as given that it has the Beta(18, 2) distribution, with distribution function <span class="math inline">\(19u^{18} - 18u^{19}\)</span> and variance <span class="math inline">\(0.9 \times 0.1/21\)</span>. Find its standard deviation, and the probability that the coverage is below 80%.</p></li>
-<li><p>Each of 100 ranges of <span class="math inline">\(x\)</span> gets its own interval of this kind from its own 19 rows. About how many of the intervals cover less than 80%?</p></li>
-<li><p>With 199 rows and the interval from the 10th smallest to the 10th largest, the coverage has mean 0.9 and variance <span class="math inline">\(0.9 \times 0.1/201\)</span>. Find its standard deviation. How does it scale with the number of rows?</p></li>
-</ol>
-<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Hint 1
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-23" class="callout-23-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li>Among the 20 values <span class="math inline">\(Y_1, \ldots, Y_{19}, Y\)</span>, each is equally likely to be the largest, and each equally likely to be the smallest.</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Reveal answer
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-24" class="callout-24-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li><p>The 20 values are independent draws from one continuous distribution, so every ordering is equally likely. <span class="math inline">\(Y\)</span> falls outside the interval only when it is the smallest of the 20 (probability <span class="math inline">\(1/20\)</span>) or the largest (<span class="math inline">\(1/20\)</span>), so it is covered with probability <span class="math inline">\(18/20 = 0.9\)</span>. The 90% averages over the draw of the 19 rows.</p></li>
-<li><p>The standard deviation is <span class="math inline">\(\sqrt{0.09/21} = 0.065\)</span>, so the coverage of one interval is typically 6.5 points from 90%. <span class="math inline">\(P(\text{coverage} &lt; 0.8) = 19(0.8)^{18} - 18(0.8)^{19} = 0.343 - 0.260 = 0.083\)</span>.</p></li>
-<li><p>About <span class="math inline">\(100 \times 0.083 = 8\)</span> of the 100 intervals cover less than 80%, though every one of them has the 90% guarantee on average.</p></li>
-<li><p><span class="math inline">\(\sqrt{0.09/201} = 0.021\)</span>: ten times the rows, about <span class="math inline">\(\sqrt{10}\)</span> times less spread. With <span class="math inline">\(n\)</span> rows the standard deviation is about <span class="math inline">\(\sqrt{0.9 \times 0.1/n}\)</span>, the same as for a share of 0.9 estimated from <span class="math inline">\(n\)</span> rows. An interval at <span class="math inline">\(x\)</span> built from the rows near <span class="math inline">\(x\)</span> is only as reliable as the number of those rows allows.</p></li>
-</ol>
-<p>Common errors: <span class="math inline">\(19/20\)</span> in (a), counting only one end; reading the 90% in (a) as the coverage of the interval in hand.</p>
-</div>
-</div>
-</div>
-<p><strong>Problem 6 (permutation importance and leaving an input out).</strong> <!-- About 8 min. --> <span class="math inline">\(Y = f(X) + \varepsilon\)</span>, with <span class="math inline">\(\varepsilon\)</span> independent of <span class="math inline">\(X\)</span>, mean 0 and variance <span class="math inline">\(\sigma^2\)</span>, and the fitted model is exactly <span class="math inline">\(f\)</span>. Importance is measured in the population. The <strong>permutation importance</strong> of input <span class="math inline">\(j\)</span> is <span class="math inline">\(\mathbb E[(Y - f(X^{(j)}))^2] - \mathbb E[(Y - f(X))^2]\)</span>, where <span class="math inline">\(X^{(j)}\)</span> is <span class="math inline">\(X\)</span> with <span class="math inline">\(X_j\)</span> replaced by an independent copy <span class="math inline">\(X&#39;_j\)</span> from its marginal distribution (what shuffling a column does in a large sample). The <strong>LOCO importance</strong> of input <span class="math inline">\(j\)</span> (leave one covariate out) is <span class="math inline">\(\mathbb E[(Y - \mathbb E[Y \mid X_{-j}])^2] - \mathbb E[(Y - f(X))^2]\)</span>: how much the risk rises when the best model without <span class="math inline">\(X_j\)</span> replaces <span class="math inline">\(f\)</span>.</p>
-<ol type="a">
-<li><p><span class="math inline">\(f(x) = \sum_j f_j(x_j)\)</span>, with independent inputs. Show that the permutation importance of input <span class="math inline">\(j\)</span> is <span class="math inline">\(2\,\mathrm{Var}\,f_j(X_j)\)</span> and its LOCO importance is <span class="math inline">\(\mathrm{Var}\,f_j(X_j)\)</span>.</p></li>
-<li><p>Two inputs, <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> jointly normal, each standard normal, with correlation <span class="math inline">\(\rho\)</span>, and <span class="math inline">\(f(x) = \beta_1x_1 + \beta_2x_2\)</span>. Show that the permutation importance of <span class="math inline">\(X_1\)</span> is <span class="math inline">\(2\beta_1^2\)</span> and its LOCO importance is <span class="math inline">\(\beta_1^2(1 - \rho^2)\)</span>.</p></li>
-<li><p>Take <span class="math inline">\(\beta_1 = \beta_2 = 1\)</span> and <span class="math inline">\(\rho = 0.95\)</span>. Compute both importances for <span class="math inline">\(X_1\)</span>. Which one says that <span class="math inline">\(X_1\)</span> hardly matters, and in what sense is each right?</p></li>
-</ol>
-<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Hint 1
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-25" class="callout-25-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li><span class="math inline">\(Y - f(X^{(j)}) = \varepsilon + f_j(X_j) - f_j(X&#39;_j)\)</span>, a sum of three independent terms.</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 2">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Hint 2
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-26" class="callout-26-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol start="2" type="a">
-<li>If <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> are jointly normal, each standard normal, with correlation <span class="math inline">\(\rho\)</span>, then <span class="math inline">\(\mathbb E[X_1 \mid X_2] = \rho X_2\)</span> and <span class="math inline">\(\mathrm{Var}(X_1 - \rho X_2) = 1 - \rho^2\)</span>.</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Reveal answer
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-27" class="callout-27-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li><p><span class="math inline">\(Y - f(X^{(j)}) = \varepsilon + f_j(X_j) - f_j(X&#39;_j)\)</span>; the other components cancel. The three terms are independent, and <span class="math inline">\(f_j(X_j) - f_j(X&#39;_j)\)</span> has mean 0 and variance <span class="math inline">\(2\,\mathrm{Var}\,f_j(X_j)\)</span>, so the expected square is <span class="math inline">\(\sigma^2 + 2\,\mathrm{Var}\,f_j(X_j)\)</span>. Subtracting <span class="math inline">\(\mathbb E[(Y - f(X))^2] = \sigma^2\)</span> gives <span class="math inline">\(2\,\mathrm{Var}\,f_j(X_j)\)</span>. With independent inputs, <span class="math inline">\(\mathbb E[Y \mid X_{-j}] = \sum_{k \ne j} f_k(X_k) + \mathbb E f_j(X_j)\)</span>, so <span class="math inline">\(Y - \mathbb E[Y \mid X_{-j}] = \varepsilon + f_j(X_j) - \mathbb E f_j(X_j)\)</span>, whose expected square is <span class="math inline">\(\sigma^2 + \mathrm{Var}\,f_j(X_j)\)</span>. LOCO is <span class="math inline">\(\mathrm{Var}\,f_j(X_j)\)</span>, half the permutation importance.</p></li>
-<li><p>Permutation: <span class="math inline">\(Y - f(X^{(1)}) = \varepsilon + \beta_1(X_1 - X&#39;_1)\)</span>, with expected square <span class="math inline">\(\sigma^2 + 2\beta_1^2\)</span>, so the importance is <span class="math inline">\(2\beta_1^2\)</span>, whatever <span class="math inline">\(\rho\)</span>. LOCO: <span class="math inline">\(\mathbb E[Y \mid X_2] = \beta_1\rho X_2 + \beta_2X_2\)</span>, so <span class="math inline">\(Y - \mathbb E[Y \mid X_2] = \varepsilon + \beta_1(X_1 - \rho X_2)\)</span>, with expected square <span class="math inline">\(\sigma^2 + \beta_1^2(1 - \rho^2)\)</span>. LOCO is <span class="math inline">\(\beta_1^2(1 - \rho^2)\)</span>.</p></li>
-<li><p>Permutation importance is 2; LOCO is <span class="math inline">\(1 - 0.9025 = 0.0975\)</span>. LOCO says <span class="math inline">\(X_1\)</span> hardly matters, and for its question it is right: a model refitted without <span class="math inline">\(X_1\)</span> predicts almost as well, because <span class="math inline">\(X_2\)</span> carries nearly the same information. Permutation importance answers another question, how much this <span class="math inline">\(f\)</span> relies on <span class="math inline">\(X_1\)</span>, and it is right that <span class="math inline">\(f\)</span> uses <span class="math inline">\(X_1\)</span> heavily. But it measures that by evaluating <span class="math inline">\(f\)</span> at pairs <span class="math inline">\((X&#39;_1, X_2)\)</span> that, with <span class="math inline">\(\rho = 0.95\)</span>, almost never occur in the data. Neither says what would happen to <span class="math inline">\(Y\)</span> if we changed <span class="math inline">\(X_1\)</span>.</p></li>
-</ol>
-<p>Common errors: in (a), forgetting that <span class="math inline">\(X&#39;_j\)</span> is independent of <span class="math inline">\(X_j\)</span>, which doubles the variance; in (b), using <span class="math inline">\(\mathbb E[X_1 \mid X_2] = X_2\)</span>.</p>
-</div>
-</div>
-</div>
-<p><strong>Problem 7 (a partial dependence plot in three worlds).</strong> <!-- About 8 min. --> In each world below the noises <span class="math inline">\(\varepsilon_1\)</span>, <span class="math inline">\(\varepsilon_2\)</span> and <span class="math inline">\(\varepsilon_Y\)</span> are independent <span class="math inline">\(N(0, 1)\)</span>. The fitted model is the best predictor from <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span>, <span class="math inline">\(f(x_1, x_2) = \mathbb E[Y \mid X_1 = x_1, X_2 = x_2]\)</span>, which here is linear, so its PDP for <span class="math inline">\(X_1\)</span> is a line. Compare its slope with the slope of <span class="math inline">\(\mathbb E[Y \mid do(X_1 = x)]\)</span>.</p>
-<ul>
-<li>World 1: <span class="math inline">\(X_2 = \varepsilon_2\)</span>, <span class="math inline">\(X_1 = X_2 + \varepsilon_1\)</span>, <span class="math inline">\(Y = X_1 + X_2 + \varepsilon_Y\)</span>.</li>
-<li>World 2: <span class="math inline">\(X_1 = \varepsilon_1\)</span>, <span class="math inline">\(X_2 = X_1 + \varepsilon_2\)</span>, <span class="math inline">\(Y = X_2 + \varepsilon_Y\)</span>.</li>
-<li>World 3: <span class="math inline">\(X_1 = \varepsilon_1\)</span>, <span class="math inline">\(Y = X_1 + \varepsilon_Y\)</span>, <span class="math inline">\(X_2 = Y + \varepsilon_2\)</span>.</li>
-</ul>
-<ol type="a">
-<li><p>In each world, draw the graph, find <span class="math inline">\(f\)</span>, its PDP slope for <span class="math inline">\(X_1\)</span>, and the slope of the effect of setting <span class="math inline">\(X_1\)</span>.</p></li>
-<li><p>In each world, would the model on <span class="math inline">\(X_1\)</span> alone, <span class="math inline">\(\mathbb E[Y \mid X_1]\)</span>, have a PDP with the right slope?</p></li>
-<li><p>Which of the two models predicts better, in each world?</p></li>
-</ol>
-<div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-28-contents" aria-controls="callout-28" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Hint 1
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-28" class="callout-28-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li>In world 3, given <span class="math inline">\(X_1\)</span>, the pair <span class="math inline">\((Y, X_2)\)</span> is <span class="math inline">\((X_1 + \varepsilon_Y,\ X_1 + \varepsilon_Y + \varepsilon_2)\)</span>. What is the best prediction of <span class="math inline">\(\varepsilon_Y\)</span> from <span class="math inline">\(\varepsilon_Y + \varepsilon_2\)</span>?</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-29-contents" aria-controls="callout-29" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Reveal answer
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-29" class="callout-29-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="a">
-<li>World 1: <span class="math inline">\(X_2 \to X_1\)</span>, <span class="math inline">\(X_2 \to Y\)</span>, <span class="math inline">\(X_1 \to Y\)</span>; <span class="math inline">\(X_2\)</span> is a common cause. <span class="math inline">\(f(x_1, x_2) = x_1 + x_2\)</span>, PDP slope 1. Setting <span class="math inline">\(X_1 = x\)</span> leaves <span class="math inline">\(X_2\)</span> alone, so <span class="math inline">\(\mathbb E[Y \mid do(X_1 = x)] = x + \mathbb E X_2 = x\)</span>: slope 1. They agree: the model’s other input is a common cause, which is what the adjustment theorem asks for.</li>
-</ol>
-<p>World 2: <span class="math inline">\(X_1 \to X_2 \to Y\)</span>; <span class="math inline">\(X_2\)</span> is a mediator. <span class="math inline">\(Y = X_2 + \varepsilon_Y\)</span> with <span class="math inline">\(\varepsilon_Y\)</span> independent of both inputs, so <span class="math inline">\(f(x_1, x_2) = x_2\)</span> and the PDP slope is 0. Setting <span class="math inline">\(X_1 = x\)</span> makes <span class="math inline">\(X_2 = x + \varepsilon_2\)</span> and <span class="math inline">\(\mathbb E[Y \mid do(X_1 = x)] = x\)</span>: slope 1. The PDP holds <span class="math inline">\(X_2\)</span> at each unit’s value and shows the effect of <span class="math inline">\(X_1\)</span> with the mediator held fixed, here none.</p>
-<p>World 3: <span class="math inline">\(X_1 \to Y \to X_2\)</span>; <span class="math inline">\(X_2\)</span> is a consequence of <span class="math inline">\(Y\)</span>. Given <span class="math inline">\(X_1\)</span>, <span class="math inline">\(Y = X_1 + \varepsilon_Y\)</span> and <span class="math inline">\(X_2 - X_1 = \varepsilon_Y + \varepsilon_2\)</span>, and the best prediction of <span class="math inline">\(\varepsilon_Y\)</span> from <span class="math inline">\(\varepsilon_Y + \varepsilon_2\)</span> is half of it, so <span class="math inline">\(f(x_1, x_2) = x_1 + \frac12(x_2 - x_1) = \frac12x_1 + \frac12x_2\)</span>. PDP slope <span class="math inline">\(\frac12\)</span>; the effect has slope 1. <span class="math inline">\(X_2\)</span> contains information about <span class="math inline">\(\varepsilon_Y\)</span>, and holding it fixed hides part of <span class="math inline">\(X_1\)</span>’s effect.</p>
-<ol start="2" type="a">
-<li><p>World 1: <span class="math inline">\(X_1 = X_2 + \varepsilon_1\)</span> has variance 2, so <span class="math inline">\(\mathbb E[X_2 \mid X_1] = \frac12X_1\)</span> and <span class="math inline">\(\mathbb E[Y \mid X_1] = 1.5X_1\)</span>: slope 1.5, wrong, because the common cause is left out. Worlds 2 and 3: <span class="math inline">\(\mathbb E[Y \mid X_1] = X_1\)</span>, slope 1, right. No one choice of inputs is right in all three worlds: which one is right depends on the graph.</p></li>
-<li><p>The model on both inputs is the best predictor from them, so it predicts at least as well as the model on <span class="math inline">\(X_1\)</span> alone in every world, and strictly better here. In worlds 2 and 3 the model that predicts best has the wrong PDP.</p></li>
-</ol>
-<p>Common errors: in world 3, leaving <span class="math inline">\(X_2\)</span> out of <span class="math inline">\(f\)</span> because it comes “after” <span class="math inline">\(Y\)</span>; computing the PDP slope as the slope of <span class="math inline">\(Y\)</span> on <span class="math inline">\(X_1\)</span> alone.</p>
-</div>
-</div>
-</div>
-<p><strong>Problem 8 (calibration in two groups).</strong> <!-- About 8 min. --> A score takes the values 0.2 and 0.8. In two groups of 100 people:</p>
+<p><strong>Problem 3 (calibration in two groups).</strong> <!-- About 8 min. --> A score takes the values 0.2 and 0.8. In two groups of 100 people:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -3205,7 +2929,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 <li><p>Let <span class="math inline">\(S\)</span> be any score that is calibrated in a group with base rate <span class="math inline">\(p\)</span>, so <span class="math inline">\(P(Y = 1 \mid S) = S\)</span>. Show that <span class="math inline">\(\mathbb E S = p\)</span>, and so <span class="math inline">\(p\,\mathbb E[S \mid Y = 1] + (1 - p)\,\mathbb E[S \mid Y = 0] = p\)</span>. Use this to show that two groups with different base rates cannot have the same <span class="math inline">\(\mathbb E[S \mid Y = 1]\)</span> and the same <span class="math inline">\(\mathbb E[S \mid Y = 0]\)</span>, unless <span class="math inline">\(\mathbb E[S \mid Y = 1] = 1\)</span> and <span class="math inline">\(\mathbb E[S \mid Y = 0] = 0\)</span>.</p></li>
 </ol>
 <div class="answer callout callout-style-default callout-note callout-titled" title="Hint 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-30-contents" aria-controls="callout-30" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3214,7 +2938,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-30" class="callout-30-contents callout-collapse collapse">
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol start="4" type="a">
 <li><span class="math inline">\(\mathbb E S = \mathbb E\big[P(Y = 1 \mid S)\big]\)</span>. Write the second equation for both groups with the same two averages, and divide one by the other.</li>
@@ -3223,7 +2947,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-31-contents" aria-controls="callout-31" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3232,7 +2956,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-31" class="callout-31-contents callout-collapse collapse">
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
 <li><p>Group A: <span class="math inline">\(50/100 = 0.50\)</span>. Group B: <span class="math inline">\(32/100 = 0.32\)</span>. In A, <span class="math inline">\(40/50 = 0.8\)</span> of the people with score 0.8 have the condition and <span class="math inline">\(10/50 = 0.2\)</span> of those with 0.2; in B, <span class="math inline">\(16/20 = 0.8\)</span> and <span class="math inline">\(16/80 = 0.2\)</span>. Overall, <span class="math inline">\(56/70 = 0.8\)</span> and <span class="math inline">\(26/130 = 0.2\)</span>. Calibrated within each group and overall.</p></li>
@@ -3279,7 +3003,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># round(sapply(ks, function(k) knn_at(x0, k, d)), 3)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-32-contents" aria-controls="callout-32" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3288,7 +3012,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-32" class="callout-32-contents callout-collapse collapse">
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>knn_at <span class="ot">&lt;-</span> <span class="cf">function</span>(x0, k, d) <span class="fu">mean</span>(d<span class="sc">$</span>y[<span class="fu">order</span>(<span class="fu">abs</span>(d<span class="sc">$</span>x <span class="sc">-</span> x0))[<span class="dv">1</span><span class="sc">:</span>k]])</span>
@@ -3321,7 +3045,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-33-contents" aria-controls="callout-33" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-21-contents" aria-controls="callout-21" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3330,7 +3054,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-33" class="callout-33-contents callout-collapse collapse">
+<div id="callout-21" class="callout-21-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>On this sample the fit at <span class="math inline">\(x_0\)</span> is 0.22, 0.50, 0.73, 0.83, 0.85, 0.63, 0.57 for <span class="math inline">\(k\)</span> = 5, 10, 25, 50, 90, 150, 250, against <span class="math inline">\(f^\star(x_0) = 1\)</span>. With <span class="math inline">\(k = 10\)</span> the curve follows the noise of a few rows (variance). With <span class="math inline">\(k = 150\)</span> the neighbors of <span class="math inline">\(x_0\)</span> reach about 0.15 on each side, where <span class="math inline">\(\sin(2\pi x)\)</span> is well below its peak, so the average is pulled down at the peak and up at the trough (bias). One sample cannot separate the two; question 2 repeats the experiment.</p>
 <p>Common errors: <code>order(d$x - x0)</code>, without the absolute value, which takes the rows with the smallest <span class="math inline">\(x\)</span>; <code>sort()</code> in place of <code>order()</code>, which returns the distances instead of the rows.</p>
@@ -3352,7 +3076,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># q2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-34-contents" aria-controls="callout-34" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3361,7 +3085,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-34" class="callout-34-contents callout-collapse collapse">
+<div id="callout-22" class="callout-22-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="fl">0.95</span>)</span>
@@ -3394,7 +3118,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(q2<span class="sc">$</span>ci_covers[q2<span class="sc">$</span>k <span class="sc">==</span> <span class="dv">10</span>] <span class="sc">-</span> <span class="fl">0.9</span>) <span class="sc">&lt;</span> <span class="fl">0.03</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-35-contents" aria-controls="callout-35" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3403,7 +3127,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-35" class="callout-35-contents callout-collapse collapse">
+<div id="callout-23" class="callout-23-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The mean squared error is smallest at <span class="math inline">\(k\)</span> = 90 (0.014). There the bias is -0.056, 0.54 of a standard deviation, and the confidence interval covers 85% instead of 90%; problem 2 shows that a fit tuned to predict well has a bias of about half a standard deviation, and so a coverage of about 86%. At <span class="math inline">\(k = 150\)</span> the bias is 1.72 standard deviations and the confidence interval covers 45%; at <span class="math inline">\(k = 250\)</span>, 0%. The prediction interval covers 88% to 90% at every <span class="math inline">\(k\)</span>.</p>
 <p>Common errors: comparing the fits with <code>y0</code> for the confidence interval, which asks about <span class="math inline">\(f^\star(x_0)\)</span>; using <code>sd(fits)</code> over all <span class="math inline">\(k\)</span> at once.</p>
@@ -3412,7 +3136,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <p><strong>Question 3.</strong> Using question 2’s table: which <code>k</code> would you use for a confidence interval for <span class="math inline">\(f^\star(x_0)\)</span> that covers about 90%, and what does it cost? Why does the prediction interval keep its coverage at <span class="math inline">\(k = 150\)</span>?</p>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-36-contents" aria-controls="callout-36" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3421,7 +3145,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-36" class="callout-36-contents callout-collapse collapse">
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>A <span class="math inline">\(k\)</span> smaller than the one that predicts best: at <span class="math inline">\(k\)</span> = 25 the confidence interval covers 89%, with half-width <span class="math inline">\(1.645/5 = 0.33\)</span> against <span class="math inline">\(1.645/\sqrt{90}\)</span> = 0.17 at <span class="math inline">\(k\)</span> = 90. This is undersmoothing: the fit used for inference is rougher than the fit used for prediction. The prediction interval’s half-width is <span class="math inline">\(1.645\sqrt{1 + 1/k}\)</span>, about 1.65, so a bias of 0.14 at <span class="math inline">\(k = 150\)</span> moves it only a little; the confidence interval’s half-width at <span class="math inline">\(k = 150\)</span> is 0.13, smaller than that bias.</p>
 </div>
@@ -3444,7 +3168,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># q4</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-37-contents" aria-controls="callout-37" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3453,7 +3177,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-37" class="callout-37-contents callout-collapse collapse">
+<div id="callout-25" class="callout-25-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>hold <span class="ot">&lt;-</span> <span class="fu">sim</span>(<span class="dv">500</span>)</span>
@@ -3482,7 +3206,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-38-contents" aria-controls="callout-38" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3491,7 +3215,7 @@ M&#39;(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-38" class="callout-38-contents callout-collapse collapse">
+<div id="callout-26" class="callout-26-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>With <span class="math inline">\(C\)</span> from the training residuals the interval covers 0%, 79%, 87% of fresh rows for <span class="math inline">\(k\)</span> = 1, 5 and 25; from held-out residuals, 92%, 89%, 90%. With <span class="math inline">\(k = 1\)</span> each training row is its own nearest neighbor, every training residual is 0, and the interval has width 0. With <span class="math inline">\(k = 5\)</span> and <span class="math inline">\(25\)</span> the training residuals are too small by about the factor <span class="math inline">\(\sqrt{(k - 1)/(k + 1)}\)</span> that problem 1 derived, and the coverage is close to its 82% and 89%, a little lower here because the neighborhoods overlap and <span class="math inline">\(f^\star\)</span> is not flat. The held-out <span class="math inline">\(C\)</span> is larger, 2.53, 1.84, 1.70 against 0.00, 1.42, 1.57, and gives about 90% for every <span class="math inline">\(k\)</span>: on average over <span class="math inline">\(x\)</span>, not at each <span class="math inline">\(x\)</span>.</p>
 <p>Common errors: <code>quantile(..., 0.9)</code> of the signed residuals instead of their absolute values; computing <code>pred_fresh</code> from <code>hold</code>.</p>
@@ -3523,7 +3247,7 @@ x_1 \sim \mathrm{Unif}[-2, 2], \quad x_2 = x_1 + \varepsilon_2, \quad y = \tfrac
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co"># c(mse = base, var_y = var(world_fresh$y))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-39-contents" aria-controls="callout-39" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3532,7 +3256,7 @@ x_1 \sim \mathrm{Unif}[-2, 2], \quad x_2 = x_1 + \varepsilon_2, \quad y = \tfrac
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-39" class="callout-39-contents callout-collapse collapse">
+<div id="callout-27" class="callout-27-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>base <span class="ot">&lt;-</span> <span class="fu">mse</span>(world_fresh<span class="sc">$</span>y, <span class="fu">predict</span>(fit_all, world_fresh))</span>
@@ -3546,7 +3270,7 @@ x_1 \sim \mathrm{Unif}[-2, 2], \quad x_2 = x_1 + \varepsilon_2, \quad y = \tfrac
 </div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-40-contents" aria-controls="callout-40" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-28-contents" aria-controls="callout-28" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3555,7 +3279,7 @@ x_1 \sim \mathrm{Unif}[-2, 2], \quad x_2 = x_1 + \varepsilon_2, \quad y = \tfrac
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-40" class="callout-40-contents callout-collapse collapse">
+<div id="callout-28" class="callout-28-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The fresh MSE is 0.081, against a variance of 2.66: the forest explains 97% of the variance of <span class="math inline">\(y\)</span>. As a predictor it does very well.</p>
 </div>
@@ -3574,7 +3298,7 @@ x_1 \sim \mathrm{Unif}[-2, 2], \quad x_2 = x_1 + \varepsilon_2, \quad y = \tfrac
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co"># loco_imp &lt;- c(x1 = ____, x2 = ____, x3 = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-41-contents" aria-controls="callout-41" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-29-contents" aria-controls="callout-29" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3583,7 +3307,7 @@ x_1 \sim \mathrm{Unif}[-2, 2], \quad x_2 = x_1 + \varepsilon_2, \quad y = \tfrac
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-41" class="callout-41-contents callout-collapse collapse">
+<div id="callout-29" class="callout-29-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>perm_imp <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">c</span>(<span class="st">&quot;x1&quot;</span>, <span class="st">&quot;x2&quot;</span>, <span class="st">&quot;x3&quot;</span>), <span class="cf">function</span>(j) {</span>
@@ -3617,7 +3341,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-42-contents" aria-controls="callout-42" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-30-contents" aria-controls="callout-30" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3626,7 +3350,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-42" class="callout-42-contents callout-collapse collapse">
+<div id="callout-30" class="callout-30-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Every measure ranks <span class="math inline">\(x_3\)</span> first, with shares of 0.95, 0.95, 0.79, 0.79 for split improvement, permutation, LOCO and mean absolute Shapley value. They disagree about <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>, but not about which input the forest relies on: <span class="math inline">\(x_3\)</span> is <span class="math inline">\(y\)</span> plus <span class="math inline">\(x_1\)</span> plus a little noise, so given <span class="math inline">\(x_1\)</span> it nearly pins <span class="math inline">\(y\)</span> down.</p>
 <p>Common errors: shuffling the training rows and scoring on the fresh ones, which mixes two changes; refitting with <code>mtry = 3</code> on two inputs, which <code>randomForest</code> resets with a warning.</p>
@@ -3641,7 +3365,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># })</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-43-contents" aria-controls="callout-43" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-31-contents" aria-controls="callout-31" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3650,7 +3374,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-43" class="callout-43-contents callout-collapse collapse">
+<div id="callout-31" class="callout-31-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pdp_curve <span class="ot">&lt;-</span> <span class="cf">function</span>(fit, d, input, grid) <span class="fu">sapply</span>(grid, <span class="cf">function</span>(t) {</span>
@@ -3689,7 +3413,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-44-contents" aria-controls="callout-44" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-32-contents" aria-controls="callout-32" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3698,7 +3422,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-44" class="callout-44-contents callout-collapse collapse">
+<div id="callout-32" class="callout-32-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The PDP for <span class="math inline">\(x_1\)</span> falls, from 0.13 at <span class="math inline">\(-1\)</span> to -0.30 at <span class="math inline">\(1\)</span>, and 92% of the 500 ICE curves end lower at <span class="math inline">\(1\)</span> than at <span class="math inline">\(-1\)</span>: read at face value, raising <span class="math inline">\(x_1\)</span> lowers <span class="math inline">\(y\)</span>. The PDP for <span class="math inline">\(x_3\)</span> rises steeply, from -0.46 to 0.40, and the PDP for <span class="math inline">\(x_2\)</span> rises a little. Most ICE curves slope the same way as the PDP.</p>
 <p>Common errors: <code>d[[input]] &lt;- grid</code> instead of <code>t</code>, which sets each row to a different value; averaging over the grid instead of over the rows.</p>
@@ -3707,7 +3431,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 <p><strong>Question 8.</strong> Before you run anything else, write down two answers. (a) From questions 6 and 7: which input gives the largest rise in the forest’s average prediction when it is moved from <span class="math inline">\(-1\)</span> to <span class="math inline">\(1\)</span>, and how large is the rise? (b) From the equations above: what would setting each input from <span class="math inline">\(-1\)</span> to <span class="math inline">\(1\)</span> do to the mean of <span class="math inline">\(y\)</span>? The sign is enough.</p>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-45-contents" aria-controls="callout-45" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-33-contents" aria-controls="callout-33" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3716,7 +3440,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-45" class="callout-45-contents callout-collapse collapse">
+<div id="callout-33" class="callout-33-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="a">
 <li><p><span class="math inline">\(x_3\)</span>: moving it from <span class="math inline">\(-1\)</span> to <span class="math inline">\(1\)</span> raises the forest’s average prediction by about 0.86, and every importance measure ranks it first. The PDPs also show <span class="math inline">\(x_1\)</span> with a small negative slope and <span class="math inline">\(x_2\)</span> with a small positive one.</p></li>
@@ -3738,7 +3462,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 <span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-46-contents" aria-controls="callout-46" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-34-contents" aria-controls="callout-34" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3747,7 +3471,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-46" class="callout-46-contents callout-collapse collapse">
+<div id="callout-34" class="callout-34-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>world_do_x1 <span class="ot">&lt;-</span> <span class="cf">function</span>(n, t) {</span>
@@ -3782,7 +3506,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-47-contents" aria-controls="callout-47" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-35-contents" aria-controls="callout-35" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3791,7 +3515,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-47" class="callout-47-contents callout-collapse collapse">
+<div id="callout-35" class="callout-35-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Setting <span class="math inline">\(x_1\)</span> from <span class="math inline">\(-1\)</span> to <span class="math inline">\(1\)</span> raises the mean of <span class="math inline">\(y\)</span> by 2.83; setting <span class="math inline">\(x_2\)</span>, by 2.52. Setting <span class="math inline">\(x_3\)</span> changes nothing: <span class="math inline">\(y\)</span>’s equation does not contain <span class="math inline">\(x_3\)</span>, so <span class="math inline">\(\mathbb E[y \mid do(x_3 = t)] = \mathbb E[y]\)</span> for every <span class="math inline">\(t\)</span>. The input every tool ranked first has no effect, and the PDP for <span class="math inline">\(x_1\)</span> has the wrong sign. In closed form, <span class="math inline">\(\mathbb E[y \mid do(x_1 = t)] = \frac12 t + \frac32 e^{-0.32}\sin t\)</span>, since <span class="math inline">\(\mathbb E\sin(t + \varepsilon_2) = e^{-0.8^2/2}\sin t\)</span> for <span class="math inline">\(\varepsilon_2 \sim N(0, 0.8^2)\)</span>; and <span class="math inline">\(\mathbb E[y \mid do(x_2 = t)] = \frac32\sin t\)</span>, since <span class="math inline">\(\mathbb E x_1 = 0\)</span>.</p>
 <p>The tools miss because each describes the forest, and the forest is right about prediction. Given <span class="math inline">\(x_3 = y + x_1 + \varepsilon_3\)</span>, a larger <span class="math inline">\(x_1\)</span> with <span class="math inline">\(x_3\)</span> held fixed means a smaller <span class="math inline">\(y\)</span>, which is what the PDP for <span class="math inline">\(x_1\)</span> shows. That is a fact about the conditional distribution, not about what setting <span class="math inline">\(x_1\)</span> does.</p>
@@ -3808,7 +3532,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 <span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="co"># c(all_three = base, x1_x2 = ____, x1 = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-48-contents" aria-controls="callout-48" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-36-contents" aria-controls="callout-36" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3817,7 +3541,7 @@ mean |Shapley| 0.12 0.09 0.79</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-48" class="callout-48-contents callout-collapse collapse">
+<div id="callout-36" class="callout-36-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>fit_x1 <span class="ot">&lt;-</span> <span class="fu">gam</span>(y <span class="sc">~</span> <span class="fu">s</span>(x1), <span class="at">data =</span> world)</span>
@@ -3845,7 +3569,7 @@ effect        -1.41  0.00  1.42</code></pre>
 </div>
 </div>
 <div class="answer full callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-49-contents" aria-controls="callout-49" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-37-contents" aria-controls="callout-37" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3854,7 +3578,7 @@ effect        -1.41  0.00  1.42</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-49" class="callout-49-contents callout-collapse collapse">
+<div id="callout-37" class="callout-37-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <thead>
@@ -3914,7 +3638,7 @@ effect        -1.41  0.00  1.42</code></pre>
 <span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="co"># reliability(p_tune, nh_tune$diabetes)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-50-contents" aria-controls="callout-50" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-38-contents" aria-controls="callout-38" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3923,7 +3647,7 @@ effect        -1.41  0.00  1.42</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-50" class="callout-50-contents callout-collapse collapse">
+<div id="callout-38" class="callout-38-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>reliability <span class="ot">&lt;-</span> <span class="cf">function</span>(p, y) <span class="fu">tibble</span>(p, y) <span class="sc">|&gt;</span></span>
@@ -3952,7 +3676,7 @@ effect        -1.41  0.00  1.42</code></pre>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-51-contents" aria-controls="callout-51" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-39-contents" aria-controls="callout-39" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3961,7 +3685,7 @@ effect        -1.41  0.00  1.42</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-51" class="callout-51-contents callout-collapse collapse">
+<div id="callout-39" class="callout-39-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>At both ends. In the top bin the average score is 0.61 and the share with diabetes 0.40; in the bottom bins the scores are near 0 while 3% to 7% of the adults have diabetes. The trees push their scores too far toward 0 and 1.</p>
 </div>
@@ -3977,7 +3701,7 @@ effect        -1.41  0.00  1.42</code></pre>
 <span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="co"># c(before = log_loss(nh_tune$diabetes[half_b], p_tune[half_b]), after = ____)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal solution">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-52-contents" aria-controls="callout-52" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-40-contents" aria-controls="callout-40" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -3986,7 +3710,7 @@ effect        -1.41  0.00  1.42</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-52" class="callout-52-contents callout-collapse collapse">
+<div id="callout-40" class="callout-40-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>half_a <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">1500</span></span>
@@ -4042,7 +3766,7 @@ effect        -1.41  0.00  1.42</code></pre>
 </div>
 </div>
 <div class="answer callout callout-style-default callout-tip callout-titled" title="Reveal answer">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-53-contents" aria-controls="callout-53" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-41-contents" aria-controls="callout-41" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -4051,7 +3775,7 @@ effect        -1.41  0.00  1.42</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-53" class="callout-53-contents callout-collapse collapse">
+<div id="callout-41" class="callout-41-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The fitted slope on the logit is 0.39, positive, so the new score is an increasing function of the old one: the order of the adults is unchanged, and only the numbers attached to them move. A slope below 1 pulls the scores toward the middle, which is what a score that is too confident at both ends needs. The log loss on the other 1,500 adults falls from 0.375 to 0.329, and on those adults the reliability table moves from a top bin that is too high to one close to the diagonal. The recalibration is fitted on adults not used to fit the trees, and checked on adults not used to fit either.</p>
 <p>Common errors: fitting the recalibration on the training adults, whose scores look better than they are; scoring it on the 1,500 adults it was fitted on, which makes the “after” number look better than it is.</p>
