@@ -1,0 +1,57 @@
+---
+title: "Teacher note: week 9 seminar"
+subtitle: "For class teachers"
+format:
+  html:
+    toc: false
+    embed-resources: true
+---
+
+## Keep or rush
+
+In seminar order. The notebook has eight problems; the hour uses three of them, problems 1, 2 and 4, and the others are spares. Planned total 60 minutes, with no slack: past that, cut in the order marked, and the minimum seminar is below the table. The numbers below are for a run in order.
+
+| Item | Min | | If short |
+|---|---:|---|---|
+| Problem 1: a training residual of a $k$-nearest-neighbor fit has variance $\sigma^2(1 - \frac1k)$, a new one $\sigma^2(1 + \frac1k)$; coverage with training residuals 0, 66%, 82%, 86%, 89% for $k$ = 1, 2, 5, 10, 50; with held-out residuals 90%, $\sqrt{1 + 1/k}$ times as wide as with the truth | 7 | Keep | The two variances, then the $k = 1$ and $k = 5$ coverages |
+| Problem 2(a to c): bias $ah^2/6$, variance $\sigma^2/(2nh)$; at the $h$ that minimizes the mean squared error, bias/sd $= 1/2$ for every $n$, so the confidence interval covers 86% | 6 | Keep | $M'(h) = 0$ gives $4\,\text{bias}^2 = \text{variance}$; then $\Phi(1.145) - \Phi(-2.145)$ |
+| Problem 2(d to f): with $d$ inputs bias/sd $= \sqrt d/2$, 74% at $d = 4$, 56% at $d = 9$; the prediction interval covers 89.95% at $k = 90$; undersmooth to fix the confidence interval | 4 | Rush; cut second | Say the three results |
+| Problem 4: one $C = 2.4$ covers 100% and 80% of the two groups; two $C$s, 0.9 and 2.7, average width 3.6 against 4.8; with a 90/10 split, one $C = 0.964$ covers 32% of the small group | 7 | Keep | (a) and (c): the 80% and the 32% |
+| Coding 1, question 1: the fits at $x_0$ on one sample, 0.22 ($k = 5$) to 0.57 ($k = 250$), against 1; the plot of $k = 10$ and $k = 150$ | 2 | Rush | Run it and show the plot |
+| Coding 1, question 2: over 2,000 samples the mean squared error is smallest at $k = 90$, where bias/sd is 0.54 and the confidence interval covers 85%; 45% at $k = 150$, 0 at 250; the prediction interval 88% to 90% throughout | 5 | Keep | The `mse` and `ci_covers` lines; the table at $k$ = 10, 90, 150 |
+| Coding 1, question 3: a smaller $k$ (25: 89%, half-width 0.33 against 0.17) for the confidence interval | 1 | Rush | Say it |
+| Coding 1, question 4: $C$ from training residuals covers 0%, 79%, 87% for $k$ = 1, 5, 25; from held-out residuals 92%, 89%, 90% | 4 | Keep | The two `C` lines |
+| Coding 2, question 5: the forest on $x_1, x_2, x_3$ has fresh MSE 0.081 against a variance of 2.66 | 1 | Rush | Read the two numbers |
+| Coding 2, question 6: every importance measure ranks $x_3$ first, shares 0.95, 0.95, 0.79, 0.79 (split, permutation, LOCO, Shapley) | 6 | Keep | The permutation loop, then the table; LOCO's three refits can be shown |
+| Coding 2, question 7: the PDP for $x_1$ falls from 0.13 to $-0.30$ between $-1$ and 1, and 92% of the ICE curves slope down; the PDP for $x_3$ rises from $-0.46$ to 0.40 | 5 | Keep | `d[[input]] <- t; mean(predict(fit, d))`, then the figure |
+| Coding 2, question 8: write down the answer the tools suggest, $x_3$ | 2 | Keep | One minute of writing; do not skip it |
+| Coding 2, question 9: setting $x_1$ from $-1$ to 1 raises $y$ by 2.83, $x_2$ by 2.52, $x_3$ by 0 | 5 | Keep | `x1 <- rep(t, n)`, then the figure. Keep it whatever else is cut |
+| Coding 2, question 10: the smooth of $x_1$ alone matches the effect ($-1.35$ to 1.39 against $-1.41$ to 1.42) and predicts worst (MSE 0.72 against 0.08); for $x_2$, include $x_1$ and leave out $x_3$ | 5 | Keep the first part; cut the $x_2$ part first | The table, then: only the graph says which model to read |
+
+: {tbl-colwidths="[52,6,14,28]"}
+
+Minimum seminar, about 45 minutes: problems 1 and 4, problem 2(a to c), coding questions 2, 4, 6, 7, 8 and 9. With more time, add question 10 first, then problem 2(d to f).
+
+## If you read on
+
+How it runs
+
+- Students did exercises 1 to 3 at home (quantile optimality, the coverage of a split conformal interval, partial dependence by hand). Open the [instructor notebook](https://ml4ds.com/teachers/notebook9_instructor.html) on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are solution code and short answers. Show an exercise's solution only if asked. The [complete notebook](https://ml4ds.com/teachers/notebook9_complete.html) has the full answers, with common errors, for preparing. Each problem's solution stands on its own.
+- Coding part 2 is the main exercise: every tool from the lecture ranks first an input that has no effect, and the partial dependence plot for $x_1$ has the wrong sign. Keep question 8, the written answer, before question 9 reveals the truth.
+- One seed, `set.seed(310)` at the NHANES split (the lecture's split, used only in the optional item), then every simulation in order. A student who skips a chunk that draws random numbers gets slightly different numbers from then on; no conclusion depends on the second decimal.
+
+What students should see
+
+- Exercise 1: $G'(\hat y) = F(\hat y) - \tau$. Exercise 2: the new residual's rank among $m + 1$ is uniform, so coverage $k/(m+1)$; for $m = 5$ no finite $C$. Exercise 3: the ICE curves are $t\,x_{i2}$ and the PDP for $x_1$ is flat; the PDP for $x_2$ is $1.5t$.
+- Spare problems, if a room is fast: 3 (one leaf of a tree: coverage 94% at the center, 81% at the edge), 5 (19 rows: coverage has standard deviation 6.5 points, below 80% with probability 0.083), 6 (permutation importance $2\,\mathrm{Var}\,f_j$ and LOCO $\mathrm{Var}\,f_j$; with correlation 0.95, 2 against 0.0975), 7 (three worlds: PDP slopes 1, 0, $\frac12$ against effects of 1), 8 (a score calibrated in both groups, with true positive rates 0.8 and 0.5).
+- Run times in the build container (R 4.3, randomForest 4.7-1.2, kernelshap): the whole notebook in under a minute; question 2's 2,000 samples about 3 seconds, the Shapley values about 5, the three LOCO refits about 4. A laptop may take two or three times as long.
+
+Where they get stuck
+
+- Problem 1: giving a training residual the variance of $\bar y$, $\sigma^2/k$.
+- Problem 4(a): solving $\frac12 c + \frac12\cdot\frac c3 = 0.9$, which gives 1.35 and ignores that coverage for $x = 0$ stops at 100% once $c$ passes 1.
+- Question 2: comparing the fits with `y0` for the confidence interval, which is about $f^\star(x_0)$.
+- Question 7: `d[[input]] <- grid` instead of `t`, which sets each row to a different value.
+- Question 9: drawing `x1` at random inside `world_do_x1`, which gives the observational mean, or leaving out the line for `x2`, so that the intervention does not reach $y$ through it. In the student file, a chunk with a blank starts with `#| eval: false`: students uncomment the lines, fill the blanks and delete that line.
+
+Sources: the data note at [ml4ds.com/data/nhanes.html](https://ml4ds.com/data/nhanes.html); exercise 2 follows Lei, J., G'Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018), Distribution-free predictive inference for regression, *Journal of the American Statistical Association* 113(523), 1094--1111, [doi:10.1080/01621459.2017.1307116](https://doi.org/10.1080/01621459.2017.1307116); problem 8 cites Chouldechova, A. (2017), Fair prediction with disparate impact, *Big Data* 5(2), 153--163, [doi:10.1089/big.2016.0047](https://doi.org/10.1089/big.2016.0047), and Kleinberg, J., Mullainathan, S. and Raghavan, M. (2017), Inherent trade-offs in the fair determination of risk scores, *ITCS 2017*, LIPIcs 67, 43:1--43:23, [doi:10.4230/LIPIcs.ITCS.2017.43](https://doi.org/10.4230/LIPIcs.ITCS.2017.43).

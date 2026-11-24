@@ -1,0 +1,484 @@
+---
+title: "Week 9 seminar"
+author: "Joshua Loftus"
+format:
+  html:
+    toc: true
+    embed-resources: false
+execute:
+  echo: true
+  warning: false
+  message: false
+  error: false
+---
+
+::: {.callout-note}
+This is the student version of the notebook. The code you write goes where a line says `# ...` or has a `____`. A code chunk with a blank starts with `#| eval: false`, so the file renders as it stands; delete that line once you have filled the blank. Working through the chunks one at a time in RStudio (Ctrl/Cmd+Enter) is unaffected. Answers are revealed in the seminar.
+:::
+
+```{r}
+#| label: setup
+library(tidyverse)      # should've already install.packages("tidyverse")
+library(randomForest)   # might need to install.packages("randomForest")
+library(kernelshap)     # Shapley values; might need to install.packages("kernelshap")
+library(mgcv)           # ships with R
+library(NHANES)         # the optional item's data; might need to install.packages("NHANES")
+library(xgboost)        # the optional item; version 3 or later
+library(patchwork)      # two plots side by side
+theme_set(theme_minimal())
+options(pillar.sigfig = 4)   # tables print four significant digits
+mse <- function(y, pred) mean((y - pred)^2)
+pct <- function(v) sprintf("%.0f%%", 100 * v)
+```
+
+## Before the seminar
+
+<!-- At home, before the seminar. -->
+
+The lecture stated two results without proof: exercise 1 proves quantile optimality, and exercise 2 proves the coverage of a split conformal interval. Exercise 3 computes partial dependence and individual curves by hand. Do all three on paper before the seminar. You may use, without proof: differentiation under the integral sign (if $G(a) = \int_{-\infty}^a h(y, a)\,dy$, then $G'(a) = h(a, a) + \int_{-\infty}^a \partial_a h(y, a)\,dy$, and similarly for $\int_a^\infty$, where the boundary term changes sign); and that if $V_1, \ldots, V_{m+1}$ are independent draws from one continuous distribution, every ordering of them is equally likely.
+
+::: {.callout-warning title="Hints"}
+Each exercise has hints, collapsed below it. Do not open a hint unless you have been stuck for at least a few minutes, and open them in order. Solutions are shown in the seminar if you ask.
+:::
+
+**Exercise 1 (quantile optimality).** $Y$ has a continuous distribution function $F$ with a density $f$ and a finite mean, and $0 < \tau < 1$. The pinball loss of a prediction $\hat y$ is $\rho_\tau(y - \hat y) = (y - \hat y)\big(\tau - \mathbf 1\{y < \hat y\}\big)$. Let $G(\hat y) = \mathbb E[\rho_\tau(Y - \hat y)]$.
+
+(a) Before any calculus: move the prediction from $\hat y$ up to $\hat y + \delta$, with $\delta > 0$ small. How does the loss change for an outcome below $\hat y$? For an outcome above $\hat y + \delta$? Use this to guess at which $\hat y$ the expected loss stops falling.
+
+(b) Write $G(\hat y)$ as two integrals, one over $y < \hat y$ and one over $y \ge \hat y$, and show that $G'(\hat y) = F(\hat y) - \tau$.
+
+(c) Show that $G$ is convex, and conclude that a $\tau$-quantile, a value $q_\tau$ with $F(q_\tau) = \tau$, minimizes $G$. When is the minimizer not unique?
+
+(d) Explain why the same argument shows that, for $Y$ given $X = x$, the conditional $\tau$-quantile $q_\tau(x)$ is the best prediction at $x$, and why the function $x \mapsto q_\tau(x)$ minimizes $\mathbb E[\rho_\tau(Y - h(X))]$ over functions $h$.
+
+::: {.callout-note collapse="true" title="Hint 1"}
+(a) Below the prediction the loss is $(1 - \tau)(\hat y - y)$; above it, $\tau(y - \hat y)$. Which outcomes are below $\hat y$, and with what probability?
+:::
+
+::: {.callout-note collapse="true" title="Hint 2"}
+(b) The boundary terms from differentiating under the integral sign are zero: at $y = \hat y$ both integrands vanish.
+:::
+
+::: {.callout-note collapse="true" title="Hint 3"}
+(c) A differentiable function whose derivative is nondecreasing is convex. (d) $\mathbb E[\rho_\tau(Y - h(X))] = \mathbb E\big[\mathbb E[\rho_\tau(Y - h(X)) \mid X]\big]$.
+:::
+
+**Exercise 2 (coverage of a split conformal interval; Lei et al. 2018).** A model $\hat f$ has been fitted on training rows. Then $m$ held-out rows $(X_1, Y_1), \ldots, (X_m, Y_m)$ and a new row $(X, Y)$ are independent draws from one distribution, independent of the training rows. Write $R_i = |Y_i - \hat f(X_i)|$ and $R = |Y - \hat f(X)|$, and assume these have a continuous distribution, so that there are no ties. Let $k = \lceil 0.9(m + 1)\rceil$, assume $k \le m$, and let $C$ be the $k$th smallest of $R_1, \ldots, R_m$. The interval is $\hat f(X) \pm C$.
+
+(a) Explain why, given the training rows, $R_1, \ldots, R_m, R$ are independent and identically distributed. Show that the interval covers $Y$ exactly when $R$ is among the $k$ smallest of all $m + 1$ values, and conclude that $P\big(Y \in \hat f(X) \pm C\big) = k/(m + 1) \ge 0.9$. What does this probability average over?
+
+(b) Compute $k$ and the coverage for $m = 9$, $19$ and $1{,}000$. What happens when $m = 5$?
+
+(c) Suppose $C$ is computed the same way from the training rows' residuals instead. Which step of (a) fails, and in which direction does the coverage usually move?
+
+(d) Suppose the held-out rows were also used to choose between several models before $C$ was computed. Which step of (a) fails?
+
+::: {.callout-note collapse="true" title="Hint 1"}
+(a) Given the training rows, $\hat f$ is a fixed function.
+:::
+
+::: {.callout-note collapse="true" title="Hint 2"}
+(a) The interval covers $Y$ when $R \le C$. If $R \le C$, how many of $R_1, \ldots, R_m$ can be smaller than $R$?
+:::
+
+**Exercise 3 (partial dependence by hand).** A fitted model is $\hat f(x_1, x_2) = x_1x_2$, and the data are four units:
+
+| Unit | $x_1$ | $x_2$ |
+|---|---:|---:|
+| 1 | 0 | $-2$ |
+| 2 | 1 | $-1$ |
+| 3 | 2 | 1 |
+| 4 | 3 | 2 |
+
+The individual conditional expectation (ICE) curve of unit $i$ for $x_1$ is $t \mapsto \hat f(t, x_{i2})$, and the partial dependence plot (PDP) for $x_1$ is their average, $\mathrm{PDP}_1(t) = \frac14\sum_{i=1}^4 \hat f(t, x_{i2})$.
+
+(a) Evaluate each unit's ICE curve for $x_1$ at $t = -1, 0, 1$, and sketch the four curves.
+
+(b) Compute $\mathrm{PDP}_1(t)$. Does the PDP say that $\hat f$ uses $x_1$? Does it?
+
+(c) Compute the PDP for $x_2$. The model treats $x_1$ and $x_2$ alike; why are the two PDPs different?
+
+(d) Now $\hat f(x_1, x_2) = g_1(x_1) + g_2(x_2)$ for any functions $g_1$ and $g_2$. Show that the ICE curves for $x_1$ are parallel and that $\mathrm{PDP}_1(t) = g_1(t) + c$ for a constant $c$.
+
+(e) Unit 1's ICE curve at $t = 3$ evaluates $\hat f(3, -2)$. Is there a unit like that in the data?
+
+::: {.callout-note collapse="true" title="Hint 1"}
+(a), (b) Each ICE curve is a line through the origin. In the sum for $\mathrm{PDP}_1(t)$, $t$ is the same for every unit.
+:::
+
+## Problems
+
+<!-- Pen and paper. Minutes for each problem are in its own comment; the teacher note says which are done in the room. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the one before it. -->
+
+Problems 1 to 5 use the normal distribution function $\Phi$; for a 90% interval, $\Phi(1.645) = 0.95$. If $W \sim N(\mu, s^2)$, then $P(|W| \le c) = \Phi\big((c - \mu)/s\big) - \Phi\big((-c - \mu)/s\big)$.
+
+**Problem 1 (the residuals of a nearest-neighbor fit).** <!-- About 7 min. --> The inputs come in groups of $k$ rows that share the same $x$, and $Y = f^\star(x) + \varepsilon$ with $\varepsilon \sim N(0, \sigma^2)$, independent across rows. The $k$-nearest-neighbor fit predicts, at the $x$ of a group, the mean $\bar y$ of that group's $k$ outcomes $y_1, \ldots, y_k$. A training row's residual is $y_i - \bar y$. A new outcome at that $x$ is $Y_0 = f^\star(x) + \varepsilon_0$, independent of the group's outcomes.
+
+(a) Find the distribution of a training residual $y_i - \bar y$, and of the new residual $Y_0 - \bar y$.
+
+(b) There are many groups, and $C$ is the 90th percentile of the absolute training residuals over all of them, so $C$ is close to the 90th percentile of the distribution of $|y_i - \bar y|$. Find it. Find the coverage $P(|Y_0 - \bar y| \le C)$ as a function of $k$, and evaluate it at $k = 1, 2, 5, 10$ and $50$.
+
+(c) Instead, $C$ comes from held-out rows: one more row in each group, not used in the fit. What is $C$ now, and the coverage? How much wider is the interval than $f^\star(x) \pm 1.645\sigma$, which needs the truth?
+
+(d) In this setting, larger $k$ gives a narrower interval with the right coverage. What does the setting leave out that stops us from taking $k$ as large as we like?
+
+**Problem 2 (smoothing bias and the confidence interval).** <!-- About 10 min. --> One input. The rows are spread evenly in $x$, $n$ of them per unit of $x$, and $Y = f^\star(x) + \varepsilon$ with independent $N(0, \sigma^2)$ errors, $\sigma$ known. At a point $x_0$ the fit $\hat f(x_0)$ averages the $k = 2nh$ outcomes with $|x_i - x_0| \le h$. $f^\star$ is twice differentiable, with $f^{\star\prime\prime}(x_0) = a \ne 0$. For small $h$, use $f^\star(x_i) \approx f^\star(x_0) + f^{\star\prime}(x_0)(x_i - x_0) + \frac a2(x_i - x_0)^2$, and treat the $x_i$ in the window as spread evenly over it, so that the average of $x_i - x_0$ is 0 and the average of $(x_i - x_0)^2$ is $h^2/3$.
+
+(a) Show that the bias $\mathbb E\hat f(x_0) - f^\star(x_0)$ is about $ah^2/6$, and that the variance of $\hat f(x_0)$ is $\sigma^2/(2nh)$.
+
+(b) Find the $h$ that minimizes the mean squared error, bias$^2$ + variance, and show that at that $h$ the bias is half the standard deviation of $\hat f(x_0)$, whatever $n$, $\sigma$ and $a$.
+
+(c) The confidence interval $\hat f(x_0) \pm 1.645\,\mathrm{sd}$ for $f^\star(x_0)$, with $\mathrm{sd} = \sigma/\sqrt k$, ignores the bias. What is its coverage at the $h$ of (b)? Does more data help?
+
+(d) With $d$ inputs and a window of half-width $h$ in each, the bias is still proportional to $h^2$ and the variance to $1/(nh^d)$. Show that at the $h$ that minimizes the mean squared error, bias/sd $= \sqrt d/2$, and find the coverage for $d = 4$ and $d = 9$.
+
+(e) The prediction interval $\hat f(x_0) \pm 1.645\sqrt{\sigma^2 + \mathrm{sd}^2}$ for a new outcome $Y_0 = f^\star(x_0) + \varepsilon_0$. With one input, the $h$ of (b) and $k = 90$, what is its coverage?
+
+(f) How would you change the fit used for the confidence interval to bring its coverage back to 90%, and what does that cost?
+
+**Problem 3 (one leaf of a tree).** <!-- About 7 min. --> A tree's leaf covers $-1 \le x \le 1$ (after rescaling $x$), where $x$ is uniform, $f^\star(x) = x$ and the noise is $N(0, 1)$. The leaf has many training rows, so it predicts 0, the average of $f^\star$ over the leaf. Held-out rows in the leaf give $C$, the 90th percentile of $|Y - 0|$ over the leaf: $C = 1.90$ (you need not compute it).
+
+(a) Find the coverage of $0 \pm 1.90$ at $x = 0$ and at $x = 1$.
+
+(b) What is the coverage averaged over the leaf?
+
+(c) The tree splits the leaf at 0, and each new leaf has many rows. What does each new leaf predict? How far is $f^\star$ from the prediction at the edges now? With the new $C = 1.71$, find the coverage at the center and at the edges of a new leaf.
+
+(d) What stops us from splitting until every leaf is tiny?
+
+**Problem 4 (one width, two noise levels).** <!-- About 7 min. --> Half the people have $x = 0$ and half have $x = 1$. Given $x$, $Y = f^\star(x) + \varepsilon$, with $\varepsilon$ uniform on $[-1, 1]$ when $x = 0$ and uniform on $[-3, 3]$ when $x = 1$. The model is exact, $\hat f = f^\star$, and the interval is $f^\star(x) \pm C$, with one $C$ for everyone.
+
+(a) Find the $C$ that covers 90% of people. What is the coverage among people with $x = 0$, and among people with $x = 1$?
+
+(b) Find the $C$ for each value of $x$ that covers 90% of the people with that value. Compare the average width with (a).
+
+(c) Now 90% of people have $x = 0$ and 10% have $x = 1$. Find the one $C$ that covers 90% of people, and the coverage among people with $x = 1$.
+
+(d) Which coverage does a split conformal interval with one $C$ guarantee here? How could you guarantee 90% among people with $x = 1$?
+
+**Problem 5 (an interval from 19 rows).** <!-- About 6 min. --> At one $x$ there are 19 rows with outcomes $Y_1, \ldots, Y_{19}$, independent draws from the distribution of $Y$ given $X = x$, which is continuous with distribution function $F$. The interval is $[\min_i Y_i, \max_i Y_i]$.
+
+(a) Show that a new outcome $Y$ from the same distribution falls in the interval with probability 0.9, averaging over the 19 rows and $Y$.
+
+(b) Given the 19 rows, the coverage is $F(\max_i Y_i) - F(\min_i Y_i)$. Take as given that it has the Beta(18, 2) distribution, with distribution function $19u^{18} - 18u^{19}$ and variance $0.9 \times 0.1/21$. Find its standard deviation, and the probability that the coverage is below 80%.
+
+(c) Each of 100 ranges of $x$ gets its own interval of this kind from its own 19 rows. About how many of the intervals cover less than 80%?
+
+(d) With 199 rows and the interval from the 10th smallest to the 10th largest, the coverage has mean 0.9 and variance $0.9 \times 0.1/201$. Find its standard deviation. How does it scale with the number of rows?
+
+**Problem 6 (permutation importance and leaving an input out).** <!-- About 8 min. --> $Y = f(X) + \varepsilon$, with $\varepsilon$ independent of $X$, mean 0 and variance $\sigma^2$, and the fitted model is exactly $f$. Importance is measured in the population. The **permutation importance** of input $j$ is $\mathbb E[(Y - f(X^{(j)}))^2] - \mathbb E[(Y - f(X))^2]$, where $X^{(j)}$ is $X$ with $X_j$ replaced by an independent copy $X'_j$ from its marginal distribution (what shuffling a column does in a large sample). The **LOCO importance** of input $j$ (leave one covariate out) is $\mathbb E[(Y - \mathbb E[Y \mid X_{-j}])^2] - \mathbb E[(Y - f(X))^2]$: how much the risk rises when the best model without $X_j$ replaces $f$.
+
+(a) $f(x) = \sum_j f_j(x_j)$, with independent inputs. Show that the permutation importance of input $j$ is $2\,\mathrm{Var}\,f_j(X_j)$ and its LOCO importance is $\mathrm{Var}\,f_j(X_j)$.
+
+(b) Two inputs, $X_1$ and $X_2$ standard normal with correlation $\rho$, and $f(x) = \beta_1x_1 + \beta_2x_2$. Show that the permutation importance of $X_1$ is $2\beta_1^2$ and its LOCO importance is $\beta_1^2(1 - \rho^2)$.
+
+(c) Take $\beta_1 = \beta_2 = 1$ and $\rho = 0.95$. Compute both importances for $X_1$. Which one says that $X_1$ hardly matters, and in what sense is each right?
+
+**Problem 7 (a partial dependence plot in three worlds).** <!-- About 8 min. --> In each world below the noises $\varepsilon_1$, $\varepsilon_2$ and $\varepsilon_Y$ are independent $N(0, 1)$. The fitted model is the best predictor from $X_1$ and $X_2$, $f(x_1, x_2) = \mathbb E[Y \mid X_1 = x_1, X_2 = x_2]$, which here is linear, so its PDP for $X_1$ is a line. Compare its slope with the slope of $\mathbb E[Y \mid do(X_1 = x)]$.
+
+- World 1: $X_2 = \varepsilon_2$, $X_1 = X_2 + \varepsilon_1$, $Y = X_1 + X_2 + \varepsilon_Y$.
+- World 2: $X_1 = \varepsilon_1$, $X_2 = X_1 + \varepsilon_2$, $Y = X_2 + \varepsilon_Y$.
+- World 3: $X_1 = \varepsilon_1$, $Y = X_1 + \varepsilon_Y$, $X_2 = Y + \varepsilon_2$.
+
+(a) In each world, draw the graph, find $f$, its PDP slope for $X_1$, and the slope of the effect of setting $X_1$.
+
+(b) In each world, would the model on $X_1$ alone, $\mathbb E[Y \mid X_1]$, have a PDP with the right slope?
+
+(c) Which of the two models predicts better, in each world?
+
+**Problem 8 (calibration in two groups).** <!-- About 8 min. --> A score takes the values 0.2 and 0.8. In two groups of 100 people:
+
+| Group | Score | People | With the condition |
+|---|---:|---:|---:|
+| A | 0.8 | 50 | 40 |
+| A | 0.2 | 50 | 10 |
+| B | 0.8 | 20 | 16 |
+| B | 0.2 | 80 | 16 |
+
+(a) Find each group's base rate. Is the score calibrated within each group? Overall?
+
+(b) Predict 1 when the score is above 0.5. In each group, find the true positive rate (the share of people with the condition who are predicted 1), the false positive rate (the share of people without it who are predicted 1) and the positive predictive value (the share of people predicted 1 who have it).
+
+(c) In each group, find the average score among people with the condition and among people without it.
+
+(d) Let $S$ be any score that is calibrated in a group with base rate $p$, so $P(Y = 1 \mid S) = S$. Show that $\mathbb E S = p$, and so $p\,\mathbb E[S \mid Y = 1] + (1 - p)\,\mathbb E[S \mid Y = 0] = p$. Use this to show that two groups with different base rates cannot have the same $\mathbb E[S \mid Y = 1]$ and the same $\mathbb E[S \mid Y = 0]$, unless $\mathbb E[S \mid Y = 1] = 1$ and $\mathbb E[S \mid Y = 0] = 0$.
+
+## Coding
+
+<!-- About 36 min: part 1 12, part 2 24. Skeleton lines in comments are scaffolds: the statistical operation is what you write. Everything headed "Optional, can be done at home" is outside the seminar. -->
+
+Two simulations, where the truth is known: part 1 checks intervals at one point, and part 2 asks a fitted model a causal question. The optional item at the end recalibrates a score on the NHANES adults, with the lecture's split, which is made here so that the seed is set once, before every random step below.
+
+```{r}
+#| label: data
+nh <- NHANESraw |>
+  filter(Age >= 20) |>
+  select(Diabetes, Gender, Age, Race1, Poverty, Weight, Height, BMI, Pulse, BPSysAve, TotChol, DirectChol, PhysActive) |>
+  drop_na() |>
+  mutate(diabetes = as.numeric(Diabetes == "Yes"), male = as.numeric(Gender == "male"),
+         active = as.numeric(PhysActive == "Yes"))
+set.seed(310)   # change this number: a different split, and different numbers below
+nh_id <- sample(nrow(nh))
+nh_train <- nh[nh_id[1:4000], ]
+nh_tune <- nh[nh_id[4001:7000], ]
+nh_test <- nh[nh_id[7001:nrow(nh)], ]
+```
+
+### 1. Intervals at one point
+
+<!-- 12 min: question 1 2, question 2 5, question 3 1, question 4 4. -->
+
+One input, uniform on $[0, 1]$; $f^\star(x) = \sin(2\pi x)$; noise $N(0, 1)$; 500 training rows. At $x_0 = 0.25$, $f^\star$ is at its peak, $f^\star(x_0) = 1$. The $k$-nearest-neighbor fit at $x_0$ averages the outcomes of the $k$ rows whose $x$ is closest to $x_0$. With $\sigma = 1$ known, the usual intervals, which ignore any bias, are: for $f^\star(x_0)$, the confidence interval $\hat f(x_0) \pm 1.645/\sqrt k$; for a new outcome $Y_0$ at $x_0$, the prediction interval $\hat f(x_0) \pm 1.645\sqrt{1 + 1/k}$.
+
+```{r}
+#| label: sim-setup
+f_star <- function(x) sin(2 * pi * x)
+sim <- function(n) tibble(x = runif(n), y = f_star(x) + rnorm(n))
+x0 <- 0.25
+ks <- c(5, 10, 25, 50, 90, 150, 250)
+```
+
+**Question 1.** Complete `knn_at(x0, k, d)`, which returns the mean outcome of the `k` rows of `d` whose `x` is closest to `x0`. On one sample of 500 rows, compute the fit at $x_0$ for each `k` in `ks`. Then look at the plot of the fits for $k = 10$ and $k = 150$ across $x$. What goes wrong for small $k$, and for large $k$?
+
+```{r}
+#| eval: false
+# knn_at <- function(x0, k, d) ____
+d <- sim(500)
+# round(sapply(ks, function(k) knn_at(x0, k, d)), 3)
+```
+
+```{r}
+#| label: knn-plot
+#| eval: !expr exists("knn_at")
+#| fig-width: 8
+#| fig-height: 3.5
+x_grid <- seq(0, 1, by = 0.005)
+curves <- expand_grid(k = c(10, 150), x = x_grid) |>
+  mutate(fit = map2_dbl(x, k, function(x, k) knn_at(x, k, d)), k = paste("k =", k))
+ggplot(d, aes(x, y)) + geom_point(alpha = 0.25, size = 0.8) +
+  geom_line(data = tibble(x = x_grid, y = f_star(x_grid)), linetype = "dashed") +
+  geom_line(data = curves, aes(x, fit, colour = k), linewidth = 1) +
+  geom_vline(xintercept = x0, colour = "grey50") +
+  labs(colour = NULL, title = "Dashed: f*. Grey line: x0 = 0.25")
+```
+
+**Question 2.** Repeat on 2,000 samples of 500 rows (the chunk below, about 3 seconds). For each `k`, estimate the bias and the standard deviation of $\hat f(x_0)$, its mean squared error, and how often each interval covers: the confidence interval covers $f^\star(x_0)$, and the prediction interval covers a new outcome $Y_0$. At which `k` is the mean squared error smallest? How often does each interval cover there?
+
+```{r}
+#| label: knn-sims
+#| eval: !expr exists("knn_at")
+fits <- replicate(2000, { d_s <- sim(500); sapply(ks, function(k) knn_at(x0, k, d_s)) })   # one row per k, one column per sample
+y0 <- f_star(x0) + rnorm(2000)                                                            # a new outcome for each sample
+```
+
+```{r}
+#| eval: false
+# q2 <- tibble(k = ks,
+#              bias = rowMeans(fits) - f_star(x0),
+#              sd = apply(fits, 1, sd),
+#              mse = ____,
+#              ci_covers = ____,
+#              pi_covers = ____)
+# q2
+```
+
+Checkpoint (run it; if it stops, fix question 2 before going on): for small `k` the bias is negligible, so the confidence interval should cover about 90%.
+
+```{r}
+#| eval: !expr exists("q2")
+stopifnot(abs(q2$ci_covers[q2$k == 10] - 0.9) < 0.03)
+```
+
+**Question 3.** Using question 2's table: which `k` would you use for a confidence interval for $f^\star(x_0)$ that covers about 90%, and what does it cost? Why does the prediction interval keep its coverage at $k = 150$?
+
+**Question 4.** Now an interval at every $x$: $\hat f(x) \pm C$, with one $C$. For $k$ = 1, 5 and 25 and the sample `d` from question 1, compute $C$ two ways: as the 90th percentile of the absolute training residuals (each training row's fit uses that row too), and from 500 held-out rows, as the $\lceil 0.9 \times 501 \rceil = 451$st smallest of their absolute residuals. Check each on 2,000 fresh rows. Compare with problem 1, which predicted 0%, 82% and 89% for training residuals when $f^\star$ is flat.
+
+```{r}
+#| eval: false
+hold <- sim(500)
+fresh <- sim(2000)
+# q4 <- map_dfr(c(1, 5, 25), function(k) {
+#   fit_train <- sapply(d$x, function(x) knn_at(x, k, d))
+#   pred_hold <- sapply(hold$x, function(x) knn_at(x, k, d))
+#   pred_fresh <- sapply(fresh$x, function(x) knn_at(x, k, d))
+#   C_train <- ____
+#   C_hold <- ____
+#   tibble(k, C_train, C_hold,
+#          covers_train = mean(____),
+#          covers_hold = mean(____))
+# })
+# q4
+```
+
+### 2. Every tool, one causal question
+
+<!-- 24 min: question 5 1, question 6 6, question 7 5, question 8 2, question 9 5, question 10 5. -->
+
+A simulated world with three inputs. $x_1$ causes $x_2$; $x_1$ and $x_2$ cause $y$; $x_3$ is caused by $y$ and by $x_1$:
+$$
+x_1 \sim \mathrm{Unif}[-2, 2], \quad x_2 = x_1 + \varepsilon_2, \quad y = \tfrac12 x_1 + \tfrac32\sin x_2 + \varepsilon_y, \quad x_3 = y + x_1 + \varepsilon_3,
+$$
+with independent normal noises of standard deviations 0.8, 0.5 and 0.3. The question: **which input should we set, and how, to raise $y$, and by how much?** A forest fitted on all three inputs predicts $y$ well. Apply every interpretation tool from the lecture, write down what they suggest, then intervene in the simulator and compare.
+
+```{r}
+#| label: world
+draw_world <- function(n) {
+  x1 <- runif(n, -2, 2)
+  x2 <- x1 + rnorm(n, 0, 0.8)
+  y <- 0.5 * x1 + 1.5 * sin(x2) + rnorm(n, 0, 0.5)
+  x3 <- y + x1 + rnorm(n, 0, 0.3)
+  tibble(x1, x2, x3, y)
+}
+world <- draw_world(2000)
+world_fresh <- draw_world(2000)
+fit_all <- randomForest(y ~ x1 + x2 + x3, data = world, ntree = 300, mtry = 3, nodesize = 20)
+```
+
+**Question 5.** Compute the forest's MSE on the fresh rows, and compare it with the variance of $y$.
+
+```{r}
+#| eval: false
+# base <- mse(world_fresh$y, ____)
+# c(mse = base, var_y = var(world_fresh$y))
+```
+
+**Question 6.** Importance, four ways. Split importance and Shapley values are computed in the chunk after this one. Write the other two: permutation importance (shuffle one input in the fresh rows and score again), and leave-one-covariate-out (LOCO: refit the forest without the input, with `mtry = 2` and the other settings unchanged, and score it on the fresh rows), each as the rise in fresh MSE over `base`. Which input does each measure rank first, and with what share of its total?
+
+```{r}
+#| eval: false
+# perm_imp <- sapply(c("x1", "x2", "x3"), function(j) {
+#   d_perm <- world_fresh
+#   d_perm[[j]] <- ____
+#   ____ - base
+# })
+# fit_no_x1 <- randomForest(____, data = world, ntree = 300, mtry = 2, nodesize = 20)
+# fit_no_x2 <- ____
+# fit_no_x3 <- ____
+# loco_imp <- c(x1 = ____, x2 = ____, x3 = ____)
+```
+
+```{r}
+#| label: importance-table
+#| eval: !expr exists("perm_imp") && exists("loco_imp")
+split_imp <- importance(fit_all)[, "IncNodePurity"]
+shap <- permshap(fit_all, X = select(world_fresh[1:200, ], x1, x2, x3),
+                 bg_X = select(world[1:200, ], x1, x2, x3), verbose = FALSE)   # about 5 seconds
+shap_imp <- colMeans(abs(shap$S))
+imp <- rbind(split = split_imp, permutation = perm_imp, LOCO = loco_imp, `mean |Shapley|` = shap_imp)
+round(imp / rowSums(imp), 2)   # each measure as a share of its total
+```
+
+**Question 7.** Partial dependence by hand. Complete `pdp_curve()`: for each value `t` in `grid`, set the input to `t` for every row of `d` and average the forest's predictions. The chunk after it draws the three curves, and 100 ICE curves for $x_1$. According to the PDP, what happens to $y$ when $x_1$ goes from $-1$ to $1$? What share of the ICE curves for $x_1$ slope down there?
+
+```{r}
+#| eval: false
+# pdp_curve <- function(fit, d, input, grid) sapply(grid, function(t) {
+#   d[[input]] <- ____
+#   ____
+# })
+```
+
+```{r}
+#| label: pdp-ice
+#| eval: !expr exists("pdp_curve")
+#| fig-width: 9
+#| fig-height: 3.5
+grid <- seq(-2, 2, by = 0.25)
+d_pd <- world_fresh[1:500, ]
+pd <- tibble(t = grid, x1 = pdp_curve(fit_all, d_pd, "x1", grid), x2 = pdp_curve(fit_all, d_pd, "x2", grid),
+             x3 = pdp_curve(fit_all, d_pd, "x3", grid))
+ice <- d_pd[rep(1:100, each = length(grid)), ] |> mutate(unit = rep(1:100, each = length(grid)), t = rep(grid, 100), x1 = t)
+ice$pred <- predict(fit_all, ice)                                                    # one ICE curve per unit, the first 100 units
+slope_ice <- (predict(fit_all, mutate(d_pd, x1 = 1)) - predict(fit_all, mutate(d_pd, x1 = -1))) / 2   # each unit's ICE slope from -1 to 1
+p_pd <- pd |> pivot_longer(-t, names_to = "input", values_to = "pdp") |>
+  ggplot(aes(t, pdp, colour = input)) + geom_line(linewidth = 1.2) + labs(x = "value set", y = "PDP", title = "Partial dependence")
+p_ice <- ggplot(ice, aes(t, pred, group = unit)) + geom_line(alpha = 0.2) +
+  geom_line(data = pd, aes(t, x1, group = NULL), colour = "black", linewidth = 1.4) +
+  labs(x = "x1 set to", y = "prediction", title = "ICE curves for x1, and their average")
+p_pd | p_ice
+c(pdp_x1_at_minus1 = pd$x1[pd$t == -1], pdp_x1_at_1 = pd$x1[pd$t == 1], share_ice_down = mean(slope_ice < 0))
+```
+
+**Question 8.** Before you run anything else: from questions 6 and 7, which input would you set to raise $y$, in which direction, and how much would you expect $y$ to change if you moved it from $-1$ to $1$? Write the answer down.
+
+**Question 9.** Intervene in the simulator. $do(x_1 = t)$ replaces $x_1$'s line with $x_1 = t$ for everyone and leaves the other equations alone. Complete `world_do_x1(n, t)` and `world_do_x2(n, t)`, each returning the mean of $y$ over `n` draws. What is $\mathbb E[y \mid do(x_3 = t)]$? Answer from the equations, without code. The chunk after it plots each input's effect against its PDP.
+
+```{r}
+#| eval: false
+# world_do_x1 <- function(n, t) {
+#   x1 <- ____
+#   x2 <- ____
+#   y <- ____
+#   mean(y)
+# }
+# world_do_x2 <- function(n, t) {
+#   ____
+# }
+```
+
+```{r}
+#| label: truth-plot
+#| eval: !expr exists("world_do_x1") && exists("world_do_x2") && exists("pd")
+#| fig-width: 9
+#| fig-height: 3.2
+truth <- tibble(t = grid, x1 = sapply(grid, function(t) world_do_x1(1e5, t)),
+                x2 = sapply(grid, function(t) world_do_x2(1e5, t)), x3 = 0)
+bind_rows(pivot_longer(pd, -t, names_to = "input") |> mutate(curve = "PDP of the forest"),
+          pivot_longer(truth, -t, names_to = "input") |> mutate(curve = "effect of setting it")) |>
+  ggplot(aes(t, value, linetype = curve)) + geom_line(linewidth = 1) + facet_wrap(~ input) +
+  labs(x = "value set", y = NULL, linetype = NULL) + theme(legend.position = "bottom")
+```
+
+**Question 10.** Fit two more models: a forest on $x_1$ and $x_2$ only (the forest `fit_no_x3` from question 6), and a smooth of $x_1$ alone, `gam(y ~ s(x1), data = world)`. Compute each model's PDP for $x_1$ and its fresh MSE. Which PDP matches the effect of setting $x_1$, and which model predicts best? To read the effect of $x_2$ from a PDP, which inputs should the model include? Which of the tools in questions 6 and 7 could have told you which model to read?
+
+```{r}
+#| eval: false
+# fit_x1 <- ____
+# rbind(forest_x1_x2 = pdp_curve(fit_no_x3, d_pd, "x1", c(-1, 0, 1)),
+#       gam_x1 = ____,
+#       effect = truth$x1[truth$t %in% c(-1, 0, 1)])
+# c(all_three = base, x1_x2 = ____, x1 = ____)
+```
+
+### Optional, can be done at home: recalibrating a score
+
+Boosted trees with xgboost's defaults predict diabetes from nine measurements, fitted on the lecture's training adults ([data note](https://ml4ds.com/data/nhanes.html)).
+
+```{r}
+#| label: calib-fit
+inputs <- c("Age", "male", "BMI", "Pulse", "BPSysAve", "TotChol", "DirectChol", "Poverty", "active")
+fit_xg <- xgboost(x = as.matrix(nh_train[inputs]), y = factor(nh_train$diabetes), nthread = 1)
+p_tune <- predict(fit_xg, as.matrix(nh_tune[inputs]))   # predicted probabilities for the tuning adults
+logit <- function(p) log(p / (1 - p))
+log_loss <- function(y, p) -mean(y * log(p) + (1 - y) * log(1 - p))
+```
+
+**Question 11.** Complete `reliability(p, y)`: sort the adults into ten bins of equal size by their score (`ntile()`), and return each bin's average score and share with diabetes. Apply it to the tuning adults. Where is the score too confident?
+
+```{r}
+#| eval: false
+# reliability <- function(p, y) tibble(p, y) |>
+#   mutate(bin = ____) |>
+#   group_by(bin) |>
+#   summarise(mean_p = ____, share = ____)
+# reliability(p_tune, nh_tune$diabetes)
+```
+
+**Question 12.** Recalibrate. On the first 1,500 tuning adults, fit a logistic regression of diabetes on the logit of the score; apply it to the other 1,500. Compare the reliability tables and the log loss on those 1,500, before and after. Is the new score an increasing function of the old one?
+
+```{r}
+#| eval: false
+# half_a <- 1:1500
+# half_b <- 1501:3000
+# recal <- glm(____, family = binomial,
+#              data = tibble(diabetes = nh_tune$diabetes[half_a], logit_p = ____))
+# p_new <- predict(recal, tibble(logit_p = ____), type = "response")
+# c(before = log_loss(nh_tune$diabetes[half_b], p_tune[half_b]), after = ____)
+```
+
+## References
+
+- Chouldechova, A. (2017). Fair prediction with disparate impact: a study of bias in recidivism prediction instruments. *Big Data* 5(2), 153--163. [doi:10.1089/big.2016.0047](https://doi.org/10.1089/big.2016.0047)
+- Kleinberg, J., Mullainathan, S. and Raghavan, M. (2017). Inherent trade-offs in the fair determination of risk scores. *8th Innovations in Theoretical Computer Science Conference (ITCS 2017)*, LIPIcs 67, 43:1--43:23. [doi:10.4230/LIPIcs.ITCS.2017.43](https://doi.org/10.4230/LIPIcs.ITCS.2017.43)
+- Lei, J., G'Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. *Journal of the American Statistical Association* 113(523), 1094--1111. [doi:10.1080/01621459.2017.1307116](https://doi.org/10.1080/01621459.2017.1307116)
+- The NHANES adults: [data note](https://ml4ds.com/data/nhanes.html).

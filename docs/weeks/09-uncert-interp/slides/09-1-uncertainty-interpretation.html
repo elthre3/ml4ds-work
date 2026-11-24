@@ -512,7 +512,7 @@
 <h2>Coverage at every <span class="math inline">\(x\)</span> in many dimensions</h2>
 <p>An interval at <span class="math inline">\(x\)</span> is learned from the <span class="math inline">\(n_x\)</span> rows near <span class="math inline">\(x\)</span>. Its coverage there misses 90% by</p>
 <ul>
-<li><strong>Variance</strong>: about <span class="math inline">\(\sqrt{0.9 \times 0.1 / n_x}\)</span>, as for a share of 0.9 among <span class="math inline">\(n_x\)</span> rows: 4 points with 50 rows, 1.3 with 500</li>
+<li><strong>Variance</strong>: about <span class="math inline">\(\sqrt{0.9 \times 0.1 / n_x}\)</span>: 4 points with 50 rows, 1.3 with 500</li>
 <li><strong>Bias</strong>: rows farther from <span class="math inline">\(x\)</span> have different quantiles. Edges off by half a noise standard deviation: 86%, not 90%</li>
 </ul>
 <p>More inputs, fewer rows near <span class="math inline">\(x\)</span>. 2,000 rows, 5 bins for each input:</p>

@@ -235,7 +235,7 @@ Questions: what a 90 percent interval should promise you; how to compute C for e
 
 Cut order: dark content slides (among them "Multicalibration"); "Coverage at every x in many dimensions" to its table; "Recalibration" to its first sentence; "The same loss, a flexible model" to its figure.
 
-Exercises (stage 3): quantile optimality (the proof); partial dependence by hand; the model-intervention corollary.
+In the notebook: exercise 1 proves quantile optimality; exercise 2 the coverage of split conformal; exercise 3 is partial dependence by hand.
 :::
 
 ### Week 9: uncertainty and interpretation
@@ -791,11 +791,12 @@ Edges fitted near each $x$: two quantile fits on $n$ rows. The noise is known, s
 ::: {.notes}
 Variance: the interval between the 5th and 95th percentiles of n rows drawn at x covers a share of the distribution with a Beta distribution, mean about 0.9, variance about 0.9 x 0.1 / n. One edge alone: tau(1 - tau) / n = 0.0475 / n; the two edges' errors are correlated (covariance 0.05 x 0.05 / n), so (0.0475 + 0.0475 - 2 x 0.0025) / n = 0.09 / n. Bias: a normal outcome, both edges half a standard deviation too high.
 So the speed depends on the rows near x, on how fast the quantiles change with x compared with the noise, and on the number of inputs. Table: five bins per input, 2,000 rows spread evenly. A smoother, a tree or boosting instead of bins: the same trade-off, since a neighborhood holding enough rows is wide.
+The variance is that of a share of 0.9 among n_x rows.
 :::
 
 An interval at $x$ is learned from the $n_x$ rows near $x$. Its coverage there misses 90% by
 
-- **Variance**: about $\sqrt{0.9 \times 0.1 / n_x}$, as for a share of 0.9 among $n_x$ rows: 4 points with 50 rows, 1.3 with 500
+- **Variance**: about $\sqrt{0.9 \times 0.1 / n_x}$: 4 points with 50 rows, 1.3 with 500
 - **Bias**: rows farther from $x$ have different quantiles. Edges off by half a noise standard deviation: `r round(100 * (pnorm(qnorm(0.95) + 0.5) - pnorm(0.5 - qnorm(0.95))))`%, not 90%
 
 More inputs, fewer rows near $x$. 2,000 rows, 5 bins for each input:
@@ -1450,7 +1451,7 @@ If asked about dependence: weight, height and BMI together `r sprintf("%.1f", lo
 ```{r}
 #| label: importance
 #| fig-width: 10
-#| fig-height: 3.7
+#| fig-height: 3.4
 #| fig-align: center
 tibble(input = factor(imp_inputs, levels = imp_inputs[order(split_j)]),
        `split improvement` = split_j / sum(split_j), permutation = pi_j / sum(pi_j), `mean |Shapley value|` = shap_j / sum(shap_j),
@@ -1653,7 +1654,7 @@ NDDP falls: with $x_3$ held fixed, a larger $x_1$ means a smaller $y$. TDP follo
 
 ::: {.notes}
 A heuristic; no statement to learn. First bullet: Zhao and Hastie (2021): the PDP is the adjustment formula with the model in place of the regression function. It also needs overlap, as in the causality lecture. Second bullet: Loftus, Bynum and Hansen (2024), Theorem 2.10: PDP = NDDP.
-The formal statement (the model-intervention corollary) and its derivation: an exercise.
+The formal statement (the model-intervention corollary) is not set; the notebook's coding part 2 shows the failures.
 The first is a claim about the world, and needs assumptions about the world. The second is about the model.
 :::
 
