@@ -14,8 +14,8 @@ In seminar order. The notebook has eight problems; the hour uses three of them, 
 | Item | Min | | If short |
 |---|---:|---|---|
 | Problem 1: a training residual of a $k$-nearest-neighbor fit has variance $\sigma^2(1 - \frac1k)$, a new one $\sigma^2(1 + \frac1k)$; coverage with training residuals 0, 66%, 82%, 86%, 89% for $k$ = 1, 2, 5, 10, 50; with held-out residuals 90%, $\sqrt{1 + 1/k}$ times as wide as with the truth | 7 | Keep | The two variances, then the $k = 1$ and $k = 5$ coverages |
-| Problem 2(a to c): bias $ah^2/6$, variance $\sigma^2/(2nh)$; at the $h$ that minimizes the mean squared error, bias/sd $= 1/2$ for every $n$, so the confidence interval covers 86% | 6 | Keep | $M'(h) = 0$ gives $4\,\text{bias}^2 = \text{variance}$; then $\Phi(1.145) - \Phi(-2.145)$ |
-| Problem 2(d to f): with $d$ inputs bias/sd $= \sqrt d/2$, 74% at $d = 4$, 56% at $d = 9$; the prediction interval covers 89.95% at $k = 90$; undersmooth to fix the confidence interval | 4 | Rush; cut second | Say the three results |
+| Problem 2(a to c): bias $ah^2/6$, variance $\sigma^2/(2nh)$; at the $h$ that minimizes the mean squared error, $|\text{bias}|/\mathrm{sd} = 1/2$ for every $n$ (to leading order), so the confidence interval covers about 86% | 6 | Keep | $M'(h) = 0$ gives $4\,\text{bias}^2 = \text{variance}$; then $\Phi(1.145) - \Phi(-2.145)$ |
+| Problem 2(d to f): with $d$ inputs $|\text{bias}|/\mathrm{sd} = \sqrt d/2$, 74% at $d = 4$, 56% at $d = 9$; the prediction interval covers 89.95% at $k = 90$; undersmooth to fix the confidence interval | 4 | Rush; cut second | Say the three results |
 | Problem 4: one $C = 2.4$ covers 100% and 80% of the two groups; two $C$s, 0.9 and 2.7, average width 3.6 against 4.8; with a 90/10 split, one $C = 0.964$ covers 32% of the small group | 7 | Keep | (a) and (c): the 80% and the 32% |
 | Coding 1, question 1: the fits at $x_0$ on one sample, 0.22 ($k = 5$) to 0.57 ($k = 250$), against 1; the plot of $k = 10$ and $k = 150$ | 2 | Rush | Run it and show the plot |
 | Coding 1, question 2: over 2,000 samples the mean squared error is smallest at $k = 90$, where bias/sd is 0.54 and the confidence interval covers 85%; 45% at $k = 150$, 0 at 250; the prediction interval 88% to 90% throughout | 5 | Keep | The `mse` and `ci_covers` lines; the table at $k$ = 10, 90, 150 |
@@ -23,8 +23,8 @@ In seminar order. The notebook has eight problems; the hour uses three of them, 
 | Coding 1, question 4: $C$ from training residuals covers 0%, 79%, 87% for $k$ = 1, 5, 25; from held-out residuals 92%, 89%, 90% | 4 | Keep | The two `C` lines |
 | Coding 2, question 5: the forest on $x_1, x_2, x_3$ has fresh MSE 0.081 against a variance of 2.66 | 1 | Rush | Read the two numbers |
 | Coding 2, question 6: every importance measure ranks $x_3$ first, shares 0.95, 0.95, 0.79, 0.79 (split, permutation, LOCO, Shapley) | 6 | Keep | The permutation loop, then the table; LOCO's three refits can be shown |
-| Coding 2, question 7: the PDP for $x_1$ falls from 0.13 to $-0.30$ between $-1$ and 1, and 92% of the ICE curves slope down; the PDP for $x_3$ rises from $-0.46$ to 0.40 | 5 | Keep | `d[[input]] <- t; mean(predict(fit, d))`, then the figure |
-| Coding 2, question 8: write down the answer the tools suggest, $x_3$ | 2 | Keep | One minute of writing; do not skip it |
+| Coding 2, question 7: the PDP for $x_1$ falls from 0.13 to $-0.30$ between $-1$ and 1, and 92% of the 500 ICE curves end lower at 1 than at $-1$; the PDP for $x_3$ rises from $-0.46$ to 0.40 | 5 | Keep | `d[[input]] <- t; mean(predict(fit, d))`, then the figure |
+| Coding 2, question 8: two written answers: the tools point to $x_3$ (its PDP rises by 0.86); the equations say setting $x_3$ leaves $y$ unchanged | 2 | Keep | One minute of writing; do not skip it |
 | Coding 2, question 9: setting $x_1$ from $-1$ to 1 raises $y$ by 2.83, $x_2$ by 2.52, $x_3$ by 0 | 5 | Keep | `x1 <- rep(t, n)`, then the figure. Keep it whatever else is cut |
 | Coding 2, question 10: the smooth of $x_1$ alone matches the effect ($-1.35$ to 1.39 against $-1.41$ to 1.42) and predicts worst (MSE 0.72 against 0.08); for $x_2$, include $x_1$ and leave out $x_3$ | 5 | Keep the first part; cut the $x_2$ part first | The table, then: only the graph says which model to read |
 
@@ -37,7 +37,7 @@ Minimum seminar, about 45 minutes: problems 1 and 4, problem 2(a to c), coding q
 How it runs
 
 - Students did exercises 1 to 3 at home (quantile optimality, the coverage of a split conformal interval, partial dependence by hand). Open the [instructor notebook](https://ml4ds.com/teachers/notebook9_instructor.html) on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are solution code and short answers. Show an exercise's solution only if asked. The [complete notebook](https://ml4ds.com/teachers/notebook9_complete.html) has the full answers, with common errors, for preparing. Each problem's solution stands on its own.
-- Coding part 2 is the main exercise: every tool from the lecture ranks first an input that has no effect, and the partial dependence plot for $x_1$ has the wrong sign. Keep question 8, the written answer, before question 9 reveals the truth.
+- Coding part 2 is the main exercise: every tool from the lecture ranks first an input that has no effect, and the partial dependence plot for $x_1$ has the wrong sign. Keep question 8, the two written answers (what the tools say, and what the equations say), before question 9 computes the effects.
 - One seed, `set.seed(310)` at the NHANES split (the lecture's split, used only in the optional item), then every simulation in order. A student who skips a chunk that draws random numbers gets slightly different numbers from then on; no conclusion depends on the second decimal.
 
 What students should see

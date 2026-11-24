@@ -68,7 +68,7 @@ Each exercise has hints, collapsed below it. Do not open a hint unless you have 
 
 (c) Show that $G$ is convex, and conclude that a $\tau$-quantile, a value $q_\tau$ with $F(q_\tau) = \tau$, minimizes $G$. When is the minimizer not unique?
 
-(d) Explain why the same argument shows that, for $Y$ given $X = x$, the conditional $\tau$-quantile $q_\tau(x)$ is the best prediction at $x$, and why the function $x \mapsto q_\tau(x)$ minimizes $\mathbb E[\rho_\tau(Y - h(X))]$ over functions $h$.
+(d) Suppose that, for each $x$, $Y$ given $X = x$ has a continuous distribution function with a density and a finite mean. Explain why the same argument shows that the conditional $\tau$-quantile $q_\tau(x)$ is the best prediction at $x$, and why the function $x \mapsto q_\tau(x)$ minimizes $\mathbb E[\rho_\tau(Y - h(X))]$ over functions $h$.
 
 ::: {.callout-note collapse="true" title="Hint 1"}
 (a) Below the prediction the loss is $(1 - \tau)(\hat y - y)$; above it, $\tau(y - \hat y)$. Which outcomes are below $\hat y$, and with what probability?
@@ -110,7 +110,7 @@ $$
 
 (c) $G'(\hat y) = F(\hat y) - \tau$ is nondecreasing in $\hat y$, so $G$ is convex. $F$ is continuous and goes from 0 to 1, so some $q_\tau$ has $F(q_\tau) = \tau$; there $G' = 0$, and a point where the derivative of a convex function is zero is a minimum. $G' < 0$ below every such point and $G' > 0$ above, so the set of minimizers is the set of $\hat y$ with $F(\hat y) = \tau$. It has more than one point when $F$ is flat at height $\tau$, which happens when $Y$ puts no probability on an interval between two parts of its distribution. $\blacksquare$
 
-(d) Given $X = x$, $Y$ has the conditional distribution function $F(\cdot \mid x)$, and (a) to (c) apply to it unchanged: the best prediction at $x$ is $q_\tau(x)$. For any function $h$, $\mathbb E[\rho_\tau(Y - h(X))] = \mathbb E\big[\mathbb E[\rho_\tau(Y - h(X)) \mid X]\big]$, and the inner expectation at $X = x$ is smallest when $h(x) = q_\tau(x)$. Choosing $q_\tau(x)$ at every $x$ makes every inner expectation as small as it can be, so it minimizes the average too: the same argument as for the mean (squared loss) and the threshold (0--1 loss with costs).
+(d) Given $X = x$, $Y$ has the conditional distribution function $F(\cdot \mid x)$, which by assumption is continuous with a density and a finite mean, so (a) to (c) apply to it unchanged: the best prediction at $x$ is $q_\tau(x)$. For any function $h$, $\mathbb E[\rho_\tau(Y - h(X))] = \mathbb E\big[\mathbb E[\rho_\tau(Y - h(X)) \mid X]\big]$, and the inner expectation at $X = x$ is smallest when $h(x) = q_\tau(x)$. Choosing $q_\tau(x)$ at every $x$ makes every inner expectation as small as it can be, so it minimizes the average too: the same argument as for the mean (squared loss) and the threshold (0--1 loss with costs).
 
 Common errors: dropping the minus sign in front of the second integral's derivative; getting $F(\hat y) = 1 - \tau$ by giving weight $\tau$ to the wrong side; assuming the quantile is always unique.
 :::
@@ -138,7 +138,7 @@ Common errors: dropping the minus sign in front of the second integral's derivat
 
 (b) $m = 9$: $k = 9$, 0.9. $m = 19$: $k = 18$, 0.9. $m = 1{,}000$: $k = 901$, 0.9001. $m = 5$: $k = 6 > m$, so no held-out residual is large enough; only $C = \infty$ keeps the guarantee.
 
-(c) $\hat f$ was fitted to the training rows, so their residuals are not exchangeable with $R$: they are smaller, and coverage falls below 0.9. (d) $\hat f$ now depends on the held-out rows, so they are not exchangeable with the new row either.
+(c) $\hat f$ was fitted to the training rows, so their residuals are not exchangeable with $R$ and the guarantee is lost. The argument gives no direction, but the fit makes them small, so coverage is usually below 0.9 (for one nearest neighbor, 0). (d) $\hat f$ now depends on the held-out rows, so they are not exchangeable with the new row either; the guarantee is lost, usually with a small loss of coverage for a few candidates.
 :::
 
 ::: {.callout-tip .answer .full collapse="true" title="Reveal solution"}
@@ -152,9 +152,9 @@ Since $k < 0.9(m + 1) + 1$, the coverage is also below $0.9 + 1/(m + 1)$. The pr
 
 (b) $m = 9$: $k = \lceil 9 \rceil = 9$, so $C$ is the largest held-out residual and the coverage is $9/10 = 0.9$. $m = 19$: $k = \lceil 18 \rceil = 18$, coverage $18/20 = 0.9$. $m = 1{,}000$: $k = \lceil 900.9\rceil = 901$, coverage $901/1001 = 0.9001$. $m = 5$: $k = \lceil 5.4 \rceil = 6 > 5$: even the largest of five held-out residuals is exceeded by $R$ with probability $1/6$, so no finite $C$ from these rows has the guarantee.
 
-(c) The training rows' residuals are not independent of $\hat f$: $\hat f$ was fitted to make them small, so they are not exchangeable with $R$. A new residual tends to rank high among them, and the coverage falls below 0.9, far below for a flexible model. A one-nearest-neighbor fit has every training residual equal to zero, so $C = 0$ and the interval covers nothing.
+(c) The first step: the training rows' residuals are not independent of $\hat f$, so they are not exchangeable with $R$, and $R$'s rank among them need not be uniform. The argument then says nothing about the coverage, neither its direction nor its size. In practice it is usually below 0.9, because $\hat f$ was fitted to make the training residuals small, so a new residual tends to rank high among them; far below for a flexible model. A one-nearest-neighbor fit has every training residual equal to zero, so $C = 0$ and the interval covers nothing.
 
-(d) The step "given the training rows, $\hat f$ is fixed and independent of the held-out rows". The chosen model depends on the held-out rows, so their residuals are no longer exchangeable with the new row's: they tend to be a little smaller, as the training rows' are in (c). With a handful of candidates the loss of coverage is usually small, but the theorem no longer applies.
+(d) The step "given the training rows, $\hat f$ is fixed and independent of the held-out rows". The chosen model depends on the held-out rows, so their residuals are no longer exchangeable with the new row's: the uniform rank, and with it the guarantee, is lost. The argument does not say how much the coverage moves; choosing the model that fits the held-out rows best tends to make their residuals a little smaller, and with a handful of candidates the loss is usually small.
 
 Common errors: $k = \lceil 0.9m \rceil$, which can fall short (for $m = 10$ it gives $k = 9$ and coverage $9/11 = 0.82$); reading the 90% as holding at each $x$; forgetting that it averages over the held-out rows, so one set of held-out rows can give an interval that covers somewhat more or less.
 :::
@@ -279,11 +279,11 @@ Common errors: giving the training residual variance $\sigma^2/k$, the variance 
 
 (a) Show that the bias $\mathbb E\hat f(x_0) - f^\star(x_0)$ is about $ah^2/6$, and that the variance of $\hat f(x_0)$ is $\sigma^2/(2nh)$.
 
-(b) Find the $h$ that minimizes the mean squared error, bias$^2$ + variance, and show that at that $h$ the bias is half the standard deviation of $\hat f(x_0)$, whatever $n$, $\sigma$ and $a$.
+(b) Find the $h$ that minimizes the mean squared error, bias$^2$ + variance, and show that, to the order of these approximations, at that $h$ the size of the bias is half the standard deviation of $\hat f(x_0)$, $|\text{bias}|/\mathrm{sd} = 1/2$, whatever $n$, $\sigma$ and $a$.
 
 (c) The confidence interval $\hat f(x_0) \pm 1.645\,\mathrm{sd}$ for $f^\star(x_0)$, with $\mathrm{sd} = \sigma/\sqrt k$, ignores the bias. What is its coverage at the $h$ of (b)? Does more data help?
 
-(d) With $d$ inputs and a window of half-width $h$ in each, the bias is still proportional to $h^2$ and the variance to $1/(nh^d)$. Show that at the $h$ that minimizes the mean squared error, bias/sd $= \sqrt d/2$, and find the coverage for $d = 4$ and $d = 9$.
+(d) With $d$ inputs and a window of half-width $h$ in each, the bias is still proportional to $h^2$ and the variance to $1/(nh^d)$. Show that at the $h$ that minimizes the mean squared error, $|\text{bias}|/\mathrm{sd} = \sqrt d/2$, and find the coverage for $d = 4$ and $d = 9$.
 
 (e) The prediction interval $\hat f(x_0) \pm 1.645\sqrt{\sigma^2 + \mathrm{sd}^2}$ for a new outcome $Y_0 = f^\star(x_0) + \varepsilon_0$. With one input, the $h$ of (b) and $k = 90$, what is its coverage?
 
@@ -304,15 +304,15 @@ Common errors: giving the training residual variance $\sigma^2/k$, the variance 
 ::: {.content-hidden .answer .brief title="Reveal answer"}
 (a) Bias $\approx \frac a2 \cdot \frac{h^2}{3} = \frac{ah^2}{6}$; variance $\sigma^2/k = \sigma^2/(2nh)$.
 
-(b) MSE $= a^2h^4/36 + \sigma^2/(2nh)$. Setting the derivative to zero gives $4\,\text{bias}^2 = \text{variance}$, so bias/sd $= 1/2$.
+(b) MSE $= a^2h^4/36 + \sigma^2/(2nh)$. Setting the derivative to zero gives $4\,\text{bias}^2 = \text{variance}$, at $h = \big(9\sigma^2/(2na^2)\big)^{1/5}$, so $|\text{bias}|/\mathrm{sd} = 1/2$.
 
-(c) $\Phi(1.645 - 0.5) - \Phi(-1.645 - 0.5) = 0.86$, for every $n$: more data does not help.
+(c) $\Phi(1.645 - 0.5) - \Phi(-1.645 - 0.5) = 0.86$, to leading order at every $n$: more data does not help.
 
-(d) $4\,\text{bias}^2 = d \times \text{variance}$, so bias/sd $= \sqrt d/2$: coverage 74% for $d = 4$, 56% for $d = 9$.
+(d) $4\,\text{bias}^2 = d \times \text{variance}$, so $|\text{bias}|/\mathrm{sd} = \sqrt d/2$: coverage 74% for $d = 4$, 56% for $d = 9$.
 
 (e) The shift is bias/$\sqrt{\sigma^2 + \mathrm{sd}^2} \approx 0.05$, so the coverage is 89.95%.
 
-(f) A smaller $h$ (undersmoothing), so that bias/sd shrinks; the interval is wider. Or estimate the bias and subtract it.
+(f) A smaller $h$ (undersmoothing), so that $|\text{bias}|/\mathrm{sd}$ shrinks; the interval is wider. Or estimate the bias and subtract it.
 :::
 
 ::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
@@ -324,13 +324,13 @@ M'(h) = \frac{4}{h}\cdot\frac{a^2h^4}{36} - \frac1h\cdot\frac{\sigma^2}{2nh} = \
 $$
 At the minimizing $h$, $h^5 = 9\sigma^2/(2na^2)$, we have $4\,\text{bias}^2 = \text{variance}$, so $|\text{bias}|/\mathrm{sd} = 1/2$, whatever $n$, $\sigma$ and $a$.
 
-(c) $(\hat f(x_0) - f^\star(x_0))/\mathrm{sd} \sim N(\pm\frac12, 1)$, so the coverage is $\Phi(1.645 - 0.5) - \Phi(-1.645 - 0.5) = 0.874 - 0.016 = 0.858$. More data does not help: the best $h$ shrinks as $n$ grows, but the ratio stays $1/2$, so the interval covers 86% at every $n$.
+(c) $(\hat f(x_0) - f^\star(x_0))/\mathrm{sd} \sim N(\pm\frac12, 1)$, so the coverage is $\Phi(1.645 - 0.5) - \Phi(-1.645 - 0.5) = 0.874 - 0.016 = 0.858$. The sign of the bias is that of $a$: negative at a peak, where $a < 0$. More data does not help: the best $h$ shrinks as $n$ grows, but the ratio stays $1/2$, so to leading order the interval covers 86% at every $n$. These are approximations for small $h$; at a given $n$ the coverage is near 86%, not exactly 86%.
 
-(d) With bias $= Bh^2$ and variance $= V/(nh^d)$, $M'(h) = \frac1h\big(4\,\text{bias}^2 - d\,\text{variance}\big)$, so at the minimum bias/sd $= \sqrt d/2$. For $d = 4$ the shift is 1 and the coverage $\Phi(0.645) - \Phi(-2.645) = 0.74$; for $d = 9$ it is 1.5 and the coverage $\Phi(0.145) - \Phi(-3.145) = 0.56$. The more inputs, the more the fit that predicts best trades variance for bias, and the worse its confidence interval.
+(d) With bias $= Bh^2$ and variance $= V/(nh^d)$, $M'(h) = \frac1h\big(4\,\text{bias}^2 - d\,\text{variance}\big)$, so at the minimum $|\text{bias}|/\mathrm{sd} = \sqrt d/2$. For $d = 4$ the shift is 1 and the coverage $\Phi(0.645) - \Phi(-2.645) = 0.74$; for $d = 9$ it is 1.5 and the coverage $\Phi(0.145) - \Phi(-3.145) = 0.56$. The more inputs, the more the fit that predicts best trades variance for bias, and the worse its confidence interval.
 
 (e) $Y_0 - \hat f(x_0) \sim N\big(-\text{bias}, \sigma^2 + \mathrm{sd}^2\big)$. With $k = 90$, $\mathrm{sd} = \sigma/\sqrt{90} = 0.105\sigma$ and the bias is $0.053\sigma$, so the shift in units of the interval's scale is $0.053/\sqrt{1 + 1/90} = 0.052$, and the coverage is 89.95%. The prediction interval compares the bias with $\sigma$, not with sd, so a bias that ruins the confidence interval hardly moves it.
 
-(f) Use a smaller $h$ for the interval than for the prediction (undersmoothing): bias/sd shrinks toward 0 as $h$ shrinks faster than the MSE-best rate, and the coverage returns toward 90%, but sd is larger, so the interval is wider. Or estimate the bias (it needs an estimate of $a$) and subtract it, which adds variance of its own.
+(f) Use a smaller $h$ for the interval than for the prediction (undersmoothing): $|\text{bias}|/\mathrm{sd}$ shrinks toward 0 as $h$ shrinks faster than the MSE-best rate, and the coverage returns toward 90%, but sd is larger, so the interval is wider. Or estimate the bias (it needs an estimate of $a$) and subtract it, which adds variance of its own.
 
 Common errors: averaging the linear term to something nonzero; solving for $h$ and then losing track of the ratio, which is easier to read from $M'(h) = 0$; concluding that a bias of half a standard deviation is harmless because it is small in absolute terms.
 :::
@@ -396,7 +396,7 @@ Common errors: using $N(0, 1)$ at every $x$; expecting 90% at the edge because $
 
 (c) For $c \le 1$, $0.9c + 0.1\cdot\frac c3 = 0.9$ gives $C = 0.964$: coverage $0.964/3 = 32\%$ for $x = 1$.
 
-(d) Marginal coverage, 90% on average over people. Compute $C$ separately within each group (group-conditional coverage).
+(d) At least 90%, averaged over the held-out sample and the next person: marginal coverage. (a) to (c) used the population's percentile, which gives exactly 90%. Compute $C$ separately within each group (group-conditional coverage).
 :::
 
 ::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
@@ -406,7 +406,7 @@ Common errors: using $N(0, 1)$ at every $x$; expecting 90% at the edge because $
 
 (c) At $c = 1$ the overall coverage is $0.9 + 0.1/3 = 0.933 > 0.9$, so $C < 1$, and $0.9c + 0.1\cdot\frac c3 = 0.9333c = 0.9$ gives $C = 0.964$. Among people with $x = 1$ the coverage is $0.964/3 = 32\%$, while it is 96% among people with $x = 0$. A 90% guarantee on average over people can coexist with 32% coverage for a group of one person in ten.
 
-(d) Marginal coverage: 90% on average over people, which (c) satisfies. To guarantee 90% among people with $x = 1$, compute $C$ from held-out rows of that group alone (group-conditional coverage). It needs the group to be known when the interval is made, and enough held-out rows in it.
+(d) Marginal coverage: at least 90%, averaged over the held-out sample and the next person, which a $C$ like (c)'s satisfies. Parts (a) to (c) used the population's 90th percentile, which gives exactly 90%; split conformal, with $C$ from a finite held-out sample, gives at least 90% on average over that sample. To guarantee 90% among people with $x = 1$, compute $C$ from held-out rows of that group alone (group-conditional coverage). It needs the group to be known when the interval is made, and enough held-out rows in it.
 
 Common errors: solving $\frac12 c + \frac12\cdot\frac c3 = 0.9$, which gives $c = 1.35$ and ignores that coverage for $x = 0$ stops at 100% once $c$ passes 1; in (c), assuming $C$ is still above 1.
 :::
@@ -451,7 +451,7 @@ Common errors: $19/20$ in (a), counting only one end; reading the 90% in (a) as 
 
 (a) $f(x) = \sum_j f_j(x_j)$, with independent inputs. Show that the permutation importance of input $j$ is $2\,\mathrm{Var}\,f_j(X_j)$ and its LOCO importance is $\mathrm{Var}\,f_j(X_j)$.
 
-(b) Two inputs, $X_1$ and $X_2$ standard normal with correlation $\rho$, and $f(x) = \beta_1x_1 + \beta_2x_2$. Show that the permutation importance of $X_1$ is $2\beta_1^2$ and its LOCO importance is $\beta_1^2(1 - \rho^2)$.
+(b) Two inputs, $X_1$ and $X_2$ jointly normal, each standard normal, with correlation $\rho$, and $f(x) = \beta_1x_1 + \beta_2x_2$. Show that the permutation importance of $X_1$ is $2\beta_1^2$ and its LOCO importance is $\beta_1^2(1 - \rho^2)$.
 
 (c) Take $\beta_1 = \beta_2 = 1$ and $\rho = 0.95$. Compute both importances for $X_1$. Which one says that $X_1$ hardly matters, and in what sense is each right?
 
@@ -460,7 +460,7 @@ Common errors: $19/20$ in (a), counting only one end; reading the 90% in (a) as 
 :::
 
 ::: {.callout-note .answer collapse="true" title="Hint 2"}
-(b) For standard normals with correlation $\rho$, $\mathbb E[X_1 \mid X_2] = \rho X_2$ and $\mathrm{Var}(X_1 - \rho X_2) = 1 - \rho^2$.
+(b) If $X_1$ and $X_2$ are jointly normal, each standard normal, with correlation $\rho$, then $\mathbb E[X_1 \mid X_2] = \rho X_2$ and $\mathrm{Var}(X_1 - \rho X_2) = 1 - \rho^2$.
 :::
 
 ::: {.content-hidden .answer .brief title="Reveal answer"}
@@ -553,7 +553,7 @@ Common errors: in world 3, leaving $X_2$ out of $f$ because it comes "after" $Y$
 ::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
 (a) Group A: $50/100 = 0.50$. Group B: $32/100 = 0.32$. In A, $40/50 = 0.8$ of the people with score 0.8 have the condition and $10/50 = 0.2$ of those with 0.2; in B, $16/20 = 0.8$ and $16/80 = 0.2$. Overall, $56/70 = 0.8$ and $26/130 = 0.2$. Calibrated within each group and overall.
 
-(b) Group A: 40 of the 50 people with the condition are predicted 1, TPR 0.8; 10 of the 50 without, FPR 0.2; 40 of the 50 predicted 1 have it, PPV 0.8. Group B: 16 of 32, TPR 0.5; 4 of 68, FPR 0.059; 16 of 20, PPV 0.8. The same positive predictive value, and different error rates: people with the condition in group B are missed half the time, in group A one time in five. When base rates differ, an imperfect rule with equal positive predictive value cannot also have equal false positive and false negative rates (Chouldechova 2017).
+(b) Group A: 40 of the 50 people with the condition are predicted 1, TPR 0.8; 10 of the 50 without, FPR 0.2; 40 of the 50 predicted 1 have it, PPV 0.8. Group B: 16 of 32, TPR 0.5; 4 of 68, FPR 0.059; 16 of 20, PPV 0.8. The same positive predictive value, and different error rates: people with the condition in group B are missed half the time, in group A one time in five. When base rates differ, a rule whose positive predictive value is the same in both groups, and strictly between 0 and 1, cannot also have equal false positive and false negative rates (Chouldechova 2017). The condition matters: a rule with no false positives has PPV 1, and can miss half the people with the condition in both groups.
 
 (c) A, with the condition: $(40 \times 0.8 + 10 \times 0.2)/50 = 0.68$; without: $(10 \times 0.8 + 40 \times 0.2)/50 = 0.32$. B, with: $(16 \times 0.8 + 16 \times 0.2)/32 = 0.50$; without: $(4 \times 0.8 + 64 \times 0.2)/68 = 0.235$.
 
@@ -847,7 +847,7 @@ Every measure ranks $x_3$ first, with shares of `r paste(sprintf("%.2f", (imp / 
 Common errors: shuffling the training rows and scoring on the fresh ones, which mixes two changes; refitting with `mtry = 3` on two inputs, which `randomForest` resets with a warning.
 :::
 
-**Question 7.** Partial dependence by hand. Complete `pdp_curve()`: for each value `t` in `grid`, set the input to `t` for every row of `d` and average the forest's predictions. The chunk after it draws the three curves, and 100 ICE curves for $x_1$. According to the PDP, what happens to $y$ when $x_1$ goes from $-1$ to $1$? What share of the ICE curves for $x_1$ slope down there?
+**Question 7.** Partial dependence by hand. Complete `pdp_curve()`: for each value `t` in `grid`, set the input to `t` for every row of `d` and average the forest's predictions. The chunk after it draws the three curves, and 100 of the 500 ICE curves for $x_1$. According to the PDP, what happens to $y$ when $x_1$ goes from $-1$ to $1$? What share of all 500 ICE curves for $x_1$ end lower at $1$ than at $-1$?
 
 ```{r}
 #| eval: false
@@ -882,32 +882,34 @@ p_pd <- pd |> pivot_longer(-t, names_to = "input", values_to = "pdp") |>
   ggplot(aes(t, pdp, colour = input)) + geom_line(linewidth = 1.2) + labs(x = "value set", y = "PDP", title = "Partial dependence")
 p_ice <- ggplot(ice, aes(t, pred, group = unit)) + geom_line(alpha = 0.2) +
   geom_line(data = pd, aes(t, x1, group = NULL), colour = "black", linewidth = 1.4) +
-  labs(x = "x1 set to", y = "prediction", title = "ICE curves for x1, and their average")
+  labs(x = "x1 set to", y = "prediction", title = "ICE curves for x1 (100 of 500), and the PDP")
 p_pd | p_ice
 c(pdp_x1_at_minus1 = pd$x1[pd$t == -1], pdp_x1_at_1 = pd$x1[pd$t == 1], share_ice_down = mean(slope_ice < 0))
 ```
 
 ::: {.content-hidden .answer .brief}
-The PDP for $x_1$ falls from `r sprintf("%.2f", pd$x1[pd$t == -1])` to `r sprintf("%.2f", pd$x1[pd$t == 1])`, and `r pct(mean(slope_ice < 0))` of the ICE curves slope down. The PDP for $x_3$ rises steeply, from `r sprintf("%.2f", pd$x3[pd$t == -1])` to `r sprintf("%.2f", pd$x3[pd$t == 1])`.
+The PDP for $x_1$ falls from `r sprintf("%.2f", pd$x1[pd$t == -1])` to `r sprintf("%.2f", pd$x1[pd$t == 1])`, and `r pct(mean(slope_ice < 0))` of the 500 ICE curves end lower at 1 than at $-1$. The PDP for $x_3$ rises steeply, from `r sprintf("%.2f", pd$x3[pd$t == -1])` to `r sprintf("%.2f", pd$x3[pd$t == 1])`.
 :::
 
 ::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
-The PDP for $x_1$ falls, from `r sprintf("%.2f", pd$x1[pd$t == -1])` at $-1$ to `r sprintf("%.2f", pd$x1[pd$t == 1])` at $1$, and `r pct(mean(slope_ice < 0))` of the ICE curves slope down between those values: read at face value, raising $x_1$ lowers $y$. The PDP for $x_3$ rises steeply, from `r sprintf("%.2f", pd$x3[pd$t == -1])` to `r sprintf("%.2f", pd$x3[pd$t == 1])`, and the PDP for $x_2$ rises a little. Most ICE curves slope the same way as the PDP.
+The PDP for $x_1$ falls, from `r sprintf("%.2f", pd$x1[pd$t == -1])` at $-1$ to `r sprintf("%.2f", pd$x1[pd$t == 1])` at $1$, and `r pct(mean(slope_ice < 0))` of the 500 ICE curves end lower at $1$ than at $-1$: read at face value, raising $x_1$ lowers $y$. The PDP for $x_3$ rises steeply, from `r sprintf("%.2f", pd$x3[pd$t == -1])` to `r sprintf("%.2f", pd$x3[pd$t == 1])`, and the PDP for $x_2$ rises a little. Most ICE curves slope the same way as the PDP.
 
 Common errors: `d[[input]] <- grid` instead of `t`, which sets each row to a different value; averaging over the grid instead of over the rows.
 :::
 
-**Question 8.** Before you run anything else: from questions 6 and 7, which input would you set to raise $y$, in which direction, and how much would you expect $y$ to change if you moved it from $-1$ to $1$? Write the answer down.
+**Question 8.** Before you run anything else, write down two answers. (a) From questions 6 and 7: which input gives the largest rise in the forest's average prediction when it is moved from $-1$ to $1$, and how large is the rise? (b) From the equations above: what would setting each input from $-1$ to $1$ do to the mean of $y$? The sign is enough.
 
 ::: {.content-hidden .answer .brief}
-The tools point to $x_3$: the largest importance by every measure, and a PDP that rises by about `r sprintf("%.1f", pd$x3[pd$t == 1] - pd$x3[pd$t == -1])` from $-1$ to $1$. They also suggest that lowering $x_1$ would raise $y$.
+(a) $x_3$: its PDP rises by about `r sprintf("%.2f", pd$x3[pd$t == 1] - pd$x3[pd$t == -1])`, and every importance measure ranks it first. (b) Setting $x_3$ cannot change $y$, whose equation does not contain it. Setting $x_1$ or $x_2$ higher raises $y$, since $\sin$ is increasing between $-1$ and $1$; $x_1$ both directly and through $x_2$.
 :::
 
 ::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
-Read at face value, every tool points to $x_3$: the largest importance by all four measures, and a PDP that rises by about `r sprintf("%.1f", pd$x3[pd$t == 1] - pd$x3[pd$t == -1])` from $-1$ to $1$. They also suggest that $x_1$ has a small negative effect and $x_2$ a small positive one. Question 9 checks these readings against the world.
+(a) $x_3$: moving it from $-1$ to $1$ raises the forest's average prediction by about `r sprintf("%.2f", pd$x3[pd$t == 1] - pd$x3[pd$t == -1])`, and every importance measure ranks it first. The PDPs also show $x_1$ with a small negative slope and $x_2$ with a small positive one.
+
+(b) From the equations: $y = \frac12 x_1 + \frac32\sin x_2 + \varepsilon_y$ does not contain $x_3$, so setting $x_3$ leaves the mean of $y$ unchanged. Setting $x_2$ higher raises it, since $\sin$ is increasing between $-1$ and $1$. Setting $x_1$ higher raises it directly, by $\frac12$ per unit, and through $x_2$, which follows $x_1$. The two answers disagree in sign for $x_1$, about whether $x_3$ does anything at all, and for $x_2$ in size: the tools describe the forest's predictions, and (b) asks what setting an input does. Question 9 computes the answers to (b).
 :::
 
-**Question 9.** Intervene in the simulator. $do(x_1 = t)$ replaces $x_1$'s line with $x_1 = t$ for everyone and leaves the other equations alone. Complete `world_do_x1(n, t)` and `world_do_x2(n, t)`, each returning the mean of $y$ over `n` draws. What is $\mathbb E[y \mid do(x_3 = t)]$? Answer from the equations, without code. The chunk after it plots each input's effect against its PDP.
+**Question 9.** Intervene in the simulator. $do(x_1 = t)$ replaces $x_1$'s line with $x_1 = t$ for everyone and leaves the other equations alone. Complete `world_do_x1(n, t)` and `world_do_x2(n, t)`, each returning the mean of $y$ over `n` draws. Setting $x_3$ leaves the mean of $y$ at $\mathbb E[y] = 0$, as question 8 found from the equations. The chunk after it plots each input's effect against its PDP. Compare with your answers to question 8.
 
 ```{r}
 #| eval: false
@@ -1074,12 +1076,13 @@ p_new <- predict(recal, tibble(logit_p = logit(p_tune[half_b])), type = "respons
 q12 <- c(before = log_loss(nh_tune$diabetes[half_b], p_tune[half_b]), after = log_loss(nh_tune$diabetes[half_b], p_new))
 round(coef(recal), 2)
 round(q12, 3)
-reliability(p_new, nh_tune$diabetes[half_b])
+reliability(p_tune[half_b], nh_tune$diabetes[half_b])   # before, on the same 1,500 adults
+reliability(p_new, nh_tune$diabetes[half_b])            # after
 ```
 :::
 
 ::: {.callout-tip .answer collapse="true" title="Reveal answer"}
-The fitted slope on the logit is `r sprintf("%.2f", coef(recal)[2])`, positive, so the new score is an increasing function of the old one: the order of the adults is unchanged, and only the numbers attached to them move. A slope below 1 pulls the scores toward the middle, which is what a score that is too confident at both ends needs. The log loss on the other 1,500 adults falls from `r sprintf("%.3f", q12[["before"]])` to `r sprintf("%.3f", q12[["after"]])`, and the reliability table lies close to the diagonal. The recalibration is fitted on adults not used to fit the trees, and checked on adults not used to fit either.
+The fitted slope on the logit is `r sprintf("%.2f", coef(recal)[2])`, positive, so the new score is an increasing function of the old one: the order of the adults is unchanged, and only the numbers attached to them move. A slope below 1 pulls the scores toward the middle, which is what a score that is too confident at both ends needs. The log loss on the other 1,500 adults falls from `r sprintf("%.3f", q12[["before"]])` to `r sprintf("%.3f", q12[["after"]])`, and on those adults the reliability table moves from a top bin that is too high to one close to the diagonal. The recalibration is fitted on adults not used to fit the trees, and checked on adults not used to fit either.
 
 Common errors: fitting the recalibration on the training adults, whose scores look better than they are; scoring it on the 1,500 adults it was fitted on, which makes the "after" number look better than it is.
 :::
