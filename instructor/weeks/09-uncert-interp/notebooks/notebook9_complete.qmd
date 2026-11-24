@@ -28,7 +28,7 @@ answer and its short twin together. The notebook with solutions, for students th
 week after, is this file without the short twins.
 
 How this seminar runs: students do exercises 1 to 3 at home (none is gone through in
-the room unless asked). In the room: the problems chosen for this year, then the
+the room unless asked). In the room: problems 1 to 3, then the
 coding: part 1 (about 12 minutes) and part 2 (about 24). The teacher note has the
 selection, the minutes and the cut order. Everything headed "Optional, can be done at
 home" is outside the seminar. One seed, set at the NHANES split: every student who
@@ -220,7 +220,7 @@ Common errors: averaging over $t$ instead of over units; reading the flat PDP in
 
 <!-- Pen and paper. Minutes for each problem are in its own comment; the teacher note says which are done in the room. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the one before it. -->
 
-Problems 1 to 5 use the normal distribution function $\Phi$; for a 90% interval, $\Phi(1.645) = 0.95$. If $W \sim N(\mu, s^2)$, then $P(|W| \le c) = \Phi\big((c - \mu)/s\big) - \Phi\big((-c - \mu)/s\big)$.
+Problems 1 and 2 use the normal distribution function $\Phi$; for a 90% interval, $\Phi(1.645) = 0.95$. If $W \sim N(\mu, s^2)$, then $P(|W| \le c) = \Phi\big((c - \mu)/s\big) - \Phi\big((-c - \mu)/s\big)$.
 
 **Problem 1 (the residuals of a nearest-neighbor fit).** <!-- About 7 min. --> The inputs come in groups of $k$ rows that share the same $x$, and $Y = f^\star(x) + \varepsilon$ with $\varepsilon \sim N(0, \sigma^2)$, independent across rows. The $k$-nearest-neighbor fit predicts, at the $x$ of a group, the mean $\bar y$ of that group's $k$ outcomes $y_1, \ldots, y_k$. A training row's residual is $y_i - \bar y$. A new outcome at that $x$ is $Y_0 = f^\star(x) + \varepsilon_0$, independent of the group's outcomes.
 
@@ -335,191 +335,7 @@ At the minimizing $h$, $h^5 = 9\sigma^2/(2na^2)$, we have $4\,\text{bias}^2 = \t
 Common errors: averaging the linear term to something nonzero; solving for $h$ and then losing track of the ratio, which is easier to read from $M'(h) = 0$; concluding that a bias of half a standard deviation is harmless because it is small in absolute terms.
 :::
 
-**Problem 3 (one leaf of a tree).** <!-- About 7 min. --> A tree's leaf covers $-1 \le x \le 1$ (after rescaling $x$), where $x$ is uniform, $f^\star(x) = x$ and the noise is $N(0, 1)$. The leaf has many training rows, so it predicts 0, the average of $f^\star$ over the leaf. Held-out rows in the leaf give $C$, the 90th percentile of $|Y - 0|$ over the leaf: $C = 1.90$ (you need not compute it).
-
-(a) Find the coverage of $0 \pm 1.90$ at $x = 0$ and at $x = 1$.
-
-(b) What is the coverage averaged over the leaf?
-
-(c) The tree splits the leaf at 0, and each new leaf has many rows. What does each new leaf predict? How far is $f^\star$ from the prediction at the edges now? With the new $C = 1.71$, find the coverage at the center and at the edges of a new leaf.
-
-(d) What stops us from splitting until every leaf is tiny?
-
-::: {.callout-note .answer collapse="true" title="Hint 1"}
-(a) Given $X = x$, $Y \sim N(x, 1)$.
-:::
-
-::: {.callout-note .answer collapse="true" title="Hint 2"}
-(b) What was $C$ chosen to do?
-:::
-
-::: {.content-hidden .answer .brief title="Reveal answer"}
-(a) $x = 0$: $\Phi(1.9) - \Phi(-1.9) = 94\%$. $x = 1$: $\Phi(0.9) - \Phi(-2.9) = 81\%$.
-
-(b) 90%, since $C$ was chosen for that.
-
-(c) $-\frac12$ and $\frac12$; $f^\star$ is $\frac12$ from the prediction at the edges. Center $\Phi(1.71) - \Phi(-1.71) = 91\%$; edges $\Phi(1.21) - \Phi(-2.21) = 87\%$.
-
-(d) Fewer rows per leaf: the leaf's mean and its $C$ get noisier.
-:::
-
-::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
-(a) Given $X = x$, $Y \sim N(x, 1)$, so the coverage at $x$ is $\Phi(1.9 - x) - \Phi(-1.9 - x)$. At $x = 0$: $0.971 - 0.029 = 94.3\%$. At $x = 1$: $\Phi(0.9) - \Phi(-2.9) = 0.816 - 0.002 = 81.4\%$.
-
-(b) 90%: $C$ was chosen so that 90% of the outcomes in the leaf are covered, which is the coverage at $x$ averaged over the leaf. Above 90% near the center, below it near the edges.
-
-(c) The new leaves cover $[-1, 0]$ and $[0, 1]$ and predict $-\frac12$ and $\frac12$, the averages of $f^\star$ over them. At the edges $f^\star$ is $\frac12$ from the prediction, half as far as before. Center: $\Phi(1.71) - \Phi(-1.71) = 91.3\%$. Edges: $\Phi(1.21) - \Phi(-2.21) = 0.887 - 0.014 = 87.4\%$. Closer to 90% everywhere.
-
-(d) With fewer rows in each leaf, the leaf's prediction has more variance (as in problem 1), and $C$, computed from the leaf's held-out rows, varies more from sample to sample. Smaller leaves trade the bias of (a) for that variance: the same trade-off as choosing $k$ for nearest neighbors.
-
-Common errors: using $N(0, 1)$ at every $x$; expecting 90% at the edge because $C$ was chosen for 90%.
-:::
-
-**Problem 4 (one width, two noise levels).** <!-- About 7 min. --> Half the people have $x = 0$ and half have $x = 1$. Given $x$, $Y = f^\star(x) + \varepsilon$, with $\varepsilon$ uniform on $[-1, 1]$ when $x = 0$ and uniform on $[-3, 3]$ when $x = 1$. The model is exact, $\hat f = f^\star$, and the interval is $f^\star(x) \pm C$, with one $C$ for everyone.
-
-(a) Find the $C$ that covers 90% of people. What is the coverage among people with $x = 0$, and among people with $x = 1$?
-
-(b) Find the $C$ for each value of $x$ that covers 90% of the people with that value. Compare the average width with (a).
-
-(c) Now 90% of people have $x = 0$ and 10% have $x = 1$. Find the one $C$ that covers 90% of people, and the coverage among people with $x = 1$.
-
-(d) Which coverage does a split conformal interval with one $C$ guarantee here? How could you guarantee 90% among people with $x = 1$?
-
-::: {.callout-note .answer collapse="true" title="Hint 1"}
-(a) Write $P(|\varepsilon| \le c)$ for each value of $x$ separately. For $x = 0$, it cannot exceed 1.
-:::
-
-::: {.content-hidden .answer .brief title="Reveal answer"}
-(a) For $1 \le c \le 3$, $\frac12 + \frac12\cdot\frac c3 = 0.9$ gives $C = 2.4$: coverage 100% for $x = 0$ and 80% for $x = 1$.
-
-(b) $0.9$ and $2.7$; widths 1.8 and 5.4, average 3.6 against 4.8.
-
-(c) For $c \le 1$, $0.9c + 0.1\cdot\frac c3 = 0.9$ gives $C = 0.964$: coverage $0.964/3 = 32\%$ for $x = 1$.
-
-(d) At least 90%, averaged over the held-out sample and the next person: marginal coverage. (a) to (c) used the population's percentile, which gives exactly 90%. Compute $C$ separately within each group (group-conditional coverage).
-:::
-
-::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
-(a) $P(|\varepsilon| \le c \mid x = 0) = \min(c, 1)$ and $P(|\varepsilon| \le c \mid x = 1) = c/3$ for $c \le 3$. Overall coverage is their average; at $c = 1$ it is $\frac12 + \frac16 = 0.67$, so $C > 1$ and $\frac12 + \frac c6 = 0.9$ gives $C = 2.4$. Among people with $x = 0$ the coverage is 100%; among people with $x = 1$ it is $2.4/3 = 80\%$. The interval is too wide for one group and too narrow for the other.
-
-(b) $C_0 = 0.9$ and $C_1 = 2.7$: widths 1.8 and 5.4, average 3.6, against $2 \times 2.4 = 4.8$ for the single $C$. Covering 90% in each group gives narrower intervals on average.
-
-(c) At $c = 1$ the overall coverage is $0.9 + 0.1/3 = 0.933 > 0.9$, so $C < 1$, and $0.9c + 0.1\cdot\frac c3 = 0.9333c = 0.9$ gives $C = 0.964$. Among people with $x = 1$ the coverage is $0.964/3 = 32\%$, while it is 96% among people with $x = 0$. A 90% guarantee on average over people can coexist with 32% coverage for a group of one person in ten.
-
-(d) Marginal coverage: at least 90%, averaged over the held-out sample and the next person, which a $C$ like (c)'s satisfies. Parts (a) to (c) used the population's 90th percentile, which gives exactly 90%; split conformal, with $C$ from a finite held-out sample, gives at least 90% on average over that sample. To guarantee 90% among people with $x = 1$, compute $C$ from held-out rows of that group alone (group-conditional coverage). It needs the group to be known when the interval is made, and enough held-out rows in it.
-
-Common errors: solving $\frac12 c + \frac12\cdot\frac c3 = 0.9$, which gives $c = 1.35$ and ignores that coverage for $x = 0$ stops at 100% once $c$ passes 1; in (c), assuming $C$ is still above 1.
-:::
-
-**Problem 5 (an interval from 19 rows).** <!-- About 6 min. --> At one $x$ there are 19 rows with outcomes $Y_1, \ldots, Y_{19}$, independent draws from the distribution of $Y$ given $X = x$, which is continuous with distribution function $F$. The interval is $[\min_i Y_i, \max_i Y_i]$.
-
-(a) Show that a new outcome $Y$ from the same distribution falls in the interval with probability 0.9, averaging over the 19 rows and $Y$.
-
-(b) Given the 19 rows, the coverage is $F(\max_i Y_i) - F(\min_i Y_i)$. Take as given that it has the Beta(18, 2) distribution, with distribution function $19u^{18} - 18u^{19}$ and variance $0.9 \times 0.1/21$. Find its standard deviation, and the probability that the coverage is below 80%.
-
-(c) Each of 100 ranges of $x$ gets its own interval of this kind from its own 19 rows. About how many of the intervals cover less than 80%?
-
-(d) With 199 rows and the interval from the 10th smallest to the 10th largest, the coverage has mean 0.9 and variance $0.9 \times 0.1/201$. Find its standard deviation. How does it scale with the number of rows?
-
-::: {.callout-note .answer collapse="true" title="Hint 1"}
-(a) Among the 20 values $Y_1, \ldots, Y_{19}, Y$, each is equally likely to be the largest, and each equally likely to be the smallest.
-:::
-
-::: {.content-hidden .answer .brief title="Reveal answer"}
-(a) $Y$ is covered unless it is the smallest or the largest of the 20: probability $18/20 = 0.9$.
-
-(b) sd $= \sqrt{0.09/21} = 0.065$; $P(\text{coverage} < 0.8) = 19(0.8)^{18} - 18(0.8)^{19} = 0.083$.
-
-(c) About 8.
-
-(d) $\sqrt{0.09/201} = 0.021$: about $\sqrt{0.09/n}$, shrinking like $1/\sqrt n$.
-:::
-
-::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
-(a) The 20 values are independent draws from one continuous distribution, so every ordering is equally likely. $Y$ falls outside the interval only when it is the smallest of the 20 (probability $1/20$) or the largest ($1/20$), so it is covered with probability $18/20 = 0.9$. The 90% averages over the draw of the 19 rows.
-
-(b) The standard deviation is $\sqrt{0.09/21} = 0.065$, so the coverage of one interval is typically 6.5 points from 90%. $P(\text{coverage} < 0.8) = 19(0.8)^{18} - 18(0.8)^{19} = 0.343 - 0.260 = 0.083$.
-
-(c) About $100 \times 0.083 = 8$ of the 100 intervals cover less than 80%, though every one of them has the 90% guarantee on average.
-
-(d) $\sqrt{0.09/201} = 0.021$: ten times the rows, about $\sqrt{10}$ times less spread. With $n$ rows the standard deviation is about $\sqrt{0.9 \times 0.1/n}$, the same as for a share of 0.9 estimated from $n$ rows. An interval at $x$ built from the rows near $x$ is only as reliable as the number of those rows allows.
-
-Common errors: $19/20$ in (a), counting only one end; reading the 90% in (a) as the coverage of the interval in hand.
-:::
-
-**Problem 6 (permutation importance and leaving an input out).** <!-- About 8 min. --> $Y = f(X) + \varepsilon$, with $\varepsilon$ independent of $X$, mean 0 and variance $\sigma^2$, and the fitted model is exactly $f$. Importance is measured in the population. The **permutation importance** of input $j$ is $\mathbb E[(Y - f(X^{(j)}))^2] - \mathbb E[(Y - f(X))^2]$, where $X^{(j)}$ is $X$ with $X_j$ replaced by an independent copy $X'_j$ from its marginal distribution (what shuffling a column does in a large sample). The **LOCO importance** of input $j$ (leave one covariate out) is $\mathbb E[(Y - \mathbb E[Y \mid X_{-j}])^2] - \mathbb E[(Y - f(X))^2]$: how much the risk rises when the best model without $X_j$ replaces $f$.
-
-(a) $f(x) = \sum_j f_j(x_j)$, with independent inputs. Show that the permutation importance of input $j$ is $2\,\mathrm{Var}\,f_j(X_j)$ and its LOCO importance is $\mathrm{Var}\,f_j(X_j)$.
-
-(b) Two inputs, $X_1$ and $X_2$ jointly normal, each standard normal, with correlation $\rho$, and $f(x) = \beta_1x_1 + \beta_2x_2$. Show that the permutation importance of $X_1$ is $2\beta_1^2$ and its LOCO importance is $\beta_1^2(1 - \rho^2)$.
-
-(c) Take $\beta_1 = \beta_2 = 1$ and $\rho = 0.95$. Compute both importances for $X_1$. Which one says that $X_1$ hardly matters, and in what sense is each right?
-
-::: {.callout-note .answer collapse="true" title="Hint 1"}
-(a) $Y - f(X^{(j)}) = \varepsilon + f_j(X_j) - f_j(X'_j)$, a sum of three independent terms.
-:::
-
-::: {.callout-note .answer collapse="true" title="Hint 2"}
-(b) If $X_1$ and $X_2$ are jointly normal, each standard normal, with correlation $\rho$, then $\mathbb E[X_1 \mid X_2] = \rho X_2$ and $\mathrm{Var}(X_1 - \rho X_2) = 1 - \rho^2$.
-:::
-
-::: {.content-hidden .answer .brief title="Reveal answer"}
-(a) Permutation: $\mathbb E[(\varepsilon + f_j(X_j) - f_j(X'_j))^2] - \sigma^2 = 2\,\mathrm{Var}\,f_j(X_j)$. LOCO: $\mathbb E[Y \mid X_{-j}] = \sum_{k \ne j} f_k(X_k) + \mathbb E f_j(X_j)$, so the rise is $\mathrm{Var}\,f_j(X_j)$.
-
-(b) Permutation: $\beta_1^2\,\mathbb E[(X_1 - X'_1)^2] = 2\beta_1^2$. LOCO: $\mathbb E[Y \mid X_2] = (\beta_2 + \rho\beta_1)X_2$, so the rise is $\beta_1^2\,\mathrm{Var}(X_1 - \rho X_2) = \beta_1^2(1 - \rho^2)$.
-
-(c) Permutation 2; LOCO 0.0975. LOCO: a model without $X_1$ loses little, since $X_2$ stands in for it. Permutation: $f$ uses $X_1$ heavily, measured at pairs $(X'_1, X_2)$ that almost never occur.
-:::
-
-::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
-(a) $Y - f(X^{(j)}) = \varepsilon + f_j(X_j) - f_j(X'_j)$; the other components cancel. The three terms are independent, and $f_j(X_j) - f_j(X'_j)$ has mean 0 and variance $2\,\mathrm{Var}\,f_j(X_j)$, so the expected square is $\sigma^2 + 2\,\mathrm{Var}\,f_j(X_j)$. Subtracting $\mathbb E[(Y - f(X))^2] = \sigma^2$ gives $2\,\mathrm{Var}\,f_j(X_j)$. With independent inputs, $\mathbb E[Y \mid X_{-j}] = \sum_{k \ne j} f_k(X_k) + \mathbb E f_j(X_j)$, so $Y - \mathbb E[Y \mid X_{-j}] = \varepsilon + f_j(X_j) - \mathbb E f_j(X_j)$, whose expected square is $\sigma^2 + \mathrm{Var}\,f_j(X_j)$. LOCO is $\mathrm{Var}\,f_j(X_j)$, half the permutation importance.
-
-(b) Permutation: $Y - f(X^{(1)}) = \varepsilon + \beta_1(X_1 - X'_1)$, with expected square $\sigma^2 + 2\beta_1^2$, so the importance is $2\beta_1^2$, whatever $\rho$. LOCO: $\mathbb E[Y \mid X_2] = \beta_1\rho X_2 + \beta_2X_2$, so $Y - \mathbb E[Y \mid X_2] = \varepsilon + \beta_1(X_1 - \rho X_2)$, with expected square $\sigma^2 + \beta_1^2(1 - \rho^2)$. LOCO is $\beta_1^2(1 - \rho^2)$.
-
-(c) Permutation importance is 2; LOCO is $1 - 0.9025 = 0.0975$. LOCO says $X_1$ hardly matters, and for its question it is right: a model refitted without $X_1$ predicts almost as well, because $X_2$ carries nearly the same information. Permutation importance answers another question, how much this $f$ relies on $X_1$, and it is right that $f$ uses $X_1$ heavily. But it measures that by evaluating $f$ at pairs $(X'_1, X_2)$ that, with $\rho = 0.95$, almost never occur in the data. Neither says what would happen to $Y$ if we changed $X_1$.
-
-Common errors: in (a), forgetting that $X'_j$ is independent of $X_j$, which doubles the variance; in (b), using $\mathbb E[X_1 \mid X_2] = X_2$.
-:::
-
-**Problem 7 (a partial dependence plot in three worlds).** <!-- About 8 min. --> In each world below the noises $\varepsilon_1$, $\varepsilon_2$ and $\varepsilon_Y$ are independent $N(0, 1)$. The fitted model is the best predictor from $X_1$ and $X_2$, $f(x_1, x_2) = \mathbb E[Y \mid X_1 = x_1, X_2 = x_2]$, which here is linear, so its PDP for $X_1$ is a line. Compare its slope with the slope of $\mathbb E[Y \mid do(X_1 = x)]$.
-
-- World 1: $X_2 = \varepsilon_2$, $X_1 = X_2 + \varepsilon_1$, $Y = X_1 + X_2 + \varepsilon_Y$.
-- World 2: $X_1 = \varepsilon_1$, $X_2 = X_1 + \varepsilon_2$, $Y = X_2 + \varepsilon_Y$.
-- World 3: $X_1 = \varepsilon_1$, $Y = X_1 + \varepsilon_Y$, $X_2 = Y + \varepsilon_2$.
-
-(a) In each world, draw the graph, find $f$, its PDP slope for $X_1$, and the slope of the effect of setting $X_1$.
-
-(b) In each world, would the model on $X_1$ alone, $\mathbb E[Y \mid X_1]$, have a PDP with the right slope?
-
-(c) Which of the two models predicts better, in each world?
-
-::: {.callout-note .answer collapse="true" title="Hint 1"}
-(a) In world 3, given $X_1$, the pair $(Y, X_2)$ is $(X_1 + \varepsilon_Y,\ X_1 + \varepsilon_Y + \varepsilon_2)$. What is the best prediction of $\varepsilon_Y$ from $\varepsilon_Y + \varepsilon_2$?
-:::
-
-::: {.content-hidden .answer .brief title="Reveal answer"}
-(a) World 1 ($X_2$ a common cause): $f = x_1 + x_2$, slope 1; effect 1. World 2 ($X_2$ a mediator): $f = x_2$, slope 0; effect 1. World 3 ($X_2$ a consequence of $Y$): $f = \frac12x_1 + \frac12x_2$, slope $\frac12$; effect 1.
-
-(b) World 1: $\mathbb E[Y \mid X_1] = 1.5X_1$, wrong. Worlds 2 and 3: $\mathbb E[Y \mid X_1] = X_1$, right.
-
-(c) The model on both inputs, in every world. Prediction does not tell you which model to read.
-:::
-
-::: {.callout-tip .answer .full collapse="true" title="Reveal answer"}
-(a) World 1: $X_2 \to X_1$, $X_2 \to Y$, $X_1 \to Y$; $X_2$ is a common cause. $f(x_1, x_2) = x_1 + x_2$, PDP slope 1. Setting $X_1 = x$ leaves $X_2$ alone, so $\mathbb E[Y \mid do(X_1 = x)] = x + \mathbb E X_2 = x$: slope 1. They agree: the model's other input is a common cause, which is what the adjustment theorem asks for.
-
-World 2: $X_1 \to X_2 \to Y$; $X_2$ is a mediator. $Y = X_2 + \varepsilon_Y$ with $\varepsilon_Y$ independent of both inputs, so $f(x_1, x_2) = x_2$ and the PDP slope is 0. Setting $X_1 = x$ makes $X_2 = x + \varepsilon_2$ and $\mathbb E[Y \mid do(X_1 = x)] = x$: slope 1. The PDP holds $X_2$ at each unit's value and shows the effect of $X_1$ with the mediator held fixed, here none.
-
-World 3: $X_1 \to Y \to X_2$; $X_2$ is a consequence of $Y$. Given $X_1$, $Y = X_1 + \varepsilon_Y$ and $X_2 - X_1 = \varepsilon_Y + \varepsilon_2$, and the best prediction of $\varepsilon_Y$ from $\varepsilon_Y + \varepsilon_2$ is half of it, so $f(x_1, x_2) = x_1 + \frac12(x_2 - x_1) = \frac12x_1 + \frac12x_2$. PDP slope $\frac12$; the effect has slope 1. $X_2$ contains information about $\varepsilon_Y$, and holding it fixed hides part of $X_1$'s effect.
-
-(b) World 1: $X_1 = X_2 + \varepsilon_1$ has variance 2, so $\mathbb E[X_2 \mid X_1] = \frac12X_1$ and $\mathbb E[Y \mid X_1] = 1.5X_1$: slope 1.5, wrong, because the common cause is left out. Worlds 2 and 3: $\mathbb E[Y \mid X_1] = X_1$, slope 1, right. No one choice of inputs is right in all three worlds: which one is right depends on the graph.
-
-(c) The model on both inputs is the best predictor from them, so it predicts at least as well as the model on $X_1$ alone in every world, and strictly better here. In worlds 2 and 3 the model that predicts best has the wrong PDP.
-
-Common errors: in world 3, leaving $X_2$ out of $f$ because it comes "after" $Y$; computing the PDP slope as the slope of $Y$ on $X_1$ alone.
-:::
-
-**Problem 8 (calibration in two groups).** <!-- About 8 min. --> A score takes the values 0.2 and 0.8. In two groups of 100 people:
+**Problem 3 (calibration in two groups).** <!-- About 8 min. --> A score takes the values 0.2 and 0.8. In two groups of 100 people:
 
 | Group | Score | People | With the condition |
 |---|---:|---:|---:|

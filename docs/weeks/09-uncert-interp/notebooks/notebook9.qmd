@@ -49,7 +49,7 @@ Each exercise has hints, collapsed below it. Do not open a hint unless you have 
 
 (c) Show that $G$ is convex, and conclude that a $\tau$-quantile, a value $q_\tau$ with $F(q_\tau) = \tau$, minimizes $G$. When is the minimizer not unique?
 
-(d) Explain why the same argument shows that, for $Y$ given $X = x$, the conditional $\tau$-quantile $q_\tau(x)$ is the best prediction at $x$, and why the function $x \mapsto q_\tau(x)$ minimizes $\mathbb E[\rho_\tau(Y - h(X))]$ over functions $h$.
+(d) Suppose that, for each $x$, $Y$ given $X = x$ has a continuous distribution function with a density and a finite mean. Explain why the same argument shows that the conditional $\tau$-quantile $q_\tau(x)$ is the best prediction at $x$, and why the function $x \mapsto q_\tau(x)$ minimizes $\mathbb E[\rho_\tau(Y - h(X))]$ over functions $h$.
 
 ::: {.callout-note collapse="true" title="Hint 1"}
 (a) Below the prediction the loss is $(1 - \tau)(\hat y - y)$; above it, $\tau(y - \hat y)$. Which outcomes are below $\hat y$, and with what probability?
@@ -110,7 +110,7 @@ The individual conditional expectation (ICE) curve of unit $i$ for $x_1$ is $t \
 
 <!-- Pen and paper. Minutes for each problem are in its own comment; the teacher note says which are done in the room. Hints are revealed in order after a few minutes, the answer last. Each solution is written from scratch, so that a problem can be done without the one before it. -->
 
-Problems 1 to 5 use the normal distribution function $\Phi$; for a 90% interval, $\Phi(1.645) = 0.95$. If $W \sim N(\mu, s^2)$, then $P(|W| \le c) = \Phi\big((c - \mu)/s\big) - \Phi\big((-c - \mu)/s\big)$.
+Problems 1 and 2 use the normal distribution function $\Phi$; for a 90% interval, $\Phi(1.645) = 0.95$. If $W \sim N(\mu, s^2)$, then $P(|W| \le c) = \Phi\big((c - \mu)/s\big) - \Phi\big((-c - \mu)/s\big)$.
 
 **Problem 1 (the residuals of a nearest-neighbor fit).** <!-- About 7 min. --> The inputs come in groups of $k$ rows that share the same $x$, and $Y = f^\star(x) + \varepsilon$ with $\varepsilon \sim N(0, \sigma^2)$, independent across rows. The $k$-nearest-neighbor fit predicts, at the $x$ of a group, the mean $\bar y$ of that group's $k$ outcomes $y_1, \ldots, y_k$. A training row's residual is $y_i - \bar y$. A new outcome at that $x$ is $Y_0 = f^\star(x) + \varepsilon_0$, independent of the group's outcomes.
 
@@ -126,67 +126,17 @@ Problems 1 to 5 use the normal distribution function $\Phi$; for a 90% interval,
 
 (a) Show that the bias $\mathbb E\hat f(x_0) - f^\star(x_0)$ is about $ah^2/6$, and that the variance of $\hat f(x_0)$ is $\sigma^2/(2nh)$.
 
-(b) Find the $h$ that minimizes the mean squared error, bias$^2$ + variance, and show that at that $h$ the bias is half the standard deviation of $\hat f(x_0)$, whatever $n$, $\sigma$ and $a$.
+(b) Find the $h$ that minimizes the mean squared error, bias$^2$ + variance, and show that, to the order of these approximations, at that $h$ the size of the bias is half the standard deviation of $\hat f(x_0)$, $|\text{bias}|/\mathrm{sd} = 1/2$, whatever $n$, $\sigma$ and $a$.
 
 (c) The confidence interval $\hat f(x_0) \pm 1.645\,\mathrm{sd}$ for $f^\star(x_0)$, with $\mathrm{sd} = \sigma/\sqrt k$, ignores the bias. What is its coverage at the $h$ of (b)? Does more data help?
 
-(d) With $d$ inputs and a window of half-width $h$ in each, the bias is still proportional to $h^2$ and the variance to $1/(nh^d)$. Show that at the $h$ that minimizes the mean squared error, bias/sd $= \sqrt d/2$, and find the coverage for $d = 4$ and $d = 9$.
+(d) With $d$ inputs and a window of half-width $h$ in each, the bias is still proportional to $h^2$ and the variance to $1/(nh^d)$. Show that at the $h$ that minimizes the mean squared error, $|\text{bias}|/\mathrm{sd} = \sqrt d/2$, and find the coverage for $d = 4$ and $d = 9$.
 
 (e) The prediction interval $\hat f(x_0) \pm 1.645\sqrt{\sigma^2 + \mathrm{sd}^2}$ for a new outcome $Y_0 = f^\star(x_0) + \varepsilon_0$. With one input, the $h$ of (b) and $k = 90$, what is its coverage?
 
 (f) How would you change the fit used for the confidence interval to bring its coverage back to 90%, and what does that cost?
 
-**Problem 3 (one leaf of a tree).** <!-- About 7 min. --> A tree's leaf covers $-1 \le x \le 1$ (after rescaling $x$), where $x$ is uniform, $f^\star(x) = x$ and the noise is $N(0, 1)$. The leaf has many training rows, so it predicts 0, the average of $f^\star$ over the leaf. Held-out rows in the leaf give $C$, the 90th percentile of $|Y - 0|$ over the leaf: $C = 1.90$ (you need not compute it).
-
-(a) Find the coverage of $0 \pm 1.90$ at $x = 0$ and at $x = 1$.
-
-(b) What is the coverage averaged over the leaf?
-
-(c) The tree splits the leaf at 0, and each new leaf has many rows. What does each new leaf predict? How far is $f^\star$ from the prediction at the edges now? With the new $C = 1.71$, find the coverage at the center and at the edges of a new leaf.
-
-(d) What stops us from splitting until every leaf is tiny?
-
-**Problem 4 (one width, two noise levels).** <!-- About 7 min. --> Half the people have $x = 0$ and half have $x = 1$. Given $x$, $Y = f^\star(x) + \varepsilon$, with $\varepsilon$ uniform on $[-1, 1]$ when $x = 0$ and uniform on $[-3, 3]$ when $x = 1$. The model is exact, $\hat f = f^\star$, and the interval is $f^\star(x) \pm C$, with one $C$ for everyone.
-
-(a) Find the $C$ that covers 90% of people. What is the coverage among people with $x = 0$, and among people with $x = 1$?
-
-(b) Find the $C$ for each value of $x$ that covers 90% of the people with that value. Compare the average width with (a).
-
-(c) Now 90% of people have $x = 0$ and 10% have $x = 1$. Find the one $C$ that covers 90% of people, and the coverage among people with $x = 1$.
-
-(d) Which coverage does a split conformal interval with one $C$ guarantee here? How could you guarantee 90% among people with $x = 1$?
-
-**Problem 5 (an interval from 19 rows).** <!-- About 6 min. --> At one $x$ there are 19 rows with outcomes $Y_1, \ldots, Y_{19}$, independent draws from the distribution of $Y$ given $X = x$, which is continuous with distribution function $F$. The interval is $[\min_i Y_i, \max_i Y_i]$.
-
-(a) Show that a new outcome $Y$ from the same distribution falls in the interval with probability 0.9, averaging over the 19 rows and $Y$.
-
-(b) Given the 19 rows, the coverage is $F(\max_i Y_i) - F(\min_i Y_i)$. Take as given that it has the Beta(18, 2) distribution, with distribution function $19u^{18} - 18u^{19}$ and variance $0.9 \times 0.1/21$. Find its standard deviation, and the probability that the coverage is below 80%.
-
-(c) Each of 100 ranges of $x$ gets its own interval of this kind from its own 19 rows. About how many of the intervals cover less than 80%?
-
-(d) With 199 rows and the interval from the 10th smallest to the 10th largest, the coverage has mean 0.9 and variance $0.9 \times 0.1/201$. Find its standard deviation. How does it scale with the number of rows?
-
-**Problem 6 (permutation importance and leaving an input out).** <!-- About 8 min. --> $Y = f(X) + \varepsilon$, with $\varepsilon$ independent of $X$, mean 0 and variance $\sigma^2$, and the fitted model is exactly $f$. Importance is measured in the population. The **permutation importance** of input $j$ is $\mathbb E[(Y - f(X^{(j)}))^2] - \mathbb E[(Y - f(X))^2]$, where $X^{(j)}$ is $X$ with $X_j$ replaced by an independent copy $X'_j$ from its marginal distribution (what shuffling a column does in a large sample). The **LOCO importance** of input $j$ (leave one covariate out) is $\mathbb E[(Y - \mathbb E[Y \mid X_{-j}])^2] - \mathbb E[(Y - f(X))^2]$: how much the risk rises when the best model without $X_j$ replaces $f$.
-
-(a) $f(x) = \sum_j f_j(x_j)$, with independent inputs. Show that the permutation importance of input $j$ is $2\,\mathrm{Var}\,f_j(X_j)$ and its LOCO importance is $\mathrm{Var}\,f_j(X_j)$.
-
-(b) Two inputs, $X_1$ and $X_2$ standard normal with correlation $\rho$, and $f(x) = \beta_1x_1 + \beta_2x_2$. Show that the permutation importance of $X_1$ is $2\beta_1^2$ and its LOCO importance is $\beta_1^2(1 - \rho^2)$.
-
-(c) Take $\beta_1 = \beta_2 = 1$ and $\rho = 0.95$. Compute both importances for $X_1$. Which one says that $X_1$ hardly matters, and in what sense is each right?
-
-**Problem 7 (a partial dependence plot in three worlds).** <!-- About 8 min. --> In each world below the noises $\varepsilon_1$, $\varepsilon_2$ and $\varepsilon_Y$ are independent $N(0, 1)$. The fitted model is the best predictor from $X_1$ and $X_2$, $f(x_1, x_2) = \mathbb E[Y \mid X_1 = x_1, X_2 = x_2]$, which here is linear, so its PDP for $X_1$ is a line. Compare its slope with the slope of $\mathbb E[Y \mid do(X_1 = x)]$.
-
-- World 1: $X_2 = \varepsilon_2$, $X_1 = X_2 + \varepsilon_1$, $Y = X_1 + X_2 + \varepsilon_Y$.
-- World 2: $X_1 = \varepsilon_1$, $X_2 = X_1 + \varepsilon_2$, $Y = X_2 + \varepsilon_Y$.
-- World 3: $X_1 = \varepsilon_1$, $Y = X_1 + \varepsilon_Y$, $X_2 = Y + \varepsilon_2$.
-
-(a) In each world, draw the graph, find $f$, its PDP slope for $X_1$, and the slope of the effect of setting $X_1$.
-
-(b) In each world, would the model on $X_1$ alone, $\mathbb E[Y \mid X_1]$, have a PDP with the right slope?
-
-(c) Which of the two models predicts better, in each world?
-
-**Problem 8 (calibration in two groups).** <!-- About 8 min. --> A score takes the values 0.2 and 0.8. In two groups of 100 people:
+**Problem 3 (calibration in two groups).** <!-- About 8 min. --> A score takes the values 0.2 and 0.8. In two groups of 100 people:
 
 | Group | Score | People | With the condition |
 |---|---:|---:|---:|
@@ -368,7 +318,7 @@ imp <- rbind(split = split_imp, permutation = perm_imp, LOCO = loco_imp, `mean |
 round(imp / rowSums(imp), 2)   # each measure as a share of its total
 ```
 
-**Question 7.** Partial dependence by hand. Complete `pdp_curve()`: for each value `t` in `grid`, set the input to `t` for every row of `d` and average the forest's predictions. The chunk after it draws the three curves, and 100 ICE curves for $x_1$. According to the PDP, what happens to $y$ when $x_1$ goes from $-1$ to $1$? What share of the ICE curves for $x_1$ slope down there?
+**Question 7.** Partial dependence by hand. Complete `pdp_curve()`: for each value `t` in `grid`, set the input to `t` for every row of `d` and average the forest's predictions. The chunk after it draws the three curves, and 100 of the 500 ICE curves for $x_1$. According to the PDP, what happens to $y$ when $x_1$ goes from $-1$ to $1$? What share of all 500 ICE curves for $x_1$ end lower at $1$ than at $-1$?
 
 ```{r}
 #| eval: false
@@ -394,14 +344,14 @@ p_pd <- pd |> pivot_longer(-t, names_to = "input", values_to = "pdp") |>
   ggplot(aes(t, pdp, colour = input)) + geom_line(linewidth = 1.2) + labs(x = "value set", y = "PDP", title = "Partial dependence")
 p_ice <- ggplot(ice, aes(t, pred, group = unit)) + geom_line(alpha = 0.2) +
   geom_line(data = pd, aes(t, x1, group = NULL), colour = "black", linewidth = 1.4) +
-  labs(x = "x1 set to", y = "prediction", title = "ICE curves for x1, and their average")
+  labs(x = "x1 set to", y = "prediction", title = "ICE curves for x1 (100 of 500), and the PDP")
 p_pd | p_ice
 c(pdp_x1_at_minus1 = pd$x1[pd$t == -1], pdp_x1_at_1 = pd$x1[pd$t == 1], share_ice_down = mean(slope_ice < 0))
 ```
 
-**Question 8.** Before you run anything else: from questions 6 and 7, which input would you set to raise $y$, in which direction, and how much would you expect $y$ to change if you moved it from $-1$ to $1$? Write the answer down.
+**Question 8.** Before you run anything else, write down two answers. (a) From questions 6 and 7: which input gives the largest rise in the forest's average prediction when it is moved from $-1$ to $1$, and how large is the rise? (b) From the equations above: what would setting each input from $-1$ to $1$ do to the mean of $y$? The sign is enough.
 
-**Question 9.** Intervene in the simulator. $do(x_1 = t)$ replaces $x_1$'s line with $x_1 = t$ for everyone and leaves the other equations alone. Complete `world_do_x1(n, t)` and `world_do_x2(n, t)`, each returning the mean of $y$ over `n` draws. What is $\mathbb E[y \mid do(x_3 = t)]$? Answer from the equations, without code. The chunk after it plots each input's effect against its PDP.
+**Question 9.** Intervene in the simulator. $do(x_1 = t)$ replaces $x_1$'s line with $x_1 = t$ for everyone and leaves the other equations alone. Complete `world_do_x1(n, t)` and `world_do_x2(n, t)`, each returning the mean of $y$ over `n` draws. Setting $x_3$ leaves the mean of $y$ at $\mathbb E[y] = 0$, as question 8 found from the equations. The chunk after it plots each input's effect against its PDP. Compare with your answers to question 8.
 
 ```{r}
 #| eval: false
