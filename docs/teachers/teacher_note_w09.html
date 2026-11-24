@@ -2358,13 +2358,13 @@ window.Quarto = {
 <td>The two variances, then the <span class="math inline">\(k = 1\)</span> and <span class="math inline">\(k = 5\)</span> coverages</td>
 </tr>
 <tr class="even">
-<td>Problem 2(a to c): bias <span class="math inline">\(ah^2/6\)</span>, variance <span class="math inline">\(\sigma^2/(2nh)\)</span>; at the <span class="math inline">\(h\)</span> that minimizes the mean squared error, bias/sd <span class="math inline">\(= 1/2\)</span> for every <span class="math inline">\(n\)</span>, so the confidence interval covers 86%</td>
+<td>Problem 2(a to c): bias <span class="math inline">\(ah^2/6\)</span>, variance <span class="math inline">\(\sigma^2/(2nh)\)</span>; at the <span class="math inline">\(h\)</span> that minimizes the mean squared error, <span class="math inline">\(|\text{bias}|/\mathrm{sd} = 1/2\)</span> for every <span class="math inline">\(n\)</span> (to leading order), so the confidence interval covers about 86%</td>
 <td style="text-align: right;">6</td>
 <td>Keep</td>
 <td><span class="math inline">\(M&#39;(h) = 0\)</span> gives <span class="math inline">\(4\,\text{bias}^2 = \text{variance}\)</span>; then <span class="math inline">\(\Phi(1.145) - \Phi(-2.145)\)</span></td>
 </tr>
 <tr class="odd">
-<td>Problem 2(d to f): with <span class="math inline">\(d\)</span> inputs bias/sd <span class="math inline">\(= \sqrt d/2\)</span>, 74% at <span class="math inline">\(d = 4\)</span>, 56% at <span class="math inline">\(d = 9\)</span>; the prediction interval covers 89.95% at <span class="math inline">\(k = 90\)</span>; undersmooth to fix the confidence interval</td>
+<td>Problem 2(d to f): with <span class="math inline">\(d\)</span> inputs <span class="math inline">\(|\text{bias}|/\mathrm{sd} = \sqrt d/2\)</span>, 74% at <span class="math inline">\(d = 4\)</span>, 56% at <span class="math inline">\(d = 9\)</span>; the prediction interval covers 89.95% at <span class="math inline">\(k = 90\)</span>; undersmooth to fix the confidence interval</td>
 <td style="text-align: right;">4</td>
 <td>Rush; cut second</td>
 <td>Say the three results</td>
@@ -2412,13 +2412,13 @@ window.Quarto = {
 <td>The permutation loop, then the table; LOCO’s three refits can be shown</td>
 </tr>
 <tr class="odd">
-<td>Coding 2, question 7: the PDP for <span class="math inline">\(x_1\)</span> falls from 0.13 to <span class="math inline">\(-0.30\)</span> between <span class="math inline">\(-1\)</span> and 1, and 92% of the ICE curves slope down; the PDP for <span class="math inline">\(x_3\)</span> rises from <span class="math inline">\(-0.46\)</span> to 0.40</td>
+<td>Coding 2, question 7: the PDP for <span class="math inline">\(x_1\)</span> falls from 0.13 to <span class="math inline">\(-0.30\)</span> between <span class="math inline">\(-1\)</span> and 1, and 92% of the 500 ICE curves end lower at 1 than at <span class="math inline">\(-1\)</span>; the PDP for <span class="math inline">\(x_3\)</span> rises from <span class="math inline">\(-0.46\)</span> to 0.40</td>
 <td style="text-align: right;">5</td>
 <td>Keep</td>
 <td><code>d[[input]] &lt;- t; mean(predict(fit, d))</code>, then the figure</td>
 </tr>
 <tr class="even">
-<td>Coding 2, question 8: write down the answer the tools suggest, <span class="math inline">\(x_3\)</span></td>
+<td>Coding 2, question 8: two written answers: the tools point to <span class="math inline">\(x_3\)</span> (its PDP rises by 0.86); the equations say setting <span class="math inline">\(x_3\)</span> leaves <span class="math inline">\(y\)</span> unchanged</td>
 <td style="text-align: right;">2</td>
 <td>Keep</td>
 <td>One minute of writing; do not skip it</td>
@@ -2427,7 +2427,7 @@ window.Quarto = {
 <td>Coding 2, question 9: setting <span class="math inline">\(x_1\)</span> from <span class="math inline">\(-1\)</span> to 1 raises <span class="math inline">\(y\)</span> by 2.83, <span class="math inline">\(x_2\)</span> by 2.52, <span class="math inline">\(x_3\)</span> by 0</td>
 <td style="text-align: right;">5</td>
 <td>Keep</td>
-<td><code>x1 &lt;- rep(t, n)</code>, then the figure. This is the seminar’s main point</td>
+<td><code>x1 &lt;- rep(t, n)</code>, then the figure. Keep it whatever else is cut</td>
 </tr>
 <tr class="even">
 <td>Coding 2, question 10: the smooth of <span class="math inline">\(x_1\)</span> alone matches the effect (<span class="math inline">\(-1.35\)</span> to 1.39 against <span class="math inline">\(-1.41\)</span> to 1.42) and predicts worst (MSE 0.72 against 0.08); for <span class="math inline">\(x_2\)</span>, include <span class="math inline">\(x_1\)</span> and leave out <span class="math inline">\(x_3\)</span></td>
@@ -2444,7 +2444,7 @@ window.Quarto = {
 <p>How it runs</p>
 <ul>
 <li>Students did exercises 1 to 3 at home (quantile optimality, the coverage of a split conformal interval, partial dependence by hand). Open the <a href="https://ml4ds.com/teachers/notebook9_instructor.html">instructor notebook</a> on screen: blue boxes are hints, opened in order after the room has had a few minutes; green boxes are solution code and short answers. Show an exercise’s solution only if asked. The <a href="https://ml4ds.com/teachers/notebook9_complete.html">complete notebook</a> has the full answers, with common errors, for preparing. Each problem’s solution stands on its own.</li>
-<li>Coding part 2 is the point of the hour: every tool from the lecture ranks first an input that has no effect, and the partial dependence plot for <span class="math inline">\(x_1\)</span> has the wrong sign. Keep question 8, the written answer, before question 9 reveals the truth.</li>
+<li>Coding part 2 is the main exercise: every tool from the lecture ranks first an input that has no effect, and the partial dependence plot for <span class="math inline">\(x_1\)</span> has the wrong sign. Keep question 8, the two written answers (what the tools say, and what the equations say), before question 9 computes the effects.</li>
 <li>One seed, <code>set.seed(310)</code> at the NHANES split (the lecture’s split, used only in the optional item), then every simulation in order. A student who skips a chunk that draws random numbers gets slightly different numbers from then on; no conclusion depends on the second decimal.</li>
 </ul>
 <p>What students should see</p>

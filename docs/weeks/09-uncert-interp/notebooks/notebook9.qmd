@@ -49,7 +49,7 @@ Each exercise has hints, collapsed below it. Do not open a hint unless you have 
 
 (c) Show that $G$ is convex, and conclude that a $\tau$-quantile, a value $q_\tau$ with $F(q_\tau) = \tau$, minimizes $G$. When is the minimizer not unique?
 
-(d) Explain why the same argument shows that, for $Y$ given $X = x$, the conditional $\tau$-quantile $q_\tau(x)$ is the best prediction at $x$, and why the function $x \mapsto q_\tau(x)$ minimizes $\mathbb E[\rho_\tau(Y - h(X))]$ over functions $h$.
+(d) Suppose that, for each $x$, $Y$ given $X = x$ has a continuous distribution function with a density and a finite mean. Explain why the same argument shows that the conditional $\tau$-quantile $q_\tau(x)$ is the best prediction at $x$, and why the function $x \mapsto q_\tau(x)$ minimizes $\mathbb E[\rho_\tau(Y - h(X))]$ over functions $h$.
 
 ::: {.callout-note collapse="true" title="Hint 1"}
 (a) Below the prediction the loss is $(1 - \tau)(\hat y - y)$; above it, $\tau(y - \hat y)$. Which outcomes are below $\hat y$, and with what probability?
@@ -126,11 +126,11 @@ Problems 1 to 5 use the normal distribution function $\Phi$; for a 90% interval,
 
 (a) Show that the bias $\mathbb E\hat f(x_0) - f^\star(x_0)$ is about $ah^2/6$, and that the variance of $\hat f(x_0)$ is $\sigma^2/(2nh)$.
 
-(b) Find the $h$ that minimizes the mean squared error, bias$^2$ + variance, and show that at that $h$ the bias is half the standard deviation of $\hat f(x_0)$, whatever $n$, $\sigma$ and $a$.
+(b) Find the $h$ that minimizes the mean squared error, bias$^2$ + variance, and show that, to the order of these approximations, at that $h$ the size of the bias is half the standard deviation of $\hat f(x_0)$, $|\text{bias}|/\mathrm{sd} = 1/2$, whatever $n$, $\sigma$ and $a$.
 
 (c) The confidence interval $\hat f(x_0) \pm 1.645\,\mathrm{sd}$ for $f^\star(x_0)$, with $\mathrm{sd} = \sigma/\sqrt k$, ignores the bias. What is its coverage at the $h$ of (b)? Does more data help?
 
-(d) With $d$ inputs and a window of half-width $h$ in each, the bias is still proportional to $h^2$ and the variance to $1/(nh^d)$. Show that at the $h$ that minimizes the mean squared error, bias/sd $= \sqrt d/2$, and find the coverage for $d = 4$ and $d = 9$.
+(d) With $d$ inputs and a window of half-width $h$ in each, the bias is still proportional to $h^2$ and the variance to $1/(nh^d)$. Show that at the $h$ that minimizes the mean squared error, $|\text{bias}|/\mathrm{sd} = \sqrt d/2$, and find the coverage for $d = 4$ and $d = 9$.
 
 (e) The prediction interval $\hat f(x_0) \pm 1.645\sqrt{\sigma^2 + \mathrm{sd}^2}$ for a new outcome $Y_0 = f^\star(x_0) + \varepsilon_0$. With one input, the $h$ of (b) and $k = 90$, what is its coverage?
 
@@ -170,7 +170,7 @@ Problems 1 to 5 use the normal distribution function $\Phi$; for a 90% interval,
 
 (a) $f(x) = \sum_j f_j(x_j)$, with independent inputs. Show that the permutation importance of input $j$ is $2\,\mathrm{Var}\,f_j(X_j)$ and its LOCO importance is $\mathrm{Var}\,f_j(X_j)$.
 
-(b) Two inputs, $X_1$ and $X_2$ standard normal with correlation $\rho$, and $f(x) = \beta_1x_1 + \beta_2x_2$. Show that the permutation importance of $X_1$ is $2\beta_1^2$ and its LOCO importance is $\beta_1^2(1 - \rho^2)$.
+(b) Two inputs, $X_1$ and $X_2$ jointly normal, each standard normal, with correlation $\rho$, and $f(x) = \beta_1x_1 + \beta_2x_2$. Show that the permutation importance of $X_1$ is $2\beta_1^2$ and its LOCO importance is $\beta_1^2(1 - \rho^2)$.
 
 (c) Take $\beta_1 = \beta_2 = 1$ and $\rho = 0.95$. Compute both importances for $X_1$. Which one says that $X_1$ hardly matters, and in what sense is each right?
 
@@ -368,7 +368,7 @@ imp <- rbind(split = split_imp, permutation = perm_imp, LOCO = loco_imp, `mean |
 round(imp / rowSums(imp), 2)   # each measure as a share of its total
 ```
 
-**Question 7.** Partial dependence by hand. Complete `pdp_curve()`: for each value `t` in `grid`, set the input to `t` for every row of `d` and average the forest's predictions. The chunk after it draws the three curves, and 100 ICE curves for $x_1$. According to the PDP, what happens to $y$ when $x_1$ goes from $-1$ to $1$? What share of the ICE curves for $x_1$ slope down there?
+**Question 7.** Partial dependence by hand. Complete `pdp_curve()`: for each value `t` in `grid`, set the input to `t` for every row of `d` and average the forest's predictions. The chunk after it draws the three curves, and 100 of the 500 ICE curves for $x_1$. According to the PDP, what happens to $y$ when $x_1$ goes from $-1$ to $1$? What share of all 500 ICE curves for $x_1$ end lower at $1$ than at $-1$?
 
 ```{r}
 #| eval: false
@@ -394,14 +394,14 @@ p_pd <- pd |> pivot_longer(-t, names_to = "input", values_to = "pdp") |>
   ggplot(aes(t, pdp, colour = input)) + geom_line(linewidth = 1.2) + labs(x = "value set", y = "PDP", title = "Partial dependence")
 p_ice <- ggplot(ice, aes(t, pred, group = unit)) + geom_line(alpha = 0.2) +
   geom_line(data = pd, aes(t, x1, group = NULL), colour = "black", linewidth = 1.4) +
-  labs(x = "x1 set to", y = "prediction", title = "ICE curves for x1, and their average")
+  labs(x = "x1 set to", y = "prediction", title = "ICE curves for x1 (100 of 500), and the PDP")
 p_pd | p_ice
 c(pdp_x1_at_minus1 = pd$x1[pd$t == -1], pdp_x1_at_1 = pd$x1[pd$t == 1], share_ice_down = mean(slope_ice < 0))
 ```
 
-**Question 8.** Before you run anything else: from questions 6 and 7, which input would you set to raise $y$, in which direction, and how much would you expect $y$ to change if you moved it from $-1$ to $1$? Write the answer down.
+**Question 8.** Before you run anything else, write down two answers. (a) From questions 6 and 7: which input gives the largest rise in the forest's average prediction when it is moved from $-1$ to $1$, and how large is the rise? (b) From the equations above: what would setting each input from $-1$ to $1$ do to the mean of $y$? The sign is enough.
 
-**Question 9.** Intervene in the simulator. $do(x_1 = t)$ replaces $x_1$'s line with $x_1 = t$ for everyone and leaves the other equations alone. Complete `world_do_x1(n, t)` and `world_do_x2(n, t)`, each returning the mean of $y$ over `n` draws. What is $\mathbb E[y \mid do(x_3 = t)]$? Answer from the equations, without code. The chunk after it plots each input's effect against its PDP.
+**Question 9.** Intervene in the simulator. $do(x_1 = t)$ replaces $x_1$'s line with $x_1 = t$ for everyone and leaves the other equations alone. Complete `world_do_x1(n, t)` and `world_do_x2(n, t)`, each returning the mean of $y$ over `n` draws. Setting $x_3$ leaves the mean of $y$ at $\mathbb E[y] = 0$, as question 8 found from the equations. The chunk after it plots each input's effect against its PDP. Compare with your answers to question 8.
 
 ```{r}
 #| eval: false
