@@ -18,17 +18,17 @@ format:
     geometry: margin=2.5cm
 ---
 
-A prediction is one number. A decision usually needs to know how far off that number may be. This note covers two ways of saying so, and how to check them on data the model has not seen: an interval for a numerical outcome, and a probability for a binary one. Throughout, the numerical example is a simulation, so that the right answers are known: $x$ is uniform on $[0, 10]$, and
+A prediction is one number. A decision usually needs to know how far off that number may be. This note covers two ways of saying so, and how to check them on data the model has not seen: an interval for a numerical outcome, and a probability for a binary one. Throughout, the numerical example is the lecture's simulation, so that the right answers are known:
 $$
-Y = 3 + x + 2\sin x + (0.5 + 0.35\,x)\,\varepsilon, \qquad \varepsilon \sim N(0, 1),
+Y = f^\star(x) + (0.5 + 0.35\,x)\,\varepsilon, \qquad f^\star(x) = 3 + x + 2\sin x + 3e^{-(x - 3)^2/0.08}, \qquad \varepsilon \sim N(0, 1).
 $$
-so the noise grows with $x$. There are 1,000 points to fit on and 2,000 fresh points to check on.
+The noise grows with $x$; the curve has a narrow bump at $x = 3$; and $x$ lies between 0 and 10, with few points between 4 and 6 (a quarter as many per unit of $x$ as elsewhere). There are 1,000 points to fit on and 7,000 fresh points to check on.
 
 ```{r}
 #| label: setup
 #| code-summary: "Show the setup code"
-# quantreg is on the course's package list; plotly draws the interactive figures and is needed only here.
-library(tidyverse); library(quantreg); library(xgboost); library(NHANES); library(plotly)
+# quantreg and randomForest are on the course's package list; plotly draws the interactive figures and is needed only here.
+library(tidyverse); library(quantreg); library(xgboost); library(randomForest); library(NHANES); library(plotly)
 
 # Course palette (theme/st310.scss): viridis for the primary scale, magma for the second.
 v_dark <- "#440154"; v_blue <- "#31688e"; v_teal <- "#21918c"; m_pink <- "#b73779"; m_orange <- "#fc8961"
@@ -45,11 +45,13 @@ nh_id <- sample(nrow(nh))
 nh_train <- nh[nh_id[1:4000], ]
 nh_tune  <- nh[nh_id[4001:7000], ]
 
-f_sim <- function(x) 3 + x + 2 * sin(x)
+f_sim <- function(x) 3 + x + 2 * sin(x) + 3 * exp(-(x - 3)^2 / (2 * 0.2^2))
 s_sim <- function(x) 0.5 + 0.35 * x
-sim <- function(n) tibble(x = runif(n, 0, 10)) |> mutate(y = f_sim(x) + s_sim(x) * rnorm(n))
+# x: uniform, except that a stretch of the line is spread over [4, 6], which leaves few points there.
+x_thin <- function(n) { u <- runif(n, 0, 8.5); case_when(u < 4 ~ u, u < 4.5 ~ 4 + 4 * (u - 4), TRUE ~ u + 1.5) }
+sim <- function(n) tibble(x = x_thin(n)) |> mutate(y = f_sim(x) + s_sim(x) * rnorm(n))
 het_train <- sim(1000)
-het_fresh <- sim(2000)
+het_fresh <- sim(7000)
 x_grid <- tibble(x = seq(0, 10, length.out = 201))
 ```
 
@@ -59,7 +61,9 @@ At a new input $x_0$ the outcome is $Y_0 = f^\star(x_0) + \varepsilon_0$. A **co
 $$
 \mathbb E\big[(Y_0 - \hat f(x_0))^2\big] = \sigma^2 + \text{bias}^2 + \text{variance},
 $$
-and more data shrink the variance, never $\sigma^2$. For a linear model with normal noise of constant variance, R gives both: `predict(fit, newdata, interval = "confidence")` and `interval = "prediction"`. This note is about the second kind, without assuming normal noise of constant variance.
+and more data shrink the variance, never $\sigma^2$. For a linear model with normal noise of constant variance, R gives both: `predict(fit, newdata, interval = "confidence")` and `interval = "prediction"`.
+
+The simplest interval of either kind is the prediction plus or minus one number, $\hat C(x_0) = [\hat f(x_0) - C,\ \hat f(x_0) + C]$. For $f^\star(x_0)$, $C$ comes from how much $\hat f(x_0)$ varies from one training sample to another: a multiple of its standard error, from a formula or the bootstrap. That interval is centered on $f^\star(x_0)$ only if $\hat f(x_0)$ has no bias, and a flexible model tuned to predict well usually has some. For $Y_0$, $C$ comes from how far outcomes fall from predictions: a quantile of the absolute residuals $|y_i - \hat f(x_i)|$, for a 90% interval their 90th percentile. This note is about the second kind, without assuming normal noise of constant variance. Which rows the residuals should come from is taken up below; first, quantiles that change with $x$, for when one $C$ for every $x$ is the wrong shape.
 
 ## Quantiles and the pinball loss
 
@@ -99,9 +103,9 @@ If $Y$ given $X = x$ has a continuous distribution with a finite mean, the condi
 
 Fitting a model with the pinball loss is **quantile regression**: minimize $\frac1n\sum_i \rho_\tau(y_i - f(x_i))$ over a class of functions $f$, a line or a sum of trees, just as least squares minimizes the average squared error.
 
-## An interval from two quantiles
+## Local intervals from two quantiles
 
-A 90% interval from two quantile fits is $\hat C(x) = [\hat q_{0.05}(x), \hat q_{0.95}(x)]$. The true quantiles would cover $Y$ with probability $0.9$ at every $x$; estimated quantiles aim at that, and miss by however much the fits are wrong. The figure compares four ways to make a 90% interval on the simulated data; the dashed lines are the true 5% and 95% quantiles.
+A **local** interval has ends that change with $x$. A 90% interval from two quantile fits is $\hat C(x) = [\hat q_{0.05}(x), \hat q_{0.95}(x)]$. The true quantiles would cover $Y$ with probability $0.9$ at every $x$; estimated quantiles aim at that, and miss by however much the fits are wrong. The figure compares four ways to make a 90% interval on the simulated data; the dashed lines are the true 5% and 95% quantiles.
 
 ::: {.content-visible when-format="html"}
 Click a name in the legend to show or hide it.
@@ -166,34 +170,120 @@ p |> add_lines(data = x_grid, x = ~x, y = ~f_sim(x) - z90 * s_sim(x), line = lis
 }
 ```
 
+The first three are rigid: each uses every row at every $x$, which makes it stable, and wrong wherever its shape is wrong, as at the bump. The boosted fits can follow the bump and the growing noise, at a cost. The ends of the interval near $x$ are learned from the rows near $x$, and between 4 and 6 there are only `r sum(het_train$x >= 4 & het_train$x < 6)` of the 1,000. And the 5% and 95% quantiles are harder to learn than the mean: about one row in twenty lies beyond each.
+
 ## Checking an interval
 
-Check a claimed 90% on data that played no part in the fit: the share of fresh outcomes inside their intervals (the **coverage**), the mean width, and both again within ranges of $x$. The linear model's interval is close to 90% overall and far from it within ranges, too wide where the noise is small and too narrow where it is large; covering is not enough on its own either, since widening an interval never lowers its coverage.
+Check a claimed 90% on data that played no part in the fit: the share of fresh outcomes inside their intervals (the **coverage**), the mean width, and both again within ranges of $x$. Covering is not enough on its own, since widening an interval never lowers its coverage.
 
 ```{r}
 #| label: coverage
 #| code-summary: "Show the code for the table"
 # Coverage of the fresh points, overall and within five ranges of x, and the mean width; one row per interval.
+pct0 <- function(v) sprintf("%.0f%%", 100 * v)
 coverage_table <- function(ints) {
   imap_dfr(ints, function(b, nm) tibble(
-    method = nm, range = cut(het_fresh$x, c(0, 2, 4, 6, 8, 10), include.lowest = TRUE),
+    method = nm, range = cut(het_fresh$x, c(0, 2, 4, 6, 8, 10), right = FALSE, include.lowest = TRUE),
     inside = het_fresh$y >= b[, 1] & het_fresh$y <= b[, 2], width = b[, 2] - b[, 1])) |>
     group_by(method = fct_inorder(method)) |>
     summarise(all = mean(inside),
-              `x in [0, 2]` = mean(inside[range == "[0,2]"]), `(2, 4]` = mean(inside[range == "(2,4]"]),
-              `(4, 6]` = mean(inside[range == "(4,6]"]), `(6, 8]` = mean(inside[range == "(6,8]"]),
-              `(8, 10]` = mean(inside[range == "(8,10]"]), `mean width` = mean(width)) |>
-    mutate(across(all:`(8, 10]`, \(v) sprintf("%.0f%%", 100 * v)), `mean width` = sprintf("%.1f", `mean width`)) |>
+              `x in [0, 2)` = mean(inside[range == "[0,2)"]), `[2, 4)` = mean(inside[range == "[2,4)"]),
+              `[4, 6)` = mean(inside[range == "[4,6)"]), `[6, 8)` = mean(inside[range == "[6,8)"]),
+              `[8, 10]` = mean(inside[range == "[8,10]"]), `mean width` = mean(width)) |>
+    mutate(across(all:`[8, 10]`, \(v) sprintf("%.0f%%", 100 * v)), `mean width` = sprintf("%.1f", `mean width`)) |>
     knitr::kable(align = "lrrrrrrr")
 }
 coverage_table(intervals(het_fresh))
 ```
 
-The true quantiles have mean width `r sprintf("%.1f", mean(2 * z90 * s_sim(het_fresh$x)))` on these points. Coverage by range is a diagnostic, not a certificate: a range can be right on average while a smaller group within it is not. Could a method promise 90% at every $x$? **Marginal coverage** averages over $X$, $P(Y \in \hat C(X)) \ge 0.9$; **conditional coverage** asks for $P(Y \in \hat C(X) \mid X = x) \ge 0.9$ at every $x$. Barber, Candès, Ramdas and Tibshirani (2021) show that if a procedure guarantees the second in finite samples for every distribution, then wherever the inputs are continuous its intervals are infinitely long on average (their Proposition 2.2).[^atoms] Guarantees for groups, such as each range of $x$, and results that rest on assumptions about the distribution, or hold as $n$ grows, remain possible. No method does best on every distribution, and none can promise coverage at every $x$ without saying something about the distribution.
+The true quantiles have mean width `r sprintf("%.1f", mean(2 * z90 * s_sim(het_fresh$x)))` on these points. The linear model's interval is close to 90% overall and far from it within ranges, too wide where the noise is small and too narrow where it is large. The boosted quantiles are within a few points of 90% in every range, the one with few rows included, and a little low overall: nothing guarantees their level. Coverage by range is a diagnostic, not a certificate: a range can be right on average while a smaller group within it is not.
+
+## Residuals from training rows, and from held-out rows
+
+Back to the simplest interval, $\hat f(x) \pm C$ with one $C$. Take $C$ to be the 90th percentile of the absolute residuals on the rows the model was fitted to. Two things go wrong, one for each kind of model.
+
+```{r}
+#| label: residual-intervals
+#| code-summary: "Show the code for the table"
+het_tune <- sim(1000); het_hold <- sim(1000)   # 1,000 rows to tune on, 1,000 held out
+fit_rf <- randomForest(y ~ x, data = het_train, ntree = 300)   # the defaults: nodes of down to 5 rows
+C_train <- function(fit) quantile(abs(het_train$y - predict(fit, het_train)), 0.9)
+C_from <- function(fit, d) sort(abs(d$y - predict(fit, d)))[ceiling(0.9 * (nrow(d) + 1))]
+# A forest whose node size is chosen on the tuning rows.
+sizes <- c(5, 10, 20, 40, 80, 160, 320)
+rf_sizes <- map(sizes, function(s) randomForest(y ~ x, data = het_train, ntree = 300, nodesize = s))
+fit_rf_tuned <- rf_sizes[[which.min(map_dbl(rf_sizes, function(f) mean((het_tune$y - predict(f, het_tune))^2)))]]
+plus_minus <- function(fit, C) cbind(predict(fit, het_fresh) - C, predict(fit, het_fresh) + C)
+cover <- function(b) mean(het_fresh$y >= b[, 1] & het_fresh$y <= b[, 2])
+res_ints <- list(`line, C from its training rows` = plus_minus(fit_lm, C_train(fit_lm)),
+                 `forest (defaults), C from its training rows` = plus_minus(fit_rf, C_train(fit_rf)),
+                 `tuned forest, C from 1,000 held-out rows` = plus_minus(fit_rf_tuned, C_from(fit_rf_tuned, het_hold)),
+                 `tuned forest, C from the 1,000 tuning rows` = plus_minus(fit_rf_tuned, C_from(fit_rf_tuned, het_tune)))
+coverage_table(res_ints)
+```
+
+- **Bias.** The line misses the bends of the curve. Its residuals include that bias and the noise at every $x$, so the level is about right overall (`r pct0(cover(res_ints[[1]]))`) and wrong by range.
+- **Variance.** The forest follows the noise in its own rows, so its residuals there are too small: with randomForest's defaults the interval covers `r pct0(cover(res_ints[[2]]))` of fresh points. Training error underestimates the risk, and the residuals behind it underestimate $C$.
+
+The repair for the second problem is to take the residuals from rows the model has not seen. **Split conformal prediction** (Lei et al. 2018, section 2.2): fit $\hat f$ on the training rows; compute the absolute residuals $R_i = |y_i - \hat f(x_i)|$ on $m$ **held-out** rows; let $C$ be the $k$-th smallest of them, with $k = \lceil 0.9(m + 1) \rceil$ (if $k > m$, take $C = \infty$); report $\hat f(x) \pm C$. With $m = 1{,}000$, $k = 901$. For the forest, with its node size chosen on tuning rows (`r sizes[which.min(map_dbl(rf_sizes, function(f) mean((het_tune$y - predict(f, het_tune))^2)))]` here), this gives `r pct0(cover(res_ints[[3]]))` overall, for this one set of held-out rows.
+
+**Why it works.** A new row $(X, Y)$ is inside the interval exactly when its own absolute residual $R = |Y - \hat f(X)|$ is at most $C$. Suppose all the rows, including the new one, are independent draws from one distribution.[^exch] The fit used neither the held-out rows nor the new row, so given the training rows, the $m + 1$ absolute residuals of these rows are independent draws from one distribution too. With no ties, the new one's rank among them is then equally likely to be any of $1, \dots, m + 1$, and it is at most the $k$-th smallest of the other $m$ exactly when its rank is at most $k$. So
+$$
+P\big(Y \in \hat C(X)\big) = \frac{k}{m + 1}, \qquad 0.9 \;\le\; \frac{k}{m + 1} \;<\; 0.9 + \frac{1}{m + 1},
+$$
+and with ties the probability is at least $k/(m + 1)$. Nothing is assumed about the model: a poor fit gives a wide interval, not a wrong overall level.
+
+**Scope of the guarantee.** First, the argument needs a fit that did not use the held-out rows in any way, and that includes tuning. If the rows that set $C$ also chose the model's settings, the setting chosen is one whose residuals there happen to be small, and the guarantee is lost. In the table the tuning rows happen to give a slightly wider interval than the held-out rows, which is sampling variation (below) and not the effect of tuning. In a simulation like the lecture's, choosing a forest's node size among six settings on 500 rows, the loss was too small to see in 150 repeats; with fewer rows or more candidates it grows. Use separate rows to fit, tune and compute $C$, or tune by cross-validation within the training rows. Second, the probability is over the held-out rows and the new row together. For one fixed set of held-out rows, the coverage of future rows is the chance that a new residual is at most that set's $C$. If the residuals have a continuous distribution, this chance is the $k$-th smallest of $m$ independent uniform draws, which has the $\mathrm{Beta}(k, m + 1 - k)$ distribution: mean $k/(m + 1)$, standard deviation about $\sqrt{0.9 \times 0.1/m}$, 0.9 percentage points when $m = 1{,}000$ and 1.3 when $m = 500$. Third, the guarantee is an average over $X$. The table shows what that leaves open: the tuned forest with a held-out $C$ is right overall and wrong by range, too wide where the noise is small and too narrow where it is large.
+
+## Coverage at every $x$
+
+**Marginal coverage** averages over $X$: $P(Y \in \hat C(X)) \ge 0.9$. **Conditional coverage** asks for $P(Y \in \hat C(X) \mid X = x) \ge 0.9$ at every $x$, which is what a person with inputs $x$ wants from an interval made for them. In the simulation the noise is normal with a known mean and standard deviation at each $x$, so the coverage at $x$ of any fitted interval can be computed exactly. The figure averages it over repeated training samples of $n$ rows, for two intervals: boosted trees for the mean with one $C$ from $n$ held-out rows, and two boosted quantile fits.
+
+```{r}
+#| label: coverage-at-x
+#| fig-width: 6.5
+#| fig-height: 3
+# P(Y in [lo, hi] | X = x) = pnorm((hi - f(x)) / s(x)) - pnorm((lo - f(x)) / s(x)), averaged over fits on fresh
+# training rows: 5 fits for the first interval, which varies little between samples, and 12 for the second.
+bst <- function(d, objective, ...) xgboost(x = as.matrix(d["x"]), y = d$y, objective = objective, ...,
+  max_depth = 2, learning_rate = 0.05, nrounds = 300, min_child_weight = 30, nthread = 1)
+gx <- tibble(x = seq(0.005, 9.995, by = 0.01)); gx_m <- as.matrix(gx)
+cov_at <- function(lo, hi) pnorm((hi - f_sim(gx$x)) / s_sim(gx$x)) - pnorm((lo - f_sim(gx$x)) / s_sim(gx$x))
+grow <- map_dfr(c(1000, 8000, 32000), function(n) map_dfr(1:12, function(r) {
+  d <- sim(n)
+  out <- tibble(method = "two quantile fits", n = n, x = gx$x,
+                cov = cov_at(predict(bst(d, "reg:quantileerror", quantile_alpha = 0.05), gx_m),
+                             predict(bst(d, "reg:quantileerror", quantile_alpha = 0.95), gx_m)))
+  if (r <= 5) {
+    h <- sim(n); m <- bst(d, "reg:squarederror"); p <- predict(m, gx_m)
+    C <- sort(abs(h$y - predict(m, as.matrix(h["x"]))))[ceiling(0.9 * (n + 1))]
+    out <- bind_rows(out, tibble(method = "one C for every x", n = n, x = gx$x, cov = cov_at(p - C, p + C)))
+  }
+  out
+})) |> group_by(method, n, x) |> summarise(cov = mean(cov), .groups = "drop")
+ggplot(grow, aes(x, cov, colour = factor(n))) +
+  annotate("rect", xmin = 4, xmax = 6, ymin = -Inf, ymax = Inf, alpha = 0.08) +
+  geom_hline(yintercept = 0.9, linetype = "dashed", colour = "grey40") + geom_line(linewidth = 0.6) +
+  facet_wrap(~ method) + coord_cartesian(ylim = c(0.65, 1)) +
+  scale_colour_manual(values = c(`1000` = m_pink, `8000` = v_teal, `32000` = v_dark), labels = c("1,000", "8,000", "32,000"), name = "n") +
+  scale_x_continuous(breaks = seq(0, 10, 2)) + scale_y_continuous(labels = scales::percent) +
+  labs(x = "x (shaded: few rows)", y = "coverage at x") + theme_minimal(base_size = 12)
+```
+
+**One $C$ for every $x$.** Its coverage is too high where the noise is small and too low where it is large, and more data do not change that: as $n$ grows the interval tends to the true curve plus or minus one number, the 90th percentile of the absolute noise over all $x$.
+
+**Ends fitted near each $x$.** At $n = 1{,}000$ the coverage of the two quantile fits dips in three places: near 0, where the curve is steep and the noise is smallest; just past the bump at 3; and between 4 and 6, where the rows are few. The dips fill in as $n$ grows. An interval at $x$ is learned from the rows near $x$, say $n_x$ of them, and its coverage there misses 90% for two reasons.
+
+- **Variance.** Two quantiles estimated from $n_x$ rows give a coverage that varies by about $\sqrt{0.9 \times 0.1/n_x}$ from sample to sample, as a share of 0.9 estimated from $n_x$ rows does: 4 percentage points with 50 rows, 1.3 with 500.
+- **Bias.** Rows farther from $x$ have different quantiles, so using them moves the ends. What counts is how fast the quantiles change with $x$ compared with the noise: for a normal outcome, ends that are both half a noise standard deviation too high cover `r round(100 * (pnorm(z90 + 0.5) - pnorm(0.5 - z90)))`% instead of 90%.
+
+A smaller neighborhood has less bias and fewer rows: the trade-off of every local method, here for quantiles. The number of inputs sets how many rows a neighborhood holds. With 2,000 rows spread evenly over 5 bins for each input, a bin has 400 rows with one input, 80 with two, 16 with three and under one with five; with 16 rows the variance term is 7.5 percentage points. The same limits apply to checking coverage near $x$, which needs fresh rows near $x$.
+
+So coverage at every $x$ is reachable as $n$ grows, if the fits approach the true quantiles (**consistency**), and how fast depends on the rows near $x$, on how quickly the quantiles change relative to the noise, and on the number of inputs. Each of these is an assumption about the distribution. With none, the answer is no: Barber, Candès, Ramdas and Tibshirani (2021) show that if a procedure guarantees conditional coverage in finite samples for every distribution, then wherever the inputs are continuous its intervals are infinitely long on average (their Proposition 2.2).[^atoms] Guarantees for groups, such as each range of $x$, and results that rest on assumptions about the distribution, or hold as $n$ grows, remain possible. No method does best on every distribution, and none can promise coverage at every $x$ without saying something about the distribution.
 
 ## Conformalized quantile regression
 
-An interval from two quantile fits covers as well as the fits are right, and the fits do not say how right they are. Checked on the points that fitted them, they look better than they are, just as training error underestimates the risk. **Conformalized quantile regression** (CQR; Romano, Patterson and Candès 2019, section 4) measures how far the fits miss on rows they did not see, and moves both ends of the interval by that amount. For a $1 - \alpha$ interval, here $\alpha = 0.1$:
+Two quantile fits have the right shape when they are right, and no guarantee; split conformal prediction has a guarantee, and one width. **Conformalized quantile regression** (CQR; Romano, Patterson and Candès 2019, section 4) applies the held-out correction to the quantile fits: it measures how far they miss on rows they did not see, and moves both ends of the interval by that amount. For a $1 - \alpha$ interval, here $\alpha = 0.1$:
 
 1. Split the training rows in two. On the first part, fit a lower and an upper quantile, $\hat q_{\mathrm{lo}}$ and $\hat q_{\mathrm{hi}}$ (here the 5% and 95% quantiles), by any method. Keep the other $m$ rows, the **calibration set**, for the next step.
 2. On each calibration row, compute the **score**
@@ -208,17 +298,9 @@ $$
 $$
 (their equation 7). If the fits were too narrow, $Q > 0$ and the interval widens; if too wide, $Q < 0$ and it narrows.
 
-**Proof sketch.** A new row $(X, Y)$ is inside $\hat C(X)$ exactly when its own score, $E = \max\{\hat q_{\mathrm{lo}}(X) - Y,\ Y - \hat q_{\mathrm{hi}}(X)\}$, is at most $Q$. Suppose all the rows, including the new one, are independent draws from one distribution.[^exch] The fits used neither the calibration rows nor the new row, so given the rows they were fitted on, the $m + 1$ scores of these rows are independent draws from one distribution too. With no ties, the new score's rank among them is then equally likely to be any of $1, \dots, m + 1$, and the new score is at most the $k$-th smallest of the other $m$ exactly when its rank is at most $k$. So
-$$
-P\big(Y \in \hat C(X)\big) = \frac{k}{m + 1}, \qquad 1 - \alpha \;\le\; \frac{k}{m + 1} \;<\; 1 - \alpha + \frac{1}{m + 1},
-$$
-and with ties the probability is at least $k/(m + 1)$. This is their Theorem 1: coverage at least $1 - \alpha$, and at most $1 - \alpha + 1/(m + 1)$ when the scores are almost surely distinct, as they are when continuous. Nothing is assumed about the quantile fits. A poor fit gives a wide or badly shaped interval, not a wrong overall level. The argument needs fits that did not use the calibration rows in any way, and that includes tuning: if the rows that set $Q$ also chose the fits' settings, the setting chosen is one whose scores there happen to be small, and coverage falls below $1 - \alpha$. In a simulation like the lecture's, choosing a forest's node size among six settings on 500 rows, the loss was too small to see in 150 repeats; with fewer rows or more candidates it grows. Use separate rows to fit, tune and calibrate, or tune by cross-validation within the fitting rows.
+The argument for split conformal prediction goes through with the score $E$ in place of the absolute residual: a new row is inside $\hat C(X)$ exactly when its own score is at most $Q$, and its rank among the $m + 1$ scores is uniform. This is their Theorem 1: coverage at least $1 - \alpha$, and at most $1 - \alpha + 1/(m + 1)$ when the scores are almost surely distinct, as they are when continuous. Split conformal prediction is the special case in which both quantile fits are the same fit of the mean, $\hat q_{\mathrm{lo}} = \hat q_{\mathrm{hi}} = \hat f$: the score is then $\lvert y_i - \hat f(x_i) \rvert$ and the interval is $\hat f(x) \pm Q$. The scope is the same too: fits that did not use the calibration rows, an average over calibration sets, and a marginal guarantee. The same $Q$ is added at every $x$, so CQR corrects the overall level and not the shape: where the fits are too narrow in one range and too wide in another, the conformalized interval is too.
 
-**Scope of the guarantee.** First, the probability is over the calibration rows and the new row together. For one fixed calibration set, the coverage of future rows is the chance that a new score is at most that set's $Q$. If the rows are independent draws from one distribution and the scores have a continuous distribution, this chance is the $k$-th smallest of $m$ independent uniform draws, which has the $\mathrm{Beta}(k, m + 1 - k)$ distribution: mean $k/(m + 1)$, standard deviation about $\sqrt{\alpha(1 - \alpha)/m}$, 1.3 percentage points when $m = 500$. Second, the guarantee is marginal. The same $Q$ is added at every $x$, so CQR corrects the overall level and not the shape: where the fits are too narrow in one range and too wide in another, the conformalized interval is too.
-
-**Conditional coverage as $n$ grows.** If the quantile fits are consistent, approaching the true conditional quantiles as the fitting and calibration sets grow, then the CQR interval approaches $[q_{\alpha/2}(x), q_{1 - \alpha/2}(x)]$ and its coverage given $X = x$ tends to $1 - \alpha$, except on a set of $x$ whose probability tends to zero (Sesia and Candès 2020, Theorem 1 and its corollary, for independent rows and scores with a density bounded away from zero near zero). This does not contradict the impossibility result: consistency is an assumption about the distribution and the method. How fast the fits converge depends on how smooth the quantiles are and on the number of inputs. The same limits apply to checking coverage near $x$, which needs rows near $x$: 2,000 fresh rows in 5 bins for each input give 400 rows a bin with one input, 16 with three, under one with five, and with 16 rows the standard error of a bin's coverage near 90% is 7.5 percentage points.
-
-**Split conformal prediction is a special case.** If both quantile fits are the same fit of the mean, $\hat q_{\mathrm{lo}} = \hat q_{\mathrm{hi}} = \hat f$, the score is $\max\{\hat f(x_i) - y_i,\ y_i - \hat f(x_i)\} = \lvert y_i - \hat f(x_i) \rvert$ and the interval is $\hat f(x) \pm Q$, the same width at every $x$ (Lei et al. 2018, section 2.2).
+If the quantile fits are consistent, $Q$ tends to zero, the CQR interval approaches $[q_{\alpha/2}(x), q_{1 - \alpha/2}(x)]$, and its coverage given $X = x$ tends to $1 - \alpha$, except on a set of $x$ whose probability tends to zero (Sesia and Candès 2020, Theorem 1 and its corollary, for independent rows and scores with a density bounded away from zero near zero). The conditional coverage is the quantile fits'; the correction supplies the finite-sample average.
 
 On the simulated data: boosted 5% and 95% fits, with the settings above, on the first 500 training points, and scores on the other 500, so $m = 500$ and $k = 451$. The figure shows the scores; the dashed line is $Q$, and the points above it are the outcomes the interval still misses.
 
@@ -247,22 +329,22 @@ ggplot(cal, aes(x, score)) +
   labs(x = "x", y = "score on the calibration rows") + theme_minimal(base_size = 12)
 ```
 
-Here $Q = `r sprintf("%.2f", Q_cqr)`$. The two fits cover `r sprintf("%.0f%%", 100 * cover_own)` of their own 500 training points but only `r sprintf("%.0f%%", 100 * mean(cal$score <= 0))` of the calibration rows, so CQR widens each end by $Q$. The scores spread out above zero for $x$ beyond 6, where the fits are too narrow, and one $Q$ cannot fix that. On the fresh points, against split conformal prediction around a least squares line fitted and calibrated on the same halves:
+Here $Q = `r sprintf("%.2f", Q_cqr)`$. The two fits cover `r sprintf("%.0f%%", 100 * cover_own)` of their own 500 training points but only `r sprintf("%.0f%%", 100 * mean(cal$score <= 0))` of the calibration rows, so CQR widens each end by $Q$. On the fresh points, against split conformal prediction around a least squares line fitted and calibrated on the same halves:
 
 ```{r}
 #| label: cqr-coverage
 lm_half <- lm(y ~ x, data = het_train[fit_part, ])
-d_split <- sort(abs(het_train$y[cal_part] - predict(lm_half, het_train[cal_part, ])))[k90]
+C_split <- sort(abs(het_train$y[cal_part] - predict(lm_half, het_train[cal_part, ])))[k90]
 b_fresh <- plug_in(het_fresh)
 cov_cqr <- mean(het_fresh$y >= b_fresh[, 1] - Q_cqr & het_fresh$y <= b_fresh[, 2] + Q_cqr)
-cov_split <- mean(abs(het_fresh$y - predict(lm_half, het_fresh)) <= d_split)
+cov_split <- mean(abs(het_fresh$y - predict(lm_half, het_fresh)) <= C_split)
 coverage_table(list(
   `boosted quantiles, 500 points` = b_fresh,
   `conformalized, 500 + 500` = cbind(b_fresh[, 1] - Q_cqr, b_fresh[, 2] + Q_cqr),   # their equation 7
-  `split conformal, least squares, 500 + 500` = cbind(predict(lm_half, het_fresh) - d_split, predict(lm_half, het_fresh) + d_split)))
+  `split conformal, least squares, 500 + 500` = cbind(predict(lm_half, het_fresh) - C_split, predict(lm_half, het_fresh) + C_split)))
 ```
 
-Overall, CQR covers `r sprintf("%.0f%%", 100 * cov_cqr)` of the fresh points and split conformal `r sprintf("%.0f%%", 100 * cov_split)`. Theorem 1 is about the average over calibration sets: for one set of 500, the coverage varies with a standard deviation of about 1.3 percentage points (above), and measuring it on 2,000 fresh points adds a standard error of about 0.7. Split conformal has one width everywhere, so it covers too much where the noise is small and too little where it is large; CQR keeps the shape of its quantile fits, including their error beyond $x = 6$.
+Overall, CQR covers `r sprintf("%.0f%%", 100 * cov_cqr)` of the fresh points and split conformal `r sprintf("%.0f%%", 100 * cov_split)`. Theorem 1 is about the average over calibration sets: for one set of 500, the coverage varies with a standard deviation of about 1.3 percentage points (above). Measuring it on 7,000 fresh points adds a standard error of about 0.4. CQR keeps the shape of its quantile fits and corrects their level; split conformal has one width everywhere, so it covers too much where the noise is small and too little where it is large.
 
 ## Ways to make an interval
 
@@ -271,10 +353,10 @@ Overall, CQR covers `r sprintf("%.0f%%", 100 * cov_cqr)` of the fresh points and
 | Linear model, normal noise | $\hat f(x)$ plus or minus a multiple of the estimated noise sd | linear mean, constant variance, normal noise | 90% at every $x$, if the model is right |
 | Mean and variance | a model for the mean, another for the spread | both models right, normal noise | about 90% at every $x$, if right |
 | Quantile regression | two fits with the pinball loss | the quantile model right | 90% at every $x$ as $n$ grows, if right |
-| Split conformal prediction | fit $\hat f$ on part of the data; on the rest, find the residual size $d$ that 90% of residuals stay within (with a small correction); report $\hat f(x) \pm d$ | independent rows from one distribution | at least 90% marginally, in finite samples, with any model; the same width at every $x$ |
-| Conformalized quantile regression | fit two quantiles on part of the data; on the rest, find how far to widen (or narrow) them so that 90% of outcomes fall inside | independent rows from one distribution | at least 90% marginally, in finite samples; widths that follow the quantile fits; 90% at every $x$ as $n$ grows, if the fits are consistent |
+| Split conformal prediction | fit $\hat f$ on part of the data; on the rest, find the residual size $C$ that 90% of residuals stay within (with a small correction); report $\hat f(x) \pm C$ | exchangeable rows | at least 90% marginally, in finite samples, with any model; the same width at every $x$ |
+| Conformalized quantile regression | fit two quantiles on part of the data; on the rest, find how far to widen (or narrow) them so that 90% of outcomes fall inside | exchangeable rows | at least 90% marginally, in finite samples; widths that follow the quantile fits; 90% at every $x$ as $n$ grows, if the fits are consistent |
 
-The first three rows rest on a model being right; the two conformal methods (Lei et al. 2018, section 2.2; Romano, Patterson and Candès 2019, Theorem 1) need only independent rows from one distribution, and in return their guarantee is marginal.
+The first three rows rest on a model being right; the two conformal methods (Lei et al. 2018, section 2.2; Romano, Patterson and Candès 2019, Theorem 1) need only exchangeable rows, which independent draws from one distribution are,[^exch] and in return their guarantee is marginal.
 
 ## Calibration
 
@@ -338,11 +420,15 @@ tibble(` ` = c("boosted trees", "recalibrated"),
 
 The fitted slope is $b = `r sprintf("%.2f", coef(recal)[["s"]])`$: two adults whose boosted log-odds differ by 1 differ by `r sprintf("%.2f", coef(recal)[["s"]])` after recalibration, in the same order. Van Calster et al. (2019) describe the same checks and repairs for risk models in medicine, where a miscalibrated risk can change a treatment decision.
 
-**Calibration within groups.** A score can be right on average and still too high for one group and too low for another, with the errors cancelling. Used with one threshold for everyone, such a score refers the first group for tests more often, and the second less often, than their risk warrants: it discriminates, even when group membership is not one of its inputs. Calibration within groups is one fairness criterion among several, and they conflict. Kleinberg, Mullainathan and Raghavan (2017) show that when the groups' base rates differ, a score that is calibrated within groups cannot also be balanced, meaning that its average is the same in each group among those with the outcome, and the same in each group among those without, unless it predicts perfectly. For a rule that thresholds a score, Chouldechova (2017) shows that with different base rates, equal positive predictive values across groups rule out equal false positive and false negative rates (for a rule whose positive predictive value is strictly between 0 and 1). **Multicalibration** (Hébert-Johnson, Kim, Reingold and Rothblum 2018, definition 2.6) asks for calibration within every group in a collection named in advance: within each group, among the units with score near $v$, the share of 1s should be within a tolerance of $v$, for every $v$. Their algorithm (section 3.2) repeatedly finds a group and a range of scores where the average score and the share of 1s differ by more than the tolerance, and shifts the scores there by the difference. The groups must be large enough to check, and a group not in the collection gets no guarantee. On these data the logistic score above, which leaves race and ethnicity out, is right on average on the tuning adults (an average score of `r sprintf("%.1f%%", 100 * mean(p_lr))` against `r sprintf("%.1f%%", 100 * mean(y_tune))` with diabetes), but for White adults it averages `r sprintf("%.1f%%", 100 * mean(p_lr[nh_tune$Race1 == "White"]))` against `r sprintf("%.1f%%", 100 * mean(y_tune[nh_tune$Race1 == "White"]))` with diabetes, a gap of about `r sprintf("%.0f", gap_se("White"))` standard errors; for the survey's other groups the gaps are within about two standard errors. Matching averages, overall or in a group, would not show calibration: errors at different scores can cancel, which is why multicalibration asks for calibration at every range of scores within each group. In the lecture, shifts learned on the tuning adults shrink the gaps for White and Black adults on the test adults and widen the gap for Mexican American adults: with a few hundred adults in a cell, the shifts partly fit noise. Applying them also needs each person's group when the score is used.
+**Calibration within groups.** A score can be right on average and still too high for one group and too low for another, with the errors cancelling. Used with one threshold for everyone, such a score refers the first group for tests more often, and the second less often, than their risk warrants: it discriminates, even when group membership is not one of its inputs. Calibration within groups is one fairness criterion among several, and they conflict. Kleinberg, Mullainathan and Raghavan (2017) show that when the groups' base rates differ, a score that is calibrated within groups cannot also be balanced, meaning that its average is the same in each group among those with the outcome, and the same in each group among those without, unless it predicts perfectly. For a rule that thresholds a score, Chouldechova (2017) shows that with different base rates, equal positive predictive values across groups rule out equal false positive and false negative rates (for a rule whose positive predictive value is strictly between 0 and 1).
+
+**Multicalibration** (Hébert-Johnson, Kim, Reingold and Rothblum 2018, definition 2.6) asks for calibration within every group in a collection named in advance: within each group, among the units with score near $v$, the share of 1s should be within a tolerance of $v$, for every $v$. Their algorithm (section 3.2) repeatedly finds a group and a range of scores where the average score and the share of 1s differ by more than the tolerance, and shifts the scores there by the difference. The groups must be large enough to check, and a group not in the collection gets no guarantee.
+
+On these data the logistic score above, which leaves race and ethnicity out, is right on average on the tuning adults (an average score of `r sprintf("%.1f%%", 100 * mean(p_lr))` against `r sprintf("%.1f%%", 100 * mean(y_tune))` with diabetes), but for White adults it averages `r sprintf("%.1f%%", 100 * mean(p_lr[nh_tune$Race1 == "White"]))` against `r sprintf("%.1f%%", 100 * mean(y_tune[nh_tune$Race1 == "White"]))` with diabetes, a gap of about `r sprintf("%.0f", gap_se("White"))` standard errors; for the survey's other groups the gaps are within about two standard errors. Matching averages, overall or in a group, would not show calibration: errors at different scores can cancel, which is why multicalibration asks for calibration at every range of scores within each group. In the lecture, shifts learned on the tuning adults and checked on the test adults close the gap for White adults, the one gap the data can establish, and widen the gap for Mexican American adults: a gap of 2 or 3 percentage points in a group of a few hundred is within noise, and a shift fitted to it does not carry over. Applying the shifts also needs each person's group when the score is used.
 
 [^atoms]: Their statement is about every $x$ that is not an atom of the inputs' distribution, a value with positive probability; continuous inputs have none.
 
-[^exch]: Romano, Patterson and Candès, and Lei et al., state their results for exchangeable rows, a weaker condition: the joint distribution of the rows is unchanged when they are reordered. Independent draws from one distribution are exchangeable; draws without replacement from a finite population are exchangeable but not independent. The argument here uses only exchangeability. The Beta distribution in the next paragraph uses independence.
+[^exch]: Romano, Patterson and Candès, and Lei et al., state their results for exchangeable rows, a weaker condition: the joint distribution of the rows is unchanged when they are reordered. Independent draws from one distribution are exchangeable; draws without replacement from a finite population are exchangeable but not independent. The argument here uses only exchangeability. The Beta distribution under "Scope of the guarantee" uses independence.
 
 ## Further reading
 

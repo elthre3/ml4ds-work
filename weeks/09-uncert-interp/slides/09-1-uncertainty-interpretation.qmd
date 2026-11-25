@@ -82,8 +82,8 @@ nh_train <- nh[nh_id[1:4000], ]
 nh_tune  <- nh[nh_id[4001:7000], ]
 nh_test  <- nh[nh_id[7001:nrow(nh)], ]
 # Simulated data for part 1: noise that grows with x, a bump at 3 (height 3, sd 0.2), and few rows with x between
-# 4 and 6 (a quarter of the density elsewhere). The note's simulation has the same curve and noise, without the bump,
-# and x uniform.
+# 4 and 6 (a quarter of the density elsewhere). The note uses the same simulation, and its first two samples are
+# these two.
 f_sim <- function(x) 3 + x + 2 * sin(x) + 3 * exp(-(x - 3)^2 / (2 * 0.2^2))
 s_sim <- function(x) 0.5 + 0.35 * x
 x_thin <- function(n) { u <- runif(n, 0, 8.5); case_when(u < 4 ~ u, u < 4.5 ~ 4 + 4 * (u - 4), TRUE ~ u + 1.5) }
