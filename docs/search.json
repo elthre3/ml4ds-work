@@ -14,18 +14,32 @@
     "text": "Loader\nlibrary(tidyverse)\nsp &lt;- read_csv(\"https://ml4ds.com/files/spotify_tracks.csv\") |&gt;\n  distinct(track_id, .keep_all = TRUE) |&gt;          # one row per track\n  mutate(duration_min = duration_ms / 60000)"
   },
   {
-    "objectID": "data/nhanes.html",
-    "href": "data/nhanes.html",
-    "title": "NHANES",
+    "objectID": "data/obermeyer.html",
+    "href": "data/obermeyer.html",
+    "title": "Health system patients (synthetic)",
     "section": "",
-    "text": "Source\nThe US National Health and Nutrition Examination Survey (NHANES), run by the National Center for Health Statistics, cycles 2009–10 and 2011–12; shipped as NHANESraw in the R package NHANES (Pruim, R., NHANES: Data from the US National Health and Nutrition Examination Study, version 2.1.4, CRAN). Survey documentation: cdc.gov/nchs/nhanes.\n\n\nRows\nOne row per participant (20,293 rows, all ages). The course uses the 9,212 adults (20 and over) with every column below recorded (the loader).\n\n\nColumns\nAmong the package’s 79: Gender, Age (80 means 80 or older), Race1 (the survey’s five groups: Black, Hispanic, Mexican, White, Other), Poverty (family income over the poverty guideline), Weight (kg), Height (cm), BMI (weight over height squared), Pulse, BPSysAve (systolic blood pressure, mm Hg), TotChol and DirectChol (total and HDL cholesterol, mmol/L), PhysActive (moderate or vigorous sports or recreation), Diabetes (ever told by a doctor or health professional that they have diabetes).\n\n\nTargets\nDiabetes, a yes or no answer (14% of the adults used); BPSysAve.\n\n\nNotes\nNHANES oversamples some groups on purpose, and the course does not use its survey weights, so the rows are not a sample of the US population: shares and averages computed from them describe these participants, not the country. Diabetes is what participants report having been told, so undiagnosed diabetes counts as no."
+    "text": "Source\nObermeyer, Z., Powers, B., Vogeli, C. and Mullainathan, S. (2019), “Dissecting racial bias in an algorithm used to manage the health of populations”, Science 366(6464), 447–453, doi:10.1126/science.aax2342. The authors released a synthetic version of their data, with a data dictionary and their code: gitlab.com/labsysmed/dissecting-bias. The course reads the file from there and does not host it.\n\n\nRows\n48,784 patient-years, each one row: 5,582 of Black and 43,202 of White patients. The rows were generated with the R package synthpop from the study’s data, so no row is a real patient, and, unlike the original data, the rows are not grouped by patient.\n\n\nColumns\n160. Measured in the year before (names ending _tm1): age band, sex, 34 chronic conditions and their count gagne_sum_tm1, 13 kinds of cost, and 94 indicators of test results and medications. Measured in the year itself (names ending _t): cost_t (total cost, rounded to $100), cost_avoidable_t (emergency and inpatient), gagne_sum_t (number of active chronic conditions), five test results, program_enrolled_t, and risk_score_t, the commercial algorithm’s score. Also race.\n\n\nTargets\nWhether cost_t is in the top quarter; cost_t; gagne_sum_t.\n\n\nNotes\nClaims about these rows are claims about the synthetic data, which mimic the study’s data in their moments and covariances. The commercial algorithm did not use race, and the course’s models do not either."
   },
   {
-    "objectID": "data/nhanes.html#loader",
-    "href": "data/nhanes.html#loader",
-    "title": "NHANES",
+    "objectID": "data/obermeyer.html#loader",
+    "href": "data/obermeyer.html#loader",
+    "title": "Health system patients (synthetic)",
     "section": "Loader",
-    "text": "Loader\nlibrary(tidyverse)\nlibrary(NHANES)\nnh &lt;- NHANESraw |&gt;\n  filter(Age &gt;= 20) |&gt;\n  select(Diabetes, Gender, Age, Race1, Poverty, Weight, Height, BMI, Pulse, BPSysAve, TotChol, DirectChol, PhysActive) |&gt;\n  drop_na() |&gt;\n  mutate(diabetes = as.numeric(Diabetes == \"Yes\"), male = as.numeric(Gender == \"male\"),\n         active = as.numeric(PhysActive == \"Yes\"))"
+    "text": "Loader\nlibrary(tidyverse)\nhs &lt;- read_csv(\"https://gitlab.com/labsysmed/dissecting-bias/-/raw/master/data/data_new.csv\")\noutcomes_t &lt;- c(\"risk_score_t\", \"program_enrolled_t\", \"gagne_sum_t\", \"cost_t\", \"cost_avoidable_t\",\n                \"bps_mean_t\", \"ghba1c_mean_t\", \"hct_mean_t\", \"cre_mean_t\", \"ldl_mean_t\")\ninputs &lt;- setdiff(names(hs), c(outcomes_t, \"race\"))   # the year before, without race"
+  },
+  {
+    "objectID": "data/movies.html",
+    "href": "data/movies.html",
+    "title": "Movies",
+    "section": "",
+    "text": "Source\nIMDb data extracted by Hadley Wickham, shipped in the R package ggplot2movies (GPL-3). IMDb’s terms restrict commercial use.\n\n\nRows\nOne row per film (58,788 rows), films with a known length and at least five user votes, 1893 to 2005.\n\n\nColumns\ntitle, year, length (minutes), budget (91% missing), rating (average user rating, 1 to 10), votes, r1 to r10 (the share of users giving each rating, in coarse bands, so a row need not sum to 100), mpaa (mostly blank), and seven genre indicators (Action, Animation, Comedy, Drama, Documentary, Romance, Short).\n\n\nTarget\nrating. The ratings come from people who chose to watch a film and then to rate it.\n\n\nNotes\nvotes and r1 to r10 are computed from the same users’ ratings as rating, so they are not used as inputs. Lengths are as reported to IMDb; there is no director, cast, language or country. The course uses the 33,287 films from 1919 on that run 11 to 200 minutes and have at least 20 votes (the loader below)."
+  },
+  {
+    "objectID": "data/movies.html#loader",
+    "href": "data/movies.html#loader",
+    "title": "Movies",
+    "section": "Loader",
+    "text": "Loader\nlibrary(tidyverse)\nlibrary(ggplot2movies)\nmv &lt;- movies |&gt;\n  filter(length &lt;= 200, length &gt; 10, year &gt; 1918, votes &gt;= 20)"
   },
   {
     "objectID": "weeks/09-uncert-interp/slides/09-1-uncertainty-interpretation.html#where-we-left-off",
@@ -2198,11 +2212,11 @@
     "text": "Week 9: uncertainty and interpretation\nWhat a fitted prediction leaves out, and what it can tell us. The loss decides which number is the best prediction: the mean, the median, a cost threshold, or a quantile. A prediction interval for one person’s outcome, from residuals or from two quantiles: how to check one on fresh data, overall and across the range of the inputs, how bias and variance break intervals computed on the wrong rows, how residuals from held-out rows guarantee coverage on average over the inputs, what coverage at every input needs as the sample grows, and why no method can guarantee it without assumptions. Calibration: when a stated probability matches a frequency, what that means for decisions, what it does not say about a score, how to repair one, and calibration within groups, a fairness criterion. Then interpretation: partial dependence and individual curves for any model, Shapley values, and permutation and leave-one-covariate-out importance. Last, the model and the world: a causal model for the inputs, the difference between what a partial dependence plot holds fixed and the total dependence of a prediction on an input, and when a model’s curve is an effect.\nReading\n\nPrediction intervals and calibration (PDF), a note for this lecture: what an interval or a probability claims, and how to check it on fresh data.\nIML, the chapters “Partial Dependence Plot (PDP)”, “Individual Conditional Expectation (ICE)” and “Permutation Feature Importance”: the definitions, the examples and the limitations.\n\nOptional: Loftus, J. R., Bynum, L. E. J. and Hansen, S. (2024), “Causal dependence plots”, Advances in Neural Information Processing Systems 37, doi:10.52202/079017-3579, section 1 with its Figure 1; Zhao, Q. and Hastie, T. (2021), “Causal interpretations of black-box models”, Journal of Business and Economic Statistics 39(1), 272–281, doi:10.1080/07350015.2019.1624293.\nLecture: slides\nSeminar: notebook (.qmd). Before the seminar, do exercises 1 to 3 at the top of the notebook (quantile optimality and the coverage of a split conformal interval, proved; partial dependence by hand). The seminar’s problems work out, in examples small enough to solve by hand, why intervals from flexible models miss their coverage, and what calibration within groups does and does not give. Then two simulations: confidence and prediction intervals for nearest neighbors, and every interpretation tool from the lecture applied to a causal question whose answer is known."
   },
   {
-    "objectID": "index.html#week-10-how-do-prediction-methods-support-other-statistical-tasks",
-    "href": "index.html#week-10-how-do-prediction-methods-support-other-statistical-tasks",
+    "objectID": "index.html#week-10-evaluation-distribution-shift-and-deployment",
+    "href": "index.html#week-10-evaluation-distribution-shift-and-deployment",
     "title": "ST310 course page",
-    "section": "Week 10: how do prediction methods support other statistical tasks?",
-    "text": "Week 10: how do prediction methods support other statistical tasks?\nA fitted model put to a use other than predicting. A partial dependence curve as an estimate of week 3’s interventional mean, exact at the population level when the adjustment condition holds and the model is right, and an estimate otherwise. One effect estimated with machine learning doing the nuisance work: residual on residual, the two lines that show why residualizing the treatment makes the nuisance error second order (the lecture’s derivation), what cross-fitting does, a standard error that can be trusted, and honest trees as the same split-sample idea; nothing in any of it makes the effect causal without week 3’s condition. Then the data move: covariate shift and reweighting by a ratio of probabilities (week 3’s inverse propensity weighting again), label shift and which factorization of the joint distribution you believe, and adaptive drift when the model has been tuned to the score it is judged by.\nReading [PROVISIONAL]\n\nPPA Chapter 10 (Causal inference in practice), pp. 204–217: design and inference, adjustment and controls, reductions to model fitting (double machine learning in a page), quasi-experiments, and the limitations.\nPPA Chapter 8 (Datasets), “Longevity of benchmarks”, pp. 158–167 (what happens when the same held-out set is used many times, and the CIFAR-10 and ImageNet replications).\nZhao and Hastie, “Causal interpretations of black-box models”, Journal of Business and Economic Statistics 39(1), 2021 (the back-door statement behind the lecture’s corollary).\n\nDeeper, optional: Chernozhukov, Chetverikov, Demirer, Duflo, Hansen, Newey and Robins, “Double/debiased machine learning for treatment and structural parameters”, Econometrics Journal 21(1), 2018, sections 1–2; Shimodaira, “Improving predictive inference under covariate shift by weighting the log-likelihood function”, Journal of Statistical Planning and Inference 90(2), 2000; Lipton, Wang and Smola, “Detecting and correcting for label shift with black box predictors”, ICML 2018 (the setting; the correction itself is not taught); PPA Chapter 13 (Epilogue), pp. 268–271.\nLecture and seminar: released here at the start of the week. One effect estimated by residual on residual with cross-fitting, two wrong versions and a hidden confounder; a partial dependence curve against the true interventional mean on a simulation; reweighting under covariate shift and under label shift, and a shift diagnosed on gapminder 1952 against 2007. Data: supplied simulations, gapminder."
+    "section": "Week 10: evaluation, distribution shift and deployment",
+    "text": "Week 10: evaluation, distribution shift and deployment\nWhat a winning score shows, and what it does not. The leaderboard first: comparing two models on the same rows, paired; Hoeffding’s inequality and the union bound, which say how far every score can be from its risk at once; choosing the comparison before the test rows are opened; the bootstrap for numbers that are not averages; and scores that drift when the candidates are tuned to them. Then the data move: in-distribution against out-of-distribution generalization, covariate shift and reweighting by a ratio of probabilities, label shift and a change of intercept, and what each shift does to accuracy, calibration and ranking. Last, scores and decisions: curve fitting with and without a theory behind it, what a competition win does and does not license, a cost score used to allocate extra care that is accurate and calibrated and still allocates it unequally, and prediction tasks that a better score would not make better. Data: synthetic patient-years from a study of a commercial health algorithm (data note).\nReading [PROVISIONAL]\n\nPPA, chapter 8 (“Datasets”), the sections “Longevity of benchmarks”, “Harms associated with data” (its parts on privacy and on problem framing) and “Limits of data and prediction”. Web version: mlstory.org/data.html.\nObermeyer, Z., Powers, B., Vogeli, C. and Mullainathan, S. (2019), “Dissecting racial bias in an algorithm used to manage the health of populations”, Science 366(6464), 447–453, doi:10.1126/science.aax2342.\n\nOptional: Rodu, J. and Baiocchi, M. (2023), “When black box algorithms are (not) appropriate: a principled prediction-problem ontology”, Observational Studies, arXiv:2001.07648, sections 1 and 2.\nLecture: slides"
   },
   {
     "objectID": "index.html#week-11-what-changes-when-the-representation-is-learned",
@@ -3045,18 +3059,277 @@
     "text": "References\n\nChouldechova, A. (2017). Fair prediction with disparate impact: a study of bias in recidivism prediction instruments. Big Data 5(2), 153–163. doi:10.1089/big.2016.0047\nKleinberg, J., Mullainathan, S. and Raghavan, M. (2017). Inherent trade-offs in the fair determination of risk scores. 8th Innovations in Theoretical Computer Science Conference (ITCS 2017), LIPIcs 67, 43:1–43:23. doi:10.4230/LIPIcs.ITCS.2017.43\nLei, J., G’Sell, M., Rinaldo, A., Tibshirani, R. J. and Wasserman, L. (2018). Distribution-free predictive inference for regression. Journal of the American Statistical Association 113(523), 1094–1111. doi:10.1080/01621459.2017.1307116\nThe NHANES adults: data note."
   },
   {
-    "objectID": "data/movies.html",
-    "href": "data/movies.html",
-    "title": "Movies",
-    "section": "",
-    "text": "Source\nIMDb data extracted by Hadley Wickham, shipped in the R package ggplot2movies (GPL-3). IMDb’s terms restrict commercial use.\n\n\nRows\nOne row per film (58,788 rows), films with a known length and at least five user votes, 1893 to 2005.\n\n\nColumns\ntitle, year, length (minutes), budget (91% missing), rating (average user rating, 1 to 10), votes, r1 to r10 (the share of users giving each rating, in coarse bands, so a row need not sum to 100), mpaa (mostly blank), and seven genre indicators (Action, Animation, Comedy, Drama, Documentary, Romance, Short).\n\n\nTarget\nrating. The ratings come from people who chose to watch a film and then to rate it.\n\n\nNotes\nvotes and r1 to r10 are computed from the same users’ ratings as rating, so they are not used as inputs. Lengths are as reported to IMDb; there is no director, cast, language or country. The course uses the 33,287 films from 1919 on that run 11 to 200 minutes and have at least 20 votes (the loader below)."
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#where-we-left-off",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#where-we-left-off",
+    "title": "Machine learning",
+    "section": "Where we left off",
+    "text": "Where we left off\n\nPrediction competition: curated data, the same for every competitor; a task; an agreed score; an evaluation dataset the competitors cannot see. Winning model chosen by best score\n\nThe Netflix prize went to a blend that was never put into production\n\nWinning a competition is not always useful\n\nToday, what a winning score does and does not tell us:\n\nhow variable the leaderboard is\nwhat happens when the data the model meets are not like the data it was scored on\nwhat the score leaves out"
   },
   {
-    "objectID": "data/movies.html#loader",
-    "href": "data/movies.html#loader",
-    "title": "Movies",
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#section",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#section",
+    "title": "Machine learning",
+    "section": "",
+    "text": "Evaluation, distribution shift and deployment\nPart 1: the leaderboard\nPart 2: when the data move\nPart 3: scores and decisions"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#section-1",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#section-1",
+    "title": "Machine learning",
+    "section": "",
+    "text": "Part 1: the leaderboard"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#data-patients-of-a-health-system",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#data-patients-of-a-health-system",
+    "title": "Machine learning",
+    "section": "Data: patients of a health system",
+    "text": "Data: patients of a health system\nObermeyer et al. (2019) studied a commercial algorithm that a US health system used to predict patients’ costs, and released synthetic rows that mimic their data: 48,784 patient-years (5,582 Black, 43,202 White)\n\nInputs, from the year before: age band, sex, 34 chronic conditions, 13 kinds of cost, 94 test results and medications (149 columns)\nOutcomes, the year after: cost, number of active chronic conditions, test results\nTask: predict whether next year’s cost will be in the top quarter (above $6,800 on the training rows), as a probability \\(\\hat p(x)\\)\nScore: the Brier score, squared error for a probability, \\(\\ell(y, \\hat p) = (y - \\hat p)^2\\), between 0 and 1\n\nSplit once at random: 16,000 training, 8,000 tuning, 12,000 test, 12,784 kept back for later"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#ctf-competition-the-tuning-leaderboard",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#ctf-competition-the-tuning-leaderboard",
+    "title": "Machine learning",
+    "section": "CTF competition: the tuning leaderboard",
+    "text": "CTF competition: the tuning leaderboard\n\n\n\n\n\n\n\n\n\nThe four models with any structure are within 0.014 of each other, and every bar is about 0.010 wide"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#can-the-same-rows-separate-two-models",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#can-the-same-rows-separate-two-models",
+    "title": "Machine learning",
+    "section": "Can the same rows separate two models?",
+    "text": "Can the same rows separate two models?\n\nThe two leaders’ bars overlap. Their scores come from the same 8,000 patients. Can those patients still tell the two models apart?\n\n\nScore each patient twice and take the difference, \\(\\Delta_j = \\ell\\big(y_j, \\hat p_A(x_j)\\big) - \\ell\\big(y_j, \\hat p_B(x_j)\\big)\\)\n\nThe difference of the two scores is \\(\\bar\\Delta\\), with standard error \\(\\mathrm{sd}(\\Delta)/\\sqrt m\\)\n\\(\\mathrm{Var}(\\ell_A - \\ell_B) = \\mathrm{Var}(\\ell_A) + \\mathrm{Var}(\\ell_B) - 2\\,\\mathrm{Cov}(\\ell_A, \\ell_B)\\): the models err on mostly the same patients, so the covariance is large\n\nboosted trees minus lasso: \\(\\bar\\Delta = -0.0021\\), standard error 0.0008, against 0.0025 for one score alone\nThe pair to compare on the test rows: boosted trees against lasso, chosen now"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#a-score-and-its-risk",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#a-score-and-its-risk",
+    "title": "Machine learning",
+    "section": "A score and its risk",
+    "text": "A score and its risk\nA score is a mean of \\(m\\) losses, \\(\\hat R = \\frac1m\\sum_j \\ell_j\\), with mean \\(R\\), the risk\n\nA loss between 0 and 1 has variance at most \\(\\frac14\\), so \\(\\mathrm{Var}(\\hat R) \\le \\frac{1}{4m}\\)\n\nIf \\(\\hat R\\) were normal with that variance: \\(P\\big(|\\hat R - R| \\ge t\\big) \\le 2e^{-t^2/(2\\sigma^2)}\\) with \\(\\sigma^2 = \\frac{1}{4m}\\), which is \\(2e^{-2mt^2}\\)\n\n\n\n\n\n\n\n\n\n\n\n\n\\(m = 50\\) losses of 0 or 1\nThe central limit theorem makes the normal shape plausible, but does not control the far tail at a fixed \\(m\\)"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#hoeffdings-inequality",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#hoeffdings-inequality",
+    "title": "Machine learning",
+    "section": "Hoeffding’s inequality",
+    "text": "Hoeffding’s inequality\n\nHoeffding’s inequality (stated). If \\(Z_1, \\ldots, Z_m\\) are independent with \\(0 \\le Z_i \\le 1\\) and \\(\\bar Z\\) is their mean, then for every \\(t &gt; 0\\) and every \\(m\\), \\(P\\big(|\\bar Z - \\mathbb E\\bar Z| \\ge t\\big) \\le 2e^{-2mt^2}\\)\n\nWhy it holds for every \\(m\\):\n\nMarkov’s inequality on \\(e^{\\lambda D}\\), \\(D = \\bar Z - \\mathbb E\\bar Z\\); by independence, \\(\\mathbb E\\big[e^{\\lambda D}\\big]\\) is a product of \\(m\\) factors\nHoeffding’s lemma (stated): each factor is at most what a normal with variance \\(\\frac14\\) would give; then choose \\(\\lambda\\)\n\n\n\\(K\\) models fixed in advance, by the union bound: every score within \\(t_K = \\sqrt{\\log(2K/\\delta)/(2m)}\\) of its risk, with probability \\(1 - \\delta\\). Here \\(t_K = 0.018\\): gaps above \\(2t_K\\) are resolved for 1 of the 10 pairs, against a paired standard error of 0.0008"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#the-test-rows-opened-once",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#the-test-rows-opened-once",
+    "title": "Machine learning",
+    "section": "The test rows, opened once",
+    "text": "The test rows, opened once\nDecided before opening: boosted trees against lasso, the paired difference with two standard errors\n\n\n\n\n\n\nboosted trees\nlasso\ndifference ± 2 SE\n\n\n\n\ntuning\n0.147\n0.149\n-0.0021 ± 0.0015\n\n\ntest\n0.145\n0.147\n-0.0023 ± 0.0012\n\n\n\n\n\n\nThe selected candidate’s score is biased low: the winner of \\(K\\) noisy scores was partly lucky. A test set scored once, for models fixed before it is opened, has no such bias\n\nThe leader scored 0.147 on the tuning rows and 0.145 on the test rows: with \\(K = 5\\) and \\(m = 8{,}000\\), no sign of the bias"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#resampling-the-test-rows",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#resampling-the-test-rows",
+    "title": "Machine learning",
+    "section": "Resampling the test rows",
+    "text": "Resampling the test rows\nA program can enroll only the 3% with the highest scores. Of those 360 test patients, the share with top-quarter cost is 84.7% for boosted trees and 82.5% for lasso\n\nWhich patients are in the top 3% depends on every patient’s score. This number is not an average of per-patient losses. What replaces \\(\\mathrm{sd}/\\sqrt m\\)?\n\n\nBootstrap the test rows: draw \\(m\\) rows with replacement, recompute the difference, repeat \\(B\\) times, and read off the spread. Each drawn row keeps both models’ predictions, so the comparison stays paired\n90% bootstrap interval for the difference: -0.6 to 5.3 percentage points, so this number does not separate them. The models are held fixed: the interval says nothing about refitting, and nothing about how the pair was chosen"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#scores-that-move",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#scores-that-move",
+    "title": "Machine learning",
+    "section": "Scores that move",
+    "text": "Scores that move\nAdaptive drift (stated). If the candidates depend on earlier scores on the same rows (tune, look, tune again), the union bound no longer covers them, and the score can be driven away from the risk. A test set scored once, for models fixed before, does not move\nRecht et al. (2019) built new test sets for CIFAR-10 and ImageNet to the original recipe. Accuracy fell for every model, many by about 10 percentage points (the best ImageNet model in their Table 1 from 82.9% to 72.2%), with the order of the models almost unchanged. They split the drop into three gaps:\n\\[\n\\hat R_{\\text{old}} - \\hat R_{\\text{new}} = \\underbrace{\\hat R_{\\text{old}} - R_{\\text{old}}}_{\\text{adaptivity}} \\;+\\; \\underbrace{R_{\\text{old}} - R_{\\text{new}}}_{\\text{distribution}} \\;+\\; \\underbrace{R_{\\text{new}} - \\hat R_{\\text{new}}}_{\\text{sampling}}\n\\]\nand found it was mostly the distribution: slightly harder images. On 120 Kaggle competitions, public and private leaderboards agreed closely (Roelofs et al. 2019)"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#section-2",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#section-2",
+    "title": "Machine learning",
+    "section": "",
+    "text": "Part 2: when the data move"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#in-distribution-and-out-of-distribution",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#in-distribution-and-out-of-distribution",
+    "title": "Machine learning",
+    "section": "In distribution and out of distribution",
+    "text": "In distribution and out of distribution\n\nFit to 142 countries in 2002, tested on the same countries in 1997: has it predicted anything new?\n\nBuilt from the patients kept back: a sicker population (kept with a probability rising with last year’s chronic conditions), and one with high cost twice as common (every high-cost patient kept, a third of the others)\n\n\n\n\n\nModel\nTuning rows\nSicker population\nHigh cost twice as common\n\n\n\n\nboosted trees\n0.147\n0.164\n0.235\n\n\nlasso\n0.149\n0.165\n0.244\n\n\nforest\n0.150\n0.165\n0.255\n\n\ntree\n0.160\n0.178\n0.261\n\n\nbaseline\n0.185\n0.212\n0.305"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#covariate-shift",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#covariate-shift",
+    "title": "Machine learning",
+    "section": "Covariate shift",
+    "text": "Covariate shift\n\nThe new patients’ costs are not known yet. What is a model’s risk on them?\n\n\n\\(p_{\\text{test}}\\): where the model will be used. \\(r(x) = \\mathbb E[\\ell(Y, f(X)) \\mid X = x]\\), \\(w(x) = p_{\\text{test}}(x)/p_{\\text{train}}(x)\\)\n\\[\n\\begin{alignedat}{2}\nR_{\\text{test}}(f) &= \\mathbb E_{\\text{test}}\\big[r_{\\text{test}}(X)\\big] &\\quad& \\color{gray}\\small\\text{tower property} \\\\[2pt]\n&\\class{fragment}{{}= \\mathbb E_{\\text{test}}\\big[r_{\\text{train}}(X)\\big]}\n&& \\class{fragment}{\\color{gray}\\small\\text{covariate shift: } p_{\\text{test}}(y \\mid x) = p_{\\text{train}}(y \\mid x)} \\\\[2pt]\n&\\class{fragment}{{}= \\textstyle\\int r_{\\text{train}}(x)\\, w(x)\\, p_{\\text{train}}(x)\\, dx}\n&& \\class{fragment}{\\color{gray}\\small\\text{needs } p_{\\text{train}}(x) &gt; 0 \\text{ wherever } p_{\\text{test}}(x) &gt; 0} \\\\[2pt]\n&\\class{fragment}{{}= \\mathbb E_{\\text{train}}\\big[w(X)\\, \\ell(Y, f(X))\\big]}\n&& \\class{fragment}{\\color{gray}\\small\\text{tower property again}}\n\\end{alignedat}\n\\]\n\nInverse propensity weighting: weight \\(1/\\pi(Z)\\), needing \\(0 &lt; \\pi(Z) &lt; 1\\)"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#reweighting-the-tuning-rows",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#reweighting-the-tuning-rows",
+    "title": "Machine learning",
+    "section": "Reweighting the tuning rows",
+    "text": "Reweighting the tuning rows\nThe covariate-shift identity on the tuning rows, \\(\\frac1m\\sum_j w(x_j)\\,\\ell_j\\), against the score on the sicker population itself:\n\n\n\n\n\nModel\nTuning rows\nReweighted tuning rows\nSicker population\n\n\n\n\nboosted trees\n0.147\n0.163\n0.164\n\n\nlasso\n0.149\n0.164\n0.165\n\n\nforest\n0.150\n0.166\n0.165\n\n\ntree\n0.160\n0.182\n0.178\n\n\nbaseline\n0.185\n0.219\n0.212\n\n\n\n\n\nThe weights are needed to evaluate a fixed model’s risk on the new population. Whether to fit with them is a separate question\nThe weights add variance: for boosted trees, the reweighted score has standard error 0.0031, against 0.0025 unweighted"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#label-shift",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#label-shift",
+    "title": "Machine learning",
+    "section": "Label shift",
+    "text": "Label shift\nIf \\(p(x \\mid y)\\) is unchanged and the share with \\(Y = 1\\) moves from \\(q_{\\text{train}}\\) to \\(q_{\\text{test}}\\), Bayes’ rule in odds changes only the last factor:\n\\[\n\\begin{aligned}\n\\frac{P(Y = 1 \\mid X = x)}{P(Y = 0 \\mid X = x)} &= \\frac{p(x \\mid 1)}{p(x \\mid 0)} \\cdot \\frac{q}{1 - q} \\\\[4pt]\n\\operatorname{logit} P_{\\text{test}}(Y = 1 \\mid X = x) &= \\operatorname{logit} P_{\\text{train}}(Y = 1 \\mid X = x) + \\operatorname{logit} q_{\\text{test}} - \\operatorname{logit} q_{\\text{train}}\n\\end{aligned}\n\\]\n\nThe fix: move the intercept (a recalibration with the slope kept at 1), with \\(q_{\\text{test}}\\) known or estimated\nWith unchanged costs, the optimal threshold on the correct deployment probability is still \\(c^\\star\\); the old score needs a new threshold. The order of patients by score does not change"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#accuracy-calibration-and-ranking-under-shift",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#accuracy-calibration-and-ranking-under-shift",
+    "title": "Machine learning",
+    "section": "Accuracy, calibration and ranking under shift",
+    "text": "Accuracy, calibration and ranking under shift\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCovariate shift, \\(p(y \\mid x)\\) fixed\nLabel shift, \\(p(x \\mid y)\\) fixed\n\n\n\n\nRisk\nchanges; estimate it by reweighting with \\(w(x)\\)\nchanges\n\n\nCalibration\nkept by a correct model of \\(p(y \\mid x)\\), not always by others\nlost; move the intercept\n\n\nRanking by score (AUC)\ncan change with the mix of patients\nkept"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#when-the-function-itself-has-moved",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#when-the-function-itself-has-moved",
+    "title": "Machine learning",
+    "section": "When the function itself has moved",
+    "text": "When the function itself has moved\nIf \\(p(y \\mid x)\\) changes (a new payment rule, a new treatment, a change in who gets care), neither fix applies: the old rows contain no information about the new relation, and only new outcomes reveal it\nDeploying a model can be what moves it: a program that enrolls the predicted high-cost patients changes their costs, and next year’s training rows record a world the model helped make"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#causes-and-effects-as-inputs",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#causes-and-effects-as-inputs",
+    "title": "Machine learning",
+    "section": "Causes and effects as inputs",
+    "text": "Causes and effects as inputs\nTheory: the distribution of \\(Y\\) given all its causes is unchanged by interventions that leave \\(Y\\)’s own mechanism alone, so a model on the causes should travel\nNastl and Hardt (2024), 16 tabular tasks with several domains each (income by region, voting by region, hospital mortality by insurance type, …): models on all features beat models on causal features in and out of domain in every task. Their advice: approximate the best predictor on all the features available\nThe invariance holds for the true conditional distribution, not for the risk of a model fitted to a few features"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#section-3",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#section-3",
+    "title": "Machine learning",
+    "section": "",
+    "text": "Part 3: scores and decisions"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#an-absurdly-abbreviated-history-of-optics",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#an-absurdly-abbreviated-history-of-optics",
+    "title": "Machine learning",
+    "section": "An absurdly abbreviated history of optics",
+    "text": "An absurdly abbreviated history of optics\n\nPtolemy (100-170) measured refraction of light passing from air to water, altering measurements so they would fit to a quadratic curve (ancient “machine learning” or curve fitting)\nIbn Sahl (940-1000) described the correct law, which English speakers refer to as Snell’s law\nFermat (1607-1665) proposed the more general “principle of least time” which can be used to derive Snell’s law and solve other optical problems – predict values in different settings"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#ptolemys-curve-in-glass",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#ptolemys-curve-in-glass",
+    "title": "Machine learning",
+    "section": "Ptolemy’s curve in glass",
+    "text": "Ptolemy’s curve in glass\n\n\n\n\n\n\n\n\n\n\n\n\nPoints: Ptolemy’s table, air to water, within 2.2 degrees of Snell’s law, \\(\\sin i = n \\sin r\\) with \\(n = 1.33\\)\nIn glass the same curve is off by 1.4 degrees at 10 and 9.0 at 80. Snell’s law changes one number, \\(n = 1.5\\)\nRefitted to new measurements, a quadratic would fit glass too. It could not say anything before them"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#put-the-science-back-in-data-science",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#put-the-science-back-in-data-science",
+    "title": "Machine learning",
+    "section": "Put the “science” back in “data science”!",
+    "text": "Put the “science” back in “data science”!\nFeynman, Lectures on Physics, Vol. 1:\n\nNow in the further development of science, we want more than just a formula. First we have an observation, then we have numbers that we measure, then we have a law which summarizes all the numbers. But the real glory of science is that we can find a way of thinking such that the law is evident.\n\nAnd from “Cargo Cult Science”:\n\nWhen you have put a lot of ideas together to make an elaborate theory, you want to make sure, when explaining what it fits, that those things it fits are not just the things that gave you the idea for the theory; but that the finished theory makes something else come out right, in addition."
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#ctf-competition-what-it-delivered",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#ctf-competition-what-it-delivered",
+    "title": "Machine learning",
+    "section": "CTF competition: what it delivered",
+    "text": "CTF competition: what it delivered\nDonoho (2017) called prediction plus the common task framework machine learning’s “secret sauce”:\n\ntraining data shared by everyone, competitors, and a referee who scores each submitted rule on data hidden from them\neffort goes to measured performance; many groups compete; judging is impartial and automatic\nwinners arrive already tested, so they look close to deployable\n\n\nThe Netflix prize: the winning blend was never put into production"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#outcome-reasoning-and-model-reasoning",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#outcome-reasoning-and-model-reasoning",
+    "title": "Machine learning",
+    "section": "Outcome reasoning and model reasoning",
+    "text": "Outcome reasoning and model reasoning\nRodu and Baiocchi (2023): a competition justifies “Algorithm A performs better than Algorithm B”, not deployment\n\n\nTwo ways to trust a prediction:\n\noutcome reasoning: measured performance\nmodel reasoning: the model’s structure, checked against what we know\n\nOnly the second can be argued before use\n\nOutcome reasoning is enough only if:\n\nmeasurement: future outcomes can be scored\nadaptability: the model can be updated in time\nresilience: accumulated errors are tolerable\nagnosis: conflict with beliefs is tolerable\n\n\nEach depends on who is asking, the stakeholders"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#the-winner-deployed",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#the-winner-deployed",
+    "title": "Machine learning",
+    "section": "The winner, deployed",
+    "text": "The winner, deployed\nThe health system uses a cost score to choose who gets extra care: the 3% with the highest scores are enrolled in a program for patients with complex needs\nUse the competition’s winner, boosted trees. On the test patients at or above the 97th percentile of its score, the share with top-quarter cost is 81.8% for Black and 85.4% for White patients\n\nThe score predicts cost well, and about equally well in both groups. What could still be wrong?"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#the-same-score-by-health",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#the-same-score-by-health",
+    "title": "Machine learning",
+    "section": "The same score, by health",
+    "text": "The same score, by health\n\n\n\n\n\n\n\n\n\nLeft: what the score was trained for, similar in both groups. Right: at the same score, Black patients are sicker. Enrolled: 6.4 active chronic conditions for Black, 4.6 for White patients\nWhy, in the study: at the same number of chronic illnesses, $1,801 a year less was spent on Black patients (in these rows, $320), so cost understates their need"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#another-target",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#another-target",
+    "title": "Machine learning",
+    "section": "Another target",
+    "text": "Another target\nBoosted trees with the same settings, trained on other targets. Who is in the top 3% of the test patients:\n\n\n\n\n\nTarget\nShare Black\nMean active conditions\nShare of next year's cost\n\n\n\n\nTop quarter of cost (the competition)\n18.3%\n4.92\n16.5%\n\n\nTotal cost\n21.4%\n5.46\n17.8%\n\n\nAvoidable cost\n21.9%\n5.99\n16.9%\n\n\nActive chronic conditions\n26.7%\n7.43\n15.2%\n\n\nThe commercial score (in the data)\n20.0%\n5.59\n16.5%\n\n\n\n\n\n11.9% of all test patients are Black. With chronic conditions as the target, the share among those enrolled rises by 9.0 percentage points (90% bootstrap interval 5.3 to 13.1)\nThe competition fixed the target before anyone competed. Changing it changes who gets care, and no score on the old target can show that"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#should-this-be-predicted-at-all",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#should-this-be-predicted-at-all",
+    "title": "Machine learning",
+    "section": "Should this be predicted at all?",
+    "text": "Should this be predicted at all?\n\nFor which of these tasks would a model with a better score make things better?\n\nwhich patients will cost the most next year, to offer them extra care\nwhich defendants will be re-arrested before trial, to decide who is released\nwhich applicants will stay in a job for two years, to decide who is hired\nwhich drivers will claim on their insurance, to set the price they pay"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#limits-of-predictive-optimization",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#limits-of-predictive-optimization",
+    "title": "Machine learning",
+    "section": "Limits of predictive optimization",
+    "text": "Limits of predictive optimization\nThe case for prediction: decisions that are consistent, cheap, auditable, and often more accurate than unaided judgment (Wang et al. 2024). Questions a score does not answer:\n\nActing on it: does acting on the prediction help? A decision can change the outcome it was predicted from\nThe target: is it what we care about? Re-arrest is not offending, and cost is not need\nPredictability: in a mass competition on life outcomes, 160 teams’ best predictions were only slightly better than a simple benchmark (Salganik et al. 2020)\nContesting: can the person decided about get an explanation, their data, and a way to correct the decision?\n\nSome predictions are objected to even when they are accurate: pricing car insurance by credit score holds people accountable for things that are not their fault (Kiviat 2019)"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#more-warnings-for-data-about-humans",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#more-warnings-for-data-about-humans",
+    "title": "Machine learning",
+    "section": "More warnings for data about humans",
+    "text": "More warnings for data about humans\nSocial science is hard! Health is also (at least partially) social. It is very difficult to predict life outcomes, even with machine learning models and big data\nStrategic/adversarial/adaptive behavior: Goodhart’s law / Campbell’s law / Lucas critique / Friedman’s thermostat / Washback effect / Performativity / Reflexivity / Hammer’s law\nFor these reasons, when dealing with human data:\n\nAlmost all variables correlate\nUnconfoundedness assumptions are always wrong\nCan’t separate “normative vs scientific” (ethics always important)\n\nRemember: focus on what is importantly wrong"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#recap",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#recap",
+    "title": "Machine learning",
+    "section": "Recap",
+    "text": "Recap\n\n\n\n\n\n\n\n\nThe loss and the target define the problem\noptimal model theorem; optimal threshold theorem; quantile optimality\n\n\nTraining error underestimates the risk\noptimism theorem; the selected candidate’s score is biased low\n\n\nFaster rates need assumptions\nno free lunch; the k-NN rate\n\n\nShrinkage and averaging trade bias for variance\nbias–variance decompositions; ridge; the correlated-average variance\n\n\nPrediction is not intervention\nadjustment theorem; inverse propensity weighting; partial dependence and causal effects\n\n\nA score is evidence about one target on one distribution, not a license to deploy\nHoeffding’s inequality; covariate and label shift; another target"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#before-the-seminar",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#before-the-seminar",
+    "title": "Machine learning",
+    "section": "Before the seminar",
+    "text": "Before the seminar\n\nDo the exercises at the top of the seminar notebook before the seminar"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#conclusion",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#conclusion",
+    "title": "Machine learning",
+    "section": "Conclusion",
+    "text": "Conclusion\nThe leaderboard\nCompare two models on the same rows, paired. Hoeffding’s inequality bounds every score at once for models fixed in advance. Choose the comparison before opening the test rows; resample the rows for anything that is not a mean\nWhen the data move\nCovariate shift: reweight by \\(p_{\\text{test}}/p_{\\text{train}}\\), where the supports overlap. Label shift: move the intercept. Neither repairs a change in \\(p(y \\mid x)\\)\nScores and decisions\nThat one model beats another, on one target and one distribution. Whether to deploy it, and whether the target is the right one, are questions the score does not answer"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#course-survey",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#course-survey",
+    "title": "Machine learning",
+    "section": "Course survey",
+    "text": "Course survey\nA few minutes for the course survey, now"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#references-1-of-2",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#references-1-of-2",
+    "title": "Machine learning",
+    "section": "References (1 of 2)",
+    "text": "References (1 of 2)\n\n\nDonoho, D. (2017). 50 years of data science. Journal of Computational and Graphical Statistics 26(4), 745–766. doi:10.1080/10618600.2017.1384734. Section 6.\nFeynman, R. P., Leighton, R. B. and Sands, M. (1963). The Feynman Lectures on Physics, vol. I, chapter 26, Table 26-1 and section 26-3. feynmanlectures.caltech.edu/I_26.html\nFeynman, R. P. (1974). Cargo cult science. Engineering and Science 37(7), 10–13.\nHoeffding, W. (1963). Probability inequalities for sums of bounded random variables. Journal of the American Statistical Association 58(301), 13–30. doi:10.1080/01621459.1963.10500830\nKiviat, B. (2019). The moral limits of predictive practices: the case of credit-based insurance scores. American Sociological Review 84(6), 1134–1158. doi:10.1177/0003122419884917\nNastl, V. Y. and Hardt, M. (2024). Do causal predictors generalize better to new domains? Advances in Neural Information Processing Systems 37. doi:10.52202/079017-0983\nObermeyer, Z., Powers, B., Vogeli, C. and Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. Science 366(6464), 447–453. doi:10.1126/science.aax2342. Synthetic data and code: gitlab.com/labsysmed/dissecting-bias"
+  },
+  {
+    "objectID": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#references-2-of-2",
+    "href": "weeks/10-explaining-intervening/slides/10-1-evaluation.html#references-2-of-2",
+    "title": "Machine learning",
+    "section": "References (2 of 2)",
+    "text": "References (2 of 2)\n\n\nRecht, B., Roelofs, R., Schmidt, L. and Shankar, V. (2019). Do ImageNet classifiers generalize to ImageNet? Proceedings of the 36th International Conference on Machine Learning, PMLR 97, 5389–5400. proceedings.mlr.press/v97/recht19a.html\nRodu, J. and Baiocchi, M. (2023). When black box algorithms are (not) appropriate: a principled prediction-problem ontology. Observational Studies. muse.jhu.edu/pub/56/article/883478. Sections as numbered in arXiv:2001.07648v4.\nRoelofs, R., Shankar, V., Recht, B., Fridovich-Keil, S., Hardt, M., Miller, J. and Schmidt, L. (2019). A meta-analysis of overfitting in machine learning. Advances in Neural Information Processing Systems 32. NeurIPS proceedings\nSalganik, M. J. et al. (2020). Measuring the predictability of life outcomes with a scientific mass collaboration. Proceedings of the National Academy of Sciences 117(15), 8398–8403. doi:10.1073/pnas.1915006117\nWang, A., Kapoor, S., Barocas, S. and Narayanan, A. (2024). Against predictive optimization: on the legitimacy of decision-making algorithms that optimize predictive accuracy. ACM Journal on Responsible Computing 1(1), 1–45. predictive-optimization.cs.princeton.edu. Sections as numbered in the draft of 16 February 2023."
+  },
+  {
+    "objectID": "data/nhanes.html",
+    "href": "data/nhanes.html",
+    "title": "NHANES",
+    "section": "",
+    "text": "Source\nThe US National Health and Nutrition Examination Survey (NHANES), run by the National Center for Health Statistics, cycles 2009–10 and 2011–12; shipped as NHANESraw in the R package NHANES (Pruim, R., NHANES: Data from the US National Health and Nutrition Examination Study, version 2.1.4, CRAN). Survey documentation: cdc.gov/nchs/nhanes.\n\n\nRows\nOne row per participant (20,293 rows, all ages). The course uses the 9,212 adults (20 and over) with every column below recorded (the loader).\n\n\nColumns\nAmong the package’s 79: Gender, Age (80 means 80 or older), Race1 (the survey’s five groups: Black, Hispanic, Mexican, White, Other), Poverty (family income over the poverty guideline), Weight (kg), Height (cm), BMI (weight over height squared), Pulse, BPSysAve (systolic blood pressure, mm Hg), TotChol and DirectChol (total and HDL cholesterol, mmol/L), PhysActive (moderate or vigorous sports or recreation), Diabetes (ever told by a doctor or health professional that they have diabetes).\n\n\nTargets\nDiabetes, a yes or no answer (14% of the adults used); BPSysAve.\n\n\nNotes\nNHANES oversamples some groups on purpose, and the course does not use its survey weights, so the rows are not a sample of the US population: shares and averages computed from them describe these participants, not the country. Diabetes is what participants report having been told, so undiagnosed diabetes counts as no."
+  },
+  {
+    "objectID": "data/nhanes.html#loader",
+    "href": "data/nhanes.html#loader",
+    "title": "NHANES",
     "section": "Loader",
-    "text": "Loader\nlibrary(tidyverse)\nlibrary(ggplot2movies)\nmv &lt;- movies |&gt;\n  filter(length &lt;= 200, length &gt; 10, year &gt; 1918, votes &gt;= 20)"
+    "text": "Loader\nlibrary(tidyverse)\nlibrary(NHANES)\nnh &lt;- NHANESraw |&gt;\n  filter(Age &gt;= 20) |&gt;\n  select(Diabetes, Gender, Age, Race1, Poverty, Weight, Height, BMI, Pulse, BPSysAve, TotChol, DirectChol, PhysActive) |&gt;\n  drop_na() |&gt;\n  mutate(diabetes = as.numeric(Diabetes == \"Yes\"), male = as.numeric(Gender == \"male\"),\n         active = as.numeric(PhysActive == \"Yes\"))"
   },
   {
     "objectID": "data/penguins.html",
