@@ -4,9 +4,10 @@ What a winning score shows, and what it does not. The leaderboard first: compari
 
 **Reading [PROVISIONAL]**
 
+- [What a winning score shows](weeks/10-explaining-intervening/winning-scores.html) ([PDF](weeks/10-explaining-intervening/winning-scores.pdf)), a note for this lecture: what the readings below say about competitions, benchmarks, distribution shift and deployment, and which sections to read.
 - PPA, chapter 8 ("Datasets"), the sections "Longevity of benchmarks", "Harms associated with data" (its parts on privacy and on problem framing) and "Limits of data and prediction". Web version: [mlstory.org/data.html](https://mlstory.org/data.html).
 - Obermeyer, Z., Powers, B., Vogeli, C. and Mullainathan, S. (2019), "Dissecting racial bias in an algorithm used to manage the health of populations", *Science* 366(6464), 447--453, [doi:10.1126/science.aax2342](https://doi.org/10.1126/science.aax2342).
 
-Optional: Rodu, J. and Baiocchi, M. (2023), "When black box algorithms are (not) appropriate: a principled prediction-problem ontology", *Observational Studies*, [arXiv:2001.07648](https://arxiv.org/abs/2001.07648), sections 1 and 2.
+Optional, with the sections the note points to: Rodu, J. and Baiocchi, M. (2023), "When black box algorithms are (not) appropriate: a principled prediction-problem ontology", *Observational Studies*, [arXiv:2001.07648](https://arxiv.org/abs/2001.07648); Wang, A., Kapoor, S., Barocas, S. and Narayanan, A. (2024), "Against predictive optimization", *ACM Journal on Responsible Computing* 1(1), [predictive-optimization.cs.princeton.edu](https://predictive-optimization.cs.princeton.edu/); Recht, B., Roelofs, R., Schmidt, L. and Shankar, V. (2019), "Do ImageNet classifiers generalize to ImageNet?", *ICML*, [PMLR 97](https://proceedings.mlr.press/v97/recht19a.html); Nastl, V. Y. and Hardt, M. (2024), "Do causal predictors generalize better to new domains?", *NeurIPS*, [arXiv:2402.09891](https://arxiv.org/abs/2402.09891).
 
 **Lecture:** [slides](weeks/10-explaining-intervening/slides/10-1-evaluation.html)

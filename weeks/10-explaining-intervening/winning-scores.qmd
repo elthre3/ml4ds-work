@@ -1,0 +1,114 @@
+---
+title: "What a winning score shows"
+subtitle: "Benchmarks, distribution shift and deployment: a guide to the readings"
+format:
+  html: default
+  pdf:
+    # The printable version, as for the other notes: Latin Modern by pdfLaTeX.
+    pdf-engine: pdflatex
+    geometry: margin=2.5cm
+---
+
+Most of what machine learning knows about which methods work comes from competitions: a shared dataset, a task, an agreed score and a hidden evaluation set, with the winner chosen by best score. This note collects what the readings say about what such a win establishes. It has five parts: the framework and why it has worked; what a winning score can and cannot justify; how a score can mislead even within its own terms; what happens when the data a model meets differ from the data it was scored on; and what a score cannot answer at all, because the target or the task itself is in question.
+
+Each part says which reading it draws on and which sections to read. The required reading is this note, three sections of chapter 8 of *Patterns, Predictions, and Actions* (PPA), and Obermeyer et al. (2019). The other works are optional; the parts below say what each adds. Full references are at the end.
+
+## The common task framework
+
+Donoho (2017, section 6) gives the framework three ingredients: a publicly available training dataset; a set of competitors whose common task is to produce a prediction rule from it; and a referee who scores each submitted rule on test data the competitors cannot see. He takes the name from the computational linguist Mark Liberman and traces the practice to US research programs from the late 1980s, in which groups funded by DARPA were scored on shared, sequestered data, with NIST as the referee. He argues that this framework, together with predictive modeling, is what made machine learning so productive: effort goes to measured performance, many groups can compete, judging is impartial and automatic, and the winning rules have already been tested on data they did not see, which makes them look close to ready for use. In a footnote he records that the winning algorithm of the Netflix challenge was never implemented.
+
+Liberman's own account, in a letter quoted by Rodu and Baiocchi (section 9), adds something Donoho does not stress. The framework was designed to steer government-funded research on problems far from practical use. Tasks were deliberately chosen not to be the real goal of the work, and metrics were chosen to be simple and automatic, so that they were at best loosely related to what the research was for. Liberman's view is that tasks and metrics have to be rethought when the aim is an application rather than research progress.
+
+## Outcome reasoning and model reasoning
+
+**Reading** (optional): Rodu and Baiocchi (2023), sections 1, 2 and 4, and the recidivism example in sections 3.4 and 6.
+
+Rodu and Baiocchi list five features of the framework (section 1.2): curated data in a repository; static data shared by every analyst; a well-defined task; agreement on the evaluation metric; and an evaluation set the analysts cannot see. Done correctly, a competition with these features supports a comparison: on this task, with this metric, one algorithm performs better than another. It takes a real problem and puts it in a sandbox. What it does not provide is a foundation for deploying the winner. In their words: "Competing successfully in a CTF event does not warrant deployment" (section 6).
+
+To say what would, they separate two ways of trusting a prediction (section 4.1):
+
+- **Outcome reasoning** judges an algorithm by its measured performance on outcomes. Beliefs about the world enter only through the choice of metric. It is the reasoning of the common task framework, and the authors extend it to deployment: an algorithm in use can keep being judged on the outcomes it predicted. But it can only be applied once outcomes have been observed.
+- **Model reasoning** judges an algorithm by whether its structure agrees with what we believe about the problem. It needs deductive argument and beliefs that can be stated, and in return it can be debated before the algorithm is used.
+
+They then ask when outcome reasoning alone is enough, and give four conditions, which they call MARA (section 2 and section 4.2):
+
+- **Measurement**: the outcomes of future predictions can be observed and scored;
+- **Adaptability**: the algorithm can be updated faster than the problem changes, and its use does not itself change the outcomes it predicts;
+- **Resilience**: the errors that accumulate while the algorithm is in use are tolerable;
+- **Agnosis**: the people affected can tolerate an algorithm whose structure may conflict with their beliefs, which may be scientific or moral.
+
+Each condition depends on who is asking: the "(s)" in MARA(s) stands for the stakeholders (section 2.1). A triage algorithm for mild symptoms can satisfy all four from a hospital administrator's point of view, while for one patient the prediction replaces the diagnosis, so the outcome that would check it is never measured (section 3.3). The authors say plainly that their framework does not decide who counts as a stakeholder.
+
+Their main negative example is a recidivism score used in decisions about detention (sections 3.4 and 6). People who are detained have no observed outcome, so measurement fails; and, for public defenders and the people being scored, they argue that resilience and agnosis fail as well. When the conditions fail, their recommendation is that stakeholders should ask for model reasoning before the algorithm is used.
+
+The lecture's optics slides make the same distinction with an older example. Ptolemy's table of refraction angles, as Feynman reprints it (Lectures, volume I, Table 26-1), is a quadratic: a curve that fits the measurements it came from. Snell's law, and Fermat's principle of least time behind it, is a structure that can be checked before new measurements arrive, and that says how the angles change when the glass changes.
+
+## Test-set reuse and adaptivity
+
+**Reading** (required): PPA, chapter 8, section "Longevity of benchmarks". Optional: Recht et al. (2019), sections 1 and 2; Roelofs et al. (2019), section 1.
+
+A held-out score is a mean of $m$ losses. For a loss between 0 and 1, Hoeffding's inequality bounds how far it can be from the model's risk, and the union bound extends this to $K$ models fixed before the test data are opened: every score is within $\sqrt{\log(2K/\delta)/(2m)}$ of its risk with probability $1 - \delta$. Two models scored on the same rows are compared more precisely by the paired difference of their losses than by their two scores separately.
+
+The bound assumes the $K$ models were fixed in advance. In a benchmark that runs for years, each new model is designed after seeing the scores of the old ones on the same test set. PPA's section on adaptivity shows how badly this can go in the worst case: an analyst who keeps random predictors that happen to beat chance on the test set, and takes their majority vote, can produce a score that looks better than chance by an amount of order $\sqrt{k/n}$ after $k$ queries on $n$ test points, while the true risk is no better than chance. Without adaptivity the comparable term grows only like $\sqrt{\log(k)/n}$.
+
+Whether this happens in practice is an empirical question, and two studies tested it.
+
+- Recht et al. (2019) built new test sets for CIFAR-10 and ImageNet by repeating the original collection procedures. Every model scored worse on the new data, many by around 10 percentage points; the best ImageNet model in their Table 1 fell from 82.9% to 72.2%. But the order of the models was almost unchanged, and models that were better on the old test set gained more on the new one, which is not what overfitting to the old test set would produce. They split the drop into three parts (section 2): adaptivity (the old score against the old risk), a change of distribution (the old risk against the new risk) and sampling error (the new risk against the new score). Their evidence points to the change of distribution: the new images were slightly harder.
+- Roelofs et al. (2019) compared the public and private leaderboards of 120 Kaggle competitions: the public leaderboard is the score competitors can see and react to, the private one a separate test set used once at the end. Apart from competitions with problems such as small test sets or splits that were not random, the two agreed closely.
+
+PPA offers two reasons why adaptivity did less damage than the worst case. Models built by practitioners resemble each other, so the number of genuinely different predictions they try is far smaller than the worst case allows (model similarity). And researchers mostly report only whether a new model beats the best so far, which leaks less information about the test set than reporting every score (the leaderboard principle). The section is careful to say that these explain only part of what was observed.
+
+The lesson the readings draw is narrower than "benchmarks are fine". A benchmark score has held up well as a comparison between models on its own distribution. As an estimate of how a model will do on data collected even slightly differently, it has not.
+
+## When the distribution moves
+
+**Reading** (optional): Nastl and Hardt (2024), sections 1 and 3.
+
+A score is evidence about the distribution the test rows came from. The lecture's two identities say what can be done when the data a model will meet differ in a known way. Under covariate shift, when $p(y \mid x)$ is unchanged and only the distribution of the inputs moves, the risk on the new distribution is the old expected loss weighted by $w(x) = p_{\text{test}}(x)/p_{\text{train}}(x)$, provided the old distribution puts positive density wherever the new one does. Under label shift, when $p(x \mid y)$ is unchanged and only the share of each class moves, Bayes' rule moves every log-odds by the same constant, so a change of intercept repairs the probabilities and the order of the units by score is unchanged. Neither repairs a change in $p(y \mid x)$ itself.
+
+A natural hope is that a model built on the causes of the outcome will travel better than one built on everything, because the distribution of an outcome given all its causes is unchanged by interventions that leave the outcome's own mechanism alone. Nastl and Hardt (2024) tested this on 16 prediction tasks from tabular data in health, employment, education, social benefits and politics, each with several domains: income across regions of the US, voting across regions, hospital mortality across insurance types, and others. For each task they chose a conservative set of causal features, a broader set of arguably causal ones, and the full set. Models on all the features had the best accuracy both within the training domain and in new domains, in every task, and adding features that the outcome plausibly causes helped the causal models out of domain. Methods designed for causal domain generalization did no better than standard models on the arguably causal features. Their practical advice is to fit the best predictor on all available features. They note the limits: the choice of causal features is a judgment, the available features may leave out real causes, and the study covers tabular data only.
+
+The theory they test is about the true conditional distribution given all the causes. A model fitted to a handful of causal features measured in a survey is a different object, and its risk can still change across domains.
+
+## When the target or the task is wrong
+
+**Reading** (required): Obermeyer et al. (2019); PPA, chapter 8, the parts of "Harms associated with data" on privacy and on problem framing, and "Limits of data and prediction". Optional: Wang et al. (2024), sections 1, 2.1, 2.2, 3.1, 3.2, 3.4 and 3.6.
+
+**The cost score.** Obermeyer et al. studied a commercial algorithm that health systems use to choose patients for programs that give extra care to people with complex needs. In the system they studied, patients above the 97th percentile of the algorithm's score were enrolled automatically and those above the 55th were referred to their doctor (p. 448). The data covered about 6,000 Black and 43,500 White patients from 2013 to 2015. The algorithm predicts next year's health care cost and does not use race (p. 449). As a predictor of cost it does what it was built to do: at a given score, realized costs are about the same for Black and White patients (Figure 3A). But at the 97th percentile Black patients had 4.8 active chronic conditions against 3.8 for White patients (p. 448), and at the same number of chronic illnesses about \$1,800 a year less was spent on Black patients (p. 450). Because less is spent on them for the same need, a score that predicts cost understates their need, and it does so while being accurate and calibrated for the target it was given.
+
+The authors then trained models with the same inputs on three targets: total cost, avoidable cost and the number of active chronic conditions (Table 2, p. 452). The share of Black patients among the top 3% of predicted risk was 14.1% with total cost as the target and 26.7% with active chronic conditions. Changing the target changed who would be offered care. The manufacturer, working with the authors, retrained the algorithm with a different target and reduced the bias on its own national data. The lecture repeats the main comparisons on the synthetic data the authors released, and the pattern reappears there.
+
+One more lesson comes from the authors' repository rather than the paper. The abstract reports that removing the bias would raise the share of Black patients receiving extra help from 17.7% to 46.5%. In 2022 the authors posted a correction: a coding error in that simulation made the second number too low, and the corrected figure is 59%. They also report a critique of the swapping procedure behind it. A number quoted from an abstract is worth checking against the authors' latest materials.
+
+**The framing of the task.** PPA's section on problem framing gives two examples of how the way a task is set up decides what a good score means. Claims that models beat human accuracy on image classification rested on loosely defined human baselines. And for predicting which defendants will fail to appear in court, the chapter points out that the usual causes (transportation, childcare, work hours) can be addressed directly, so that a more accurate prediction used to justify detention may be the wrong response to the problem. The section on privacy tells how the ratings released for the Netflix challenge were linked to public IMDb ratings to identify subscribers, and how the fallout ended a planned second competition.
+
+**How predictable the outcome is.** PPA's last section describes the Fragile Families Challenge (Salganik et al. 2020). Competitors were given data on 4,242 families, followed from a child's birth to age 9, with about 12,900 variables, and asked to predict six outcomes measured at age 15, among them the child's grade point average and whether the family was evicted. Around 160 teams submitted models. The best predictions were not very accurate and only slightly better than a simple benchmark, and how badly a family was predicted depended much more on the family than on the method. The chapter's reading is that some life outcomes may be close to unpredictable over such a span, whatever the method, and that prediction is a weak basis for decisions when the world is changing or when the question is what an intervention would do.
+
+**Against predictive optimization.** Wang et al. (2024) name the kind of system the cost score belongs to: *predictive optimization* uses machine learning to predict a future outcome for each individual and uses those predictions to make decisions about them (section 2.1). They state the case for it before the case against: automation is consistent and efficient, a clear target looks objective, predictions seem to follow real patterns rather than judgment, and an algorithm's bias is supposedly easier to find and fix than a person's (section 2.2). They then argue that seven objections apply to every one of eight deployed systems they studied, one of them a commercial health risk model of the kind Obermeyer et al. examined. Four of the seven take up where Rodu and Baiocchi stop:
+
+- **Prediction is not intervention** (section 3.1). A model fitted to observational data predicts outcomes under the old decisions, not the effect of a new one. Their example: setting higher bail for defendants with a high predicted risk can itself make them more likely to reoffend.
+- **The target is not the construct** (section 3.2). Pre-trial risk tools predict re-arrest because offending is not observed, and re-arrest depends on where police look; hiring tools predict proxies such as sales or ratings for job performance. They argue some mismatch always remains.
+- **Limits to prediction** (section 3.4). Besides the Fragile Families Challenge, they report a hospital sepsis model whose developer claimed an AUC of 0.76 to 0.83 and which scored 0.63 in an outside evaluation in 2021.
+- **Contestability** (section 3.6). To contest a decision, a person needs an explanation of it, access to the data and the model it used, and a way to have it reviewed and corrected; providing these takes away much of the efficiency that justified automating. Their example is the Dutch childcare benefits scandal, in which tens of thousands of parents were wrongly accused of fraud.
+
+The other three are that training data rarely match the setting of deployment, that differences in error rates between groups cannot be removed by an algorithm alone, and that people change their behavior in response to a score (Goodhart's law). Their conclusion is that such systems should be presumed illegitimate until the people who deploy them justify them, and they give a rubric of 27 questions for doing so (section 4.4).
+
+**Accurate and still objectionable.** Kiviat (2019) studied the use of credit scores to price car insurance in the US. The scores predict claims. Policymakers resisted them anyway, she finds, when the predictions held people accountable for circumstances that were not their fault, and when no causal story connected the data to the behavior being priced. Her study is about what people regard as fair grounds for treating them differently, which a better score does not settle.
+
+## Summary
+
+A competition win is good evidence that one model beats another on one target, measured on one distribution, and the readings suggest that this evidence has held up better than the worst case predicts. It does not say how the model will do on a population collected differently; it does not say whether the target measures what the decision needs; and it does not say whether the decision should be made this way at all. Each of those is a separate question, and the readings show cases where getting it wrong caused harm while the score was good.
+
+## References
+
+- Donoho, D. (2017). 50 years of data science. *Journal of Computational and Graphical Statistics* 26(4), 745--766. [doi:10.1080/10618600.2017.1384734](https://doi.org/10.1080/10618600.2017.1384734). Section 6, read in the version of 18 September 2015.
+- Feynman, R. P., Leighton, R. B. and Sands, M. (1963). *The Feynman Lectures on Physics*, volume I, chapter 26, Table 26-1 and section 26-3. [feynmanlectures.caltech.edu/I_26.html](https://www.feynmanlectures.caltech.edu/I_26.html)
+- Hardt, M. and Recht, B. (2022). *Patterns, Predictions, and Actions: Foundations of Machine Learning*. Princeton University Press. Chapter 8, "Datasets". Free online: [mlstory.org/data.html](https://mlstory.org/data.html)
+- Kiviat, B. (2019). The moral limits of predictive practices: the case of credit-based insurance scores. *American Sociological Review* 84(6), 1134--1158. [doi:10.1177/0003122419884917](https://doi.org/10.1177/0003122419884917)
+- Nastl, V. Y. and Hardt, M. (2024). Do causal predictors generalize better to new domains? *Advances in Neural Information Processing Systems* 37. [doi:10.52202/079017-0983](https://doi.org/10.52202/079017-0983). Also [arXiv:2402.09891](https://arxiv.org/abs/2402.09891).
+- Obermeyer, Z., Powers, B., Vogeli, C. and Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. *Science* 366(6464), 447--453. [doi:10.1126/science.aax2342](https://doi.org/10.1126/science.aax2342). Synthetic data, code and the 2022 correction: [gitlab.com/labsysmed/dissecting-bias](https://gitlab.com/labsysmed/dissecting-bias)
+- Recht, B., Roelofs, R., Schmidt, L. and Shankar, V. (2019). Do ImageNet classifiers generalize to ImageNet? *Proceedings of the 36th International Conference on Machine Learning*, PMLR 97, 5389--5400. [proceedings.mlr.press/v97/recht19a.html](https://proceedings.mlr.press/v97/recht19a.html)
+- Rodu, J. and Baiocchi, M. (2023). When black box algorithms are (not) appropriate: a principled prediction-problem ontology. *Observational Studies*. [muse.jhu.edu/pub/56/article/883478](https://muse.jhu.edu/pub/56/article/883478). Section numbers as in [arXiv:2001.07648](https://arxiv.org/abs/2001.07648), version of 31 March 2021.
+- Roelofs, R., Shankar, V., Recht, B., Fridovich-Keil, S., Hardt, M., Miller, J. and Schmidt, L. (2019). A meta-analysis of overfitting in machine learning. *Advances in Neural Information Processing Systems* 32. [NeurIPS proceedings](https://papers.nips.cc/paper/9117-a-meta-analysis-of-overfitting-in-machine-learning)
+- Salganik, M. J. et al. (2020). Measuring the predictability of life outcomes with a scientific mass collaboration. *Proceedings of the National Academy of Sciences* 117(15), 8398--8403. [doi:10.1073/pnas.1915006117](https://doi.org/10.1073/pnas.1915006117)
+- Wang, A., Kapoor, S., Barocas, S. and Narayanan, A. (2024). Against predictive optimization: on the legitimacy of decision-making algorithms that optimize predictive accuracy. *ACM Journal on Responsible Computing* 1(1), 1--45. [predictive-optimization.cs.princeton.edu](https://predictive-optimization.cs.princeton.edu/). Section numbers as in the draft of 16 February 2023.

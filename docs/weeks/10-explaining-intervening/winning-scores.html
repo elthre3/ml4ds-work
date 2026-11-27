@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>What a winning score shows – machine learning 4 data science</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-2933ca209de16f787bfe4fe53c4e45ee.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="https://ml4ds.com" class="navbar-brand navbar-brand-logo">
+    <img src="../../files/sticker.png" alt="ml4ds" class="navbar-logo light-content">
+    <img src="../../files/sticker.png" alt="ml4ds" class="navbar-logo dark-content">
+    </a>
+    <a class="navbar-brand" href="https://ml4ds.com">
+    <span class="navbar-title">machine learning 4 data science</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-references" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">references</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-references">    
+        <li>
+    <a class="dropdown-item" href="https://www.statlearning.com/">
+ <span class="dropdown-text">ISLR</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://mlstory.org/">
+ <span class="dropdown-text">PPA (Patterns, Predictions, and Actions)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://causalml-book.org/">
+ <span class="dropdown-text">CausalML</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://r4ds.hadley.nz/">
+ <span class="dropdown-text">R4DS</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://hastie.su.domains/ElemStatLearn/">
+ <span class="dropdown-text">ESL</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://hastie.su.domains/CASI/">
+ <span class="dropdown-text">CASI</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://christophm.github.io/interpretable-ml-book/">
+ <span class="dropdown-text">IML</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">content</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">about</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#the-common-task-framework" id="toc-the-common-task-framework" class="nav-link active" data-scroll-target="#the-common-task-framework">The common task framework</a></li>
+  <li><a href="#outcome-reasoning-and-model-reasoning" id="toc-outcome-reasoning-and-model-reasoning" class="nav-link" data-scroll-target="#outcome-reasoning-and-model-reasoning">Outcome reasoning and model reasoning</a></li>
+  <li><a href="#test-set-reuse-and-adaptivity" id="toc-test-set-reuse-and-adaptivity" class="nav-link" data-scroll-target="#test-set-reuse-and-adaptivity">Test-set reuse and adaptivity</a></li>
+  <li><a href="#when-the-distribution-moves" id="toc-when-the-distribution-moves" class="nav-link" data-scroll-target="#when-the-distribution-moves">When the distribution moves</a></li>
+  <li><a href="#when-the-target-or-the-task-is-wrong" id="toc-when-the-target-or-the-task-is-wrong" class="nav-link" data-scroll-target="#when-the-target-or-the-task-is-wrong">When the target or the task is wrong</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="winning-scores.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">What a winning score shows</h1>
+<p class="subtitle lead">Benchmarks, distribution shift and deployment: a guide to the readings</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Most of what machine learning knows about which methods work comes from competitions: a shared dataset, a task, an agreed score and a hidden evaluation set, with the winner chosen by best score. This note collects what the readings say about what such a win establishes. It has five parts: the framework and why it has worked; what a winning score can and cannot justify; how a score can mislead even within its own terms; what happens when the data a model meets differ from the data it was scored on; and what a score cannot answer at all, because the target or the task itself is in question.</p>
+<p>Each part says which reading it draws on and which sections to read. The required reading is this note, three sections of chapter 8 of <em>Patterns, Predictions, and Actions</em> (PPA), and Obermeyer et al.&nbsp;(2019). The other works are optional; the parts below say what each adds. Full references are at the end.</p>
+<section id="the-common-task-framework" class="level2">
+<h2 class="anchored" data-anchor-id="the-common-task-framework">The common task framework</h2>
+<p>Donoho (2017, section 6) gives the framework three ingredients: a publicly available training dataset; a set of competitors whose common task is to produce a prediction rule from it; and a referee who scores each submitted rule on test data the competitors cannot see. He takes the name from the computational linguist Mark Liberman and traces the practice to US research programs from the late 1980s, in which groups funded by DARPA were scored on shared, sequestered data, with NIST as the referee. He argues that this framework, together with predictive modeling, is what made machine learning so productive: effort goes to measured performance, many groups can compete, judging is impartial and automatic, and the winning rules have already been tested on data they did not see, which makes them look close to ready for use. In a footnote he records that the winning algorithm of the Netflix challenge was never implemented.</p>
+<p>Liberman’s own account, in a letter quoted by Rodu and Baiocchi (section 9), adds something Donoho does not stress. The framework was designed to steer government-funded research on problems far from practical use. Tasks were deliberately chosen not to be the real goal of the work, and metrics were chosen to be simple and automatic, so that they were at best loosely related to what the research was for. Liberman’s view is that tasks and metrics have to be rethought when the aim is an application rather than research progress.</p>
+</section>
+<section id="outcome-reasoning-and-model-reasoning" class="level2">
+<h2 class="anchored" data-anchor-id="outcome-reasoning-and-model-reasoning">Outcome reasoning and model reasoning</h2>
+<p><strong>Reading</strong> (optional): Rodu and Baiocchi (2023), sections 1, 2 and 4, and the recidivism example in sections 3.4 and 6.</p>
+<p>Rodu and Baiocchi list five features of the framework (section 1.2): curated data in a repository; static data shared by every analyst; a well-defined task; agreement on the evaluation metric; and an evaluation set the analysts cannot see. Done correctly, a competition with these features supports a comparison: on this task, with this metric, one algorithm performs better than another. It takes a real problem and puts it in a sandbox. What it does not provide is a foundation for deploying the winner. In their words: “Competing successfully in a CTF event does not warrant deployment” (section 6).</p>
+<p>To say what would, they separate two ways of trusting a prediction (section 4.1):</p>
+<ul>
+<li><strong>Outcome reasoning</strong> judges an algorithm by its measured performance on outcomes. Beliefs about the world enter only through the choice of metric. It is the reasoning of the common task framework, and the authors extend it to deployment: an algorithm in use can keep being judged on the outcomes it predicted. But it can only be applied once outcomes have been observed.</li>
+<li><strong>Model reasoning</strong> judges an algorithm by whether its structure agrees with what we believe about the problem. It needs deductive argument and beliefs that can be stated, and in return it can be debated before the algorithm is used.</li>
+</ul>
+<p>They then ask when outcome reasoning alone is enough, and give four conditions, which they call MARA (section 2 and section 4.2):</p>
+<ul>
+<li><strong>Measurement</strong>: the outcomes of future predictions can be observed and scored;</li>
+<li><strong>Adaptability</strong>: the algorithm can be updated faster than the problem changes, and its use does not itself change the outcomes it predicts;</li>
+<li><strong>Resilience</strong>: the errors that accumulate while the algorithm is in use are tolerable;</li>
+<li><strong>Agnosis</strong>: the people affected can tolerate an algorithm whose structure may conflict with their beliefs, which may be scientific or moral.</li>
+</ul>
+<p>Each condition depends on who is asking: the “(s)” in MARA(s) stands for the stakeholders (section 2.1). A triage algorithm for mild symptoms can satisfy all four from a hospital administrator’s point of view, while for one patient the prediction replaces the diagnosis, so the outcome that would check it is never measured (section 3.3). The authors say plainly that their framework does not decide who counts as a stakeholder.</p>
+<p>Their main negative example is a recidivism score used in decisions about detention (sections 3.4 and 6). People who are detained have no observed outcome, so measurement fails; and, for public defenders and the people being scored, they argue that resilience and agnosis fail as well. When the conditions fail, their recommendation is that stakeholders should ask for model reasoning before the algorithm is used.</p>
+<p>The lecture’s optics slides make the same distinction with an older example. Ptolemy’s table of refraction angles, as Feynman reprints it (Lectures, volume I, Table 26-1), is a quadratic: a curve that fits the measurements it came from. Snell’s law, and Fermat’s principle of least time behind it, is a structure that can be checked before new measurements arrive, and that says how the angles change when the glass changes.</p>
+</section>
+<section id="test-set-reuse-and-adaptivity" class="level2">
+<h2 class="anchored" data-anchor-id="test-set-reuse-and-adaptivity">Test-set reuse and adaptivity</h2>
+<p><strong>Reading</strong> (required): PPA, chapter 8, section “Longevity of benchmarks”. Optional: Recht et al.&nbsp;(2019), sections 1 and 2; Roelofs et al.&nbsp;(2019), section 1.</p>
+<p>A held-out score is a mean of <span class="math inline">\(m\)</span> losses. For a loss between 0 and 1, Hoeffding’s inequality bounds how far it can be from the model’s risk, and the union bound extends this to <span class="math inline">\(K\)</span> models fixed before the test data are opened: every score is within <span class="math inline">\(\sqrt{\log(2K/\delta)/(2m)}\)</span> of its risk with probability <span class="math inline">\(1 - \delta\)</span>. Two models scored on the same rows are compared more precisely by the paired difference of their losses than by their two scores separately.</p>
+<p>The bound assumes the <span class="math inline">\(K\)</span> models were fixed in advance. In a benchmark that runs for years, each new model is designed after seeing the scores of the old ones on the same test set. PPA’s section on adaptivity shows how badly this can go in the worst case: an analyst who keeps random predictors that happen to beat chance on the test set, and takes their majority vote, can produce a score that looks better than chance by an amount of order <span class="math inline">\(\sqrt{k/n}\)</span> after <span class="math inline">\(k\)</span> queries on <span class="math inline">\(n\)</span> test points, while the true risk is no better than chance. Without adaptivity the comparable term grows only like <span class="math inline">\(\sqrt{\log(k)/n}\)</span>.</p>
+<p>Whether this happens in practice is an empirical question, and two studies tested it.</p>
+<ul>
+<li>Recht et al.&nbsp;(2019) built new test sets for CIFAR-10 and ImageNet by repeating the original collection procedures. Every model scored worse on the new data, many by around 10 percentage points; the best ImageNet model in their Table 1 fell from 82.9% to 72.2%. But the order of the models was almost unchanged, and models that were better on the old test set gained more on the new one, which is not what overfitting to the old test set would produce. They split the drop into three parts (section 2): adaptivity (the old score against the old risk), a change of distribution (the old risk against the new risk) and sampling error (the new risk against the new score). Their evidence points to the change of distribution: the new images were slightly harder.</li>
+<li>Roelofs et al.&nbsp;(2019) compared the public and private leaderboards of 120 Kaggle competitions: the public leaderboard is the score competitors can see and react to, the private one a separate test set used once at the end. Apart from competitions with problems such as small test sets or splits that were not random, the two agreed closely.</li>
+</ul>
+<p>PPA offers two reasons why adaptivity did less damage than the worst case. Models built by practitioners resemble each other, so the number of genuinely different predictions they try is far smaller than the worst case allows (model similarity). And researchers mostly report only whether a new model beats the best so far, which leaks less information about the test set than reporting every score (the leaderboard principle). The section is careful to say that these explain only part of what was observed.</p>
+<p>The lesson the readings draw is narrower than “benchmarks are fine”. A benchmark score has held up well as a comparison between models on its own distribution. As an estimate of how a model will do on data collected even slightly differently, it has not.</p>
+</section>
+<section id="when-the-distribution-moves" class="level2">
+<h2 class="anchored" data-anchor-id="when-the-distribution-moves">When the distribution moves</h2>
+<p><strong>Reading</strong> (optional): Nastl and Hardt (2024), sections 1 and 3.</p>
+<p>A score is evidence about the distribution the test rows came from. The lecture’s two identities say what can be done when the data a model will meet differ in a known way. Under covariate shift, when <span class="math inline">\(p(y \mid x)\)</span> is unchanged and only the distribution of the inputs moves, the risk on the new distribution is the old expected loss weighted by <span class="math inline">\(w(x) = p_{\text{test}}(x)/p_{\text{train}}(x)\)</span>, provided the old distribution puts positive density wherever the new one does. Under label shift, when <span class="math inline">\(p(x \mid y)\)</span> is unchanged and only the share of each class moves, Bayes’ rule moves every log-odds by the same constant, so a change of intercept repairs the probabilities and the order of the units by score is unchanged. Neither repairs a change in <span class="math inline">\(p(y \mid x)\)</span> itself.</p>
+<p>A natural hope is that a model built on the causes of the outcome will travel better than one built on everything, because the distribution of an outcome given all its causes is unchanged by interventions that leave the outcome’s own mechanism alone. Nastl and Hardt (2024) tested this on 16 prediction tasks from tabular data in health, employment, education, social benefits and politics, each with several domains: income across regions of the US, voting across regions, hospital mortality across insurance types, and others. For each task they chose a conservative set of causal features, a broader set of arguably causal ones, and the full set. Models on all the features had the best accuracy both within the training domain and in new domains, in every task, and adding features that the outcome plausibly causes helped the causal models out of domain. Methods designed for causal domain generalization did no better than standard models on the arguably causal features. Their practical advice is to fit the best predictor on all available features. They note the limits: the choice of causal features is a judgment, the available features may leave out real causes, and the study covers tabular data only.</p>
+<p>The theory they test is about the true conditional distribution given all the causes. A model fitted to a handful of causal features measured in a survey is a different object, and its risk can still change across domains.</p>
+</section>
+<section id="when-the-target-or-the-task-is-wrong" class="level2">
+<h2 class="anchored" data-anchor-id="when-the-target-or-the-task-is-wrong">When the target or the task is wrong</h2>
+<p><strong>Reading</strong> (required): Obermeyer et al.&nbsp;(2019); PPA, chapter 8, the parts of “Harms associated with data” on privacy and on problem framing, and “Limits of data and prediction”. Optional: Wang et al.&nbsp;(2024), sections 1, 2.1, 2.2, 3.1, 3.2, 3.4 and 3.6.</p>
+<p><strong>The cost score.</strong> Obermeyer et al.&nbsp;studied a commercial algorithm that health systems use to choose patients for programs that give extra care to people with complex needs. In the system they studied, patients above the 97th percentile of the algorithm’s score were enrolled automatically and those above the 55th were referred to their doctor (p.&nbsp;448). The data covered about 6,000 Black and 43,500 White patients from 2013 to 2015. The algorithm predicts next year’s health care cost and does not use race (p.&nbsp;449). As a predictor of cost it does what it was built to do: at a given score, realized costs are about the same for Black and White patients (Figure 3A). But at the 97th percentile Black patients had 4.8 active chronic conditions against 3.8 for White patients (p.&nbsp;448), and at the same number of chronic illnesses about $1,800 a year less was spent on Black patients (p.&nbsp;450). Because less is spent on them for the same need, a score that predicts cost understates their need, and it does so while being accurate and calibrated for the target it was given.</p>
+<p>The authors then trained models with the same inputs on three targets: total cost, avoidable cost and the number of active chronic conditions (Table 2, p.&nbsp;452). The share of Black patients among the top 3% of predicted risk was 14.1% with total cost as the target and 26.7% with active chronic conditions. Changing the target changed who would be offered care. The manufacturer, working with the authors, retrained the algorithm with a different target and reduced the bias on its own national data. The lecture repeats the main comparisons on the synthetic data the authors released, and the pattern reappears there.</p>
+<p>One more lesson comes from the authors’ repository rather than the paper. The abstract reports that removing the bias would raise the share of Black patients receiving extra help from 17.7% to 46.5%. In 2022 the authors posted a correction: a coding error in that simulation made the second number too low, and the corrected figure is 59%. They also report a critique of the swapping procedure behind it. A number quoted from an abstract is worth checking against the authors’ latest materials.</p>
+<p><strong>The framing of the task.</strong> PPA’s section on problem framing gives two examples of how the way a task is set up decides what a good score means. Claims that models beat human accuracy on image classification rested on loosely defined human baselines. And for predicting which defendants will fail to appear in court, the chapter points out that the usual causes (transportation, childcare, work hours) can be addressed directly, so that a more accurate prediction used to justify detention may be the wrong response to the problem. The section on privacy tells how the ratings released for the Netflix challenge were linked to public IMDb ratings to identify subscribers, and how the fallout ended a planned second competition.</p>
+<p><strong>How predictable the outcome is.</strong> PPA’s last section describes the Fragile Families Challenge (Salganik et al.&nbsp;2020). Competitors were given data on 4,242 families, followed from a child’s birth to age 9, with about 12,900 variables, and asked to predict six outcomes measured at age 15, among them the child’s grade point average and whether the family was evicted. Around 160 teams submitted models. The best predictions were not very accurate and only slightly better than a simple benchmark, and how badly a family was predicted depended much more on the family than on the method. The chapter’s reading is that some life outcomes may be close to unpredictable over such a span, whatever the method, and that prediction is a weak basis for decisions when the world is changing or when the question is what an intervention would do.</p>
+<p><strong>Against predictive optimization.</strong> Wang et al.&nbsp;(2024) name the kind of system the cost score belongs to: <em>predictive optimization</em> uses machine learning to predict a future outcome for each individual and uses those predictions to make decisions about them (section 2.1). They state the case for it before the case against: automation is consistent and efficient, a clear target looks objective, predictions seem to follow real patterns rather than judgment, and an algorithm’s bias is supposedly easier to find and fix than a person’s (section 2.2). They then argue that seven objections apply to every one of eight deployed systems they studied, one of them a commercial health risk model of the kind Obermeyer et al.&nbsp;examined. Four of the seven take up where Rodu and Baiocchi stop:</p>
+<ul>
+<li><strong>Prediction is not intervention</strong> (section 3.1). A model fitted to observational data predicts outcomes under the old decisions, not the effect of a new one. Their example: setting higher bail for defendants with a high predicted risk can itself make them more likely to reoffend.</li>
+<li><strong>The target is not the construct</strong> (section 3.2). Pre-trial risk tools predict re-arrest because offending is not observed, and re-arrest depends on where police look; hiring tools predict proxies such as sales or ratings for job performance. They argue some mismatch always remains.</li>
+<li><strong>Limits to prediction</strong> (section 3.4). Besides the Fragile Families Challenge, they report a hospital sepsis model whose developer claimed an AUC of 0.76 to 0.83 and which scored 0.63 in an outside evaluation in 2021.</li>
+<li><strong>Contestability</strong> (section 3.6). To contest a decision, a person needs an explanation of it, access to the data and the model it used, and a way to have it reviewed and corrected; providing these takes away much of the efficiency that justified automating. Their example is the Dutch childcare benefits scandal, in which tens of thousands of parents were wrongly accused of fraud.</li>
+</ul>
+<p>The other three are that training data rarely match the setting of deployment, that differences in error rates between groups cannot be removed by an algorithm alone, and that people change their behavior in response to a score (Goodhart’s law). Their conclusion is that such systems should be presumed illegitimate until the people who deploy them justify them, and they give a rubric of 27 questions for doing so (section 4.4).</p>
+<p><strong>Accurate and still objectionable.</strong> Kiviat (2019) studied the use of credit scores to price car insurance in the US. The scores predict claims. Policymakers resisted them anyway, she finds, when the predictions held people accountable for circumstances that were not their fault, and when no causal story connected the data to the behavior being priced. Her study is about what people regard as fair grounds for treating them differently, which a better score does not settle.</p>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>A competition win is good evidence that one model beats another on one target, measured on one distribution, and the readings suggest that this evidence has held up better than the worst case predicts. It does not say how the model will do on a population collected differently; it does not say whether the target measures what the decision needs; and it does not say whether the decision should be made this way at all. Each of those is a separate question, and the readings show cases where getting it wrong caused harm while the score was good.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Donoho, D. (2017). 50 years of data science. <em>Journal of Computational and Graphical Statistics</em> 26(4), 745–766. <a href="https://doi.org/10.1080/10618600.2017.1384734">doi:10.1080/10618600.2017.1384734</a>. Section 6, read in the version of 18 September 2015.</li>
+<li>Feynman, R. P., Leighton, R. B. and Sands, M. (1963). <em>The Feynman Lectures on Physics</em>, volume I, chapter 26, Table 26-1 and section 26-3. <a href="https://www.feynmanlectures.caltech.edu/I_26.html">feynmanlectures.caltech.edu/I_26.html</a></li>
+<li>Hardt, M. and Recht, B. (2022). <em>Patterns, Predictions, and Actions: Foundations of Machine Learning</em>. Princeton University Press. Chapter 8, “Datasets”. Free online: <a href="https://mlstory.org/data.html">mlstory.org/data.html</a></li>
+<li>Kiviat, B. (2019). The moral limits of predictive practices: the case of credit-based insurance scores. <em>American Sociological Review</em> 84(6), 1134–1158. <a href="https://doi.org/10.1177/0003122419884917">doi:10.1177/0003122419884917</a></li>
+<li>Nastl, V. Y. and Hardt, M. (2024). Do causal predictors generalize better to new domains? <em>Advances in Neural Information Processing Systems</em> 37. <a href="https://doi.org/10.52202/079017-0983">doi:10.52202/079017-0983</a>. Also <a href="https://arxiv.org/abs/2402.09891">arXiv:2402.09891</a>.</li>
+<li>Obermeyer, Z., Powers, B., Vogeli, C. and Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. <em>Science</em> 366(6464), 447–453. <a href="https://doi.org/10.1126/science.aax2342">doi:10.1126/science.aax2342</a>. Synthetic data, code and the 2022 correction: <a href="https://gitlab.com/labsysmed/dissecting-bias">gitlab.com/labsysmed/dissecting-bias</a></li>
+<li>Recht, B., Roelofs, R., Schmidt, L. and Shankar, V. (2019). Do ImageNet classifiers generalize to ImageNet? <em>Proceedings of the 36th International Conference on Machine Learning</em>, PMLR 97, 5389–5400. <a href="https://proceedings.mlr.press/v97/recht19a.html">proceedings.mlr.press/v97/recht19a.html</a></li>
+<li>Rodu, J. and Baiocchi, M. (2023). When black box algorithms are (not) appropriate: a principled prediction-problem ontology. <em>Observational Studies</em>. <a href="https://muse.jhu.edu/pub/56/article/883478">muse.jhu.edu/pub/56/article/883478</a>. Section numbers as in <a href="https://arxiv.org/abs/2001.07648">arXiv:2001.07648</a>, version of 31 March 2021.</li>
+<li>Roelofs, R., Shankar, V., Recht, B., Fridovich-Keil, S., Hardt, M., Miller, J. and Schmidt, L. (2019). A meta-analysis of overfitting in machine learning. <em>Advances in Neural Information Processing Systems</em> 32. <a href="https://papers.nips.cc/paper/9117-a-meta-analysis-of-overfitting-in-machine-learning">NeurIPS proceedings</a></li>
+<li>Salganik, M. J. et al.&nbsp;(2020). Measuring the predictability of life outcomes with a scientific mass collaboration. <em>Proceedings of the National Academy of Sciences</em> 117(15), 8398–8403. <a href="https://doi.org/10.1073/pnas.1915006117">doi:10.1073/pnas.1915006117</a></li>
+<li>Wang, A., Kapoor, S., Barocas, S. and Narayanan, A. (2024). Against predictive optimization: on the legitimacy of decision-making algorithms that optimize predictive accuracy. <em>ACM Journal on Responsible Computing</em> 1(1), 1–45. <a href="https://predictive-optimization.cs.princeton.edu/">predictive-optimization.cs.princeton.edu</a>. Section numbers as in the draft of 16 February 2023.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/ml4ds\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>ST310 Machine Learning, LSE. Original course content CC BY 4.0 except where otherwise credited; datasets and images carry their own licences.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
